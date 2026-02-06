@@ -1,0 +1,104 @@
+
+        /* Estilos específicos para a página Sobre Nós */
+        .about-section {
+            background-color: #333; /* Fundo mais escuro para o conteúdo */
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: #f8f9fa;
+        }
+
+        .about-section h2 {
+            color: #ffa500;
+            text-align: center;
+            margin-bottom: 1.5em;
+            font-size: 2.2em;
+        }
+
+        .about-content {
+            display: flex;
+            flex-wrap: wrap; /* Permite que os itens quebrem linha em telas menores */
+            gap: 2em; /* Espaçamento entre os blocos de conteúdo */
+            justify-content: center; /* Centraliza os blocos */
+            align-items: flex-start; /* Alinha os itens pelo topo */
+        }
+
+        .about-text, .about-image {
+            flex: 1; /* Permite que os blocos cresçam e diminuam */
+            min-width: 300px; /* Largura mínima para evitar colapso em telas pequenas */
+            max-width: 500px; /* Largura máxima para cada bloco */
+            padding: 1em;
+        }
+
+        .about-text p {
+            margin-bottom: 1em;
+            line-height: 1.8; /* Melhor legibilidade */
+            color: #ccc;
+        }
+
+        .about-text strong {
+            color: #ffa500; /* Destaca palavras-chave */
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+        }
+
+        .mission-vision-values {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 1.5em;
+            margin-top: 3em;
+            padding: 1em;
+            background-color: #444; /* Fundo para a seção de missão/visão/valores */
+            border-radius: 8px;
+        }
+
+        .mvv-item {
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            text-align: center;
+            padding: 1em;
+            border: 1px solid #555; /* Borda sutil */
+            border-radius: 5px;
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .mvv-item:hover {
+            transform: translateY(-3px);
+            background-color: #585858; /* Leve escurecimento no hover */
+        }
+
+        .mvv-item i {
+            font-size: 2.5em;
+            color: #ffa500;
+            margin-bottom: 0.5em;
+        }
+
+        .mvv-item h4 {
+            color: #ffa500;
+            margin-bottom: 0.5em;
+            font-size: 1.4em;
+        }
+
+        .mvv-item p {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        /* Responsividade para telas menores */
+        @media (max-width: 768px) {
+            .about-content, .mission-vision-values {
+                flex-direction: column;
+                align-items: center;
+            }
+            .about-text, .about-image, .mvv-item {
+                max-width: 90%; /* Ocupa mais largura em telas menores */
+            }
+        }

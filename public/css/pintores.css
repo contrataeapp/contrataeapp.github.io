@@ -1,0 +1,176 @@
+/* public/css/pintores.css - AJUSTE FINAL DE PROPORÇÃO */
+
+/* --- 1. CARD DE MATERIAIS --- */
+.materials-alert-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+    padding: 0 15px;
+}
+
+.materials-alert {
+    background-color: #222;
+    border-left: 5px solid #ffa500;
+    color: #fff;
+    padding: 6px 20px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+    width: auto;
+    max-width: 600px;
+}
+
+.materials-alert:hover { transform: translateY(-2px); background-color: #2a2a2a; }
+.mat-content h4 { margin: 0; color: #ffa500; font-size: 0.9rem; font-weight: 700; }
+.mat-content p { margin: 0; font-size: 0.75rem; color: #ccc; display: block; }
+.mat-icon { font-size: 1.3rem; color: #ffa500; }
+.materials-alert i.fa-chevron-down { margin-left: 15px; font-size: 0.8rem; }
+
+
+/* --- 2. GRID --- */
+.professionals-grid {
+    display: grid;
+    /* Cards com largura base de 260px */
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    padding: 0 0 10px 0;
+    margin-bottom: 30px;
+}
+
+/* --- 3. CARD DO PROFISSIONAL --- */
+.professional-card {
+    background-color: #222;
+    border: 1px solid #333;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.professional-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    border-color: #ffa500;
+}
+
+/* FOTO PC: QUADRADO (1 / 1) 
+   Isso deixa a imagem "gordinha", mostra mais o fundo 
+   e diminui a altura total do card.
+*/
+.professional-card .card-header-img {
+    width: 100%;
+    aspect-ratio: 1 / 1; 
+    overflow: hidden;
+    background-color: #000;
+    position: relative;
+    border-bottom: 1px solid #444;
+}
+
+.professional-card .card-header-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center; /* Foca no rosto, mas corta menos as laterais agora */
+    transition: transform 0.3s ease;
+}
+
+.professional-card:hover .card-header-img img { transform: scale(1.05); }
+
+/* CONTEÚDO (RODAPÉ PEQUENO) */
+.card-body {
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-body h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #fff;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.card-body .profissao-tag {
+    font-size: 0.7rem;
+    margin-bottom: 4px;
+    color: #aaa;
+    text-transform: uppercase;
+}
+
+.rating {
+    color: #ffa500;
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+}
+
+/* BOTÕES (Finos) */
+.card-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 8px;
+}
+
+.card-actions .button {
+    flex: 1;
+    padding: 7px 0;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.3s;
+}
+
+.primary-button { background-color: #ffa500; color: #222; border: none; }
+.primary-button:hover { background-color: #25D366; color: #fff; }
+
+.secondary-button { background: transparent; border: 1px solid #ffa500; color: #ffa500; }
+.secondary-button:hover { background: #ffa500; color: #222; }
+
+.ver-todos-container { grid-column: 1 / -1; text-align: center; margin-top: 10px; }
+.section-title { margin-bottom: 10px !important; }
+
+/* CARROSSEL RODAPÉ */
+.footer-carousel .carousel-container {
+    width: 100%;
+    max-width: 1600px;
+    aspect-ratio: 4 / 1; 
+    height: auto !important;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    background-color: #000;
+    margin: 0 auto;
+}
+.footer-carousel .carousel-item img { width: 100%; height: 100%; object-fit: fill; }
+
+/* --- MOBILE (O PULO DO GATO PARA APARECER OS BOTÕES) --- */
+@media (max-width: 600px) {
+    .professionals-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 por linha */
+        gap: 10px;
+        padding: 0 10px;
+    }
+    
+    /* FOTO MOBILE: 4:3 (Mais baixa que quadrado)
+       Isso "acha" a foto verticalmente, fazendo sobrar espaço 
+       para os botões aparecerem na tela sem scroll.
+    */
+    .professional-card .card-header-img {
+        aspect-ratio: 4 / 3; 
+    }
+
+    .materials-alert { width: 100%; max-width: 100%; justify-content: center; }
+}

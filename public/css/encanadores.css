@@ -1,0 +1,75 @@
+
+        /* Estilos específicos para a página de profissionais */
+        .professionals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2em; /* Aumenta o espaçamento entre os cards para melhor distinção (Gestalt: Proximidade) */
+            padding: 2em 0;
+            justify-content: center;
+        }
+        .professional-card {
+            background-color: #444; /* Cor de fundo escura */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            text-align: center;
+            padding-bottom: 1em;
+            transition: transform 0.2s ease-in-out;
+            color: #f8f9fa; /* Cor do texto claro para contraste (Gestalt: Contraste) */
+        }
+        .professional-card:hover {
+            transform: translateY(-5px);
+            background-color: #555; /* Leve escurecimento no hover */
+        }
+        .professional-card img {
+            width: 100%;
+            height: 200px; /* Altura fixa para as imagens */
+            object-fit: cover; /* Garante que a imagem preencha o espaço sem distorção */
+            border-bottom: 3px solid #ffa500; /* Linha laranja para separar a imagem do texto */
+            margin-bottom: 1em;
+        }
+        .professional-card h4 {
+            color: #ffa500; /* Cor laranja para o nome do profissional */
+            margin-bottom: 0.5em;
+            font-size: 1.5em;
+        }
+        .professional-card p {
+            color: #ccc; /* Cor cinza claro para a descrição */
+            font-size: 0.9em;
+            margin: 0 1em 1em;
+        }
+        .professional-card .rating {
+            color: #ffcc00; /* Amarelo para as estrelas */
+            margin-bottom: 1em;
+        }
+        .professional-card .button {
+            width: calc(100% - 2em); /* Ocupa quase toda a largura do card, com padding */
+            margin: 0 1em;
+            padding: 10px 15px;
+            font-size: 1em;
+        }
+
+        /* Título da seção principal */
+        .content-section h3 {
+            text-align: center;
+            color: #ffa500;
+            margin-top: 2em;
+            margin-bottom: 1.5em;
+            font-size: 2.2em;
+        }
+
+        /* Estilo para a mensagem de nenhum profissional encontrado */
+        .no-professionals-message {
+            text-align: center;
+            color: #ccc;
+            font-size: 1.2em;
+            margin-top: 3em;
+            margin-bottom: 5em;
+            padding: 20px;
+            border: 1px dashed #ffa500;
+            border-radius: 8px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+ 

@@ -1,0 +1,157 @@
+/* css/style_laranja_preto.css - Estilos Globais */
+
+:root {
+    --primary: #ffa500;
+    --dark: #1a1a1a;
+    --darker: #111;
+    --light: #f8f9fa;
+    --gray: #333;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    background-color: var(--dark);
+    color: var(--light);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0; padding: 0;
+    display: flex; flex-direction: column; min-height: 100vh;
+    position: relative;
+}
+
+a { text-decoration: none; color: inherit; transition: 0.3s; }
+ul { list-style: none; padding: 0; margin: 0; }
+main { flex: 1; }
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Botões */
+.button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}
+.primary-button { background-color: var(--primary); color: #000; }
+.primary-button:hover { background-color: #e69500; }
+.secondary-button { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+.secondary-button:hover { background: var(--primary); color: #000; }
+
+/* Cabeçalho Global */
+header { background-color: var(--darker); border-bottom: 1px solid #333; }
+.main-nav { background-color: #000; border-top: 1px solid #333; }
+.main-nav ul { display: flex; justify-content: center; flex-wrap: wrap; }
+.main-nav a { display: block; padding: 15px 20px; color: #ccc; font-weight: 500; }
+.main-nav a:hover, .main-nav a.active { color: var(--primary); background: #222; }
+
+/* Títulos e Cards */
+h1, h2, h3 { color: var(--primary); text-align: center; margin-bottom: 20px; }
+.section-title { font-size: 2rem; margin-top: 40px; }
+
+.service-cards {
+    display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 40px;
+}
+.card {
+    background: var(--gray); width: 200px; padding: 30px;
+    border-radius: 8px; text-align: center; border: 1px solid #444; transition: 0.3s;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.card:hover { transform: translateY(-5px); border-color: var(--primary); }
+.card i { font-size: 2.5rem; color: var(--primary); margin-bottom: 15px; }
+.card h4 { color: #fff; margin: 0; }
+
+/* Rodapé */
+footer {
+    background-color: var(--darker); padding: 40px 0;
+    text-align: center; border-top: 1px solid #333; margin-top: auto;
+}
+.footer-links a { margin: 0 10px; color: #bbb; }
+.footer-links a:hover { color: var(--primary); }
+
+/* --- BANNERS LATERAIS GLOBAIS --- */
+.banner-lateral {
+    position: fixed;
+    bottom: 20px;
+    width: 140px;
+    z-index: 999;
+    opacity: 0.5; /* Opacidade padrão para não atrapalhar */
+    transition: opacity 0.3s, transform 0.3s;
+    background: transparent;
+}
+
+.banner-lateral:hover {
+    opacity: 1; /* Fica 100% visível ao passar o mouse */
+    transform: scale(1.05);
+}
+
+.banner-content {
+    cursor: pointer;
+    border-radius: 15px; /* Bordas Arredondadas */
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    background-color: #000;
+}
+
+.banner-lateral img {
+    width: 100%;
+    display: block;
+    height: auto;
+}
+
+/* Botão Fechar (X) */
+.close-banner {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    opacity: 1; /* Sempre visível para o usuário saber que pode fechar */
+    transition: 0.3s;
+}
+.close-banner:hover { background-color: #f00; border-color: #f00; }
+
+.banner-esquerda { left: 20px; }
+.banner-direita { right: 20px; }
+
+/* --- MODAL DE SAÍDA (SEGURANÇA) --- */
+.modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); z-index: 2000;
+    align-items: center; justify-content: center;
+}
+.modal-box {
+    background-color: #222; padding: 30px; border-radius: 10px; text-align: center;
+    max-width: 400px; width: 90%; border: 1px solid #444; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.modal-box h3 { color: var(--primary); margin-top: 0; }
+.modal-link-preview { font-size: 0.8rem; color: #888; word-break: break-all; margin: 10px 0 20px; }
+.modal-buttons { display: flex; justify-content: center; gap: 15px; }
+
+/* --- MODO CLARO --- */
+body.light-mode { background-color: #f4f4f4; color: #333; }
+body.light-mode header, body.light-mode footer, body.light-mode .main-nav { background-color: #fff; color: #222; border-color: #ddd; }
+body.light-mode .card { background-color: #fff; border-color: #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+body.light-mode .card h4, body.light-mode h1, body.light-mode h2 { color: #222; }
+body.light-mode .site-logo img { filter: invert(1); }
+body.light-mode .modal-box { background-color: #fff; color: #222; border-color: #ccc; }
+
+/* Utils */
+.goog-te-banner-frame { display: none !important; }
+body { top: 0 !important; }

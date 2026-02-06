@@ -1,0 +1,74 @@
+
+        
+        header .container h1 {
+            text-align: center;
+        }
+        .professionals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2em;
+            padding: 2em 0;
+            justify-content: center;
+        }
+        .professional-card {
+            background-color: #444;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            text-align: center;
+            padding-bottom: 1em;
+            transition: transform 0.2s ease-in-out;
+        }
+        .professional-card:hover {
+            transform: translateY(-5px);
+        }
+        .professional-card img {
+            width: 100%;
+            height: 200px; /* Altura fixa para as imagens dos profissionais */
+            object-fit: cover; /* Garante que a imagem cubra o espaço */
+            display: block;
+            margin-bottom: 1em;
+        }
+        .professional-card h3 {
+            color: #ffa500;
+            margin-bottom: 0.5em;
+            padding: 0 1em;
+        }
+        .professional-card .bio {
+            font-size: 0.9em;
+            color: #ccc;
+            padding: 0 1.5em 1em;
+            min-height: 4.5em; /* Altura mínima para a biografia */
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* Limita a biografia a 3 linhas */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .professional-card .rating {
+            color: gold;
+            margin-bottom: 0.5em;
+        }
+        .professional-card .buttons-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8em;
+            padding: 0 1em;
+        }
+        .professional-card .button {
+            width: calc(100% - 2em); /* Ajusta a largura do botão para o padding */
+        }
+        .professional-card .button.secondary-button {
+            background-color: #666;
+            color: #eee;
+        }
+        .professional-card .button.secondary-button:hover {
+            background-color: #777;
+        }
+        .no-professionals-message {
+            text-align: center;
+            color: #ccc;
+            padding: 2em;
+            font-size: 1.2em;
+        }
+   
