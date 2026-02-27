@@ -7,100 +7,82 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// =================================================
-// 1. CONEXÃO COM BANCO DE DADOS (SUPABASE)
-// =================================================
+// 1. CONEXÃO SUPABASE
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// =================================================
-// 2. CONFIGURAÇÕES DO SERVIDOR
-// =================================================
+// 2. CONFIGURAÇÕES (IMPORTANTE: Static primeiro!)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// =================================================
-// 3. ROTAS DO SITE
-// =================================================
+// 3. ROTAS DE ADMINISTRAÇÃO
+app.get("/admin", async (req, res) => {
+    try {
+        const { data: profissionais, error } = await supabase.from("profissionais").select("*").order("data_cadastro", { ascending: false });
+        if (error) throw error;
 
-// --- HOME ---
-app.get('/', (req, res) => {
-    res.render('index');
-});
-// Caso acesse /index.html direto
-app.get('/index.html', (req, res) => {
-    res.render('index');
-});
+        const totais = {
+            ativos: profissionais.filter(p => p.status === 'ATIVO').length,
+            pendentes: profissionais.filter(p => p.status === 'PENDENTE').length,
+            receitaTotal: profissionais.reduce((acc, p) => acc + (Number(p.valor_pago) || 0), 0),
+            receitaMes: profissionais.filter(p => {
+                const data = new Date(p.data_vencimento);
+                const hoje = new Date();
+                return data.getMonth() === hoje.getMonth() && data.getFullYear() === hoje.getFullYear();
+            }).reduce((acc, p) => acc + (Number(p.valor_pago) || 0), 0)
+        };
 
-// --- PINTORES ---
-app.get('/pintores.html', async (req, res) => {
-    const { data: lista, error } = await supabase
-        .from('profissionais')
-        .select('*')
-        .eq('profissao', 'Pintor')
-        .eq('status', 'ATIVO')
-        .limit(20);
-
-    if (error) { console.log(error); return res.render('pintores', { pintores: [] }); }
-    res.render('pintores', { pintores: lista });
+        res.render("admin", { profissionais: profissionais || [], totais });
+    } catch (err) {
+        res.render("admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, receitaTotal: 0, receitaMes: 0 } });
+    }
 });
 
-// --- PEDREIROS (A ROTA QUE FALTAVA) ---
-app.get('/pedreiros.html', async (req, res) => {
-    const { data: lista, error } = await supabase
-        .from('profissionais')
-        .select('*')
-        .eq('profissao', 'Pedreiro') // Busca apenas Pedreiros
-        .eq('status', 'ATIVO')
-        .limit(20);
-
-    // Se der erro ou não tiver ninguém, carrega lista vazia para não quebrar
-    if (error) { console.log(error); return res.render('pedreiros', { pedreiros: [] }); }
+// APROVAR COM TEMPO E VALOR
+app.post("/admin/aprovar/:id", async (req, res) => {
+    const { meses, valor } = req.body;
+    const dataVencimento = new Date();
+    dataVencimento.setMonth(dataVencimento.getMonth() + parseInt(meses));
     
-    // Renderiza o arquivo views/pedreiros.ejs enviando a lista
-    res.render('pedreiros', { pedreiros: lista });
+    await supabase.from("profissionais").update({ 
+        status: "ATIVO", 
+        data_vencimento: dataVencimento.toISOString(),
+        valor_pago: parseFloat(valor),
+        plano_tipo: meses === "12" ? "ANUAL" : "MENSAL"
+    }).eq("id", req.params.id);
+    res.redirect("/admin");
 });
 
-// --- ELETRICISTAS ---
-app.get('/eletricistas.html', async (req, res) => {
-    const { data: lista, error } = await supabase
-        .from('profissionais')
-        .select('*')
-        .eq('profissao', 'Eletricista')
-        .eq('status', 'ATIVO')
-        .limit(20);
-
-    if (error) return res.render('eletricistas', { eletricistas: [] });
-    res.render('eletricistas', { eletricistas: lista });
+// ALTERAR STATUS (PAUSAR/ATIVAR)
+app.post("/admin/status/:id", async (req, res) => {
+    const { novoStatus } = req.body;
+    await supabase.from("profissionais").update({ status: novoStatus }).eq("id", req.params.id);
+    res.redirect("/admin");
 });
 
-// --- ENCANADORES ---
-app.get('/encanadores.html', async (req, res) => {
-    const { data: lista, error } = await supabase
-        .from('profissionais')
-        .select('*')
-        .eq('profissao', 'Encanador')
-        .eq('status', 'ATIVO')
-        .limit(20);
+// 4. ROTAS DO SITE
+app.get('/', (req, res) => res.render('index'));
+app.get('/index.html', (req, res) => res.render('index'));
 
-    if (error) return res.render('encanadores', { encanadores: [] });
-    res.render('encanadores', { encanadores: lista });
+// Rotas de categorias (Pintores, Pedreiros, etc)
+const categorias = ['Pintor', 'Pedreiro', 'Eletricista', 'Encanador'];
+categorias.forEach(cat => {
+    const rota = cat.toLowerCase() === 'pintor' ? 'pintores' : cat.toLowerCase() + 's';
+    app.get(`/${rota}.html`, async (req, res) => {
+        const { data } = await supabase.from('profissionais').select('*').eq('profissao', cat).eq('status', 'ATIVO').limit(20);
+        res.render(rota, { [rota]: data || [] });
+    });
 });
 
-// --- PÁGINAS ESTÁTICAS (Login, Cadastro, etc) ---
-app.get('/login.html', (req, res) => { res.render('login'); });
-app.get('/cadastro.html', (req, res) => { res.render('cadastro'); });
-app.get('/contato.html', (req, res) => { res.render('contato'); });
-app.get('/sobre_nos.html', (req, res) => { res.render('sobre_nos'); });
-app.get('/servicos_categorias.html', (req, res) => { res.render('servicos_categorias'); });
+app.get('/login.html', (req, res) => res.render('login'));
+app.get('/cadastro.html', (req, res) => res.render('cadastro'));
+app.get('/contato.html', (req, res) => res.render('contato'));
+app.get('/sobre_nos.html', (req, res) => res.render('sobre_nos'));
+app.get('/servicos_categorias.html', (req, res) => res.render('servicos_categorias'));
 
-// =================================================
-// 4. INICIALIZAR SERVIDOR
-// =================================================
-app.listen(port, () => {
-    console.log(`🚀 Sistema Contrataê rodando em http://localhost:${port}`);
-});
+app.listen(port, () => console.log(`🚀 Contrataê rodando em http://localhost:${port}`));

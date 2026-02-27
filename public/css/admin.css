@@ -1,0 +1,51 @@
+:root {
+    --primary: #002147; /* Azul Contrataê */
+    --accent: #ffa500;  /* Laranja Contrataê */
+    --bg: #f0f2f5;
+    --white: #ffffff;
+    --text: #1c1e21;
+}
+
+body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+.dashboard-wrapper { display: flex; }
+
+.sidebar { width: 260px; height: 100vh; background: var(--primary); color: white; position: fixed; padding: 25px 15px; }
+.sidebar .logo { font-size: 28px; font-weight: 800; margin-bottom: 50px; text-align: center; color: var(--accent); }
+.sidebar .logo a { color: var(--accent); text-decoration: none; }
+.sidebar nav ul { list-style: none; padding: 0; }
+.sidebar nav ul li { margin-bottom: 8px; }
+.sidebar nav ul li a { color: #cbd5e0; text-decoration: none; display: flex; align-items: center; padding: 12px 20px; border-radius: 8px; transition: 0.3s; }
+.sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: rgba(255,255,255,0.1); color: var(--accent); border-left: 4px solid var(--accent); }
+.sidebar nav ul li a i { margin-right: 12px; width: 20px; }
+
+.main-content { margin-left: 290px; padding: 40px; width: calc(100% - 370px); }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+header h1 { font-size: 28px; font-weight: 700; color: var(--primary); }
+
+.summary-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-bottom: 40px; }
+.card { background: white; padding: 25px; border-radius: 15px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 4px solid transparent; }
+.card.finance { border-color: var(--accent); }
+.card.active-users { border-color: #28a745; }
+.card.pending-users { border-color: #ffc107; }
+.card .icon { font-size: 35px; opacity: 0.8; }
+.card h3 { margin: 0; font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+.card p { margin: 8px 0 0; font-size: 22px; font-weight: 800; color: var(--primary); }
+
+.admin-section { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 15px; border-bottom: 2px solid #f1f5f9; color: #64748b; font-size: 12px; text-transform: uppercase; }
+td { padding: 18px 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+
+.badge { padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; }
+.badge.ativo { background: #dcfce7; color: #15803d; }
+.badge.pendente { background: #fef9c3; color: #a16207; }
+.badge.pausado { background: #fee2e2; color: #b91c1c; }
+
+.btn-action { padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; font-weight: 700; text-decoration: none; color: white; transition: 0.2s; }
+.btn-action:hover { opacity: 0.8; transform: translateY(-1px); }
+.approve { background: var(--accent); }
+.suspend { background: #ef4444; }
+.whatsapp { background: #22c55e; }
+
+.approve-form { display: flex; gap: 5px; align-items: center; }
+.approve-form input, .approve-form select { padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }

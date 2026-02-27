@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Gestão ADM</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="logo"><a href="/">Contrataê</a></div>
+            <nav>
+                <ul>
+                    <li><a href="/admin" class="active"><i class="fas fa-chart-line"></i> Financeiro</a></li>
+                    <li><a href="#profissionais"><i class="fas fa-tools"></i> Profissionais</a></li>
+                    <li><a href="#banners"><i class="fas fa-ad"></i> Banners</a></li>
+                    <li><a href="#comentarios"><i class="fas fa-star"></i> Moderação</a></li>
+                    <li><a href="/"><i class="fas fa-power-off"></i> Sair</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <header>
+                <h1>Painel de Controle</h1>
+                <div class="user-info"><span>Administrador</span><div class="avatar">ADM</div></div>
+            </header>
+
+            <section class="summary-cards">
+                <div class="card finance">
+                    <div class="icon"><i class="fas fa-wallet"></i></div>
+                    <div class="details"><h3>Receita Total</h3><p>R$ <%= totais.receitaTotal.toFixed(2) %></p></div>
+                </div>
+                <div class="card active-users">
+                    <div class="icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="details"><h3>Ativos</h3><p><%= totais.ativos %></p></div>
+                </div>
+                <div class="card pending-users">
+                    <div class="icon"><i class="fas fa-clock"></i></div>
+                    <div class="details"><h3>Pendentes</h3><p><%= totais.pendentes %></p></div>
+                </div>
+                <div class="card monthly">
+                    <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="details"><h3>Este Mês</h3><p>R$ <%= totais.receitaMes.toFixed(2) %></p></div>
+                </div>
+            </section>
+
+            <section class="admin-section" id="profissionais">
+                <h2>Gestão de Profissionais</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Profissional</th>
+                                <th>Status</th>
+                                <th>Vencimento</th>
+                                <th>Valor Pago</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (profissionais && profissionais.length > 0) { %>
+                                <% profissionais.forEach(function(p) { %>
+                                    <tr>
+                                        <td><strong><%= p.nome %></strong><br><small><%= p.profissao %></small></td>
+                                        <td><span class="badge <%= p.status.toLowerCase() %>"><%= p.status %></span></td>
+                                        <td><%= p.data_vencimento ? new Date(p.data_vencimento).toLocaleDateString('pt-BR') : '---' %></td>
+                                        <td>R$ <%= (Number(p.valor_pago) || 0).toFixed(2) %></td>
+                                        <td>
+                                            <% if (p.status === 'PENDENTE') { %>
+                                                <form action="/admin/aprovar/<%= p.id %>" method="POST" class="approve-form">
+                                                    <input type="number" name="valor" placeholder="R$" required style="width:60px">
+                                                    <select name="meses">
+                                                        <option value="1">1 Mês</option>
+                                                        <option value="6">6 Meses</option>
+                                                        <option value="12">1 Ano</option>
+                                                    </select>
+                                                    <button type="submit" class="btn-action approve">Aprovar</button>
+                                                </form>
+                                            <% } else { %>
+                                                <form action="/admin/status/<%= p.id %>" method="POST" style="display:inline;">
+                                                    <input type="hidden" name="novoStatus" value="<%= p.status === 'ATIVO' ? 'PAUSADO' : 'ATIVO' %>">
+                                                    <button type="submit" class="btn-action <%= p.status === 'ATIVO' ? 'suspend' : 'approve' %>">
+                                                        <%= p.status === 'ATIVO' ? 'Pausar' : 'Ativar' %>
+                                                    </button>
+                                                </form>
+                                            <% } %>
+                                            <a href="https://wa.me/55<%= p.whatsapp %>?text=Olá%20<%= p.nome %>%2C%20sua%20assinatura%20no%20Contrataê..." target="_blank" class="btn-action whatsapp"><i class="fab fa-whatsapp"></i></a>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5">Nenhum profissional encontrado.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>
