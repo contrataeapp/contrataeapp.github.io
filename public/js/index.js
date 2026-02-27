@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const nextBtn = section.querySelector('.next-btn');
         const prevBtn = section.querySelector('.prev-btn');
         let slideIndex = 0;
+        let intervalId;
 
         function showSlide(n) {
             if (n >= slides.length) slideIndex = 0;
@@ -27,49 +28,91 @@ document.addEventListener('DOMContentLoaded', () => {
             if(dots[slideIndex]) dots[slideIndex].classList.add('active');
         }
 
-        showSlide(slideIndex);
+        function nextSlide() { showSlide(slideIndex + 1); }
+        function prevSlide() { showSlide(slideIndex - 1); }
 
-        if(nextBtn) nextBtn.addEventListener('click', () => showSlide(slideIndex + 1));
-        if(prevBtn) prevBtn.addEventListener('click', () => showSlide(slideIndex - 1));
+        if(nextBtn) nextBtn.addEventListener('click', nextSlide);
+        if(prevBtn) prevBtn.addEventListener('click', prevSlide);
 
         dots.forEach((dot, index) => {
             dot.addEventListener('click', () => showSlide(index));
         });
 
-        const time = carouselId === 'carousel-topo' ? 5000 : 6500;
-        setInterval(() => showSlide(slideIndex + 1), time);
+        // Rotação Automática
+        function startAuto() { intervalId = setInterval(nextSlide, 5000); }
+        function stopAuto() { clearInterval(intervalId); }
+
+        startAuto();
+        section.addEventListener('mouseenter', stopAuto);
+        section.addEventListener('mouseleave', startAuto);
+
+        showSlide(slideIndex);
     }
 
     initCarousel('carousel-topo');
     initCarousel('carousel-baixo');
 
-    // --- BANNERS & MODAL ---
+    // --- MODAL INTELIGENTE (CORRIGIDO) ---
     const modal = document.getElementById('external-link-modal');
+    const modalLinkDest = document.getElementById('modal-link-dest');
+    const modalMsg = document.getElementById('modal-msg'); // Certifique-se que o <p> tem este ID
     const confirmBtn = document.getElementById('confirm-link');
     const cancelBtn = document.getElementById('cancel-link');
-    const modalLinkDest = document.getElementById('modal-link-dest');
     let targetLink = '';
 
+    function openModal(link) {
+        if (!link) return;
+        targetLink = link;
+        
+        // Atualiza o link visível (opcional, pode esconder com CSS se preferir)
+        if (modalLinkDest) modalLinkDest.textContent = targetLink;
+        
+        // LÓGICA DE DETECÇÃO DE LINK
+        if (modalMsg) {
+            if (link.includes('instagram.com')) {
+                modalMsg.textContent = "Você será redirecionado para o Instagram de nosso parceiro.";
+            } else if (link.includes('wa.me') || link.includes('whatsapp.com')) {
+                modalMsg.textContent = "Você será redirecionado para o WhatsApp.";
+            } else {
+                modalMsg.textContent = "Você será redirecionado para um site externo.";
+            }
+        } else {
+            console.warn('Elemento #modal-msg não encontrado no HTML.');
+        }
+
+        if (modal) modal.style.display = 'flex';
+    }
+
+    // A) Banners Flutuantes
     const bannersContent = document.querySelectorAll('.banner-content');
     bannersContent.forEach(banner => {
         banner.addEventListener('click', () => {
-            targetLink = banner.getAttribute('data-link');
-            if(targetLink) {
-                modalLinkDest.textContent = targetLink;
-                modal.style.display = 'flex';
-            }
+            const link = banner.getAttribute('data-link');
+            openModal(link);
         });
     });
 
+    // B) Links do Carrossel e Botões "Contatar"
+    const triggerLinks = document.querySelectorAll('.trigger-modal');
+    triggerLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            const url = link.getAttribute('data-link');
+            openModal(url);
+        });
+    });
+
+    // Botões de Ação do Modal
     if(confirmBtn) confirmBtn.addEventListener('click', () => {
         if(targetLink) window.open(targetLink, '_blank');
-        modal.style.display = 'none';
+        if(modal) modal.style.display = 'none';
     });
 
     if(cancelBtn) cancelBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
+        if(modal) modal.style.display = 'none';
     });
 
+    // Fechar Banner Lateral
     const closeBannerBtns = document.querySelectorAll('.close-banner');
     closeBannerBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {

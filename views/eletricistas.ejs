@@ -33,15 +33,6 @@
         </div>
     </div>
 
-    <div class="mobile-only" style="position: fixed; top: 120px; left: 10px; z-index: 9999;">
-        <div vw class="enabled">
-            <div vw-access-button class="active"></div>
-            <div vw-plugin-wrapper>
-                <div class="vw-plugin-top-wrapper"></div>
-            </div>
-        </div>
-    </div>
-
     <header class="airbnb-header">
         <div class="container header-grid">
             <div class="header-left">
@@ -59,14 +50,16 @@
 
             <div class="header-right">
                 <div id="google_translate_element" class="desktop-only"></div>
-                <button id="theme-toggle" class="icon-btn"><i class="fas fa-moon"></i></button>
+                <button id="theme-toggle" class="icon-btn" title="Alternar Tema">
+                    <i class="fas fa-moon"></i>
+                </button>
                 <a href="login.html" class="login-pill desktop-only">
                     <span class="login-text">Entrar / Cadastrar</span>
                     <span class="login-icon"><i class="fas fa-user-circle"></i></span>
                 </a>
             </div>
         </div>
-
+        
         <nav class="categories-nav" id="main-nav">
             <div class="container">
                 <div class="nav-header mobile-only">
@@ -96,8 +89,8 @@
                     <div style="display: flex; align-items: center;">
                         <i class="fas fa-bolt mat-icon" style="margin-right: 15px;"></i>
                         <div class="mat-content">
-                            <h4>Precisando de material elétrico?</h4>
-                            <p>Fios, cabos, iluminação e muito mais</p>
+                            <h4>Precisa de materiais elétricos?</h4>
+                            <p>Veja ofertas de parceiros</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-down" style="color: #666; margin-left: 15px;"></i>
@@ -124,8 +117,10 @@
                                     <i class="fas fa-star" style="color: gold;"></i> <%= profissional.avaliacao || '5.0' %>
                                 </div>
                                 <div class="card-actions">
-                                    <a href="https://wa.me/55<%= profissional.whatsapp %>?text=Ol%C3%A1%2C%20vi%20seu%20perfil%20no%20Contrata%C3%AA%20e%20gostaria%20de%20um%20or%C3%A7amento." target="_blank" class="button primary-button">
-                                        <i class="fab fa-whatsapp"></i> Contratar
+                                    <a href="#" 
+                                       class="button primary-button trigger-modal" 
+                                       data-link="https://wa.me/5516996484492?text=Olá, vi seu perfil no Contrataê e gostaria de fazer um orçamento.">
+                                            <i class="fab fa-whatsapp"></i> Contatar
                                     </a>
                                     <button class="button secondary-button">Ver Perfil</button>
                                 </div>
@@ -153,12 +148,12 @@
     <footer>
         <div class="footer-partners-area" id="parceiros-area">
             <div class="container">
-                <h4 style="color: #ffa500; text-align: center; margin-bottom: 15px; font-size: 1rem;">Nossos Parceiros</h4>
+                <h4 style="color: #ffa500; text-align: center; margin-bottom: 10px; font-size: 1rem;">Nossos Parceiros</h4>
                 <section class="carousel-section footer-carousel" id="carousel-baixo">
                     <div class="carousel-container">
                         <div class="carousel-item active">
-                            <a href="https://wa.me/5516982045647" target="_blank" style="display:block; width:100%; height:100%;">
-                                <img src="/imagens/parceiros/ponto_forte.png" alt="Ponto Forte Construções">
+                            <a href="#" class="trigger-modal" data-link="https://wa.me/5516996484492?text=Olá, vi o anúncio do Ponto Forte no Contrataê e gostaria de mais informações!">
+                                <img src="/imagens/parceiros/ponto_forte.png" alt="Ponto Forte" style="width:100%; height:100%;">
                             </a>
                         </div>
                         <div class="carousel-item"><img src="/imagens/parceiros/propaganda2.jpeg" alt="Propaganda 2"></div>
@@ -181,6 +176,18 @@
             </div>
         </div>
     </footer>
+
+    <div id="external-link-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Você está saindo do Contrataê</h3>
+            <p id="modal-msg">Você será redirecionado para o site de nosso parceiro.</p>
+            <p class="modal-link-preview" id="modal-link-dest"></p>
+            <div class="modal-buttons">
+                <button id="cancel-link" class="button secondary-button">Cancelar</button>
+                <button id="confirm-link" class="button primary-button">Continuar</button>
+            </div>
+        </div>
+    </div>
 
     <script type="text/javascript">
         function googleTranslateElementInit() {

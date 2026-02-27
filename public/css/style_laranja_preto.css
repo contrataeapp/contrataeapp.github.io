@@ -155,3 +155,55 @@ body.light-mode .modal-box { background-color: #fff; color: #222; border-color: 
 /* Utils */
 .goog-te-banner-frame { display: none !important; }
 body { top: 0 !important; }
+
+/* =======================================================
+   AJUSTES FINAIS (Gap, Carrossel Global e Mobile)
+   ======================================================= */
+
+/* 1. DIMINUIR INTERVALO/ESPAÇO NO TOPO */
+main {
+    padding-top: 10px !important; /* Aproxima o conteúdo do cabeçalho */
+}
+
+.hero-section, 
+.professionals-grid, 
+.content-section {
+    padding-top: 20px !important; /* Reduz o espaço interno da primeira seção */
+}
+
+.carousel-section {
+    margin-top: 10px !important; /* Sobe o carrossel se ele for o primeiro */
+}
+
+/* 2. PADRONIZAÇÃO DO CARROSSEL (Para todas as páginas) */
+/* Desktop: Formato Panorâmico (16:6) */
+.footer-carousel .carousel-container,
+#carousel-topo .carousel-container {
+    width: 100%;
+    max-width: 1600px;
+    border-radius: 15px !important;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    aspect-ratio: 16 / 6 !important; /* Força formato PC */
+    height: auto !important;
+    background-color: #000;
+    margin: 0 auto;
+}
+
+/* Mobile: Formato Cartão (2:1) - IGUAL AO INDEX */
+@media (max-width: 900px) {
+    .footer-carousel .carousel-container,
+    #carousel-topo .carousel-container {
+        aspect-ratio: 2 / 1 !important; /* Fica "gordinho" no celular */
+        border-radius: 15px !important;
+    }
+    
+    .carousel-item img {
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+    
+    /* Remove espaço extra específico do mobile */
+    .container { padding-top: 0 !important; }
+}
