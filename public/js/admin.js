@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     setupTabs();
     setupEventListeners();
+    setupMobileMenu();
     
     // Mantém a aba certa aberta após recarregar (ex: ao buscar ou salvar dados)
     const hash = window.location.hash || '#dashboard';
@@ -30,6 +31,14 @@ function setupTabs() {
                 e.preventDefault();
                 ativarAba(href.replace('#', ''));
                 window.history.pushState(null, null, href); // Atualiza URL sem recarregar
+                
+                // Fechar o menu ao clicar em um item do menu (apenas em mobile)
+                if (window.innerWidth <= 768) {
+                    const sidebar = document.getElementById('sidebar');
+                    const dashboardWrapper = document.querySelector('.dashboard-wrapper');
+                    if (sidebar) sidebar.classList.remove('active');
+                    if (dashboardWrapper) dashboardWrapper.classList.remove('menu-open');
+                }
             }
         });
     });
@@ -44,6 +53,22 @@ function ativarAba(idAba) {
     
     const link = document.querySelector(`.sidebar nav ul li a[href="#${idAba}"]`);
     if (link) link.classList.add('active');
+}
+
+// ============================================
+// MENU HAMBÚRGUER (MOBILE)
+// ============================================
+function setupMobileMenu() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const dashboardWrapper = document.querySelector('.dashboard-wrapper');
+
+    if (menuToggle && sidebar && dashboardWrapper) {
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            dashboardWrapper.classList.toggle('menu-open');
+        });
+    }
 }
 
 // ============================================
@@ -282,216 +307,124 @@ async function submeterReativar(event) {
 }
 
 async function alterarStatusPausar(id) {
-    const motivo = prompt(`Motivo para PAUSAR este profissional:`);
-    if(motivo === null) return;
+    const motivo = prompt('Motivo da pausa (Opcional):');
     try {
         const response = await fetch(`/api/profissionais/${id}/status`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ novoStatus: 'PAUSADO', motivo: motivo, renovar: false })
+            body: JSON.stringify({ novoStatus: 'PAUSADO', motivo: motivo || 'Pausado pelo Admin' })
         });
         const res = await response.json();
-        if (res.sucesso) {
-            window.location.hash = '#profissionais';
-            location.reload();
-        }
-    } catch (erro) { alert('Erro ao alterar status'); }
+        if (res.sucesso) location.reload();
+    } catch (erro) { alert('Erro ao pausar'); }
 }
 
 async function submeterExcluir(event) {
     event.preventDefault();
     const id = document.getElementById('id-prof-excluir').value;
-    const motivo = document.getElementById('motivo-excluir').value;
     const senha = document.getElementById('senha-excluir').value;
-
+    const motivo = document.getElementById('motivo-excluir').value;
+    
     try {
         const response = await fetch(`/api/profissionais/${id}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ senha: senha, motivo: motivo })
+            body: JSON.stringify({ senha, motivo })
         });
-        
         const res = await response.json();
         if (res.sucesso) {
-            window.location.hash = '#profissionais';
+            fecharModal('modal-excluir');
             location.reload();
         } else {
-            alert('Atenção: ' + res.erro); 
+            alert(res.erro || 'Erro ao excluir');
         }
-    } catch (erro) { 
-        alert('Erro de conexão ao tentar excluir.'); 
-    }
+    } catch (erro) { alert('Erro de conexão ao excluir'); }
 }
-
-function abrirWhatsApp(whatsapp, nome, statusAlerta) {
-    let msg = `Olá ${nome}, tudo bem? Aqui é da equipe Contrataê.`;
-    
-    if (statusAlerta === 'critico') {
-        msg += ` Notamos que sua assinatura está próxima do vencimento. Vamos renovar para continuar recebendo clientes?`;
-    } else if (statusAlerta === 'vencido') {
-        msg += ` Sua assinatura na plataforma venceu. Vamos regularizar para seu perfil não sair do ar?`;
-    }
-
-    const url = `https://wa.me/55${whatsapp}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-}
-
-// ============================================
-// HISTÓRICO E DOWNLOAD DE RELATÓRIOS (EXCEL E PDF)
-// ============================================
-let logsAtuais = [];
-let nomeProfAtual = "";
 
 async function abrirModalLogs(id, nome) {
-    nomeProfAtual = nome;
     document.getElementById('nome-prof-logs').textContent = nome;
-    document.getElementById('logs-container').innerHTML = 'Carregando histórico...';
-    document.getElementById('btn-baixar-relatorio').style.display = 'none';
-    document.getElementById('btn-baixar-pdf').style.display = 'none';
+    const tbody = document.getElementById('tabela-logs');
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Carregando...</td></tr>';
+    abrirModal('modal-logs');
     
     try {
         const response = await fetch(`/api/profissionais/${id}/logs`);
-        logsAtuais = await response.json();
+        const logs = await response.json();
+        tbody.innerHTML = '';
         
-        if (!logsAtuais || logsAtuais.length === 0) {
-            document.getElementById('logs-container').innerHTML = '<p style="color:#666; text-align:center;">Nenhum registro encontrado para este profissional.</p>';
-        } else {
-            let html = '<table style="width: 100%; text-align: left; border-collapse: collapse;"><thead><tr><th style="border-bottom: 1px solid #ddd; padding: 8px;">Data</th><th style="border-bottom: 1px solid #ddd; padding: 8px;">Ação</th><th style="border-bottom: 1px solid #ddd; padding: 8px;">Valor</th><th style="border-bottom: 1px solid #ddd; padding: 8px;">Motivo</th></tr></thead><tbody>';
-            
-            logsAtuais.forEach(l => {
-                const dataFormatada = new Date(l.data_acao).toLocaleString('pt-BR');
-                let valorPago = '---';
-                if (l.valores_novos && l.valores_novos.valor_pago !== undefined && l.valores_novos.valor_pago !== null) {
-                    valorPago = 'R$ ' + Number(l.valores_novos.valor_pago).toFixed(2).replace('.', ',');
-                }
-
-                html += `<tr>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85rem;">${dataFormatada}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; font-size: 0.85rem; color: var(--primary);">${l.tipo_acao}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85rem; color: #28a745; font-weight: bold;">${valorPago}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85rem;">${l.motivo_edicao || '<span style="color:#999;">Sem motivo</span>'}</td>
-                         </tr>`;
-            });
-            html += '</tbody></table>';
-            document.getElementById('logs-container').innerHTML = html;
-            
-            document.getElementById('btn-baixar-relatorio').style.display = 'block';
-            document.getElementById('btn-baixar-pdf').style.display = 'block'; 
+        if (logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">Nenhum histórico encontrado.</td></tr>';
+            return;
         }
-        abrirModal('modal-logs');
-    } catch (erro) { 
-        alert('Erro ao carregar histórico do servidor.'); 
-    }
+        
+        logs.forEach(log => {
+            const data = new Date(log.data_acao).toLocaleString('pt-BR');
+            tbody.innerHTML += `
+                <tr>
+                    <td>${data}</td>
+                    <td><strong>${log.tipo_acao}</strong></td>
+                    <td>${log.motivo_edicao || '---'}</td>
+                    <td>${log.realizado_por}</td>
+                </tr>
+            `;
+        });
+    } catch (erro) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Erro ao carregar logs.</td></tr>'; }
 }
 
-function baixarRelatorioProfissional() {
-    if (!logsAtuais || logsAtuais.length === 0) return;
-    let csvContent = "\uFEFFData;Ação;Valor Pago;Motivo\n";
-    logsAtuais.forEach(l => {
-        const dataFormatada = new Date(l.data_acao).toLocaleString('pt-BR');
-        let valorPago = '0,00';
-        if (l.valores_novos && l.valores_novos.valor_pago !== undefined && l.valores_novos.valor_pago !== null) {
-            valorPago = Number(l.valores_novos.valor_pago).toFixed(2).replace('.', ',');
-        }
-        let motivo = l.motivo_edicao || 'Sem motivo';
-        motivo = motivo.replace(/"/g, '""'); 
-        csvContent += `"${dataFormatada}";"${l.tipo_acao}";"R$ ${valorPago}";"${motivo}"\n`;
-    });
+function abrirWhatsApp(numero, nome, alerta) {
+    if (!numero) return alert('WhatsApp não cadastrado');
+    let msg = `Olá ${nome}, aqui é do Contrataê!`;
+    if (alerta === 'vencido') msg = `Olá ${nome}, notamos que sua assinatura no Contrataê venceu. Vamos renovar?`;
+    else if (alerta === 'critico') msg = `Olá ${nome}, sua assinatura no Contrataê vence em breve. Gostaria de renovar agora?`;
     
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', `Historico_${nomeProfAtual.replace(/\s+/g, '_')}.csv`);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    window.open(`https://wa.me/55${numero.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-function baixarRelatorioProfissionalPDF() {
-    if (!logsAtuais || logsAtuais.length === 0) return;
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    doc.setFontSize(16);
-    doc.text(`Histórico Financeiro - ${nomeProfAtual}`, 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 28);
-    
-    const tableData = logsAtuais.map(l => {
-        const dataF = new Date(l.data_acao).toLocaleDateString('pt-BR');
-        let valor = '---';
-        if (l.valores_novos && l.valores_novos.valor_pago !== undefined && l.valores_novos.valor_pago !== null) {
-            valor = 'R$ ' + Number(l.valores_novos.valor_pago).toFixed(2).replace('.', ',');
-        }
-        const motivo = l.motivo_edicao || '-';
-        return [dataF, l.tipo_acao, valor, motivo];
-    });
-
-    doc.autoTable({
-        startY: 35,
-        head: [['Data', 'Ação', 'Valor', 'Motivo']],
-        body: tableData,
-        theme: 'striped',
-        headStyles: { fillColor: [0, 33, 71] } 
-    });
-    
-    doc.save(`Historico_${nomeProfAtual.replace(/\s+/g, '_')}.pdf`);
-}
-
+// ============================================
+// RELATÓRIOS (PDF E EXCEL)
+// ============================================
 async function baixarRelatorioGeralExcel() {
     try {
-        const logs = await fetch('/api/relatorios/geral').then(r => r.json());
-        if (!logs || logs.length === 0) { alert('Sem dados de faturamento.'); return; }
+        const response = await fetch('/api/relatorios/geral');
+        const logs = await response.json();
         
-        let csvContent = "\uFEFFData;Profissional;Ação;Valor Pago;Motivo\n";
+        let csv = 'Data;Profissional;Categoria;Ação;Valor;Motivo;Admin\n';
         logs.forEach(l => {
-            const dataF = new Date(l.data_acao).toLocaleString('pt-BR');
-            const nome = l.profissionais ? l.profissionais.nome : 'Desconhecido';
-            let valor = '0,00';
-            if (l.valores_novos && l.valores_novos.valor_pago !== undefined && l.valores_novos.valor_pago !== null) {
-                valor = Number(l.valores_novos.valor_pago).toFixed(2).replace('.', ',');
-            }
-            let motivo = l.motivo_edicao || '-';
-            motivo = motivo.replace(/"/g, '""');
-            csvContent += `"${dataF}";"${nome}";"${l.tipo_acao}";"R$ ${valor}";"${motivo}"\n`;
+            const data = new Date(l.data_acao).toLocaleString('pt-BR');
+            const valor = l.valores_novos?.valor_pago || 0;
+            csv += `${data};${l.profissionais?.nome || '---'};${l.profissionais?.profissao || '---'};${l.tipo_acao};${valor};${l.motivo_edicao || ''};${l.realizado_por}\n`;
         });
         
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.setAttribute('href', url);
-        a.setAttribute('download', `Faturamento_Geral_Contratae.csv`);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    } catch(e) { alert('Erro ao gerar relatório geral.'); }
+        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Relatorio_Financeiro_Contratae_${new Date().toLocaleDateString()}.csv`;
+        link.click();
+    } catch(e) { alert('Erro ao gerar Excel'); }
 }
 
 async function baixarRelatorioGeralPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
     try {
-        const logs = await fetch('/api/relatorios/geral').then(r => r.json());
-        if (!logs || logs.length === 0) { alert('Sem dados de faturamento.'); return; }
+        const response = await fetch('/api/relatorios/geral');
+        const logs = await response.json();
         
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        doc.setFontSize(16);
-        doc.text(`Faturamento Geral da Plataforma - Contrataê`, 14, 20);
+        doc.setFontSize(18);
+        doc.text("Relatório de Faturamento - Contrataê", 14, 20);
         doc.setFontSize(10);
         doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 28);
         
-        let totalSoma = 0;
-
-        const tableData = logs.map(l => {
-            const dataF = new Date(l.data_acao).toLocaleDateString('pt-BR');
-            const nome = l.profissionais ? l.profissionais.nome : 'Desconhecido';
-            const valorNum = (l.valores_novos && l.valores_novos.valor_pago) ? Number(l.valores_novos.valor_pago) : 0;
-            totalSoma += valorNum;
-            const valorStr = 'R$ ' + valorNum.toFixed(2).replace('.', ',');
-            return [dataF, nome, l.tipo_acao, valorStr];
-        });
-
+        const tableData = logs.map(l => [
+            new Date(l.data_acao).toLocaleDateString('pt-BR'),
+            l.profissionais?.nome || '---',
+            l.tipo_acao,
+            `R$ ${(l.valores_novos?.valor_pago || 0).toFixed(2).replace('.', ',')}`
+        ]);
+        
+        const totalSoma = logs.reduce((acc, l) => acc + (parseFloat(l.valores_novos?.valor_pago) || 0), 0);
+        
         doc.autoTable({
             startY: 35,
             head: [['Data', 'Profissional', 'Ação', 'Valor']],
@@ -701,30 +634,3 @@ async function moderarComentario(id, status) {
         if(res.sucesso) carregarComentarios();
     } catch(e) { alert('Erro ao moderar comentário'); }
 }
-// ============================================
-// MENU HAMBÚRGUER (MOBILE)
-// ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.getElementById('menu-toggle');
-    const sidebar = document.getElementById('sidebar');
-    const dashboardWrapper = document.querySelector('.dashboard-wrapper');
-
-    if (menuToggle && sidebar && dashboardWrapper) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-            dashboardWrapper.classList.toggle('menu-open');
-        });
-
-        // Fechar o menu ao clicar em um item do menu (apenas em mobile)
-        const sidebarLinks = document.querySelectorAll('.sidebar nav ul li a');
-        sidebarLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                if (window.innerWidth <= 768) { // Verifica se é mobile
-                    sidebar.classList.remove('active');
-                    dashboardWrapper.classList.remove('menu-open');
-                }
-            });
-        });
-    }
-});
-});
