@@ -701,3 +701,30 @@ async function moderarComentario(id, status) {
         if(res.sucesso) carregarComentarios();
     } catch(e) { alert('Erro ao moderar comentário'); }
 }
+// ============================================
+// MENU HAMBÚRGUER (MOBILE)
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const dashboardWrapper = document.querySelector('.dashboard-wrapper');
+
+    if (menuToggle && sidebar && dashboardWrapper) {
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            dashboardWrapper.classList.toggle('menu-open');
+        });
+
+        // Fechar o menu ao clicar em um item do menu (apenas em mobile)
+        const sidebarLinks = document.querySelectorAll('.sidebar nav ul li a');
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) { // Verifica se é mobile
+                    sidebar.classList.remove('active');
+                    dashboardWrapper.classList.remove('menu-open');
+                }
+            });
+        });
+    }
+});
+});
