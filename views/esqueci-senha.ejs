@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Recuperar Senha</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #002147 0%, #1a4d7a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        
+        .auth-container { width: 100%; max-width: 450px; padding: 20px; }
+        .auth-card { background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); padding: 40px; }
+        
+        .auth-header { text-align: center; margin-bottom: 40px; }
+        .auth-header h1 { font-size: 28px; color: #002147; margin-bottom: 10px; }
+        .auth-header p { color: #6c757d; font-size: 14px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #002147; font-size: 14px; }
+        .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: 0.3s; }
+        .form-group input:focus { outline: none; border-color: #ffa500; box-shadow: 0 0 0 3px rgba(255,165,0,0.1); }
+        
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .btn-primary { background: #ffa500; color: white; }
+        .btn-primary:hover { background: #ff9500; }
+        
+        .error-message { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; border: 1px solid #f5c6cb; }
+        .success-message { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; border: 1px solid #c3e6cb; }
+        
+        .auth-footer { text-align: center; margin-top: 25px; font-size: 14px; color: #6c757d; }
+        .auth-footer a { color: #ffa500; text-decoration: none; font-weight: 600; }
+        .auth-footer a:hover { text-decoration: underline; }
+        
+        .info-box { background: #e7f3ff; color: #004085; padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 14px; border: 1px solid #b8daff; }
+        
+        @media (max-width: 480px) {
+            .auth-card { padding: 25px; }
+            .auth-header h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Contrataê</h1>
+                <p>Recuperar Senha</p>
+            </div>
+            
+            <% if (erro) { %>
+                <div class="error-message"><%= erro %></div>
+            <% } %>
+            
+            <% if (sucesso) { %>
+                <div class="success-message"><%= sucesso %></div>
+            <% } %>
+            
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> Digite seu e-mail cadastrado. Enviaremos um link para recuperar sua senha.
+            </div>
+            
+            <form method="POST" action="/auth/recuperar-senha">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" name="email" required placeholder="seu@email.com">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Enviar Link de Recuperação</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p><a href="/auth/login">Voltar ao Login</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

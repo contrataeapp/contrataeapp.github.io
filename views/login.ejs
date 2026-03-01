@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #002147 0%, #1a4d7a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        
+        .auth-container { width: 100%; max-width: 450px; padding: 20px; }
+        .auth-card { background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); padding: 40px; }
+        
+        .auth-header { text-align: center; margin-bottom: 40px; }
+        .auth-header h1 { font-size: 28px; color: #002147; margin-bottom: 10px; }
+        .auth-header p { color: #6c757d; font-size: 14px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #002147; font-size: 14px; }
+        .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: 0.3s; }
+        .form-group input:focus { outline: none; border-color: #ffa500; box-shadow: 0 0 0 3px rgba(255,165,0,0.1); }
+        
+        .password-wrapper { position: relative; }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6c757d; }
+        
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .btn-primary { background: #ffa500; color: white; margin-bottom: 15px; }
+        .btn-primary:hover { background: #ff9500; }
+        
+        .divider { display: flex; align-items: center; margin: 30px 0; }
+        .divider span { background: #e2e8f0; flex: 1; height: 1px; }
+        .divider p { margin: 0 15px; color: #6c757d; font-size: 14px; }
+        
+        .btn-google { background: white; color: #002147; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-google:hover { border-color: #ffa500; background: #f8f9fa; }
+        
+        .auth-footer { text-align: center; margin-top: 25px; font-size: 14px; color: #6c757d; }
+        .auth-footer a { color: #ffa500; text-decoration: none; font-weight: 600; }
+        .auth-footer a:hover { text-decoration: underline; }
+        
+        .error-message { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; border: 1px solid #f5c6cb; }
+        .success-message { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; border: 1px solid #c3e6cb; }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: #f0f2f5; color: #6c757d; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { background: #ffa500; color: white; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        @media (max-width: 480px) {
+            .auth-card { padding: 25px; }
+            .auth-header h1 { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Contrataê</h1>
+                <p>Conecte-se à plataforma</p>
+            </div>
+            
+            <% if (erro) { %>
+                <div class="error-message"><%= erro %></div>
+            <% } %>
+            
+            <% if (sucesso) { %>
+                <div class="success-message"><%= sucesso %></div>
+            <% } %>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="mudarAba('login')">Entrar</button>
+                <button class="tab-btn" onclick="mudarAba('registro')">Cadastro</button>
+            </div>
+            
+            <!-- ABA DE LOGIN -->
+            <div id="login" class="tab-content active">
+                <form method="POST" action="/auth/login">
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input type="email" name="email" required placeholder="seu@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password-login" name="password" required placeholder="Sua senha">
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('password-login')"></i>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </form>
+                
+                <div class="divider">
+                    <span></span>
+                    <p>ou</p>
+                    <span></span>
+                </div>
+                
+                <button class="btn btn-google" onclick="loginComGoogle()">
+                    <i class="fab fa-google"></i> Entrar com Google
+                </button>
+                
+                <div class="auth-footer">
+                    <p><a href="/esqueci-senha">Esqueceu a senha?</a></p>
+                </div>
+            </div>
+            
+            <!-- ABA DE REGISTRO -->
+            <div id="registro" class="tab-content">
+                <form method="POST" action="/auth/registro">
+                    <div class="form-group">
+                        <label>Nome Completo</label>
+                        <input type="text" name="full_name" required placeholder="Seu nome">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input type="email" name="email" required placeholder="seu@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="tel" name="phone_number" placeholder="(16) 99999-9999">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tipo de Conta</label>
+                        <select name="user_type" required style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                            <option value="">Selecione...</option>
+                            <option value="client">Cliente (Contratar Serviços)</option>
+                            <option value="professional">Profissional (Prestar Serviços)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password-registro" name="password" required placeholder="Crie uma senha">
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('password-registro')"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Confirmar Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password-confirm" name="password_confirm" required placeholder="Confirme a senha">
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('password-confirm')"></i>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Criar Conta</button>
+                </form>
+                
+                <div class="divider">
+                    <span></span>
+                    <p>ou</p>
+                    <span></span>
+                </div>
+                
+                <button class="btn btn-google" onclick="registroComGoogle()">
+                    <i class="fab fa-google"></i> Cadastrar com Google
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function mudarAba(aba) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(aba).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = event.target;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        function loginComGoogle() {
+            window.location.href = '/auth/google';
+        }
+        
+        function registroComGoogle() {
+            window.location.href = '/auth/google?signup=true';
+        }
+    </script>
+</body>
+</html>

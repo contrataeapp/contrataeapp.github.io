@@ -5,7 +5,8 @@ const cors = require('cors');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
-const session = require('express-session'); 
+const session = require('express-session');
+const authRoutes = require('./routes/auth'); 
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -33,6 +34,9 @@ app.use(session({
     saveUninitialized: false,
     cookie: { maxAge: 1000 * 60 * 60 * 24 } 
 }));
+
+// Rotas de Autenticação
+app.use('/auth', authRoutes);
 
 const checkAdmin = (req, res, next) => {
     if (req.session.adminLogado) return next();
