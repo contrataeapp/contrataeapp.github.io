@@ -44,15 +44,38 @@ function setupTabs() {
     });
 }
 
+// Função para alternar seções (usada pela navegação inferior mobile)
+function toggleSection(sectionId) {
+    ativarAba(sectionId);
+    window.history.pushState(null, null, '#' + sectionId);
+    
+    // Atualizar o botão ativo na navegação inferior
+    document.querySelectorAll('.mobile-bottom-nav-admin .nav-item').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    const activeBtn = document.querySelector(`.mobile-bottom-nav-admin .nav-item[onclick="toggleSection('${sectionId}')"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+}
+
 function ativarAba(idAba) {
     document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
     document.querySelectorAll('.sidebar nav ul li a').forEach(link => link.classList.remove('active'));
     
     const section = document.getElementById(idAba);
-    if (section) section.classList.add('active');
-    
+    if (section) {
+        section.classList.add('active');
+    }
     const link = document.querySelector(`.sidebar nav ul li a[href="#${idAba}"]`);
-    if (link) link.classList.add('active');
+    if (link) {
+        link.classList.add('active');
+    }
+    
+    // Atualizar botão ativo na navegação inferior mobile
+    document.querySelectorAll('.mobile-bottom-nav-admin .nav-item').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    const activeBtn = document.querySelector(`.mobile-bottom-nav-admin .nav-item[onclick="toggleSection('${idAba}')"]`);
+    if (activeBtn) activeBtn.classList.add('active');
 }
 
 // ============================================
