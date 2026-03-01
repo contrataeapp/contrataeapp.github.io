@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= categoria.name %> - Contrataê</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <%- include('header') %>
+
+    <main class="categoria-page">
+        <!-- SEÇÃO DE BANNERS SUPERIORES -->
+        <section class="banners-section">
+            <div class="banners-container">
+                <% if (banners && banners.length > 0) { %>
+                    <% banners.forEach((banner, index) => { %>
+                        <% if (banner.posicao === 'topo') { %>
+                            <div class="banner-item">
+                                <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo %>" style="width: 100%; height: auto; border-radius: 8px;">
+                            </div>
+                        <% } %>
+                    <% }); %>
+                <% } %>
+            </div>
+        </section>
+
+        <!-- CABEÇALHO DA CATEGORIA -->
+        <section class="categoria-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="<%= categoria.icon_url || 'fas fa-tools' %>"></i>
+                    </div>
+                    <div class="header-text">
+                        <h1><%= categoria.name %>s Disponíveis</h1>
+                        <p><%= categoria.generic_phrase || 'Encontre os melhores profissionais para suas necessidades.' %></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO DE PARCEIROS (BANNERS LATERAIS) -->
+        <% if (banners && banners.some(b => b.posicao === 'lateral')) { %>
+            <section class="parceiros-section">
+                <div class="container">
+                    <h2>Parceiros</h2>
+                    <div class="parceiros-grid">
+                        <% banners.forEach((banner) => { %>
+                            <% if (banner.posicao === 'lateral') { %>
+                                <div class="parceiro-card">
+                                    <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo %>">
+                                    <p><%= banner.titulo %></p>
+                                </div>
+                            <% } %>
+                        <% }); %>
+                    </div>
+                </div>
+            </section>
+        <% } %>
+
+        <!-- LISTA DE PROFISSIONAIS -->
+        <section class="profissionais-section">
+            <div class="container">
+                <h2><%= categoria.name %>s Disponíveis</h2>
+                
+                <% if (profissionais && profissionais.length > 0) { %>
+                    <div class="profissionais-grid">
+                        <% profissionais.forEach((prof) => { %>
+                            <div class="profissional-card">
+                                <div class="card-image">
+                                    <img src="<%= prof.foto_url || '/images/default-avatar.png' %>" alt="<%= prof.nome %>">
+                                    <div class="card-overlay">
+                                        <a href="/perfil/<%= prof.id %>" class="btn-ver-perfil">Ver Perfil</a>
+                                    </div>
+                                </div>
+                                <div class="card-content">
+                                    <h3><%= prof.nome %></h3>
+                                    <p class="profissao"><%= categoria.name %></p>
+                                    <p class="descricao"><%= prof.descricao || 'Profissional experiente' %></p>
+                                    
+                                    <% if (prof.preco_info) { %>
+                                        <p class="preco"><strong><%= prof.preco_info %></strong></p>
+                                    <% } %>
+
+                                    <div class="card-rating">
+                                        <% for (let i = 0; i < 5; i++) { %>
+                                            <i class="fas fa-star <%= i < (prof.avaliacao || 4) ? 'filled' : '' %>"></i>
+                                        <% } %>
+                                        <span>(<%= prof.num_avaliacoes || 0 %> avaliações)</span>
+                                    </div>
+
+                                    <div class="card-actions">
+                                        <button class="btn-favoritar" onclick="adicionarFavorito('<%= prof.id %>')">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <a href="https://wa.me/<%= prof.telefone %>" target="_blank" class="btn-whatsapp">
+                                            <i class="fab fa-whatsapp"></i> Contatar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>Nenhum profissional disponível</h3>
+                        <p>No momento, não temos <%= categoria.name %>s disponíveis. Tente voltar mais tarde!</p>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+
+        <!-- SEÇÃO DE BANNERS INFERIORES -->
+        <% if (banners && banners.some(b => b.posicao === 'rodape')) { %>
+            <section class="banners-rodape">
+                <div class="container">
+                    <div class="banners-container">
+                        <% banners.forEach((banner) => { %>
+                            <% if (banner.posicao === 'rodape') { %>
+                                <div class="banner-item">
+                                    <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo %>" style="width: 100%; height: auto; border-radius: 8px;">
+                                </div>
+                            <% } %>
+                        <% }); %>
+                    </div>
+                </div>
+            </section>
+        <% } %>
+    </main>
+
+    <%- include('footer') %>
+
+    <style>
+        .categoria-page {
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .categoria-header {
+            background: linear-gradient(135deg, #002147 0%, #003d7a 100%);
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-icon {
+            font-size: 60px;
+            color: #ffa500;
+            flex-shrink: 0;
+        }
+
+        .header-text h1 {
+            margin: 0 0 10px 0;
+            font-size: 36px;
+        }
+
+        .header-text p {
+            margin: 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .banners-section,
+        .banners-rodape {
+            padding: 20px;
+            background: white;
+            margin-bottom: 40px;
+        }
+
+        .banners-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .banner-item img {
+            max-height: 200px;
+            object-fit: cover;
+        }
+
+        .parceiros-section {
+            padding: 40px 20px;
+            background: white;
+            margin-bottom: 40px;
+        }
+
+        .parceiros-section h2 {
+            text-align: center;
+            color: #002147;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .parceiros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .parceiro-card {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .parceiro-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .parceiro-card img {
+            max-width: 100%;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .parceiro-card p {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .profissionais-section {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .profissionais-section h2 {
+            color: #002147;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .profissionais-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .profissional-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+
+        .profissional-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .card-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .profissional-card:hover .card-overlay {
+            opacity: 1;
+        }
+
+        .btn-ver-perfil {
+            background: #ffa500;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .btn-ver-perfil:hover {
+            background: #ff9500;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-content h3 {
+            margin: 0 0 5px 0;
+            color: #002147;
+            font-size: 18px;
+        }
+
+        .profissao {
+            color: #ffa500;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        .descricao {
+            color: #666;
+            font-size: 13px;
+            margin: 0 0 10px 0;
+            line-height: 1.4;
+        }
+
+        .preco {
+            color: #28a745;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .card-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .card-rating i {
+            color: #ffc107;
+        }
+
+        .card-rating i.fa-star:not(.filled) {
+            color: #ddd;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-favoritar {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ffa500;
+            background: white;
+            color: #ffa500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-favoritar:hover {
+            background: #ffa500;
+            color: white;
+        }
+
+        .btn-whatsapp {
+            flex: 2;
+            padding: 10px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-whatsapp:hover {
+            background: #20ba5a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin: 0 0 10px 0;
+        }
+
+        .empty-state p {
+            margin: 0;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-text h1 {
+                font-size: 24px;
+            }
+
+            .profissionais-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .banners-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script>
+        function adicionarFavorito(profissionalId) {
+            // Implementar lógica de favoritos
+            alert('Funcionalidade de favoritos em breve!');
+        }
+    </script>
+</body>
+</html>

@@ -348,4 +348,47 @@ categoriasMap.forEach(({ profissao, rota }) => {
         } catch (err) { res.render(rota, { [rota]: [], banners: [] }); }
     });
 });
+// ROTA DE CONTATO
+app.get('/contato', (req, res) => {
+    res.render('contato');
+});
+
+app.post('/api/contato', async (req, res) => {
+    try {
+        const { nome, email, telefone, assunto, mensagem } = req.body;
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: 'time.contratae@gmail.com',
+            subject: `Novo contato: ${assunto}`,
+            html: `<h2>Novo Contato</h2><p><strong>Nome:</strong> ${nome}</p><p><strong>E-mail:</strong> ${email}</p><p><strong>Telefone:</strong> ${telefone || 'Nao informado'}</p><p><strong>Assunto:</strong> ${assunto}</p><p><strong>Mensagem:</strong></p><p>${mensagem}</p>`
+        });
+        res.json({ sucesso: true });
+    } catch (err) {
+        console.error('Erro ao enviar contato:', err);
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+// ROTA DINAMICA PARA CATEGORIAS
+app.get('/categoria/:slug', async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const { data: categoriaData, error: catError } = await supabase.from('categories').select('*').eq('slug', slug).single();
+        if (catError || !categoriaData) {
+            return res.status(404).send('Categoria nao encontrada');
+        }
+        const { data: profissionaisData, error: profError } = await supabase.from('professionals').select('*').eq('category_id', categoriaData.id).eq('status', 'active');
+        if (profError) throw profError;
+        const banners = await obterBannersAtivos();
+        res.render('categoria-dinamica', { categoria: categoriaData, profissionais: profissionaisData || [], banners });
+    } catch (err) {
+        console.error('Erro ao carregar categoria:', err);
+        res.status(500).send('Erro ao carregar categoria');
+    }
+});
+
+app.get('/outros', (req, res) => {
+    res.render('outros');
+});
+
 app.listen(port, () => console.log(`🚀 Contrataê rodando em http://localhost:${port}`));
