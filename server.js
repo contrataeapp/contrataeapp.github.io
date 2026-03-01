@@ -6,7 +6,8 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const session = require('express-session');
-const authRoutes = require('./routes/auth'); 
+const authRoutes = require('./routes/auth');
+const dashboardRoutes = require('./routes/dashboards'); 
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -37,6 +38,9 @@ app.use(session({
 
 // Rotas de Autenticação
 app.use('/auth', authRoutes);
+
+// Rotas de Dashboards
+app.use('/', dashboardRoutes);
 
 const checkAdmin = (req, res, next) => {
     if (req.session.adminLogado) return next();
