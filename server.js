@@ -339,6 +339,14 @@ async function obterBannersAtivos() {
 app.get('/', async (req, res) => { const banners = await obterBannersAtivos(); res.render('index', { banners }); });
 const categoriasMap = [ { profissao: 'Pintor', rota: 'pintores' }, { profissao: 'Pedreiro', rota: 'pedreiros' }, { profissao: 'Eletricista', rota: 'eletricistas' }, { profissao: 'Encanador', rota: 'encanadores' } ];
 categoriasMap.forEach(({ profissao, rota }) => {
+    app.get(`/${rota}`, async (req, res) => {
+        try {
+            const { data, error } = await supabase.from('profissionais').select('*').eq('profissao', profissao).eq('status', 'ATIVO');
+            if (error) throw error;
+            const banners = await obterBannersAtivos();
+            res.render(rota, { [rota]: data || [], banners });
+        } catch (err) { res.render(rota, { [rota]: [], banners: [] }); }
+    });
     app.get(`/${rota}.html`, async (req, res) => {
         try {
             const { data, error } = await supabase.from('profissionais').select('*').eq('profissao', profissao).eq('status', 'ATIVO');
@@ -356,8 +364,11 @@ app.get('/contato', (req, res) => {
 app.post('/api/contato', async (req, res) => {
     try {
         const { nome, email, telefone, assunto, mensagem } = req.body;
+        if (!nome || !email || !assunto || !mensagem) {
+            return res.status(400).json({ erro: 'Campos obrigatorios nao preenchidos' });
+        }
         await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+            from: process.env.EMAIL_USER || 'noreply@contratae.com',
             to: 'time.contratae@gmail.com',
             subject: `Novo contato: ${assunto}`,
             html: `<h2>Novo Contato</h2><p><strong>Nome:</strong> ${nome}</p><p><strong>E-mail:</strong> ${email}</p><p><strong>Telefone:</strong> ${telefone || 'Nao informado'}</p><p><strong>Assunto:</strong> ${assunto}</p><p><strong>Mensagem:</strong></p><p>${mensagem}</p>`
@@ -365,7 +376,7 @@ app.post('/api/contato', async (req, res) => {
         res.json({ sucesso: true });
     } catch (err) {
         console.error('Erro ao enviar contato:', err);
-        res.status(500).json({ erro: err.message });
+        res.status(500).json({ erro: 'Erro ao enviar mensagem. Tente novamente.' });
     }
 });
 

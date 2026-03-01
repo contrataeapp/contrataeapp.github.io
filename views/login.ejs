@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #002147 0%, #1a4d7a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #002147 0%, #1a4d7a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding-bottom: 80px; }
         
         .auth-container { width: 100%; max-width: 450px; padding: 20px; }
         .auth-card { background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); padding: 40px; }
@@ -48,6 +48,43 @@
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2c2c2c;
+            border-top: 1px solid #444;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 70px;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            transition: 0.3s;
+            gap: 5px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: #ffa500;
+        }
+
+        .nav-item i {
+            font-size: 24px;
+        }
         
         @media (max-width: 480px) {
             .auth-card { padding: 25px; }
@@ -56,6 +93,25 @@
     </style>
 </head>
 <body>
+    <nav class="bottom-nav">
+        <a href="/" class="nav-item" title="Inicio">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="/" class="nav-item" title="Busca">
+            <i class="fas fa-search"></i>
+            <span>Busca</span>
+        </a>
+        <a href="/outros" class="nav-item" title="Menu">
+            <i class="fas fa-bars"></i>
+            <span>Menu</span>
+        </a>
+        <a href="/auth/login" class="nav-item active" title="Entrar">
+            <i class="fas fa-user"></i>
+            <span>Entrar</span>
+        </a>
+    </nav>
+
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -132,8 +188,8 @@
                         <label>Tipo de Conta</label>
                         <select name="user_type" required style="width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px;">
                             <option value="">Selecione...</option>
-                            <option value="client">Cliente (Contratar Serviços)</option>
-                            <option value="professional">Profissional (Prestar Serviços)</option>
+                            <option value="client">Cliente (Contratar Servicos)</option>
+                            <option value="professional">Profissional (Prestar Servicos)</option>
                         </select>
                     </div>
                     
