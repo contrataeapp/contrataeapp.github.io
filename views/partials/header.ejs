@@ -1,36 +1,21 @@
 <% 
-    // Garantir que currentPage tenha um valor padrão se não for passado
     const current = typeof currentPage !== 'undefined' ? currentPage : ''; 
 %>
-<header class="airbnb-header">
-    <div class="container header-grid">
-        <div class="header-left">
-            <a href="/" class="site-logo"><img src="/imagens/logo/logo_contratae.png" alt="Logo Contrataê"></a>
+<header>
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+        <div class="site-logo">
+            <a href="/"><img src="/imagens/logo/logo_contratae.png" alt="Contrataê" style="height: 50px;"></a>
         </div>
-
-        <div class="header-center desktop-only">
-            <div class="search-pill">
-                <input type="text" class="search-input-pill" placeholder="Busque por pintor, pedreiro...">
-                <button class="search-btn-round"><i class="fas fa-search"></i></button>
-            </div>
-        </div>
-
-        <div class="header-right">
-            <div id="google_translate_element" class="desktop-only"></div>
-            <button id="theme-toggle" class="icon-btn"><i class="fas fa-moon"></i></button>
-            <a href="/auth/login" class="login-pill desktop-only">
-                <span class="login-text">Entrar / Cadastrar</span>
-                <span class="login-icon"><i class="fas fa-user-circle"></i></span>
-            </a>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div id="google_translate_element"></div>
+            <button id="theme-toggle" class="button secondary-button" style="padding: 8px 12px;"><i class="fas fa-moon"></i></button>
+            <a href="/auth/login" class="button primary-button">Entrar</a>
         </div>
     </div>
 
-    <nav class="categories-nav" id="main-nav">
+    <nav class="main-nav">
         <div class="container">
-            <div class="nav-header mobile-only">
-                <h3>Menu</h3>
-                <button id="close-menu-btn"><i class="fas fa-times"></i></button>
-            </div>
             <ul>
                 <li><a href="/" class="<%= current === 'index' ? 'active' : '' %>"><i class="fas fa-home"></i> Início</a></li>
                 <li><a href="/pintores" class="<%= current === 'pintores' ? 'active' : '' %>"><i class="fas fa-paint-roller"></i> Pintores</a></li>
@@ -39,8 +24,26 @@
                 <li><a href="/encanadores" class="<%= current === 'encanadores' ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
                 <li><a href="/outros" class="<%= current === 'outros' ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
                 <li><a href="/contato" class="<%= current === 'contato' ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
-                <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                <% if (typeof adminLogado !== 'undefined' && adminLogado) { %>
+                    <li><a href="/admin" class="<%= current === 'admin' ? 'active' : '' %>"><i class="fas fa-user-shield"></i> Admin</a></li>
+                <% } %>
             </ul>
         </div>
     </nav>
 </header>
+
+<script>
+    // Script simples para o theme toggle se não existir
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const icon = btn.querySelector('i');
+            if (document.body.classList.contains('light-mode')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+            }
+        });
+    }
+</script>

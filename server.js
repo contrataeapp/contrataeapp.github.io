@@ -5,6 +5,8 @@ const { createClient } = require('@supabase/supabase-js');
 const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const cors = require('cors');
+const helmet = require('helmet');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,6 +15,23 @@ const port = process.env.PORT || 3000;
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // MIDDLEWARES
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://translate.google.com", "https://www.gstatic.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com", "https://translate.googleapis.com"],
+            imgSrc: ["'self'", "data:", "https://*.supabase.co", "https://*.googleusercontent.com", "https://www.gstatic.com", "https://translate.googleapis.com", "https://contrataeapp.onrender.com"],
+            connectSrc: ["'self'", "https://*.supabase.co", "https://translate.googleapis.com"],
+            fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: [],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -21,10 +40,13 @@ app.set('views', path.join(__dirname, 'views'));
 
 // CONFIGURAÇÃO DE SESSÃO
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'contratae_secret_key',
+    secret: process.env.SESSION_SECRET || 'contratae_secret_key_2026',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production' }
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 1000 * 60 * 60 * 24 // 24 horas
+    }
 }));
 
 // CONFIGURAÇÃO PASSPORT
@@ -91,7 +113,69 @@ async function obterBannersAtivos() {
     }
 }
 
-// ROTAS PRINCIPAIS
+// ============================================
+// ROTAS ADMINISTRATIVAS (RESTAURADAS)
+// ============================================
+const checkAdmin = (req, res, next) => {
+    if (req.session.adminLogado) return next();
+    res.redirect('/login-adm'); 
+};
+
+app.get('/login-adm', (req, res) => {
+    if (req.session.adminLogado) return res.redirect('/admin');
+    res.render('login_admin', { erro: null, currentPage: 'admin' });
+});
+
+app.post('/login-adm', (req, res) => {
+    const { usuario, senha } = req.body;
+    const adminUser = process.env.ADMIN_USER || 'admin';
+    const adminPass = process.env.ADMIN_PASS || '#Relaxsempre153143';
+
+    if (usuario === adminUser && senha === adminPass) {
+        req.session.adminLogado = true;
+        res.redirect('/admin');
+    } else {
+        res.render('login_admin', { erro: 'Usuário ou senha inválidos!', currentPage: 'admin' });
+    }
+});
+
+app.get('/logout-adm', (req, res) => {
+    req.session.adminLogado = false;
+    res.redirect('/login-adm');
+});
+
+app.get("/admin", checkAdmin, async (req, res) => {
+    try {
+        const { categoria, status, busca, ordenar } = req.query;
+        let query = supabase.from("profissionais").select("*");
+        if (categoria) query = query.eq('profissao', categoria);
+        if (status) query = query.eq('status', status);
+        
+        const { data: profissionais, error } = await query.order("data_cadastro", { ascending: false });
+        if (error) throw error;
+
+        let filtrados = profissionais || [];
+        if (!status) filtrados = filtrados.filter(p => p.status !== 'EXCLUIDO');
+        if (busca) filtrados = filtrados.filter(p => p.nome.toLowerCase().includes(busca.toLowerCase()) || p.profissao.toLowerCase().includes(busca.toLowerCase()));
+
+        const totais = {
+            ativos: profissionais.filter(p => p.status === 'ATIVO').length,
+            pendentes: profissionais.filter(p => p.status === 'PENDENTE').length,
+            pausados: profissionais.filter(p => p.status === 'PAUSADO').length,
+            receitaTotal: profissionais.reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
+            receitaMes: 0 // Simplificado para restauração
+        };
+
+        res.render("admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar }, currentPage: 'admin' });
+    } catch (err) { 
+        console.error(err);
+        res.render("admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {}, currentPage: 'admin' }); 
+    }
+});
+
+// ============================================
+// ROTAS PÚBLICAS
+// ============================================
 app.get('/', async (req, res) => {
     try {
         const banners = await obterBannersAtivos();
@@ -113,22 +197,20 @@ app.get('/contato', async (req, res) => {
 app.get('/outros', async (req, res) => {
     try {
         const { data: categorias, error } = await supabase.from('categories').select('*').order('name');
-        if (error) throw error;
         const banners = await obterBannersAtivos();
         res.render('outros', { categorias: categorias || [], banners, currentPage: 'outros' });
     } catch (err) {
-        console.error('Erro ao carregar categorias:', err);
         res.render('outros', { categorias: [], banners: [], currentPage: 'outros' });
     }
 });
 
-// ROTAS DE AUTENTICAÇÃO
+// ROTAS DE AUTENTICAÇÃO USUÁRIO
 app.get('/auth/login', (req, res) => {
-    res.render('auth/login', { currentPage: 'login' });
+    res.render('auth/login', { currentPage: 'login', erro: null });
 });
 
 app.get('/auth/cadastro', (req, res) => {
-    res.render('auth/cadastro', { currentPage: 'cadastro' });
+    res.render('auth/cadastro', { currentPage: 'cadastro', erro: null });
 });
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -136,17 +218,14 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 app.get('/auth/google/callback', 
     passport.authenticate('google', { failureRedirect: '/auth/login' }),
     (req, res) => {
+        req.session.userId = req.user.id;
+        req.session.userType = req.user.user_type;
+        req.session.fullName = req.user.full_name;
         res.redirect('/');
     }
 );
 
-app.get('/auth/logout', (req, res) => {
-    req.logout(() => {
-        res.redirect('/');
-    });
-});
-
-// ROTAS DE CATEGORIAS FIXAS (LEGADO)
+// ROTAS DE CATEGORIAS FIXAS
 const categoriasFixas = [
     { rota: 'pintores', profissao: 'Pintor' },
     { rota: 'pedreiros', profissao: 'Pedreiro' },
@@ -158,7 +237,6 @@ categoriasFixas.forEach(({ rota, profissao }) => {
     app.get(`/${rota}`, async (req, res) => {
         try {
             const { data, error } = await supabase.from('professionals').select('*, users(*)').eq('status', 'active');
-            // Nota: Aqui idealmente filtraríamos pela categoria correta no banco novo
             const banners = await obterBannersAtivos();
             res.render(rota, { [rota]: data || [], banners, currentPage: rota });
         } catch (err) { 
@@ -171,19 +249,17 @@ categoriasFixas.forEach(({ rota, profissao }) => {
 app.get('/categoria/:slug', async (req, res) => {
     try {
         const { slug } = req.params;
-        const { data: categoriaData, error: catError } = await supabase.from('categories').select('*').eq('slug', slug).single();
+        const { data: categoriaData } = await supabase.from('categories').select('*').eq('slug', slug).single();
         
-        if (catError || !categoriaData) {
+        if (!categoriaData) {
             return res.status(404).render('categoria-vazia', { banners: [], currentPage: 'outros' });
         }
 
-        const { data: profissionais, error: profError } = await supabase
+        const { data: profissionais } = await supabase
             .from('professionals')
             .select('*, users(*)')
             .eq('category_id', categoriaData.id)
             .eq('status', 'active');
-
-        if (profError) throw profError;
 
         const banners = await obterBannersAtivos();
 
@@ -193,12 +269,14 @@ app.get('/categoria/:slug', async (req, res) => {
 
         res.render('categoria-dinamica', { categoria: categoriaData, profissionais, banners, currentPage: 'outros' });
     } catch (err) {
-        console.error('Erro ao carregar categoria:', err);
         res.status(500).send('Erro interno do servidor');
     }
 });
 
+// DASHBOARDS (RESTAURADOS)
+const dashboardRoutes = require('./routes/dashboards');
+app.use('/', dashboardRoutes);
+
 app.listen(port, () => {
-    console.log(`🚀 Contrataê v2.0.2 rodando em http://localhost:${port}`);
-    console.log('✅ Deploy bem-sucedido - Estrutura MVP aplicada');
+    console.log(`🚀 Contrataê v2.1.0 rodando em http://localhost:${port}`);
 });
