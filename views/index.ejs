@@ -13,8 +13,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contrataê - Página Inicial</title>
-    <link rel="icon" href="data:,"> <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
     <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
@@ -39,48 +42,7 @@
     </div>
     <% } %>
 
-    <header class="airbnb-header">
-        <div class="container header-grid">
-            <div class="header-left">
-                <a href="/" class="site-logo"><img src="/imagens/logo/logo_contratae.png" alt="Logo Contrataê"></a>
-            </div>
-
-            <div class="header-center desktop-only">
-                <div class="search-pill">
-                    <input type="text" class="search-input-pill" placeholder="Busque por pintor, pedreiro...">
-                    <button class="search-btn-round"><i class="fas fa-search"></i></button>
-                </div>
-            </div>
-
-            <div class="header-right">
-                <div id="google_translate_element" class="desktop-only"></div>
-                <button id="theme-toggle" class="icon-btn"><i class="fas fa-moon"></i></button>
-                <a href="/auth/login" class="login-pill desktop-only">
-                    <span class="login-text">Entrar / Cadastrar</span>
-                    <span class="login-icon"><i class="fas fa-user-circle"></i></span>
-                </a>
-            </div>
-        </div>
-
-        <nav class="categories-nav" id="main-nav">
-            <div class="container">
-                <div class="nav-header mobile-only">
-                    <h3>Menu</h3>
-                    <button id="close-menu-btn"><i class="fas fa-times"></i></button>
-                </div>
-                <ul>
-                    <li><a href="/" class="active"><i class="fas fa-home"></i> Início</a></li>
-                    <li><a href="/pintores"><i class="fas fa-paint-roller"></i> Pintores</a></li>
-                    <li><a href="/pedreiros"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
-                    <li><a href="/eletricistas"><i class="fas fa-bolt"></i> Eletricistas</a></li>
-                    <li><a href="/encanadores"><i class="fas fa-wrench"></i> Encanadores</a></li>
-                    <li><a href="/outros"><i class="fas fa-th"></i> Outros</a></li>
-                    <li><a href="/contato"><i class="fas fa-envelope"></i> Contato</a></li>
-                    <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
-                </ul>
-            </div>
-        </nav>
-    </header>
+    <%- include('partials/header') %>
 
     <main>
         <div class="container" style="text-align: center; margin-top: 20px;">
@@ -152,66 +114,7 @@
         <a href="/auth/login" class="nav-item"><i class="fas fa-user"></i><span>Entrar</span></a>
     </nav>
 
-    <footer>
-        <div class="footer-partners-area">
-            <div class="container">
-                <h4 style="color: #ffa500; text-align: center; margin-bottom: 10px; font-size: 1rem;">Nossos Parceiros</h4>
-                <section class="carousel-section footer-carousel" id="carousel-baixo">
-                    <div class="carousel-container">
-                       
-                        <% const bannersRodape = typeof banners !== 'undefined' ? banners.filter(b => b.posicao === 2) : []; %>
-                        
-                        <% if (bannersRodape.length > 0) { %>
-                            <% bannersRodape.forEach(function(banner, index) { %>
-                                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                                    <a href="#" class="trigger-modal" data-link="<%= banner.link_destino || '#' %>">
-                                        <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo || 'Parceiro' %>" style="width:100%; height:100%;">
-                                    </a>
-                                </div>
-                            <% }); %>
-                        <% } else { %>
-                            <div class="carousel-item active">
-                                <a href="#" class="trigger-modal" data-link="https://wa.me/5516996484492?text=Olá, vi o anúncio do Ponto Forte no Contrataê e gostaria de mais informações!">
-                                    <img src="/imagens/parceiros/ponto_forte.png" alt="Ponto Forte" style="width:100%; height:100%;">
-                                </a>
-                            </div>
-                        <% } %>
-
-                        <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
-                        <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
-                        
-                        <div class="carousel-dots">
-                            <% if (bannersRodape.length > 0) { %>
-                                <% bannersRodape.forEach(function(_, index) { %>
-                                    <span class="dot <%= index === 0 ? 'active' : '' %>"></span>
-                                <% }); %>
-                            <% } else { %>
-                                <span class="dot active"></span>
-                            <% } %>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </div>
-        <div class="footer-copyright-bar">
-            <div class="container copyright-flex">
-                <p>&copy; 2026 Contrataê</p>
-                <div class="footer-links"><a href="feedback.html">Avaliação</a> | <a href="sobre_nos.html">Sobre Nós</a> | <a href="termos_de_uso.html">Termos</a></div>
-            </div>
-        </div>
-    </footer>
-
-    <div id="external-link-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>Você está saindo do Contrataê</h3>
-            <p id="modal-msg">Você será redirecionado(a) para o site de nosso parceiro.</p>
-            <p class="modal-link-preview" id="modal-link-dest"></p>
-            <div class="modal-buttons">
-                <button id="cancel-link" class="button secondary-button">Cancelar</button>
-                <button id="confirm-link" class="button primary-button">Continuar</button>
-            </div>
-        </div>
-    </div>
+    <%- include('partials/footer') %>
 
     <script type="text/javascript">
         function googleTranslateElementInit() {

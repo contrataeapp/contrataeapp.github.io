@@ -3,8 +3,86 @@ const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+// ============================================
+// CONFIGURAÇÃO DO PASSPORT - GOOGLE OAUTH2
+// ============================================
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: '/auth/google/callback'
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        const email = profile.emails[0].value;
+        const fullName = profile.displayName;
+        const googleId = profile.id;
+        const avatarUrl = profile.photos[0]?.value || null;
+
+        // Buscar ou criar usuário
+        let { data: user, error: selectError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+        if (selectError && selectError.code !== 'PGRST116') {
+            throw selectError;
+        }
+
+        if (!user) {
+            // Criar novo usuário
+            const { data: newUser, error: insertError } = await supabase
+                .from('users')
+                .insert([{
+                    email,
+                    full_name: fullName,
+                    google_id: googleId,
+                    avatar_url: avatarUrl,
+                    user_type: 'client',
+                    password: null
+                }])
+                .select()
+                .single();
+
+            if (insertError) throw insertError;
+            user = newUser;
+        } else if (!user.google_id) {
+            // Atualizar usuário existente com Google ID
+            const { error: updateError } = await supabase
+                .from('users')
+                .update({ google_id: googleId, avatar_url: avatarUrl })
+                .eq('id', user.id);
+            if (updateError) throw updateError;
+        }
+
+        return done(null, user);
+    } catch (err) {
+        console.error('Erro no Google Auth:', err);
+        return done(err);
+    }
+}));
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', id)
+            .single();
+        if (error) throw error;
+        done(null, user);
+    } catch (err) {
+        done(err);
+    }
+});
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -197,6 +275,29 @@ router.post('/recuperar-senha', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.render('esqueci-senha', { erro: 'Erro ao enviar link de recuperação', sucesso: null });
+    }
+});
+
+// ============================================
+// ROTAS DO GOOGLE OAUTH2
+// ============================================
+router.get('/google', passport.authenticate('google', {
+    scope: ['profile', 'email']
+}));
+
+router.get('/google/callback', passport.authenticate('google', {
+    failureRedirect: '/auth/login'
+}), (req, res) => {
+    // Criar sessão após autenticação bem-sucedida
+    req.session.userId = req.user.id;
+    req.session.userType = req.user.user_type;
+    req.session.fullName = req.user.full_name;
+
+    // Redirecionar conforme o tipo de usuário
+    if (req.user.user_type === 'professional') {
+        res.redirect('/profissional/dashboard');
+    } else {
+        res.redirect('/cliente/dashboard');
     }
 });
 

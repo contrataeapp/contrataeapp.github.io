@@ -1,0 +1,93 @@
+<footer class="footer-section">
+    <div class="footer-content-wrapper">
+        <div class="footer-partners-area">
+            <div class="container">
+                <h4 style="color: #ffa500; text-align: center; margin-bottom: 20px; font-size: 1rem;">Nossos Parceiros</h4>
+                <section class="carousel-section footer-carousel" id="carousel-rodape">
+                    <div class="carousel-container">
+                        <% const bannersRodape = typeof banners !== 'undefined' ? banners.filter(b => b.posicao === 2) : []; %>
+                        
+                        <% if (bannersRodape.length > 0) { %>
+                            <% bannersRodape.forEach(function(banner, index) { %>
+                                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                    <a href="#" class="trigger-modal" data-link="<%= banner.link_destino || '#' %>">
+                                        <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo || 'Parceiro' %>" style="width:100%; height:100%;">
+                                    </a>
+                                </div>
+                            <% }); %>
+                        <% } %>
+
+                        <% if (bannersRodape.length > 1) { %>
+                            <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                            <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                            
+                            <div class="carousel-dots">
+                                <% bannersRodape.forEach(function(_, index) { %>
+                                    <span class="dot <%= index === 0 ? 'active' : '' %>"></span>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="footer-main">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-col">
+                        <h4>Sobre Contrataê</h4>
+                        <ul>
+                            <li><a href="/contato">Contato</a></li>
+                            <li><a href="/">Sobre Nós</a></li>
+                            <li><a href="/">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Para Profissionais</h4>
+                        <ul>
+                            <li><a href="/auth/login">Cadastre-se</a></li>
+                            <li><a href="/">Como Funciona</a></li>
+                            <li><a href="/">Suporte</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Para Clientes</h4>
+                        <ul>
+                            <li><a href="/">Buscar Profissionais</a></li>
+                            <li><a href="/">Segurança</a></li>
+                            <li><a href="/">FAQ</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Redes Sociais</h4>
+                        <ul>
+                            <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
+                            <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
+                            <li><a href="#"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-copyright-bar">
+        <div class="container copyright-flex">
+            <p>&copy; 2026 Contrataê</p>
+            <div class="footer-links"><a href="/">Avaliação</a> | <a href="/contato">Sobre Nós</a> | <a href="/">Termos</a></div>
+        </div>
+    </div>
+</footer>
+
+<div id="external-link-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>Você está saindo do Contrataê</h3>
+        <p id="modal-msg">Você será redirecionado(a) para o site de nosso parceiro.</p>
+        <p class="modal-link-preview" id="modal-link-dest"></p>
+        <div class="modal-buttons">
+            <button id="cancel-link" class="button secondary-button">Cancelar</button>
+            <button id="confirm-link" class="button primary-button">Continuar</button>
+        </div>
+    </div>
+</div>

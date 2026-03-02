@@ -36,6 +36,10 @@ app.use(session({
     cookie: { maxAge: 1000 * 60 * 60 * 24 } 
 }));
 
+const passport = require('passport');
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Rotas de Autenticação
 app.use('/auth', authRoutes);
 

@@ -1,0 +1,432 @@
+/* ============================================
+   HEADER STYLES - CONTRATAÊ v2.0
+   Padrão: Laranja (#ffa500) e Preto (#1a1a1a)
+   ============================================ */
+
+.airbnb-header {
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ============================================
+   HEADER TOP BAR
+   ============================================ */
+
+.header-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.site-logo img {
+    height: 40px;
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.site-logo:hover img {
+    transform: scale(1.05);
+}
+
+/* ============================================
+   SEARCH PILL (CENTER)
+   ============================================ */
+
+.header-center {
+    display: flex;
+    justify-content: center;
+}
+
+.search-pill {
+    display: flex;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 25px;
+    padding: 8px 15px;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    transition: all 0.3s ease;
+}
+
+.search-pill:focus-within {
+    background: white;
+    border: 2px solid #ffa500;
+    box-shadow: 0 2px 8px rgba(255, 165, 0, 0.15);
+}
+
+.search-input-pill {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.search-input-pill::placeholder {
+    color: #999;
+}
+
+.search-btn-round {
+    background: none;
+    border: none;
+    color: #ffa500;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+    padding: 5px;
+}
+
+.search-btn-round:hover {
+    color: #ff8c00;
+}
+
+/* ============================================
+   HEADER RIGHT (LOGIN, THEME, TRANSLATE)
+   ============================================ */
+
+.header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    color: #ffa500;
+}
+
+/* ============================================
+   LOGIN PILL
+   ============================================ */
+
+.login-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #333;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.login-pill:hover {
+    border-color: #ffa500;
+    color: #ffa500;
+    box-shadow: 0 2px 8px rgba(255, 165, 0, 0.15);
+}
+
+.login-icon {
+    font-size: 1.3rem;
+}
+
+/* ============================================
+   CATEGORIES NAVIGATION
+   ============================================ */
+
+.categories-nav {
+    background: white;
+    border-top: 1px solid #f0f0f0;
+    padding: 0;
+}
+
+.categories-nav ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0;
+}
+
+.categories-nav li {
+    flex: 1;
+    text-align: center;
+}
+
+.categories-nav a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 15px 12px;
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.categories-nav a:hover {
+    color: #ffa500;
+    background: #fafafa;
+}
+
+.categories-nav a.active {
+    color: #ffa500;
+    border-bottom-color: #ffa500;
+    background: #fffaf0;
+}
+
+.categories-nav i {
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   MOBILE MENU
+   ============================================ */
+
+.nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.nav-header h3 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 1.1rem;
+}
+
+#close-menu-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+}
+
+#mobile-menu-trigger {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+}
+
+/* ============================================
+   GOOGLE TRANSLATE ELEMENT
+   ============================================ */
+
+#google_translate_element {
+    display: flex;
+    align-items: center;
+}
+
+#google_translate_element .goog-te-combo {
+    padding: 6px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#google_translate_element .goog-te-combo:hover {
+    border-color: #ffa500;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 1024px) {
+    .header-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .header-center {
+        grid-column: 1 / -1;
+        order: 3;
+        margin-top: 10px;
+    }
+
+    .search-pill {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-grid {
+        grid-template-columns: 1fr 1fr;
+        padding: 10px 0;
+    }
+
+    .site-logo img {
+        height: 35px;
+    }
+
+    .header-center {
+        display: none;
+    }
+
+    .header-center.desktop-only {
+        display: none;
+    }
+
+    .categories-nav ul {
+        flex-wrap: wrap;
+    }
+
+    .categories-nav li {
+        flex: 0 1 calc(50% - 5px);
+    }
+
+    .categories-nav a {
+        padding: 12px 8px;
+        font-size: 0.85rem;
+    }
+
+    .categories-nav i {
+        font-size: 1rem;
+    }
+
+    .login-pill {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .login-icon {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-grid {
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+    }
+
+    .site-logo img {
+        height: 32px;
+    }
+
+    .header-right {
+        gap: 8px;
+    }
+
+    .icon-btn {
+        font-size: 1rem;
+        padding: 5px;
+    }
+
+    .login-pill {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+
+    .login-text {
+        display: none;
+    }
+
+    .categories-nav li {
+        flex: 0 1 calc(50% - 5px);
+    }
+
+    .categories-nav a {
+        padding: 10px 5px;
+        font-size: 0.75rem;
+    }
+
+    .categories-nav i {
+        font-size: 0.9rem;
+    }
+
+    .nav-header h3 {
+        font-size: 1rem;
+    }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+   ============================================ */
+
+body.dark-mode .airbnb-header {
+    background: #1a1a1a;
+    border-bottom-color: #333;
+}
+
+body.dark-mode .categories-nav {
+    background: #1a1a1a;
+    border-top-color: #333;
+}
+
+body.dark-mode .search-pill {
+    background: #2a2a2a;
+}
+
+body.dark-mode .search-pill:focus-within {
+    background: #333;
+    border-color: #ffa500;
+}
+
+body.dark-mode .search-input-pill {
+    color: #e0e0e0;
+}
+
+body.dark-mode .search-input-pill::placeholder {
+    color: #666;
+}
+
+body.dark-mode .icon-btn {
+    color: #e0e0e0;
+}
+
+body.dark-mode .login-pill {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .login-pill:hover {
+    border-color: #ffa500;
+    color: #ffa500;
+}
+
+body.dark-mode .categories-nav a {
+    color: #999;
+}
+
+body.dark-mode .categories-nav a:hover {
+    color: #ffa500;
+    background: #2a2a2a;
+}
+
+body.dark-mode .categories-nav a.active {
+    color: #ffa500;
+    background: #1a3a3a;
+}
