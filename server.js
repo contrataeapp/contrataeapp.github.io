@@ -419,4 +419,7 @@ app.get('/outros', async (req, res) => {
     }
 });
 
-app.listen(port, () => console.log(`🚀 Contrataê rodando em http://localhost:${port}`));
+app.listen(port, () => {
+    console.log(`🚀 Contrataê v2.0.1 rodando em http://localhost:${port}`);
+    console.log('✅ Deploy bem-sucedido - Estrutura MVP aplicada');
+});
