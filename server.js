@@ -357,8 +357,13 @@ categoriasMap.forEach(({ profissao, rota }) => {
     });
 });
 // ROTA DE CONTATO
-app.get('/contato', (req, res) => {
-    res.render('contato');
+app.get('/contato', async (req, res) => {
+    try {
+        const banners = await obterBannersAtivos();
+        res.render('contato', { banners });
+    } catch (err) {
+        res.render('contato', { banners: [] });
+    }
 });
 
 app.post('/api/contato', async (req, res) => {
@@ -398,8 +403,13 @@ app.get('/categoria/:slug', async (req, res) => {
     }
 });
 
-app.get('/outros', (req, res) => {
-    res.render('outros');
+app.get('/outros', async (req, res) => {
+    try {
+        const banners = await obterBannersAtivos();
+        res.render('outros', { banners });
+    } catch (err) {
+        res.render('outros', { banners: [] });
+    }
 });
 
 app.listen(port, () => console.log(`🚀 Contrataê rodando em http://localhost:${port}`));
