@@ -15,21 +15,9 @@ const port = process.env.PORT || 3000;
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // MIDDLEWARES
-// Ajuste de CSP para permitir Google Auth, Favicons e recursos externos necessários
+// Simplificando o Helmet para evitar bloqueios de CSP (Favicon/Google)
 app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'", "https://*.google.com", "https://*.gstatic.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdnjs.cloudflare.com", "https://translate.google.com", "https://www.gstatic.com", "https://vlibras.gov.br", "https://apis.google.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com", "https://translate.googleapis.com", "https://cdn.jsdelivr.net"],
-            imgSrc: ["'self'", "data:", "https://*.supabase.co", "https://*.googleusercontent.com", "https://www.gstatic.com", "https://translate.googleapis.com", "https://contrataeapp.onrender.com", "https://www.google.com", "https://www.google.com.br"],
-            connectSrc: ["'self'", "https://*.supabase.co", "https://translate.googleapis.com", "https://vlibras.gov.br", "https://*.google.com"],
-            fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
-            objectSrc: ["'none'"],
-            frameSrc: ["'self'", "https://*.google.com"],
-            upgradeInsecureRequests: [],
-        },
-    },
+    contentSecurityPolicy: false, // Desativando CSP temporariamente para garantir funcionalidade
     crossOriginEmbedderPolicy: false
 }));
 
@@ -280,5 +268,5 @@ const dashboardRoutes = require('./routes/dashboards');
 app.use('/', dashboardRoutes);
 
 app.listen(port, () => {
-    console.log(`🚀 Contrataê v2.2.1 rodando em http://localhost:${port}`);
+    console.log(`🚀 Contrataê v2.2.2 rodando em http://localhost:${port}`);
 });

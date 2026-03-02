@@ -6,548 +6,67 @@
     <title>Contato - Contrataê</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/css/style_laranja_preto.css">
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        main {
-            min-height: calc(100vh - 200px);
-            background: linear-gradient(135deg, #f8f9fa 0%, #f0f0f0 100%);
-        }
-
-        .hero-section {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            color: white;
-            padding: 60px 20px;
-            text-align: center;
-            border-bottom: 4px solid #ffa500;
-        }
-
-        .hero-section h1 {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .hero-section p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .container-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 20px;
-        }
-
-        .about-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-            align-items: center;
-            margin-bottom: 80px;
-        }
-
-        .about-text h2 {
-            font-size: 2rem;
-            color: #1a1a1a;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .about-text p {
-            font-size: 1rem;
-            color: #666;
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-
-        .about-highlight {
-            color: #ffa500;
-            font-weight: 600;
-        }
-
-        .about-image {
-            background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
-            border-radius: 16px;
-            padding: 40px;
-            text-align: center;
-            color: white;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .about-image i {
-            font-size: 120px;
-            opacity: 0.8;
-        }
-
-        .values-section {
-            background: white;
-            padding: 60px 20px;
-            border-radius: 16px;
-            margin-bottom: 60px;
-        }
-
-        .values-section h2 {
-            text-align: center;
-            font-size: 2rem;
-            color: #1a1a1a;
-            margin-bottom: 50px;
-        }
-
-        .values-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-
-        .value-card {
-            text-align: center;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .value-card:hover {
-            border-color: #ffa500;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(255, 165, 0, 0.15);
-        }
-
-        .value-icon {
-            font-size: 50px;
-            color: #ffa500;
-            margin-bottom: 15px;
-        }
-
-        .value-card h3 {
-            font-size: 1.3rem;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .value-card p {
-            color: #666;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .contact-section {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            color: white;
-            padding: 60px 20px;
-            border-radius: 16px;
-            margin-bottom: 60px;
-        }
-
-        .contact-section h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 50px;
-        }
-
-        .contact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-
-        .contact-card {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            border: 1px solid rgba(255, 165, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .contact-card:hover {
-            background: rgba(255, 165, 0, 0.1);
-            border-color: #ffa500;
-        }
-
-        .contact-icon {
-            font-size: 40px;
-            color: #ffa500;
-            margin-bottom: 15px;
-        }
-
-        .contact-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .contact-card p {
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .contact-card a {
-            color: #ffa500;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-
-        .contact-card a:hover {
-            color: #ff8c00;
-        }
-
-        .cta-section {
-            background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
-            color: white;
-            padding: 60px 20px;
-            border-radius: 16px;
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .cta-section h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
-
-        .cta-section p {
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-            opacity: 0.95;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 14px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: white;
-            color: #ffa500;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: white;
-            border: 2px solid white;
-        }
-
-        .btn-secondary:hover {
-            background: white;
-            color: #ffa500;
-        }
-
-        .stats-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            color: #ffa500;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.95rem;
-        }
-
-        @media (max-width: 768px) {
-            .hero-section h1 {
-                font-size: 1.8rem;
-            }
-
-            .hero-section p {
-                font-size: 1rem;
-            }
-
-            .about-section {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-
-            .about-text h2 {
-                font-size: 1.5rem;
-            }
-
-            .values-section h2,
-            .contact-section h2,
-            .cta-section h2 {
-                font-size: 1.5rem;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .container-content {
-                padding: 40px 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero-section {
-                padding: 40px 15px;
-            }
-
-            .hero-section h1 {
-                font-size: 1.5rem;
-            }
-
-            .hero-section p {
-                font-size: 0.9rem;
-            }
-
-            .about-text h2 {
-                font-size: 1.3rem;
-            }
-
-            .about-text p {
-                font-size: 0.9rem;
-            }
-
-            .about-image {
-                min-height: 250px;
-            }
-
-            .about-image i {
-                font-size: 80px;
-            }
-
-            .value-icon,
-            .contact-icon {
-                font-size: 35px;
-            }
-
-            .stat-number {
-                font-size: 2rem;
-            }
-        }
+        body { background-color: #111 !important; color: #fff !important; }
+        main { min-height: calc(100vh - 200px); background: #111 !important; }
+        .hero-section { background: #1a1a1a; color: white; padding: 60px 20px; text-align: center; border-bottom: 4px solid #ffa500; }
+        .container-content { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+        .about-text h2 { color: #ffa500 !important; }
+        .about-text p { color: #ccc !important; }
+        .values-section { background: #1a1a1a !important; padding: 60px 20px; border-radius: 16px; margin-bottom: 60px; border: 1px solid #333; }
+        .values-section h2 { color: #ffa500 !important; }
+        .value-card { background: #222 !important; border: 1px solid #333 !important; }
+        .value-card h3 { color: #fff !important; }
+        .value-card p { color: #bbb !important; }
+        .contact-section { background: #1a1a1a !important; color: white; padding: 60px 20px; border-radius: 16px; margin-bottom: 60px; border: 1px solid #333; }
+        .contact-card { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 165, 0, 0.3) !important; }
+        .stat-card { background: #1a1a1a !important; color: #fff !important; border: 1px solid #333; }
+        .stat-label { color: #bbb !important; }
     </style>
 </head>
-<body>
-    <% const bannerEsq = typeof banners !== 'undefined' && banners.find(b => b.posicao === 3); %>
-    <% if (bannerEsq) { %>
-    <div class="banner-lateral banner-esquerda" id="banner-mov">
-        <button class="close-banner" title="Fechar anúncio">&times;</button>
-        <div class="banner-content" data-link="<%= bannerEsq.link_destino || '#' %>">
-            <img src="<%= bannerEsq.imagem_url %>" alt="<%= bannerEsq.titulo || 'Anúncio' %>">
-        </div>
-    </div>
-    <% } %>
-
-    <% const bannerDir = typeof banners !== 'undefined' && banners.find(b => b.posicao === 4); %>
-    <% if (bannerDir) { %>
-    <div class="banner-lateral banner-direita" id="banner-speed">
-        <button class="close-banner" title="Fechar anúncio">&times;</button>
-        <div class="banner-content" data-link="<%= bannerDir.link_destino || '#' %>">
-            <img src="<%= bannerDir.imagem_url %>" alt="<%= bannerDir.titulo || 'Anúncio' %>">
-        </div>
-    </div>
-    <% } %>
-
+<body class="dark-mode">
     <%- include('partials/header') %>
 
     <main>
         <section class="hero-section">
             <div class="container">
-                <h1>Conheça a Contrataê</h1>
-                <p>Conectando pessoas que precisam de soluções com profissionais que oferecem excelência</p>
+                <h1>Conectando Talentos a Oportunidades</h1>
+                <p>O Contrataê nasceu para simplificar a forma como você encontra e contrata profissionais de confiança.</p>
             </div>
         </section>
 
         <div class="container-content">
-            <!-- Seção Sobre -->
-            <section class="about-section">
+            <div class="about-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-bottom: 60px;">
                 <div class="about-text">
                     <h2>Quem Somos</h2>
-                    <p>
-                        A <span class="about-highlight">Contrataê</span> é uma plataforma inovadora que conecta clientes 
-                        com profissionais de serviços de forma <span class="about-highlight">rápida, segura e confiável</span>.
-                    </p>
-                    <p>
-                        Desde 2024, trabalhamos incansavelmente para construir um ecossistema onde a qualidade, 
-                        a transparência e a inovação são os pilares do nosso sucesso.
-                    </p>
-                    <p>
-                        Acreditamos que a tecnologia pode simplificar o dia a dia, trazendo mais eficiência 
-                        para a contratação de serviços profissionais.
-                    </p>
-                    <p>
-                        Nosso compromisso é com a <span class="about-highlight">qualidade</span>, 
-                        <span class="about-highlight">transparência</span> e <span class="about-highlight">inovação</span>. 
-                        Estamos sempre buscando novas maneiras de aprimorar a experiência de todos os usuários, 
-                        garantindo que cada conexão seja um sucesso.
-                    </p>
+                    <p>Somos uma plataforma dedicada a unir profissionais qualificados e clientes que buscam excelência em serviços. Acreditamos que a tecnologia pode humanizar as relações de trabalho, trazendo transparência e segurança para ambos os lados.</p>
+                    <p>Nossa missão é ser o elo mais forte entre a sua necessidade e a solução ideal, valorizando o trabalho local e impulsionando a economia de serviços.</p>
                 </div>
-                <div class="about-image">
-                    <i class="fas fa-handshake"></i>
+                <div class="about-image" style="background: #ffa500; border-radius: 15px; height: 300px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-users" style="font-size: 100px; color: #000;"></i>
                 </div>
-            </section>
+            </div>
 
-            <!-- Seção Valores -->
-            <section class="values-section">
-                <h2>Nossos Valores</h2>
-                <div class="values-grid">
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-star"></i></div>
-                        <h3>Qualidade</h3>
-                        <p>Garantimos que apenas profissionais qualificados e avaliados façam parte da nossa plataforma.</p>
-                    </div>
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-shield-alt"></i></div>
-                        <h3>Segurança</h3>
-                        <p>Seus dados e transações são protegidos com os mais altos padrões de segurança.</p>
-                    </div>
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-handshake"></i></div>
-                        <h3>Confiança</h3>
-                        <p>Avaliações honestas e transparentes ajudam você a tomar as melhores decisões.</p>
-                    </div>
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-rocket"></i></div>
-                        <h3>Inovação</h3>
-                        <p>Constantemente melhoramos nossa plataforma para oferecer a melhor experiência.</p>
-                    </div>
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-users"></i></div>
-                        <h3>Comunidade</h3>
-                        <p>Somos mais que uma plataforma, somos uma comunidade de pessoas que se ajudam.</p>
-                    </div>
-                    <div class="value-card">
-                        <div class="value-icon"><i class="fas fa-lightbulb"></i></div>
-                        <h3>Transparência</h3>
-                        <p>Tudo é claro e direto. Sem surpresas, sem complicações.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Seção Estatísticas -->
-            <section class="stats-section">
-                <div class="stat-card">
-                    <div class="stat-number">500+</div>
-                    <div class="stat-label">Profissionais Cadastrados</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">2.5K+</div>
-                    <div class="stat-label">Clientes Ativos</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">10K+</div>
-                    <div class="stat-label">Serviços Realizados</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">4.8★</div>
-                    <div class="stat-label">Avaliação Média</div>
-                </div>
-            </section>
-
-            <!-- Seção Contato -->
-            <section class="contact-section">
-                <h2>Entre em Contato</h2>
-                <div class="contact-grid">
-                    <div class="contact-card">
-                        <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
+            <div class="contact-section">
+                <h2>Fale Conosco</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div class="contact-card" style="padding: 30px; text-align: center; border-radius: 10px;">
+                        <i class="fab fa-whatsapp" style="font-size: 40px; color: #ffa500; margin-bottom: 15px;"></i>
                         <h3>WhatsApp</h3>
-                        <p>Dúvidas ou sugestões?</p>
-                        <a href="https://wa.me/5516996484492?text=Olá%20Contrataê!%20Gostaria%20de%20mais%20informações." target="_blank">
-                            (16) 99648-4492
-                        </a>
+                        <p>(16) 99648-4492</p>
+                        <a href="https://wa.me/5516996484492" target="_blank" style="color: #ffa500; font-weight: bold;">Chamar agora</a>
                     </div>
-                    <div class="contact-card">
-                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="contact-card" style="padding: 30px; text-align: center; border-radius: 10px;">
+                        <i class="fas fa-envelope" style="font-size: 40px; color: #ffa500; margin-bottom: 15px;"></i>
                         <h3>E-mail</h3>
-                        <p>Envie sua mensagem</p>
-                        <a href="mailto:time.contratae@gmail.com">time.contratae@gmail.com</a>
-                    </div>
-                    <div class="contact-card">
-                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
-                        <h3>Localização</h3>
-                        <p>Brasil</p>
-                        <p style="font-size: 0.85rem; opacity: 0.7;">Atendimento Nacional</p>
+                        <p>suporte@contrataeapp.com.br</p>
                     </div>
                 </div>
-            </section>
-
-            <!-- Seção CTA -->
-            <section class="cta-section">
-                <h2>Pronto para Começar?</h2>
-                <p>Junte-se a milhares de pessoas que já encontraram a solução perfeita na Contrataê</p>
-                <div class="cta-buttons">
-                    <a href="/auth/login" class="btn btn-primary">
-                        <i class="fas fa-user-plus"></i> Cadastre-se Agora
-                    </a>
-                    <a href="/" class="btn btn-secondary">
-                        <i class="fas fa-search"></i> Buscar Profissionais
-                    </a>
-                </div>
-            </section>
+            </div>
         </div>
     </main>
 
-    <nav class="mobile-bottom-nav mobile-only">
-        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
-        <a href="/#busca-rapida" class="nav-item"><i class="fas fa-search"></i><span>Busca</span></a>
-        <button class="nav-item" id="mobile-menu-trigger"><i class="fas fa-bars"></i><span>Menu</span></button>
-        <a href="/auth/login" class="nav-item"><i class="fas fa-user"></i><span>Entrar</span></a>
-    </nav>
-
     <%- include('partials/footer') %>
-
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-          new google.translate.TranslateElement({
-              pageLanguage: 'pt', 
-              includedLanguages: 'pt,en', 
-              layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-            }, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script src="/js/theme-toggle.js"></script>
-    <script src="/js/index.js"></script>
 </body>
 </html>
