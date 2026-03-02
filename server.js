@@ -409,10 +409,13 @@ app.get('/categoria/:slug', async (req, res) => {
 
 app.get('/outros', async (req, res) => {
     try {
+        const { data: categorias, error } = await supabase.from('categories').select('*').order('name');
+        if (error) throw error;
         const banners = await obterBannersAtivos();
-        res.render('outros', { banners });
+        res.render('outros', { categorias: categorias || [], banners, currentPage: 'outros' });
     } catch (err) {
-        res.render('outros', { banners: [] });
+        console.error('Erro ao carregar categorias:', err);
+        res.render('outros', { categorias: [], banners: [], currentPage: 'outros' });
     }
 });
 
