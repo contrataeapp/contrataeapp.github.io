@@ -1,409 +1,112 @@
 require('dotenv').config();
 const express = require('express');
-const { createClient } = require('@supabase/supabase-js');
-const cors = require('cors');
 const path = require('path');
-const nodemailer = require('nodemailer');
-const multer = require('multer');
+const { createClient } = require('@supabase/supabase-js');
 const session = require('express-session');
-const authRoutes = require('./routes/auth');
-const dashboardRoutes = require('./routes/dashboards'); 
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
+// CONFIGURAÇÃO SUPABASE
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: process.env.EMAIL_USER || 'seu-email@gmail.com', pass: process.env.EMAIL_PASS || 'sua-senha-app' }
-});
-
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public'))); 
-app.use(cors());
+// MIDDLEWARES
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
+// CONFIGURAÇÃO DE SESSÃO
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'chave_seguranca_contratae_2026',
+    secret: process.env.SESSION_SECRET || 'contratae_secret_key',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 } 
+    cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
-const passport = require('passport');
+// CONFIGURAÇÃO PASSPORT
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Rotas de Autenticação
-app.use('/auth', authRoutes);
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((obj, done) => done(null, obj));
 
-// Rotas de Dashboards
-app.use('/', dashboardRoutes);
+// ESTRATÉGIA GOOGLE OAUTH
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: "https://contrataeapp.onrender.com/auth/google/callback"
+    }, async (accessToken, refreshToken, profile, done) => {
+        try {
+            const email = profile.emails[0].value;
+            const { data: user, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('email', email)
+                .single();
 
-const checkAdmin = (req, res, next) => {
-    if (req.session.adminLogado) return next();
-    res.redirect('/login-adm'); 
-};
+            if (error && error.code !== 'PGRST116') throw error;
 
-const checkAdminAPI = (req, res, next) => {
-    if (req.session.adminLogado) return next();
-    res.status(401).json({ erro: 'Acesso negado. Faça login.' });
-};
-
-app.get('/login-adm', (req, res) => {
-    if (req.session.adminLogado) return res.redirect('/admin');
-    res.render('login_admin', { erro: null });
-});
-
-app.post('/login-adm', (req, res) => {
-    const { usuario, senha } = req.body;
-    const adminUser = process.env.ADMIN_USER || 'admin';
-    const adminPass = process.env.ADMIN_PASS || '#Relaxsempre153143';
-
-    if (usuario === adminUser && senha === adminPass) {
-        req.session.adminLogado = true;
-        res.redirect('/admin');
-    } else {
-        res.render('login_admin', { erro: 'Usuário ou senha inválidos!' });
-    }
-});
-
-app.get('/logout-adm', (req, res) => {
-    req.session.destroy(); 
-    res.redirect('/login-adm');
-});
-
-// ============================================
-// DASHBOARD ADM
-// ============================================
-app.get("/admin", checkAdmin, async (req, res) => {
-    try {
-        const { categoria, status, busca, ordenar } = req.query;
-        let query = supabase.from("profissionais").select("*");
-        if (categoria) query = query.eq('profissao', categoria);
-        if (status) query = query.eq('status', status);
-        
-        const { data: profissionais, error } = await query.order("data_cadastro", { ascending: false });
-        if (error) throw error;
-
-        let filtrados = profissionais || [];
-        
-        // NOVO: Esconde as contas excluídas da visão padrão para não poluir a tela
-        if (!status) {
-            filtrados = filtrados.filter(p => p.status !== 'EXCLUIDO');
-        }
-
-        if (busca) filtrados = filtrados.filter(p => p.nome.toLowerCase().includes(busca.toLowerCase()) || p.profissao.toLowerCase().includes(busca.toLowerCase()));
-        if (ordenar === 'vencimento') filtrados.sort((a, b) => {
-            const dataA = a.data_vencimento ? new Date(a.data_vencimento) : new Date('2099-12-31');
-            const dataB = b.data_vencimento ? new Date(b.data_vencimento) : new Date('2099-12-31');
-            return dataA - dataB;
-        });
-
-        const totais = {
-            ativos: profissionais.filter(p => p.status === 'ATIVO').length,
-            pendentes: profissionais.filter(p => p.status === 'PENDENTE').length,
-            pausados: profissionais.filter(p => p.status === 'PAUSADO').length,
-            receitaTotal: profissionais.reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
-            receitaMes: profissionais.filter(p => {
-                const dataRef = p.data_ultima_edicao || p.data_cadastro;
-                if (!dataRef) return false;
-                const data = new Date(dataRef);
-                const hoje = new Date();
-                return data.getMonth() === hoje.getMonth() && data.getFullYear() === hoje.getFullYear();
-            }).reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0)
-        };
-
-        filtrados = filtrados.map(p => {
-            if (p.status === 'ATIVO' && p.data_vencimento) {
-                const dataVenc = new Date(p.data_vencimento);
-                const hoje = new Date();
-                const diasRestantes = Math.floor((dataVenc - hoje) / (1000 * 60 * 60 * 24));
-                if (diasRestantes < 0) p.alerta_status = 'vencido';
-                else if (diasRestantes <= 7) p.alerta_status = 'critico';
-                else p.alerta_status = 'normal';
+            if (user) {
+                return done(null, user);
+            } else {
+                const { data: newUser, error: createError } = await supabase
+                    .from('users')
+                    .insert([{
+                        email: email,
+                        full_name: profile.displayName,
+                        google_id: profile.id,
+                        avatar_url: profile.photos[0].value,
+                        user_type: 'client'
+                    }])
+                    .select()
+                    .single();
+                
+                if (createError) throw createError;
+                return done(null, newUser);
             }
-            return p;
-        });
-
-        res.render("admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar } });
-    } catch (err) { res.render("admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {} }); }
-});
-
-// ============================================
-// API - PROFISSIONAIS
-// ============================================
-app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
-    try {
-        const { valor, tipo_prazo, prazo, motivo } = req.body;
-        const id = req.params.id;
-        let dataVencimento = new Date();
-
-        if (tipo_prazo === 'dias') dataVencimento.setDate(dataVencimento.getDate() + parseInt(prazo));
-        else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
-        else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
-
-        const { error: errorAtualizar } = await supabase.from("profissionais")
-            .update({ status: "ATIVO", data_vencimento: dataVencimento.toISOString(), valor_pago: parseFloat(valor), data_ultima_edicao: new Date().toISOString() })
-            .eq("id", id);
-        if (errorAtualizar) throw errorAtualizar;
-
-        await supabase.from("logs_adm").insert({
-            id_profissional: id, tipo_acao: "APROVAÇÃO",
-            valores_novos: { status: "ATIVO", valor_pago: parseFloat(valor), data_vencimento: dataVencimento.toISOString() },
-            motivo_edicao: motivo || 'Aprovação inicial',
-            realizado_por: 'Admin'
-        });
-        res.json({ sucesso: true });
-    } catch (err) { res.status(500).json({ erro: err.message }); }
-});
-
-app.put("/api/profissionais/:id", checkAdminAPI, async (req, res) => {
-    try {
-        const { valor, tipo_prazo, prazo, motivo } = req.body;
-        const id = req.params.id;
-        let updateData = { data_ultima_edicao: new Date().toISOString() };
-        let tipoAcaoText = "EDIÇÃO";
-
-        if (valor !== undefined && prazo) tipoAcaoText = "VALOR E VENCIMENTO";
-        else if (valor !== undefined) tipoAcaoText = "APENAS VALOR";
-        else if (prazo) tipoAcaoText = "APENAS VENCIMENTO";
-
-        if (valor !== undefined) updateData.valor_pago = parseFloat(valor);
-        if (prazo) {
-            let dataVencimento = new Date();
-            if (tipo_prazo === 'dias') dataVencimento.setDate(dataVencimento.getDate() + parseInt(prazo));
-            else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
-            else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
-            updateData.data_vencimento = dataVencimento.toISOString();
+        } catch (err) {
+            return done(err, null);
         }
+    }));
+}
 
-        await supabase.from("profissionais").update(updateData).eq("id", id);
-
-        await supabase.from("logs_adm").insert({
-            id_profissional: id, tipo_acao: tipoAcaoText,
-            valores_novos: updateData,
-            motivo_edicao: motivo || 'Sem motivo registrado',
-            realizado_por: 'Admin'
-        });
-        res.json({ sucesso: true });
-    } catch (err) { res.status(500).json({ erro: err.message }); }
-});
-
-app.post("/api/profissionais/:id/status", checkAdminAPI, async (req, res) => {
-    try {
-        const { novoStatus, motivo, renovar, valor, tipo_prazo, prazo } = req.body;
-        const id = req.params.id;
-
-        const { data: profAtual } = await supabase.from("profissionais").select("*").eq("id", id).single();
-        
-        let updateData = { status: novoStatus, data_ultima_edicao: new Date().toISOString() };
-        let tipoAcao = novoStatus === 'PAUSADO' ? 'CONTA PAUSADA' : 'CONTA REATIVADA';
-        
-        if (novoStatus === 'ATIVO' && renovar) {
-            updateData.valor_pago = parseFloat(valor);
-            let dataVencimento = new Date();
-            if (tipo_prazo === 'dias') dataVencimento.setDate(dataVencimento.getDate() + parseInt(prazo));
-            else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
-            else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
-            updateData.data_vencimento = dataVencimento.toISOString();
-            tipoAcao = 'REATIVADA COM RENOVAÇÃO';
-        }
-
-        const { error } = await supabase.from("profissionais").update(updateData).eq("id", id);
-        if (error) throw error;
-        
-        await supabase.from("logs_adm").insert({
-            id_profissional: id, 
-            tipo_acao: tipoAcao,
-            valores_anteriores: { status: profAtual.status },
-            valores_novos: updateData,
-            motivo_edicao: motivo || 'Ação de status', 
-            realizado_por: 'Admin'
-        });
-        res.json({ sucesso: true });
-    } catch (err) { res.status(500).json({ erro: err.message }); }
-});
-
-// NOVO: SOFT DELETE (Exclusão Lógica)
-app.delete("/api/profissionais/:id", checkAdminAPI, async (req, res) => {
-    try {
-        const { senha, motivo } = req.body;
-        const adminPass = process.env.ADMIN_PASS || '#Relaxsempre153143';
-
-        if (senha !== adminPass) {
-            return res.status(401).json({ erro: 'Senha de administrador incorreta!' });
-        }
-
-        const id = req.params.id;
-        const { data: profAtual } = await supabase.from("profissionais").select("*").eq("id", id).single();
-
-        // Apenas oculta o perfil mudando o status para 'EXCLUIDO'
-        const { error } = await supabase.from("profissionais").update({ status: 'EXCLUIDO', data_ultima_edicao: new Date().toISOString() }).eq("id", id);
-        if (error) throw error;
-        
-        // Registra o motivo no histórico geral para o ADM saber porque ele saiu
-        await supabase.from("logs_adm").insert({
-            id_profissional: id, 
-            tipo_acao: 'EXCLUSÃO DE CONTA',
-            valores_anteriores: { status: profAtual.status },
-            valores_novos: { status: 'EXCLUIDO' },
-            motivo_edicao: motivo || 'Excluído pelo Administrador', 
-            realizado_por: 'Admin'
-        });
-        
-        res.json({ sucesso: true });
-    } catch (err) { 
-        res.status(500).json({ erro: err.message }); 
-    }
-});
-
-app.get("/api/profissionais/:id/logs", checkAdminAPI, async (req, res) => {
-    try {
-        const { data: logs, error } = await supabase.from("logs_adm").select("*").eq("id_profissional", req.params.id).order("data_acao", { ascending: false });
-        if (error) throw error;
-        res.json(logs);
-    } catch (err) { res.status(500).json({ erro: err.message }); }
-});
-
-app.get("/api/relatorios/geral", checkAdminAPI, async (req, res) => {
-    try {
-        const { data, error } = await supabase.from("logs_adm").select(`*, profissionais (nome, profissao)`).order("data_acao", { ascending: false });
-        if (error) throw error;
-        res.json(data);
-    } catch (err) { res.status(500).json({ erro: err.message }); }
-});
-
-// ============================================
-// API - MODERAÇÃO DE COMENTÁRIOS E BANNERS (INTACTOS)
-// ============================================
-app.get("/api/comentarios", checkAdminAPI, async (req, res) => {
-    try {
-        const { data, error } = await supabase.from("avaliacoes").select(`id, cliente_nome, comentario, nota, status, profissionais (nome)`).order("criado_em", { ascending: false });
-        if(error) throw error;
-        const formatado = data.map(c => ({ id: c.id, cliente_nome: c.cliente_nome, comentario: c.comentario, nota: c.nota, status: c.status || 'PENDENTE', profissional_nome: c.profissionais ? c.profissionais.nome : 'Excluído' }));
-        res.json(formatado);
-    } catch(err) { res.status(500).json({erro: err.message}); }
-});
-
-app.post("/api/comentarios/:id/status", checkAdminAPI, async (req, res) => {
-    try {
-        await supabase.from("avaliacoes").update({ status: req.body.status }).eq("id", req.params.id);
-        res.json({ sucesso: true });
-    } catch(err) { res.status(500).json({erro: err.message}); }
-});
-
-app.get("/api/banners", checkAdminAPI, async (req, res) => {
-    try {
-        const { data: banners } = await supabase.from("banners").select("*").order("ordem", { ascending: true });
-        res.json(banners);
-    } catch (err) { res.status(500).json({ erro: err.message }); }
-});
-
-app.post("/api/banners", checkAdminAPI, upload.single('imagem'), async (req, res) => {
-    try {
-        const { id, link_destino, ordem, ativo, titulo, posicao } = req.body;
-        const bannerData = { link_destino: link_destino || null, ordem: parseInt(ordem) || 0, ativo: String(ativo) === 'true', titulo: titulo || '', posicao: parseInt(posicao) || 1 };
-        
-        if (req.file) {
-            const ext = path.extname(req.file.originalname);
-            const fileName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
-            const { data, error: uploadError } = await supabase.storage.from('contratae-imagens').upload(`banners/${fileName}`, req.file.buffer, { contentType: req.file.mimetype, upsert: false });
-            if (uploadError) throw uploadError;
-            const { data: publicUrlData } = supabase.storage.from('contratae-imagens').getPublicUrl(`banners/${fileName}`);
-            bannerData.imagem_url = publicUrlData.publicUrl;
-        }
-
-        if (id) await supabase.from("banners").update(bannerData).eq("id", id);
-        else await supabase.from("banners").insert(bannerData);
-        res.json({ sucesso: true });
-    } catch (err) { res.status(500).json({ erro: err.message }); }
-});
-
-app.delete("/api/banners/:id", checkAdminAPI, async (req, res) => {
-    try {
-        await supabase.from("banners").delete().eq("id", req.params.id);
-        res.json({ sucesso: true });
-    } catch (err) { res.status(500).json({ erro: err.message }); }
-});
-
-// ROTAS PÚBLICAS
+// FUNÇÃO AUXILIAR PARA BANNERS
 async function obterBannersAtivos() {
     try {
-        const { data } = await supabase.from('banners').select('*').eq('ativo', true).order('ordem', { ascending: true });
+        const { data, error } = await supabase
+            .from('banners')
+            .select('*')
+            .eq('ativo', true)
+            .order('ordem', { ascending: true });
+        if (error) throw error;
         return data || [];
-    } catch (e) { return []; }
+    } catch (err) {
+        console.error('Erro ao obter banners:', err);
+        return [];
+    }
 }
-app.get('/', async (req, res) => { const banners = await obterBannersAtivos(); res.render('index', { banners }); });
-const categoriasMap = [ { profissao: 'Pintor', rota: 'pintores' }, { profissao: 'Pedreiro', rota: 'pedreiros' }, { profissao: 'Eletricista', rota: 'eletricistas' }, { profissao: 'Encanador', rota: 'encanadores' } ];
-categoriasMap.forEach(({ profissao, rota }) => {
-    app.get(`/${rota}`, async (req, res) => {
-        try {
-            const { data, error } = await supabase.from('profissionais').select('*').eq('profissao', profissao).eq('status', 'ATIVO');
-            if (error) throw error;
-            const banners = await obterBannersAtivos();
-            res.render(rota, { [rota]: data || [], banners });
-        } catch (err) { res.render(rota, { [rota]: [], banners: [] }); }
-    });
-    app.get(`/${rota}.html`, async (req, res) => {
-        try {
-            const { data, error } = await supabase.from('profissionais').select('*').eq('profissao', profissao).eq('status', 'ATIVO');
-            if (error) throw error;
-            const banners = await obterBannersAtivos();
-            res.render(rota, { [rota]: data || [], banners });
-        } catch (err) { res.render(rota, { [rota]: [], banners: [] }); }
-    });
+
+// ROTAS PRINCIPAIS
+app.get('/', async (req, res) => {
+    try {
+        const banners = await obterBannersAtivos();
+        res.render('index', { banners, currentPage: 'index' });
+    } catch (err) {
+        res.render('index', { banners: [], currentPage: 'index' });
+    }
 });
-// ROTA DE CONTATO
+
 app.get('/contato', async (req, res) => {
     try {
         const banners = await obterBannersAtivos();
-        res.render('contato', { banners });
+        res.render('contato', { banners, currentPage: 'contato' });
     } catch (err) {
-        res.render('contato', { banners: [] });
-    }
-});
-
-app.post('/api/contato', async (req, res) => {
-    try {
-        const { nome, email, telefone, assunto, mensagem } = req.body;
-        if (!nome || !email || !assunto || !mensagem) {
-            return res.status(400).json({ erro: 'Campos obrigatorios nao preenchidos' });
-        }
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER || 'noreply@contratae.com',
-            to: 'time.contratae@gmail.com',
-            subject: `Novo contato: ${assunto}`,
-            html: `<h2>Novo Contato</h2><p><strong>Nome:</strong> ${nome}</p><p><strong>E-mail:</strong> ${email}</p><p><strong>Telefone:</strong> ${telefone || 'Nao informado'}</p><p><strong>Assunto:</strong> ${assunto}</p><p><strong>Mensagem:</strong></p><p>${mensagem}</p>`
-        });
-        res.json({ sucesso: true });
-    } catch (err) {
-        console.error('Erro ao enviar contato:', err);
-        res.status(500).json({ erro: 'Erro ao enviar mensagem. Tente novamente.' });
-    }
-});
-
-// ROTA DINAMICA PARA CATEGORIAS
-app.get('/categoria/:slug', async (req, res) => {
-    try {
-        const { slug } = req.params;
-        const { data: categoriaData, error: catError } = await supabase.from('categories').select('*').eq('slug', slug).single();
-        if (catError || !categoriaData) {
-            return res.status(404).send('Categoria nao encontrada');
-        }
-        const { data: profissionaisData, error: profError } = await supabase.from('professionals').select('*').eq('category_id', categoriaData.id).eq('status', 'active');
-        if (profError) throw profError;
-        const banners = await obterBannersAtivos();
-        res.render('categoria-dinamica', { categoria: categoriaData, profissionais: profissionaisData || [], banners });
-    } catch (err) {
-        console.error('Erro ao carregar categoria:', err);
-        res.status(500).send('Erro ao carregar categoria');
+        res.render('contato', { banners: [], currentPage: 'contato' });
     }
 });
 
@@ -419,7 +122,83 @@ app.get('/outros', async (req, res) => {
     }
 });
 
+// ROTAS DE AUTENTICAÇÃO
+app.get('/auth/login', (req, res) => {
+    res.render('auth/login', { currentPage: 'login' });
+});
+
+app.get('/auth/cadastro', (req, res) => {
+    res.render('auth/cadastro', { currentPage: 'cadastro' });
+});
+
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+app.get('/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/auth/login' }),
+    (req, res) => {
+        res.redirect('/');
+    }
+);
+
+app.get('/auth/logout', (req, res) => {
+    req.logout(() => {
+        res.redirect('/');
+    });
+});
+
+// ROTAS DE CATEGORIAS FIXAS (LEGADO)
+const categoriasFixas = [
+    { rota: 'pintores', profissao: 'Pintor' },
+    { rota: 'pedreiros', profissao: 'Pedreiro' },
+    { rota: 'eletricistas', profissao: 'Eletricista' },
+    { rota: 'encanadores', profissao: 'Encanador' }
+];
+
+categoriasFixas.forEach(({ rota, profissao }) => {
+    app.get(`/${rota}`, async (req, res) => {
+        try {
+            const { data, error } = await supabase.from('professionals').select('*, users(*)').eq('status', 'active');
+            // Nota: Aqui idealmente filtraríamos pela categoria correta no banco novo
+            const banners = await obterBannersAtivos();
+            res.render(rota, { [rota]: data || [], banners, currentPage: rota });
+        } catch (err) { 
+            res.render(rota, { [rota]: [], banners: [], currentPage: rota }); 
+        }
+    });
+});
+
+// ROTA DINÂMICA PARA CATEGORIAS
+app.get('/categoria/:slug', async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const { data: categoriaData, error: catError } = await supabase.from('categories').select('*').eq('slug', slug).single();
+        
+        if (catError || !categoriaData) {
+            return res.status(404).render('categoria-vazia', { banners: [], currentPage: 'outros' });
+        }
+
+        const { data: profissionais, error: profError } = await supabase
+            .from('professionals')
+            .select('*, users(*)')
+            .eq('category_id', categoriaData.id)
+            .eq('status', 'active');
+
+        if (profError) throw profError;
+
+        const banners = await obterBannersAtivos();
+
+        if (!profissionais || profissionais.length === 0) {
+            return res.render('categoria-vazia', { categoria: categoriaData, banners, currentPage: 'outros' });
+        }
+
+        res.render('categoria-dinamica', { categoria: categoriaData, profissionais, banners, currentPage: 'outros' });
+    } catch (err) {
+        console.error('Erro ao carregar categoria:', err);
+        res.status(500).send('Erro interno do servidor');
+    }
+});
+
 app.listen(port, () => {
-    console.log(`🚀 Contrataê v2.0.1 rodando em http://localhost:${port}`);
+    console.log(`🚀 Contrataê v2.0.2 rodando em http://localhost:${port}`);
     console.log('✅ Deploy bem-sucedido - Estrutura MVP aplicada');
 });

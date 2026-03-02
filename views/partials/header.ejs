@@ -1,3 +1,7 @@
+<% 
+    // Garantir que currentPage tenha um valor padrão se não for passado
+    const current = typeof currentPage !== 'undefined' ? currentPage : ''; 
+%>
 <header class="airbnb-header">
     <div class="container header-grid">
         <div class="header-left">
@@ -28,13 +32,13 @@
                 <button id="close-menu-btn"><i class="fas fa-times"></i></button>
             </div>
             <ul>
-                <li><a href="/" class="<%= currentPage === 'index' ? 'active' : '' %>"><i class="fas fa-home"></i> Início</a></li>
-                <li><a href="/pintores" class="<%= currentPage === 'pintores' ? 'active' : '' %>"><i class="fas fa-paint-roller"></i> Pintores</a></li>
-                <li><a href="/pedreiros" class="<%= currentPage === 'pedreiros' ? 'active' : '' %>"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
-                <li><a href="/eletricistas" class="<%= currentPage === 'eletricistas' ? 'active' : '' %>"><i class="fas fa-bolt"></i> Eletricistas</a></li>
-                <li><a href="/encanadores" class="<%= currentPage === 'encanadores' ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
-                <li><a href="/outros" class="<%= currentPage === 'outros' ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
-                <li><a href="/contato" class="<%= currentPage === 'contato' ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
+                <li><a href="/" class="<%= current === 'index' ? 'active' : '' %>"><i class="fas fa-home"></i> Início</a></li>
+                <li><a href="/pintores" class="<%= current === 'pintores' ? 'active' : '' %>"><i class="fas fa-paint-roller"></i> Pintores</a></li>
+                <li><a href="/pedreiros" class="<%= current === 'pedreiros' ? 'active' : '' %>"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
+                <li><a href="/eletricistas" class="<%= current === 'eletricistas' ? 'active' : '' %>"><i class="fas fa-bolt"></i> Eletricistas</a></li>
+                <li><a href="/encanadores" class="<%= current === 'encanadores' ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
+                <li><a href="/outros" class="<%= current === 'outros' ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
+                <li><a href="/contato" class="<%= current === 'contato' ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
                 <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
             </ul>
         </div>
