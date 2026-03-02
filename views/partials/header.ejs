@@ -1,7 +1,3 @@
-<% 
-    const current = typeof currentPage !== 'undefined' ? currentPage : ''; 
-    const isAdmin = typeof adminLogado !== 'undefined' && adminLogado;
-%>
 <header class="airbnb-header">
     <div class="container header-grid">
         <div class="header-left">
@@ -18,10 +14,18 @@
         <div class="header-right">
             <div id="google_translate_element" class="desktop-only"></div>
             <button id="theme-toggle" class="icon-btn"><i class="fas fa-moon"></i></button>
-            <a href="/auth/login" class="login-pill desktop-only">
-                <span class="login-text">Entrar / Cadastrar</span>
-                <span class="login-icon"><i class="fas fa-user-circle"></i></span>
-            </a>
+            
+            <% if (typeof adminLogado !== 'undefined' && adminLogado) { %>
+                <a href="/admin" class="login-pill">
+                    <span class="login-text">Painel ADM</span>
+                    <span class="login-icon"><i class="fas fa-user-shield"></i></span>
+                </a>
+            <% } else { %>
+                <a href="/auth/login" class="login-pill">
+                    <span class="login-text">Entrar / Cadastrar</span>
+                    <span class="login-icon"><i class="fas fa-user-circle"></i></span>
+                </a>
+            <% } %>
         </div>
     </div>
 
@@ -32,41 +36,15 @@
                 <button id="close-menu-btn"><i class="fas fa-times"></i></button>
             </div>
             <ul>
-                <li><a href="/" class="<%= current === 'index' ? 'active' : '' %>"><i class="fas fa-home"></i> Início</a></li>
-                <li><a href="/pintores" class="<%= current === 'pintores' ? 'active' : '' %>"><i class="fas fa-paint-roller"></i> Pintores</a></li>
-                <li><a href="/pedreiros" class="<%= current === 'pedreiros' ? 'active' : '' %>"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
-                <li><a href="/eletricistas" class="<%= current === 'eletricistas' ? 'active' : '' %>"><i class="fas fa-bolt"></i> Eletricistas</a></li>
-                <li><a href="/encanadores" class="<%= current === 'encanadores' ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
-                <li><a href="/outros" class="<%= current === 'outros' ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
-                <li><a href="/contato" class="<%= current === 'contato' ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
-                <% if (isAdmin) { %>
-                    <li><a href="/admin" class="<%= current === 'admin' ? 'active' : '' %>"><i class="fas fa-user-shield"></i> Admin</a></li>
-                <% } %>
+                <li><a href="/" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'index') ? 'active' : '' %>"><i class="fas fa-home"></i> Início</a></li>
+                <li><a href="/pintores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pintores') ? 'active' : '' %>"><i class="fas fa-paint-roller"></i> Pintores</a></li>
+                <li><a href="/pedreiros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pedreiros') ? 'active' : '' %>"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
+                <li><a href="/eletricistas" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'eletricistas') ? 'active' : '' %>"><i class="fas fa-bolt"></i> Eletricistas</a></li>
+                <li><a href="/encanadores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'encanadores') ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
+                <li><a href="/outros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'outros') ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
+                <li><a href="/contato" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'contato') ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
                 <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
             </ul>
         </div>
     </nav>
 </header>
-
-<style>
-    /* Estilos rápidos para garantir o layout do header original */
-    .airbnb-header { background: #000; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 1000; }
-    .header-grid { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
-    .site-logo img { height: 45px; }
-    .search-pill { background: #222; border: 1px solid #444; border-radius: 30px; display: flex; align-items: center; padding: 5px 15px; width: 300px; }
-    .search-input-pill { background: transparent; border: none; color: #fff; flex: 1; outline: none; padding: 5px; }
-    .search-btn-round { background: #ffa500; border: none; border-radius: 50%; color: #000; cursor: pointer; height: 30px; width: 30px; }
-    .header-right { display: flex; align-items: center; gap: 15px; }
-    .icon-btn { background: transparent; border: none; color: #ffa500; cursor: pointer; font-size: 1.2rem; }
-    .login-pill { background: #222; border: 1px solid #444; border-radius: 30px; color: #fff; display: flex; align-items: center; gap: 10px; padding: 5px 15px; text-decoration: none; }
-    .login-icon { color: #ffa500; font-size: 1.5rem; }
-    .categories-nav { background: #111; border-top: 1px solid #222; }
-    .categories-nav ul { display: flex; justify-content: center; list-style: none; margin: 0; padding: 0; }
-    .categories-nav a { color: #ccc; display: block; padding: 12px 15px; text-decoration: none; transition: 0.3s; font-size: 0.9rem; }
-    .categories-nav a:hover, .categories-nav a.active { color: #ffa500; background: #222; }
-    
-    @media (max-width: 900px) {
-        .desktop-only { display: none; }
-        .categories-nav { display: none; } /* Menu mobile será tratado pelo script original */
-    }
-</style>

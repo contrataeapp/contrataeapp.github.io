@@ -42,7 +42,11 @@
     <div class="footer-copyright-bar">
         <div class="container copyright-flex">
             <p>&copy; 2026 Contrataê</p>
-            <div class="footer-links"><a href="/feedback">Avaliação</a> | <a href="/contato">Sobre Nós</a> | <a href="/termos">Termos</a></div>
+            <div class="footer-links">
+                <a href="/feedback">Avaliação</a> | 
+                <a href="/contato">Sobre Nós</a> | 
+                <a href="/termos">Termos</a>
+            </div>
         </div>
     </div>
 </footer>
@@ -59,57 +63,24 @@
     </div>
 </div>
 
-<style>
-    /* Estilos rápidos para garantir o layout do footer original */
-    footer { background: #111; border-top: 1px solid #333; margin-top: auto; }
-    .footer-partners-area { padding: 30px 0; border-bottom: 1px solid #222; }
-    .footer-copyright-bar { background: #000; padding: 20px 0; border-top: 1px solid #222; font-size: 0.9rem; color: #888; }
-    .copyright-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .footer-links a { color: #888; text-decoration: none; margin: 0 5px; }
-    .footer-links a:hover { color: #ffa500; }
-    
-    /* Estilos do Carrossel */
-    .carousel-container { position: relative; overflow: hidden; border-radius: 15px; background: #000; aspect-ratio: 16 / 6; max-width: 1200px; margin: 0 auto; }
-    .carousel-item { display: none; width: 100%; height: 100%; }
-    .carousel-item.active { display: block; }
-    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: none; color: #fff; cursor: pointer; padding: 10px; border-radius: 50%; z-index: 10; }
-    .prev-btn { left: 10px; }
-    .next-btn { right: 10px; }
-    .carousel-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
-    .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.5); border-radius: 50%; cursor: pointer; }
-    .dot.active { background: #ffa500; }
-    
-    @media (max-width: 900px) {
-        .carousel-container { aspect-ratio: 2 / 1; }
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+          pageLanguage: 'pt', 
+          includedLanguages: 'pt,en', 
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+        }, 'google_translate_element');
     }
-</style>
-
-<script>
-    // Lógica simples de carrossel para o footer
-    document.addEventListener('DOMContentLoaded', function() {
-        const carousel = document.getElementById('carousel-baixo');
-        if (!carousel) return;
-        
-        const items = carousel.querySelectorAll('.carousel-item');
-        const dots = carousel.querySelectorAll('.dot');
-        const prevBtn = carousel.querySelector('.prev-btn');
-        const nextBtn = carousel.querySelector('.next-btn');
-        let currentIndex = 0;
-
-        function showSlide(index) {
-            items.forEach(item => item.classList.remove('active'));
-            dots.forEach(dot => dot.classList.remove('active'));
-            
-            currentIndex = (index + items.length) % items.length;
-            items[currentIndex].classList.add('active');
-            if (dots[currentIndex]) dots[currentIndex].classList.add('active');
-        }
-
-        if (nextBtn) nextBtn.addEventListener('click', () => showSlide(currentIndex + 1));
-        if (prevBtn) prevBtn.addEventListener('click', () => showSlide(currentIndex - 1));
-        
-        if (items.length > 1) {
-            setInterval(() => showSlide(currentIndex + 1), 5000);
-        }
-    });
 </script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script src="/js/theme-toggle.js"></script>
+<script src="/js/index.js"></script>
+
+<div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+    </div>
+</div>
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
