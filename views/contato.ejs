@@ -6,198 +6,364 @@
     <title>Contato - Contrataê</title>
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/css/style_laranja_preto.css">
-    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        .contato-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 20px;
+        main {
+            min-height: calc(100vh - 200px);
+            background: linear-gradient(135deg, #f8f9fa 0%, #f0f0f0 100%);
         }
 
-        .contato-header {
+        .hero-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: white;
+            padding: 60px 20px;
             text-align: center;
-            margin-bottom: 50px;
+            border-bottom: 4px solid #ffa500;
         }
 
-        .contato-header h1 {
-            font-size: 36px;
-            color: #002147;
-            margin-bottom: 10px;
+        .hero-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
         }
 
-        .contato-header p {
-            font-size: 16px;
-            color: #666;
+        .hero-section p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .contato-grid {
+        .container-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .about-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 50px;
+            gap: 50px;
+            align-items: center;
+            margin-bottom: 80px;
         }
 
-        .contato-info {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .contato-info h2 {
-            color: #002147;
-            margin-bottom: 25px;
-            font-size: 22px;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
+        .about-text h2 {
+            font-size: 2rem;
+            color: #1a1a1a;
             margin-bottom: 20px;
+            font-weight: 600;
         }
 
-        .info-item i {
-            font-size: 24px;
-            color: #ffa500;
-            margin-top: 5px;
-            min-width: 24px;
-        }
-
-        .info-item-content h3 {
-            color: #002147;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .info-item-content p {
+        .about-text p {
+            font-size: 1rem;
             color: #666;
-            font-size: 14px;
-            margin: 0;
-        }
-
-        .info-item-content a {
-            color: #ffa500;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .info-item-content a:hover {
-            text-decoration: underline;
-        }
-
-        .contato-form {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .contato-form h2 {
-            color: #002147;
-            margin-bottom: 25px;
-            font-size: 22px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #002147;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: 0.3s;
-            box-sizing: border-box;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #ffa500;
-            box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .btn-submit {
-            background: #ffa500;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            width: 100%;
-        }
-
-        .btn-submit:hover {
-            background: #ff8c00;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.3);
-        }
-
-        .sobre-section {
-            background: #f8f9fa;
-            padding: 40px;
-            border-radius: 12px;
-            margin-bottom: 50px;
-        }
-
-        .sobre-section h2 {
-            color: #002147;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-
-        .sobre-section p {
-            color: #666;
-            font-size: 16px;
             line-height: 1.8;
             margin-bottom: 15px;
         }
 
-        .sobre-section ul {
-            color: #666;
-            font-size: 16px;
-            line-height: 1.8;
-            margin-left: 20px;
+        .about-highlight {
+            color: #ffa500;
+            font-weight: 600;
         }
 
-        .sobre-section li {
+        .about-image {
+            background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .about-image i {
+            font-size: 120px;
+            opacity: 0.8;
+        }
+
+        .values-section {
+            background: white;
+            padding: 60px 20px;
+            border-radius: 16px;
+            margin-bottom: 60px;
+        }
+
+        .values-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            color: #1a1a1a;
+            margin-bottom: 50px;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .value-card {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .value-card:hover {
+            border-color: #ffa500;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 165, 0, 0.15);
+        }
+
+        .value-icon {
+            font-size: 50px;
+            color: #ffa500;
+            margin-bottom: 15px;
+        }
+
+        .value-card h3 {
+            font-size: 1.3rem;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .value-card p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .contact-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: white;
+            padding: 60px 20px;
+            border-radius: 16px;
+            margin-bottom: 60px;
+        }
+
+        .contact-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 50px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .contact-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            background: rgba(255, 165, 0, 0.1);
+            border-color: #ffa500;
+        }
+
+        .contact-icon {
+            font-size: 40px;
+            color: #ffa500;
+            margin-bottom: 15px;
+        }
+
+        .contact-card h3 {
+            font-size: 1.2rem;
             margin-bottom: 10px;
         }
 
+        .contact-card p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .contact-card a {
+            color: #ffa500;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .contact-card a:hover {
+            color: #ff8c00;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+            color: white;
+            padding: 60px 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .cta-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #ffa500;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #ffa500;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            color: #ffa500;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
         @media (max-width: 768px) {
-            .contato-grid {
+            .hero-section h1 {
+                font-size: 1.8rem;
+            }
+
+            .hero-section p {
+                font-size: 1rem;
+            }
+
+            .about-section {
                 grid-template-columns: 1fr;
                 gap: 30px;
             }
 
-            .contato-header h1 {
-                font-size: 24px;
+            .about-text h2 {
+                font-size: 1.5rem;
             }
 
-            .contato-container {
-                margin: 20px auto;
+            .values-section h2,
+            .contact-section h2,
+            .cta-section h2 {
+                font-size: 1.5rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .container-content {
+                padding: 40px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-section {
+                padding: 40px 15px;
+            }
+
+            .hero-section h1 {
+                font-size: 1.5rem;
+            }
+
+            .hero-section p {
+                font-size: 0.9rem;
+            }
+
+            .about-text h2 {
+                font-size: 1.3rem;
+            }
+
+            .about-text p {
+                font-size: 0.9rem;
+            }
+
+            .about-image {
+                min-height: 250px;
+            }
+
+            .about-image i {
+                font-size: 80px;
+            }
+
+            .value-icon,
+            .contact-icon {
+                font-size: 35px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
             }
         }
     </style>
@@ -223,220 +389,155 @@
     </div>
     <% } %>
 
-    <header class="airbnb-header">
-        <div class="container header-grid">
-            <div class="header-left">
-                <a href="/" class="site-logo"><img src="/imagens/logo/logo_contratae.png" alt="Logo Contrataê"></a>
-            </div>
-
-            <div class="header-center desktop-only">
-                <div class="search-pill">
-                    <input type="text" class="search-input-pill" placeholder="Busque por pintor, pedreiro...">
-                    <button class="search-btn-round"><i class="fas fa-search"></i></button>
-                </div>
-            </div>
-
-            <div class="header-right">
-                <div id="google_translate_element" class="desktop-only"></div>
-                <button id="theme-toggle" class="icon-btn"><i class="fas fa-moon"></i></button>
-                <a href="/auth/login" class="login-pill desktop-only">
-                    <span class="login-text">Entrar / Cadastrar</span>
-                    <span class="login-icon"><i class="fas fa-user-circle"></i></span>
-                </a>
-            </div>
-        </div>
-
-        <nav class="categories-nav" id="main-nav">
-            <div class="container">
-                <div class="nav-header mobile-only">
-                    <h3>Menu</h3>
-                    <button id="close-menu-btn"><i class="fas fa-times"></i></button>
-                </div>
-                <ul>
-                    <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
-                    <li><a href="/pintores"><i class="fas fa-paint-roller"></i> Pintores</a></li>
-                    <li><a href="/pedreiros"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
-                    <li><a href="/eletricistas"><i class="fas fa-bolt"></i> Eletricistas</a></li>
-                    <li><a href="/encanadores"><i class="fas fa-wrench"></i> Encanadores</a></li>
-                    <li><a href="/outros"><i class="fas fa-th"></i> Outros</a></li>
-                    <li><a href="/contato" class="active"><i class="fas fa-envelope"></i> Contato</a></li>
-                    <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
-                </ul>
-            </div>
-        </nav>
-    </header>
+    <%- include('partials/header') %>
 
     <main>
-        <div class="contato-container">
-            <div class="contato-header">
-                <h1>Entre em Contato</h1>
-                <p>Tem dúvidas ou sugestões? Adoraríamos ouvir de você!</p>
+        <section class="hero-section">
+            <div class="container">
+                <h1>Conheça a Contrataê</h1>
+                <p>Conectando pessoas que precisam de soluções com profissionais que oferecem excelência</p>
             </div>
+        </section>
 
-            <div class="sobre-section">
-                <h2>O que é Contrataê?</h2>
-                <p>
-                    <strong>Contrataê</strong> é uma plataforma digital inovadora que conecta clientes com profissionais qualificados de diversos segmentos. 
-                    Nossa missão é facilitar a contratação de serviços, tornando o processo rápido, seguro e transparente.
-                </p>
-                <p>
-                    Com a Contrataê, você pode:
-                </p>
-                <ul>
-                    <li><strong>Encontrar profissionais qualificados</strong> em sua região com facilidade</li>
-                    <li><strong>Comparar avaliações e comentários</strong> de clientes anteriores</li>
-                    <li><strong>Entrar em contato direto</strong> com o profissional via WhatsApp</li>
-                    <li><strong>Gerenciar seus serviços</strong> de forma organizada e profissional</li>
-                    <li><strong>Construir sua reputação</strong> através de avaliações honestas</li>
-                </ul>
-            </div>
+        <div class="container-content">
+            <!-- Seção Sobre -->
+            <section class="about-section">
+                <div class="about-text">
+                    <h2>Quem Somos</h2>
+                    <p>
+                        A <span class="about-highlight">Contrataê</span> é uma plataforma inovadora que conecta clientes 
+                        com profissionais de serviços de forma <span class="about-highlight">rápida, segura e confiável</span>.
+                    </p>
+                    <p>
+                        Desde 2024, trabalhamos incansavelmente para construir um ecossistema onde a qualidade, 
+                        a transparência e a inovação são os pilares do nosso sucesso.
+                    </p>
+                    <p>
+                        Acreditamos que a tecnologia pode simplificar o dia a dia, trazendo mais eficiência 
+                        para a contratação de serviços profissionais.
+                    </p>
+                    <p>
+                        Nosso compromisso é com a <span class="about-highlight">qualidade</span>, 
+                        <span class="about-highlight">transparência</span> e <span class="about-highlight">inovação</span>. 
+                        Estamos sempre buscando novas maneiras de aprimorar a experiência de todos os usuários, 
+                        garantindo que cada conexão seja um sucesso.
+                    </p>
+                </div>
+                <div class="about-image">
+                    <i class="fas fa-handshake"></i>
+                </div>
+            </section>
 
-            <div class="contato-grid">
-                <div class="contato-info">
-                    <h2>Informações de Contato</h2>
-                    
-                    <div class="info-item">
-                        <i class="fas fa-phone"></i>
-                        <div class="info-item-content">
-                            <h3>WhatsApp</h3>
-                            <p><a href="https://wa.me/5516996484492?text=Olá, gostaria de mais informações sobre o Contrataê" target="_blank">(16) 99648-4492</a></p>
-                        </div>
+            <!-- Seção Valores -->
+            <section class="values-section">
+                <h2>Nossos Valores</h2>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-star"></i></div>
+                        <h3>Qualidade</h3>
+                        <p>Garantimos que apenas profissionais qualificados e avaliados façam parte da nossa plataforma.</p>
                     </div>
-
-                    <div class="info-item">
-                        <i class="fas fa-envelope"></i>
-                        <div class="info-item-content">
-                            <h3>E-mail</h3>
-                            <p><a href="mailto:time.contratae@gmail.com">time.contratae@gmail.com</a></p>
-                        </div>
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3>Segurança</h3>
+                        <p>Seus dados e transações são protegidos com os mais altos padrões de segurança.</p>
                     </div>
-
-                    <div class="info-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <div class="info-item-content">
-                            <h3>Localização</h3>
-                            <p>Disponível em todo o Brasil</p>
-                        </div>
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-handshake"></i></div>
+                        <h3>Confiança</h3>
+                        <p>Avaliações honestas e transparentes ajudam você a tomar as melhores decisões.</p>
                     </div>
-
-                    <div class="info-item">
-                        <i class="fas fa-clock"></i>
-                        <div class="info-item-content">
-                            <h3>Horário de Atendimento</h3>
-                            <p>Segunda a Sexta: 8h às 18h<br>Sábado: 9h às 13h</p>
-                        </div>
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-rocket"></i></div>
+                        <h3>Inovação</h3>
+                        <p>Constantemente melhoramos nossa plataforma para oferecer a melhor experiência.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-users"></i></div>
+                        <h3>Comunidade</h3>
+                        <p>Somos mais que uma plataforma, somos uma comunidade de pessoas que se ajudam.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon"><i class="fas fa-lightbulb"></i></div>
+                        <h3>Transparência</h3>
+                        <p>Tudo é claro e direto. Sem surpresas, sem complicações.</p>
                     </div>
                 </div>
+            </section>
 
-                <div class="contato-form">
-                    <h2>Envie uma Mensagem</h2>
-                    <form method="POST" action="/api/contato" id="contact-form" onsubmit="handleContactSubmit(event)">
-                        <div class="form-group">
-                            <label for="nome">Nome Completo *</label>
-                            <input type="text" id="nome" name="nome" required placeholder="Seu nome">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="email">E-mail *</label>
-                            <input type="email" id="email" name="email" required placeholder="seu@email.com">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="telefone">Telefone</label>
-                            <input type="tel" id="telefone" name="telefone" placeholder="(XX) XXXXX-XXXX">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="assunto">Assunto *</label>
-                            <input type="text" id="assunto" name="assunto" required placeholder="Qual é o assunto?">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="mensagem">Mensagem *</label>
-                            <textarea id="mensagem" name="mensagem" required placeholder="Escreva sua mensagem aqui..."></textarea>
-                        </div>
-
-                        <button type="submit" class="btn-submit">Enviar Mensagem</button>
-                    </form>
+            <!-- Seção Estatísticas -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Profissionais Cadastrados</div>
                 </div>
-            </div>
+                <div class="stat-card">
+                    <div class="stat-number">2.5K+</div>
+                    <div class="stat-label">Clientes Ativos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Serviços Realizados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4.8★</div>
+                    <div class="stat-label">Avaliação Média</div>
+                </div>
+            </section>
+
+            <!-- Seção Contato -->
+            <section class="contact-section">
+                <h2>Entre em Contato</h2>
+                <div class="contact-grid">
+                    <div class="contact-card">
+                        <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
+                        <h3>WhatsApp</h3>
+                        <p>Dúvidas ou sugestões?</p>
+                        <a href="https://wa.me/5516996484492?text=Olá%20Contrataê!%20Gostaria%20de%20mais%20informações." target="_blank">
+                            (16) 99648-4492
+                        </a>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                        <h3>E-mail</h3>
+                        <p>Envie sua mensagem</p>
+                        <a href="mailto:time.contratae@gmail.com">time.contratae@gmail.com</a>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <h3>Localização</h3>
+                        <p>Brasil</p>
+                        <p style="font-size: 0.85rem; opacity: 0.7;">Atendimento Nacional</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção CTA -->
+            <section class="cta-section">
+                <h2>Pronto para Começar?</h2>
+                <p>Junte-se a milhares de pessoas que já encontraram a solução perfeita na Contrataê</p>
+                <div class="cta-buttons">
+                    <a href="/auth/login" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Cadastre-se Agora
+                    </a>
+                    <a href="/" class="btn btn-secondary">
+                        <i class="fas fa-search"></i> Buscar Profissionais
+                    </a>
+                </div>
+            </section>
         </div>
     </main>
 
-    <footer class="footer-section">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-col">
-                    <h4>Sobre Contrataê</h4>
-                    <ul>
-                        <li><a href="/contato">Contato</a></li>
-                        <li><a href="/">Sobre Nós</a></li>
-                        <li><a href="/">Blog</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Para Profissionais</h4>
-                    <ul>
-                        <li><a href="/auth/login">Cadastre-se</a></li>
-                        <li><a href="/">Como Funciona</a></li>
-                        <li><a href="/">Suporte</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Para Clientes</h4>
-                    <ul>
-                        <li><a href="/">Buscar Profissionais</a></li>
-                        <li><a href="/">Segurança</a></li>
-                        <li><a href="/">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Redes Sociais</h4>
-                    <ul>
-                        <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
-                        <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
-                        <li><a href="#"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="footer-copyright-bar">
-            <div class="container copyright-flex">
-                <p>&copy; 2026 Contrataê</p>
-                <div class="footer-links"><a href="/">Avaliação</a> | <a href="/contato">Sobre Nós</a> | <a href="/">Termos</a></div>
-            </div>
-        </div>
-    </footer>
+    <nav class="mobile-bottom-nav mobile-only">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="/#busca-rapida" class="nav-item"><i class="fas fa-search"></i><span>Busca</span></a>
+        <button class="nav-item" id="mobile-menu-trigger"><i class="fas fa-bars"></i><span>Menu</span></button>
+        <a href="/auth/login" class="nav-item"><i class="fas fa-user"></i><span>Entrar</span></a>
+    </nav>
+
+    <%- include('partials/footer') %>
 
     <script type="text/javascript">
-        function handleContactSubmit(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-
-            fetch('/api/contato', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.sucesso) {
-                    alert('Mensagem enviada com sucesso! Entraremos em contato em breve.');
-                    form.reset();
-                } else {
-                    alert('Erro ao enviar mensagem: ' + (result.erro || 'Tente novamente'));
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao enviar mensagem. Tente novamente.');
-            });
-        }
-
         function googleTranslateElementInit() {
           new google.translate.TranslateElement({
               pageLanguage: 'pt', 
