@@ -19,10 +19,10 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://translate.google.com", "https://www.gstatic.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com", "https://translate.googleapis.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://translate.google.com", "https://www.gstatic.com", "https://vlibras.gov.br"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com", "https://translate.googleapis.com", "https://cdn.jsdelivr.net"],
             imgSrc: ["'self'", "data:", "https://*.supabase.co", "https://*.googleusercontent.com", "https://www.gstatic.com", "https://translate.googleapis.com", "https://contrataeapp.onrender.com"],
-            connectSrc: ["'self'", "https://*.supabase.co", "https://translate.googleapis.com"],
+            connectSrc: ["'self'", "https://*.supabase.co", "https://translate.googleapis.com", "https://vlibras.gov.br"],
             fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
             objectSrc: ["'none'"],
             upgradeInsecureRequests: [],
@@ -114,7 +114,7 @@ async function obterBannersAtivos() {
 }
 
 // ============================================
-// ROTAS ADMINISTRATIVAS (RESTAURADAS)
+// ROTAS ADMINISTRATIVAS (RESTAURADAS DO BACKUP)
 // ============================================
 const checkAdmin = (req, res, next) => {
     if (req.session.adminLogado) return next();
@@ -163,13 +163,13 @@ app.get("/admin", checkAdmin, async (req, res) => {
             pendentes: profissionais.filter(p => p.status === 'PENDENTE').length,
             pausados: profissionais.filter(p => p.status === 'PAUSADO').length,
             receitaTotal: profissionais.reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
-            receitaMes: 0 // Simplificado para restauração
+            receitaMes: 0 
         };
 
-        res.render("admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar }, currentPage: 'admin' });
+        res.render("admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar }, currentPage: 'admin', adminLogado: true });
     } catch (err) { 
         console.error(err);
-        res.render("admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {}, currentPage: 'admin' }); 
+        res.render("admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {}, currentPage: 'admin', adminLogado: true }); 
     }
 });
 
@@ -179,18 +179,18 @@ app.get("/admin", checkAdmin, async (req, res) => {
 app.get('/', async (req, res) => {
     try {
         const banners = await obterBannersAtivos();
-        res.render('index', { banners, currentPage: 'index' });
+        res.render('index', { banners, currentPage: 'index', adminLogado: req.session.adminLogado });
     } catch (err) {
-        res.render('index', { banners: [], currentPage: 'index' });
+        res.render('index', { banners: [], currentPage: 'index', adminLogado: req.session.adminLogado });
     }
 });
 
 app.get('/contato', async (req, res) => {
     try {
         const banners = await obterBannersAtivos();
-        res.render('contato', { banners, currentPage: 'contato' });
+        res.render('contato', { banners, currentPage: 'contato', adminLogado: req.session.adminLogado });
     } catch (err) {
-        res.render('contato', { banners: [], currentPage: 'contato' });
+        res.render('contato', { banners: [], currentPage: 'contato', adminLogado: req.session.adminLogado });
     }
 });
 
@@ -198,19 +198,19 @@ app.get('/outros', async (req, res) => {
     try {
         const { data: categorias, error } = await supabase.from('categories').select('*').order('name');
         const banners = await obterBannersAtivos();
-        res.render('outros', { categorias: categorias || [], banners, currentPage: 'outros' });
+        res.render('outros', { categorias: categorias || [], banners, currentPage: 'outros', adminLogado: req.session.adminLogado });
     } catch (err) {
-        res.render('outros', { categorias: [], banners: [], currentPage: 'outros' });
+        res.render('outros', { categorias: [], banners: [], currentPage: 'outros', adminLogado: req.session.adminLogado });
     }
 });
 
 // ROTAS DE AUTENTICAÇÃO USUÁRIO
 app.get('/auth/login', (req, res) => {
-    res.render('auth/login', { currentPage: 'login', erro: null });
+    res.render('auth/login', { currentPage: 'login', erro: null, adminLogado: req.session.adminLogado });
 });
 
 app.get('/auth/cadastro', (req, res) => {
-    res.render('auth/cadastro', { currentPage: 'cadastro', erro: null });
+    res.render('auth/cadastro', { currentPage: 'cadastro', erro: null, adminLogado: req.session.adminLogado });
 });
 
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -238,9 +238,9 @@ categoriasFixas.forEach(({ rota, profissao }) => {
         try {
             const { data, error } = await supabase.from('professionals').select('*, users(*)').eq('status', 'active');
             const banners = await obterBannersAtivos();
-            res.render(rota, { [rota]: data || [], banners, currentPage: rota });
+            res.render(rota, { [rota]: data || [], banners, currentPage: rota, adminLogado: req.session.adminLogado });
         } catch (err) { 
-            res.render(rota, { [rota]: [], banners: [], currentPage: rota }); 
+            res.render(rota, { [rota]: [], banners: [], currentPage: rota, adminLogado: req.session.adminLogado }); 
         }
     });
 });
@@ -252,7 +252,7 @@ app.get('/categoria/:slug', async (req, res) => {
         const { data: categoriaData } = await supabase.from('categories').select('*').eq('slug', slug).single();
         
         if (!categoriaData) {
-            return res.status(404).render('categoria-vazia', { banners: [], currentPage: 'outros' });
+            return res.status(404).render('categoria-vazia', { banners: [], currentPage: 'outros', adminLogado: req.session.adminLogado });
         }
 
         const { data: profissionais } = await supabase
@@ -264,19 +264,19 @@ app.get('/categoria/:slug', async (req, res) => {
         const banners = await obterBannersAtivos();
 
         if (!profissionais || profissionais.length === 0) {
-            return res.render('categoria-vazia', { categoria: categoriaData, banners, currentPage: 'outros' });
+            return res.render('categoria-vazia', { categoria: categoriaData, banners, currentPage: 'outros', adminLogado: req.session.adminLogado });
         }
 
-        res.render('categoria-dinamica', { categoria: categoriaData, profissionais, banners, currentPage: 'outros' });
+        res.render('categoria-dinamica', { categoria: categoriaData, profissionais, banners, currentPage: 'outros', adminLogado: req.session.adminLogado });
     } catch (err) {
         res.status(500).send('Erro interno do servidor');
     }
 });
 
-// DASHBOARDS (RESTAURADOS)
+// DASHBOARDS
 const dashboardRoutes = require('./routes/dashboards');
 app.use('/', dashboardRoutes);
 
 app.listen(port, () => {
-    console.log(`🚀 Contrataê v2.1.0 rodando em http://localhost:${port}`);
+    console.log(`🚀 Contrataê v2.2.0 rodando em http://localhost:${port}`);
 });

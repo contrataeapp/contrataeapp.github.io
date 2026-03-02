@@ -1,81 +1,48 @@
-<footer class="footer-section">
-    <div class="footer-content-wrapper">
-        <div class="footer-partners-area">
-            <div class="container">
-                <h4 style="color: #ffa500; text-align: center; margin-bottom: 20px; font-size: 1rem;">Nossos Parceiros</h4>
-                <section class="carousel-section footer-carousel" id="carousel-rodape">
-                    <div class="carousel-container">
-                        <% const bannersRodape = typeof banners !== 'undefined' ? banners.filter(b => b.posicao === 2) : []; %>
-                        
-                        <% if (bannersRodape.length > 0) { %>
-                            <% bannersRodape.forEach(function(banner, index) { %>
-                                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                                    <a href="#" class="trigger-modal" data-link="<%= banner.link_destino || '#' %>">
-                                        <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo || 'Parceiro' %>" style="width:100%; height:100%;">
-                                    </a>
-                                </div>
-                            <% }); %>
-                        <% } %>
-
-                        <% if (bannersRodape.length > 1) { %>
-                            <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
-                            <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
-                            
-                            <div class="carousel-dots">
-                                <% bannersRodape.forEach(function(_, index) { %>
-                                    <span class="dot <%= index === 0 ? 'active' : '' %>"></span>
-                                <% }); %>
+<footer>
+    <div class="footer-partners-area">
+        <div class="container">
+            <h4 style="color: #ffa500; text-align: center; margin-bottom: 10px; font-size: 1rem;">Nossos Parceiros</h4>
+            <section class="carousel-section footer-carousel" id="carousel-baixo">
+                <div class="carousel-container">
+                   
+                    <% const bannersRodape = typeof banners !== 'undefined' ? banners.filter(b => b.posicao === 2) : []; %>
+                    
+                    <% if (bannersRodape.length > 0) { %>
+                        <% bannersRodape.forEach(function(banner, index) { %>
+                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                <a href="#" class="trigger-modal" data-link="<%= banner.link_destino || '#' %>">
+                                    <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo || 'Parceiro' %>" style="width:100%; height:100%;">
+                                </a>
                             </div>
-                        <% } %>
-                    </div>
-                </section>
-            </div>
-        </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="carousel-item active">
+                            <a href="#" class="trigger-modal" data-link="https://wa.me/5516996484492?text=Olá, vi o anúncio do Ponto Forte no Contrataê e gostaria de mais informações!">
+                                <img src="/imagens/parceiros/ponto_forte.png" alt="Ponto Forte" style="width:100%; height:100%;">
+                            </a>
+                        </div>
+                    <% } %>
 
-        <div class="footer-main">
-            <div class="container">
-                <div class="footer-grid">
-                    <div class="footer-col">
-                        <h4>Sobre Contrataê</h4>
-                        <ul>
-                            <li><a href="/contato">Contato</a></li>
-                            <li><a href="/">Sobre Nós</a></li>
-                            <li><a href="/">Blog</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-col">
-                        <h4>Para Profissionais</h4>
-                        <ul>
-                            <li><a href="/auth/login">Cadastre-se</a></li>
-                            <li><a href="/">Como Funciona</a></li>
-                            <li><a href="/">Suporte</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-col">
-                        <h4>Para Clientes</h4>
-                        <ul>
-                            <li><a href="/">Buscar Profissionais</a></li>
-                            <li><a href="/">Segurança</a></li>
-                            <li><a href="/">FAQ</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-col">
-                        <h4>Redes Sociais</h4>
-                        <ul>
-                            <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
-                            <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
-                            <li><a href="#"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
-                        </ul>
+                    <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                    <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                    
+                    <div class="carousel-dots">
+                        <% if (bannersRodape.length > 0) { %>
+                            <% bannersRodape.forEach(function(_, index) { %>
+                                <span class="dot <%= index === 0 ? 'active' : '' %>"></span>
+                            <% }); %>
+                        <% } else { %>
+                            <span class="dot active"></span>
+                        <% } %>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
-
     <div class="footer-copyright-bar">
         <div class="container copyright-flex">
             <p>&copy; 2026 Contrataê</p>
-            <div class="footer-links"><a href="/">Avaliação</a> | <a href="/contato">Sobre Nós</a> | <a href="/">Termos</a></div>
+            <div class="footer-links"><a href="/feedback">Avaliação</a> | <a href="/contato">Sobre Nós</a> | <a href="/termos">Termos</a></div>
         </div>
     </div>
 </footer>
@@ -93,17 +60,56 @@
 </div>
 
 <style>
-    .footer-section { background-color: #111; color: #fff; border-top: 1px solid #333; }
+    /* Estilos rápidos para garantir o layout do footer original */
+    footer { background: #111; border-top: 1px solid #333; margin-top: auto; }
     .footer-partners-area { padding: 30px 0; border-bottom: 1px solid #222; }
-    .footer-main { padding: 50px 0; }
-    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; }
-    .footer-col h4 { color: #ffa500; margin-bottom: 20px; font-size: 1.1rem; }
-    .footer-col ul { list-style: none; padding: 0; }
-    .footer-col ul li { margin-bottom: 10px; }
-    .footer-col ul li a { color: #bbb; text-decoration: none; transition: 0.3s; }
-    .footer-col ul li a:hover { color: #ffa500; }
-    .footer-copyright-bar { background-color: #000; padding: 20px 0; border-top: 1px solid #222; font-size: 0.9rem; color: #888; }
+    .footer-copyright-bar { background: #000; padding: 20px 0; border-top: 1px solid #222; font-size: 0.9rem; color: #888; }
     .copyright-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .footer-links a { color: #888; text-decoration: none; margin: 0 5px; }
     .footer-links a:hover { color: #ffa500; }
+    
+    /* Estilos do Carrossel */
+    .carousel-container { position: relative; overflow: hidden; border-radius: 15px; background: #000; aspect-ratio: 16 / 6; max-width: 1200px; margin: 0 auto; }
+    .carousel-item { display: none; width: 100%; height: 100%; }
+    .carousel-item.active { display: block; }
+    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: none; color: #fff; cursor: pointer; padding: 10px; border-radius: 50%; z-index: 10; }
+    .prev-btn { left: 10px; }
+    .next-btn { right: 10px; }
+    .carousel-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
+    .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.5); border-radius: 50%; cursor: pointer; }
+    .dot.active { background: #ffa500; }
+    
+    @media (max-width: 900px) {
+        .carousel-container { aspect-ratio: 2 / 1; }
+    }
 </style>
+
+<script>
+    // Lógica simples de carrossel para o footer
+    document.addEventListener('DOMContentLoaded', function() {
+        const carousel = document.getElementById('carousel-baixo');
+        if (!carousel) return;
+        
+        const items = carousel.querySelectorAll('.carousel-item');
+        const dots = carousel.querySelectorAll('.dot');
+        const prevBtn = carousel.querySelector('.prev-btn');
+        const nextBtn = carousel.querySelector('.next-btn');
+        let currentIndex = 0;
+
+        function showSlide(index) {
+            items.forEach(item => item.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            currentIndex = (index + items.length) % items.length;
+            items[currentIndex].classList.add('active');
+            if (dots[currentIndex]) dots[currentIndex].classList.add('active');
+        }
+
+        if (nextBtn) nextBtn.addEventListener('click', () => showSlide(currentIndex + 1));
+        if (prevBtn) prevBtn.addEventListener('click', () => showSlide(currentIndex - 1));
+        
+        if (items.length > 1) {
+            setInterval(() => showSlide(currentIndex + 1), 5000);
+        }
+    });
+</script>
