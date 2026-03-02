@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Outras Categorias - Contrataê</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/css/style_laranja_preto.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         .outros-container {
             max-width: 1200px;
-            margin: 60px auto;
-            padding: 40px 20px;
+            margin: 40px auto;
+            padding: 20px;
         }
 
         .outros-header {
@@ -104,8 +106,7 @@
 
         @media (max-width: 768px) {
             .outros-container {
-                margin: 40px auto;
-                padding: 20px;
+                margin: 20px auto;
             }
 
             .outros-header h1 {
@@ -119,57 +120,160 @@
     </style>
 </head>
 <body>
-    <div class="outros-container">
-        <div class="outros-header">
-            <h1>Outras Categorias</h1>
-            <p>Explore todas as profissões disponíveis na plataforma Contrataê</p>
+    <header class="airbnb-header">
+        <div class="container header-grid">
+            <div class="header-left">
+                <a href="/" class="site-logo"><img src="/imagens/logo/logo_contratae.png" alt="Logo Contrataê"></a>
+            </div>
+
+            <div class="header-center desktop-only">
+                <div class="search-pill">
+                    <input type="text" class="search-input-pill" placeholder="Busque por pintor, pedreiro...">
+                    <button class="search-btn-round"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div id="google_translate_element" class="desktop-only"></div>
+                <button id="theme-toggle" class="icon-btn"><i class="fas fa-moon"></i></button>
+                <a href="/auth/login" class="login-pill desktop-only">
+                    <span class="login-text">Entrar / Cadastrar</span>
+                    <span class="login-icon"><i class="fas fa-user-circle"></i></span>
+                </a>
+            </div>
         </div>
 
-        <div class="categorias-grid">
-            <a href="/categoria/jardineiro" class="categoria-card">
-                <i class="fas fa-leaf categoria-icon"></i>
-                <h3>Jardineiro</h3>
-                <p>Cuidados com plantas e paisagismo</p>
-            </a>
+        <nav class="categories-nav" id="main-nav">
+            <div class="container">
+                <div class="nav-header mobile-only">
+                    <h3>Menu</h3>
+                    <button id="close-menu-btn"><i class="fas fa-times"></i></button>
+                </div>
+                <ul>
+                    <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
+                    <li><a href="/pintores"><i class="fas fa-paint-roller"></i> Pintores</a></li>
+                    <li><a href="/pedreiros"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
+                    <li><a href="/eletricistas"><i class="fas fa-bolt"></i> Eletricistas</a></li>
+                    <li><a href="/encanadores"><i class="fas fa-wrench"></i> Encanadores</a></li>
+                    <li><a href="/outros" class="active"><i class="fas fa-th"></i> Outros</a></li>
+                    <li><a href="/contato"><i class="fas fa-envelope"></i> Contato</a></li>
+                    <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
 
-            <a href="/categoria/barbeiro" class="categoria-card">
-                <i class="fas fa-cut categoria-icon"></i>
-                <h3>Barbeiro</h3>
-                <p>Cortes e cuidados com cabelo</p>
-            </a>
+    <main>
+        <div class="outros-container">
+            <div class="outros-header">
+                <h1>Outras Categorias</h1>
+                <p>Explore todas as profissões disponíveis na plataforma Contrataê</p>
+            </div>
 
-            <a href="/categoria/mecanico" class="categoria-card">
-                <i class="fas fa-wrench categoria-icon"></i>
-                <h3>Mecânico</h3>
-                <p>Serviços automotivos</p>
-            </a>
+            <div class="categorias-grid">
+                <a href="/categoria/jardineiro" class="categoria-card">
+                    <i class="fas fa-leaf categoria-icon"></i>
+                    <h3>Jardineiro</h3>
+                    <p>Cuidados com plantas e paisagismo</p>
+                </a>
 
-            <a href="/categoria/diarista" class="categoria-card">
-                <i class="fas fa-broom categoria-icon"></i>
-                <h3>Diarista</h3>
-                <p>Limpeza e organização</p>
-            </a>
+                <a href="/categoria/barbeiro" class="categoria-card">
+                    <i class="fas fa-cut categoria-icon"></i>
+                    <h3>Barbeiro</h3>
+                    <p>Cortes e cuidados com cabelo</p>
+                </a>
 
-            <a href="/categoria/consultor" class="categoria-card">
-                <i class="fas fa-briefcase categoria-icon"></i>
-                <h3>Consultor</h3>
-                <p>Consultoria profissional</p>
-            </a>
+                <a href="/categoria/mecanico" class="categoria-card">
+                    <i class="fas fa-wrench categoria-icon"></i>
+                    <h3>Mecânico</h3>
+                    <p>Serviços automotivos</p>
+                </a>
 
-            <a href="/categoria/professor" class="categoria-card">
-                <i class="fas fa-chalkboard-user categoria-icon"></i>
-                <h3>Professor</h3>
-                <p>Aulas particulares</p>
-            </a>
+                <a href="/categoria/diarista" class="categoria-card">
+                    <i class="fas fa-broom categoria-icon"></i>
+                    <h3>Diarista</h3>
+                    <p>Limpeza e organização</p>
+                </a>
+
+                <a href="/categoria/consultor" class="categoria-card">
+                    <i class="fas fa-briefcase categoria-icon"></i>
+                    <h3>Consultor</h3>
+                    <p>Consultoria profissional</p>
+                </a>
+
+                <a href="/categoria/professor" class="categoria-card">
+                    <i class="fas fa-chalkboard-user categoria-icon"></i>
+                    <h3>Professor</h3>
+                    <p>Aulas particulares</p>
+                </a>
+            </div>
+
+            <div class="info-section">
+                <h2>Não encontrou sua profissão?</h2>
+                <p>Se você é um profissional em uma área não listada acima, pode se cadastrar como "Outros" durante o registro. Sua profissão será adicionada à plataforma e você terá sua própria página!</p>
+                <p style="margin-top: 20px;">
+                    <a href="/auth/login">Cadastre-se agora →</a>
+                </p>
+            </div>
         </div>
+    </main>
 
-        <div class="info-section">
-            <h2>Não encontrou sua profissão?</h2>
-            <p>Se você é um profissional em uma área não listada acima, pode se cadastrar como "Outros" durante o registro. Sua profissão será adicionada à plataforma e você terá sua própria página!</p>
-            <p style="margin-top: 20px;">
-                <a href="/auth/login">Cadastre-se agora →</a>
-            </p>
+    <footer class="footer-section">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h4>Sobre Contrataê</h4>
+                    <ul>
+                        <li><a href="/contato">Contato</a></li>
+                        <li><a href="/">Sobre Nós</a></li>
+                        <li><a href="/">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Para Profissionais</h4>
+                    <ul>
+                        <li><a href="/auth/login">Cadastre-se</a></li>
+                        <li><a href="/">Como Funciona</a></li>
+                        <li><a href="/">Suporte</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Para Clientes</h4>
+                    <ul>
+                        <li><a href="/">Buscar Profissionais</a></li>
+                        <li><a href="/">Segurança</a></li>
+                        <li><a href="/">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Redes Sociais</h4>
+                    <ul>
+                        <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
+                        <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
+                        <li><a href="#"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </div>
+        <div class="footer-copyright-bar">
+            <div class="container copyright-flex">
+                <p>&copy; 2026 Contrataê</p>
+                <div class="footer-links"><a href="/">Avaliação</a> | <a href="/contato">Sobre Nós</a> | <a href="/">Termos</a></div>
+            </div>
+        </div>
+    </footer>
+
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({
+              pageLanguage: 'pt', 
+              includedLanguages: 'pt,en', 
+              layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="/js/theme-toggle.js"></script>
+    <script src="/js/index.js"></script>
 </body>
 </html>
