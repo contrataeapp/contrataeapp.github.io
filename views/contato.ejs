@@ -310,7 +310,7 @@
 
                 <div class="contato-form">
                     <h2>Envie uma Mensagem</h2>
-                    <form method="POST" action="/contato">
+                    <form method="POST" action="/api/contato" id="contact-form" onsubmit="handleContactSubmit(event)">
                         <div class="form-group">
                             <label for="nome">Nome Completo *</label>
                             <input type="text" id="nome" name="nome" required placeholder="Seu nome">
@@ -389,6 +389,34 @@
     </footer>
 
     <script type="text/javascript">
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            fetch('/api/contato', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.sucesso) {
+                    alert('Mensagem enviada com sucesso! Entraremos em contato em breve.');
+                    form.reset();
+                } else {
+                    alert('Erro ao enviar mensagem: ' + (result.erro || 'Tente novamente'));
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao enviar mensagem. Tente novamente.');
+            });
+        }
+
         function googleTranslateElementInit() {
           new google.translate.TranslateElement({
               pageLanguage: 'pt', 
