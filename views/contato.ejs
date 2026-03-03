@@ -3,70 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contato - Contrataê</title>
-    <link rel="icon" href="data:,">
+    <title>Contrataê - Contato</title>
+    
     <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        body { background-color: #111 !important; color: #fff !important; }
-        main { min-height: calc(100vh - 200px); background: #111 !important; }
-        .hero-section { background: #1a1a1a; color: white; padding: 60px 20px; text-align: center; border-bottom: 4px solid #ffa500; }
-        .container-content { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
-        .about-text h2 { color: #ffa500 !important; }
-        .about-text p { color: #ccc !important; }
-        .values-section { background: #1a1a1a !important; padding: 60px 20px; border-radius: 16px; margin-bottom: 60px; border: 1px solid #333; }
-        .values-section h2 { color: #ffa500 !important; }
-        .value-card { background: #222 !important; border: 1px solid #333 !important; }
-        .value-card h3 { color: #fff !important; }
-        .value-card p { color: #bbb !important; }
-        .contact-section { background: #1a1a1a !important; color: white; padding: 60px 20px; border-radius: 16px; margin-bottom: 60px; border: 1px solid #333; }
-        .contact-card { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 165, 0, 0.3) !important; }
-        .stat-card { background: #1a1a1a !important; color: #fff !important; border: 1px solid #333; }
-        .stat-label { color: #bbb !important; }
-    </style>
 </head>
-<body class="dark-mode">
+<body>
+
+    <% const bannerEsq = typeof banners !== 'undefined' && banners.find(b => b.posicao === 3); %>
+    <% if (bannerEsq) { %>
+    <div class="banner-lateral banner-esquerda" id="banner-mov">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerEsq.link_destino || '#' %>">
+            <img src="<%= bannerEsq.imagem_url %>" alt="<%= bannerEsq.titulo || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
+    <% const bannerDir = typeof banners !== 'undefined' && banners.find(b => b.posicao === 4); %>
+    <% if (bannerDir) { %>
+    <div class="banner-lateral banner-direita" id="banner-speed">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerDir.link_destino || '#' %>">
+            <img src="<%= bannerDir.imagem_url %>" alt="<%= bannerDir.titulo || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
     <%- include('partials/header') %>
 
     <main>
-        <section class="hero-section">
-            <div class="container">
-                <h1>Conectando Talentos a Oportunidades</h1>
-                <p>O Contrataê nasceu para simplificar a forma como você encontra e contrata profissionais de confiança.</p>
-            </div>
-        </section>
-
-        <div class="container-content">
-            <div class="about-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-bottom: 60px;">
-                <div class="about-text">
-                    <h2>Quem Somos</h2>
-                    <p>Somos uma plataforma dedicada a unir profissionais qualificados e clientes que buscam excelência em serviços. Acreditamos que a tecnologia pode humanizar as relações de trabalho, trazendo transparência e segurança para ambos os lados.</p>
-                    <p>Nossa missão é ser o elo mais forte entre a sua necessidade e a solução ideal, valorizando o trabalho local e impulsionando a economia de serviços.</p>
-                </div>
-                <div class="about-image" style="background: #ffa500; border-radius: 15px; height: 300px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-users" style="font-size: 100px; color: #000;"></i>
-                </div>
-            </div>
-
-            <div class="contact-section">
-                <h2>Fale Conosco</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                    <div class="contact-card" style="padding: 30px; text-align: center; border-radius: 10px;">
-                        <i class="fab fa-whatsapp" style="font-size: 40px; color: #ffa500; margin-bottom: 15px;"></i>
-                        <h3>WhatsApp</h3>
-                        <p>(16) 99648-4492</p>
-                        <a href="https://wa.me/5516996484492" target="_blank" style="color: #ffa500; font-weight: bold;">Chamar agora</a>
+        <div class="container" style="margin-top: 10px; margin-bottom: 40px;">
+            <h2 class="section-title" style="text-align: center;">Entre em Contato</h2>
+            <p style="text-align: center; color: #ccc; margin-bottom: 30px;">Tem dúvidas ou sugestões? Adoraríamos ouvir de você!</p>
+            
+            <div class="materials-alert-wrapper">
+                <a href="#contato-info" class="materials-alert">
+                    <div style="display: flex; align-items: center;">
+                        <i class="fas fa-envelope mat-icon" style="margin-right: 15px;"></i>
+                        <div class="mat-content">
+                            <h4>Informações de Contato</h4>
+                            <p>Clique para ver nossos canais de comunicação</p>
+                        </div>
                     </div>
-                    <div class="contact-card" style="padding: 30px; text-align: center; border-radius: 10px;">
-                        <i class="fas fa-envelope" style="font-size: 40px; color: #ffa500; margin-bottom: 15px;"></i>
+                    <i class="fas fa-chevron-down" style="color: #666; margin-left: 15px;"></i>
+                </a>
+            </div>
+
+            <div class="professionals-grid" id="contato-info">
+                <div class="professional-card">
+                    <div class="card-header-img" style="background: linear-gradient(135deg, #ffa500, #ff8c00); display: flex; align-items: center; justify-content: center;">
+                        <i class="fab fa-whatsapp" style="font-size: 3rem; color: white;"></i>
+                    </div>
+                    <div class="card-body">
+                        <h3>WhatsApp</h3>
+                        <p class="profissao-tag">(16) 99648-4492</p>
+                        <div class="card-actions">
+                            <a href="https://wa.me/5516996484492?text=Olá, gostaria de mais informações sobre o Contrataê!" class="button primary-button" target="_blank">
+                                <i class="fab fa-whatsapp"></i> Chamar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="professional-card">
+                    <div class="card-header-img" style="background: linear-gradient(135deg, #ffa500, #ff8c00); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-envelope" style="font-size: 3rem; color: white;"></i>
+                    </div>
+                    <div class="card-body">
                         <h3>E-mail</h3>
-                        <p>suporte@contrataeapp.com.br</p>
+                        <p class="profissao-tag">suporte@contrataeapp.com.br</p>
+                        <div class="card-actions">
+                            <a href="mailto:suporte@contrataeapp.com.br" class="button primary-button">
+                                <i class="fas fa-envelope"></i> Enviar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="professional-card">
+                    <div class="card-header-img" style="background: linear-gradient(135deg, #ffa500, #ff8c00); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-info-circle" style="font-size: 3rem; color: white;"></i>
+                    </div>
+                    <div class="card-body">
+                        <h3>Sobre Nós</h3>
+                        <p class="profissao-tag">Conheça a história do Contrataê</p>
+                        <div class="card-actions">
+                            <a href="#" class="button primary-button">
+                                <i class="fas fa-arrow-right"></i> Saber Mais
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <nav class="mobile-bottom-nav mobile-only">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="/#busca-rapida" class="nav-item"><i class="fas fa-search"></i><span>Busca</span></a>
+        <button class="nav-item" id="mobile-menu-trigger"><i class="fas fa-bars"></i><span>Menu</span></button>
+        <a href="/auth/login" class="nav-item"><i class="fas fa-user"></i><span>Entrar</span></a>
+    </nav>
+
     <%- include('partials/footer') %>
+
+    <div id="external-link-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Você está saindo do Contrataê</h3>
+            <p id="modal-msg">Você será redirecionado para o site de nosso parceiro.</p>
+            <p class="modal-link-preview" id="modal-link-dest"></p>
+            <div class="modal-buttons">
+                <button id="cancel-link" class="button secondary-button">Cancelar</button>
+                <button id="confirm-link" class="button primary-button">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({pageLanguage: 'pt', includedLanguages: 'pt,en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="/js/theme-toggle.js"></script>
+    <script src="/js/index.js"></script>
+    
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
 </body>
 </html>

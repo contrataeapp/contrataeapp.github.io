@@ -1,12 +1,12 @@
-require('dotenv').config();
-const express = require('express');
-const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
-const session = require('express-session');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const cors = require('cors');
-const helmet = require('helmet');
+require("dotenv").config();
+const express = require("express");
+const path = require("path");
+const { createClient } = require("@supabase/supabase-js");
+const session = require("express-session");
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const cors = require("cors");
+const helmet = require("helmet");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,26 +15,37 @@ const port = process.env.PORT || 3000;
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // MIDDLEWARES
-// Simplificando o Helmet para evitar bloqueios de CSP (Favicon/Google)
 app.use(helmet({
-    contentSecurityPolicy: false, // Desativando CSP temporariamente para garantir funcionalidade
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com", "https://apis.google.com", "https://www.gstatic.com", "https://translate.google.com"],
+            connectSrc: ["'self'", "https://*.supabase.co", "wss://*.supabase.co", "https://accounts.google.com", "https://www.googleapis.com"],
+            imgSrc: ["'self'", "data:", "https:", "https://www.gstatic.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            frameSrc: ["'self'", "https://accounts.google.com", "https://contrataeapp.onrender.com"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: [],
+        },
+    },
     crossOriginEmbedderPolicy: false
 }));
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, "public")));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // CONFIGURAÇÃO DE SESSÃO
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'contratae_secret_key_2026',
+    secret: process.env.SESSION_SECRET || "contratae_secret_key_2026",
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === "production",
         maxAge: 1000 * 60 * 60 * 24 // 24 horas
     }
 }));
@@ -56,24 +67,24 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         try {
             const email = profile.emails[0].value;
             const { data: user, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('email', email)
+                .from("users")
+                .select("*")
+                .eq("email", email)
                 .single();
 
-            if (error && error.code !== 'PGRST116') throw error;
+            if (error && error.code !== "PGRST116") throw error;
 
             if (user) {
                 return done(null, user);
             } else {
                 const { data: newUser, error: createError } = await supabase
-                    .from('users')
+                    .from("users")
                     .insert([{
                         email: email,
                         full_name: profile.displayName,
                         google_id: profile.id,
                         avatar_url: profile.photos[0].value,
-                        user_type: 'client'
+                        user_type: "client"
                     }])
                     .select()
                     .single();
@@ -91,14 +102,14 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 async function obterBannersAtivos() {
     try {
         const { data, error } = await supabase
-            .from('banners')
-            .select('*')
-            .eq('ativo', true)
-            .order('ordem', { ascending: true });
+            .from("banners")
+            .select("*")
+            .eq("ativo", true)
+            .order("ordem", { ascending: true });
         if (error) throw error;
         return data || [];
     } catch (err) {
-        console.error('Erro ao obter banners:', err);
+        console.error("Erro ao obter banners:", err);
         return [];
     }
 }
@@ -108,125 +119,125 @@ async function obterBannersAtivos() {
 // ============================================
 const checkAdmin = (req, res, next) => {
     if (req.session.adminLogado) return next();
-    res.redirect('/login-adm'); 
+    res.redirect("/login-adm"); 
 };
 
-app.get('/login-adm', (req, res) => {
-    if (req.session.adminLogado) return res.redirect('/admin');
-    res.render('login_admin', { erro: null, currentPage: 'admin' });
+app.get("/login-adm", (req, res) => {
+    if (req.session.adminLogado) return res.redirect("/admin");
+    res.render("login_admin", { erro: null, currentPage: "admin" });
 });
 
-app.post('/login-adm', (req, res) => {
+app.post("/login-adm", (req, res) => {
     const { usuario, senha } = req.body;
-    const adminUser = process.env.ADMIN_USER || 'admin';
-    const adminPass = process.env.ADMIN_PASS || '#Relaxsempre153143';
+    const adminUser = process.env.ADMIN_USER || "admin";
+    const adminPass = process.env.ADMIN_PASS || "#Relaxsempre153143";
 
     if (usuario === adminUser && senha === adminPass) {
         req.session.adminLogado = true;
-        res.redirect('/admin');
+        res.redirect("/admin");
     } else {
-        res.render('login_admin', { erro: 'Usuário ou senha inválidos!', currentPage: 'admin' });
+        res.render("login_admin", { erro: "Usuário ou senha inválidos!", currentPage: "admin" });
     }
 });
 
-app.get('/logout-adm', (req, res) => {
+app.get("/logout-adm", (req, res) => {
     req.session.adminLogado = false;
-    res.redirect('/login-adm');
+    res.redirect("/login-adm");
 });
 
 app.get("/admin", checkAdmin, async (req, res) => {
     try {
         const { categoria, status, busca, ordenar } = req.query;
         let query = supabase.from("profissionais").select("*");
-        if (categoria) query = query.eq('profissao', categoria);
-        if (status) query = query.eq('status', status);
+        if (categoria) query = query.eq("profissao", categoria);
+        if (status) query = query.eq("status", status);
         
         const { data: profissionais, error } = await query.order("data_cadastro", { ascending: false });
         if (error) throw error;
 
         let filtrados = profissionais || [];
-        if (!status) filtrados = filtrados.filter(p => p.status !== 'EXCLUIDO');
+        if (!status) filtrados = filtrados.filter(p => p.status !== "EXCLUIDO");
         if (busca) filtrados = filtrados.filter(p => p.nome.toLowerCase().includes(busca.toLowerCase()) || p.profissao.toLowerCase().includes(busca.toLowerCase()));
 
         const totais = {
-            ativos: profissionais.filter(p => p.status === 'ATIVO').length,
-            pendentes: profissionais.filter(p => p.status === 'PENDENTE').length,
-            pausados: profissionais.filter(p => p.status === 'PAUSADO').length,
+            ativos: profissionais.filter(p => p.status === "ATIVO").length,
+            pendentes: profissionais.filter(p => p.status === "PENDENTE").length,
+            pausados: profissionais.filter(p => p.status === "PAUSADO").length,
             receitaTotal: profissionais.reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
             receitaMes: 0 
         };
 
-        res.render("admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar }, currentPage: 'admin', adminLogado: true });
+        res.render("admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar }, currentPage: "admin", adminLogado: req.session.adminLogado });
     } catch (err) { 
         console.error(err);
-        res.render("admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {}, currentPage: 'admin', adminLogado: true }); 
+        res.render("admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {}, currentPage: "admin", adminLogado: true }); 
     }
 });
 
 // ============================================
 // ROTAS PÚBLICAS
 // ============================================
-app.get('/', async (req, res) => {
+app.get("/", async (req, res) => {
     try {
         const banners = await obterBannersAtivos();
-        res.render('index', { banners, currentPage: 'index', adminLogado: req.session.adminLogado });
+        res.render("index", { banners, currentPage: "index", adminLogado: req.session.adminLogado });
     } catch (err) {
-        res.render('index', { banners: [], currentPage: 'index', adminLogado: req.session.adminLogado });
+        res.render("index", { banners: [], currentPage: "index", adminLogado: req.session.adminLogado });
     }
 });
 
-app.get('/contato', async (req, res) => {
+app.get("/contato", async (req, res) => {
     try {
         const banners = await obterBannersAtivos();
-        res.render('contato', { banners, currentPage: 'contato', adminLogado: req.session.adminLogado });
+        res.render("contato", { banners, currentPage: "contato", adminLogado: req.session.adminLogado });
     } catch (err) {
-        res.render('contato', { banners: [], currentPage: 'contato', adminLogado: req.session.adminLogado });
+        res.render("contato", { banners: [], currentPage: "contato", adminLogado: req.session.adminLogado });
     }
 });
 
-app.get('/outros', async (req, res) => {
+app.get("/outros", async (req, res) => {
     try {
-        const { data: categorias, error } = await supabase.from('categories').select('*').order('name');
+        const { data: categorias, error } = await supabase.from("categories").select("*").order("name");
         const banners = await obterBannersAtivos();
-        res.render('outros', { categorias: categorias || [], banners, currentPage: 'outros', adminLogado: req.session.adminLogado });
+        res.render("outros", { categorias: categorias || [], banners, currentPage: "outros", adminLogado: req.session.adminLogado });
     } catch (err) {
-        res.render('outros', { categorias: [], banners: [], currentPage: 'outros', adminLogado: req.session.adminLogado });
+        res.render("outros", { categorias: [], banners: [], currentPage: "outros", adminLogado: req.session.adminLogado });
     }
 });
 
 // ROTAS DE AUTENTICAÇÃO USUÁRIO
-app.get('/auth/login', (req, res) => {
-    res.render('auth/login', { currentPage: 'login', erro: null, adminLogado: req.session.adminLogado });
+app.get("/auth/login", (req, res) => {
+    res.render("auth/login", { currentPage: "login", erro: null, adminLogado: req.session.adminLogado });
 });
 
-app.get('/auth/cadastro', (req, res) => {
-    res.render('auth/cadastro', { currentPage: 'cadastro', erro: null, adminLogado: req.session.adminLogado });
+app.get("/auth/cadastro", (req, res) => {
+    res.render("auth/cadastro", { currentPage: "cadastro", erro: null, adminLogado: req.session.adminLogado });
 });
 
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-app.get('/auth/google/callback', 
-    passport.authenticate('google', { failureRedirect: '/auth/login' }),
+app.get("/auth/google/callback", 
+    passport.authenticate("google", { failureRedirect: "/auth/login" }),
     (req, res) => {
         req.session.userId = req.user.id;
         req.session.userType = req.user.user_type;
         req.session.fullName = req.user.full_name;
-        res.redirect('/');
+        res.redirect("/");
     }
 );
 
 // ROTAS DE CATEGORIAS FIXAS
 const categoriasFixas = [
-    { rota: 'pintores', profissao: 'Pintor' },
-    { rota: 'pedreiros', profissao: 'Pedreiro' },
-    { rota: 'eletricistas', profissao: 'Eletricista' },
-    { rota: 'encanadores', profissao: 'Encanador' }
+    { rota: "pintores", profissao: "Pintor" },
+    { rota: "pedreiros", profissao: "Pedreiro" },
+    { rota: "eletricistas", profissao: "Eletricista" },
+    { rota: "encanadores", profissao: "Encanador" }
 ];
 
 categoriasFixas.forEach(({ rota, profissao }) => {
     app.get(`/${rota}`, async (req, res) => {
         try {
-            const { data, error } = await supabase.from('professionals').select('*, users(*)').eq('status', 'active');
+            const { data, error } = await supabase.from("professionals").select("*, users(*)").eq("status", "active");
             const banners = await obterBannersAtivos();
             res.render(rota, { [rota]: data || [], banners, currentPage: rota, adminLogado: req.session.adminLogado });
         } catch (err) { 
@@ -236,36 +247,36 @@ categoriasFixas.forEach(({ rota, profissao }) => {
 });
 
 // ROTA DINÂMICA PARA CATEGORIAS
-app.get('/categoria/:slug', async (req, res) => {
+app.get("/categoria/:slug", async (req, res) => {
     try {
         const { slug } = req.params;
-        const { data: categoriaData } = await supabase.from('categories').select('*').eq('slug', slug).single();
+        const { data: categoriaData } = await supabase.from("categories").select("*").eq("slug", slug).single();
         
         if (!categoriaData) {
-            return res.status(404).render('categoria-vazia', { banners: [], currentPage: 'outros', adminLogado: req.session.adminLogado });
+            return res.status(404).render("categoria-vazia", { banners: [], currentPage: "outros", adminLogado: req.session.adminLogado });
         }
 
         const { data: profissionais } = await supabase
-            .from('professionals')
-            .select('*, users(*)')
-            .eq('category_id', categoriaData.id)
-            .eq('status', 'active');
+            .from("professionals")
+            .select("*, users(*)")
+            .eq("category_id", categoriaData.id)
+            .eq("status", "active");
 
         const banners = await obterBannersAtivos();
 
         if (!profissionais || profissionais.length === 0) {
-            return res.render('categoria-vazia', { categoria: categoriaData, banners, currentPage: 'outros', adminLogado: req.session.adminLogado });
+            return res.render("categoria-vazia", { categoria: categoriaData, banners, currentPage: "outros", adminLogado: req.session.adminLogado });
         }
 
-        res.render('categoria-dinamica', { categoria: categoriaData, profissionais, banners, currentPage: 'outros', adminLogado: req.session.adminLogado });
+        res.render("categoria-dinamica", { categoria: categoriaData, profissionais, banners, currentPage: "outros", adminLogado: req.session.adminLogado });
     } catch (err) {
-        res.status(500).send('Erro interno do servidor');
+        res.status(500).send("Erro interno do servidor");
     }
 });
 
 // DASHBOARDS
-const dashboardRoutes = require('./routes/dashboards');
-app.use('/', dashboardRoutes);
+const dashboardRoutes = require("./routes/dashboards");
+app.use("/", dashboardRoutes);
 
 app.listen(port, () => {
     console.log(`🚀 Contrataê v2.2.2 rodando em http://localhost:${port}`);
