@@ -274,6 +274,41 @@ app.get("/categoria/:slug", async (req, res) => {
     }
 });
 
+// ROTA DE CONTATO
+app.post("/api/contato", async (req, res) => {
+    try {
+        const { nome, email, assunto, mensagem } = req.body;
+        if (!nome || !email || !assunto || !mensagem) {
+            return res.status(400).json({ erro: "Campos obrigatórios não preenchidos" });
+        }
+
+        // Salvar no Supabase para o Admin ver
+        const { error: dbError } = await supabase
+            .from("contatos")
+            .insert([{ nome, email, assunto, mensagem, data_envio: new Date() }]);
+
+        if (dbError) console.error("Erro ao salvar contato no banco:", dbError);
+
+        // Enviar por E-mail
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: { user: process.env.EMAIL_USER || 'seu-email@gmail.com', pass: process.env.EMAIL_PASS || 'sua-senha-app' }
+        });
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER || "noreply@contratae.com",
+            to: "time.contratae@gmail.com",
+            subject: `Novo contato: ${assunto}`,
+            html: `<h2>Novo Contato</h2><p><strong>Nome:</strong> ${nome}</p><p><strong>E-mail:</strong> ${email}</p><p><strong>Assunto:</strong> ${assunto}</p><p><strong>Mensagem:</strong></p><p>${mensagem}</p>`
+        }).catch(err => console.error("Erro ao enviar e-mail:", err));
+
+        res.json({ sucesso: true });
+    } catch (err) {
+        console.error("Erro ao processar contato:", err);
+        res.status(500).json({ erro: "Erro ao enviar mensagem. Tente novamente." });
+    }
+});
+
 // DASHBOARDS
 const dashboardRoutes = require("./routes/dashboards");
 app.use("/", dashboardRoutes);
