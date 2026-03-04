@@ -15,21 +15,9 @@ const port = process.env.PORT || 3000;
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // MIDDLEWARES
-// Configuração de CSP mais permissiva para evitar bloqueios de recursos essenciais
+// Desativando CSP restritivo para resolver erros de bloqueio no Render
 app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'", "https:"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://accounts.google.com", "https://apis.google.com", "https://www.gstatic.com", "https://cdnjs.cloudflare.com"],
-            connectSrc: ["'self'", "https://*.supabase.co", "wss://*.supabase.co", "https://accounts.google.com", "https://www.googleapis.com"],
-            imgSrc: ["'self'", "data:", "https:", "https://*.googleusercontent.com", "https://www.gstatic.com", "https://cdnjs.cloudflare.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
-            fontSrc: ["'self'", "data:", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
-            frameSrc: ["'self'", "https://accounts.google.com", "https://contrataeapp.onrender.com"],
-            objectSrc: ["'none'"],
-            upgradeInsecureRequests: [],
-        },
-    },
+    contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false
 }));
 
