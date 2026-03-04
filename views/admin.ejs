@@ -22,6 +22,7 @@
             <button class="nav-item" onclick="toggleSection('profissionais')"><i class="fas fa-tools"></i><span>Profissionais</span></button>
             <button class="nav-item" onclick="toggleSection('banners')"><i class="fas fa-ad"></i><span>Banners</span></button>
             <button class="nav-item" onclick="toggleSection('comentarios')"><i class="fas fa-star"></i><span>Moderação</span></button>
+            <button class="nav-item" onclick="toggleSection('mensagens')"><i class="fas fa-envelope"></i><span>Mensagens</span></button>
             <button class="nav-item" onclick="toggleSection('relatorios')"><i class="fas fa-file-pdf"></i><span>Relatórios</span></button>
         </nav>
         
@@ -33,6 +34,7 @@
                     <li><a href="#profissionais"><i class="fas fa-tools"></i> Profissionais</a></li>
                     <li><a href="#banners"><i class="fas fa-ad"></i> Banners</a></li>
                     <li><a href="#comentarios"><i class="fas fa-star"></i> Moderação</a></li>
+                    <li><a href="#mensagens"><i class="fas fa-envelope"></i> Mensagens</a></li>
                     <li><a href="#relatorios"><i class="fas fa-file-pdf"></i> Relatórios</a></li>
                     <li><a href="/logout-adm" onclick="logout()"><i class="fas fa-power-off"></i> Sair</a></li>
                 </ul>
@@ -298,6 +300,46 @@
                             <i class="fas fa-file-pdf"></i> Gerar PDF
                         </button>
                     </div>
+                </div>
+            </section>
+
+            <section class="admin-section" id="mensagens">
+                <div class="section-header">
+                    <h2>Mensagens de Contato</h2>
+                    <p>Mensagens enviadas através do formulário de contato do site.</p>
+                </div>
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Assunto</th>
+                                <th>Mensagem</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-mensagens">
+                            <% if (typeof mensagens !== 'undefined' && mensagens.length > 0) { %>
+                                <% mensagens.forEach(msg => { %>
+                                    <tr>
+                                        <td><%= new Date(msg.data_envio).toLocaleDateString('pt-BR') %></td>
+                                        <td><%= msg.nome %></td>
+                                        <td><%= msg.email %></td>
+                                        <td><%= msg.assunto %></td>
+                                        <td title="<%= msg.mensagem %>"><%= msg.mensagem.substring(0, 30) %>...</td>
+                                        <td>
+                                            <button class="btn-action view" onclick="verMensagem('<%= msg.id %>')"><i class="fas fa-eye"></i></button>
+                                            <button class="btn-action delete" onclick="excluirMensagem('<%= msg.id %>')"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr><td colspan="6" style="text-align: center;">Nenhuma mensagem recebida.</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </div>

@@ -3,462 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Contrataê</title>
-    <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="/css/style_laranja_preto.css">
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/footer.css">
+    <title>Contrataê - Cadastro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        main {
-            min-height: calc(100vh - 200px);
-            background: linear-gradient(135deg, #f8f9fa 0%, #f0f0f0 100%);
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #002147 0%, #1a4d7a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding-bottom: 80px; }
+        
+        .auth-container { width: 100%; max-width: 450px; padding: 20px; }
+        .auth-card { background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); padding: 40px; }
+        
+        .auth-header { text-align: center; margin-bottom: 40px; }
+        .auth-header h1 { font-size: 28px; color: #002147; margin-bottom: 10px; }
+        .auth-header p { color: #6c757d; font-size: 14px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #002147; font-size: 14px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: 0.3s; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #ffa500; box-shadow: 0 0 0 3px rgba(255,165,0,0.1); }
+        
+        .password-wrapper { position: relative; }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #6c757d; }
+        
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 14px; text-align: center; text-decoration: none; display: block; }
+        .btn-primary { background: #ffa500; color: white; margin-bottom: 15px; }
+        .btn-primary:hover { background: #ff9500; }
+        
+        .divider { display: flex; align-items: center; margin: 30px 0; }
+        .divider span { background: #e2e8f0; flex: 1; height: 1px; }
+        .divider p { margin: 0 15px; color: #6c757d; font-size: 14px; }
+        
+        .btn-google { background: white; color: #002147; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-google:hover { border-color: #ffa500; background: #f8f9fa; }
+        
+        .auth-footer { text-align: center; margin-top: 25px; font-size: 14px; color: #6c757d; }
+        .auth-footer a { color: #ffa500; text-decoration: none; font-weight: 600; }
+        .auth-footer a:hover { text-decoration: underline; }
+        
+        .error-message { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; border: 1px solid #f5c6cb; }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2c2c2c;
+            border-top: 1px solid #444;
             display: flex;
+            justify-content: space-around;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
+            height: 70px;
+            z-index: 1000;
         }
 
-        .auth-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .auth-header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-        }
-
-        .auth-header h1 {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .auth-header p {
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .auth-body {
-            padding: 40px;
-        }
-
-        .user-type-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .user-type-option {
-            position: relative;
-        }
-
-        .user-type-option input[type="radio"] {
-            display: none;
-        }
-
-        .user-type-label {
+        .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .user-type-option input[type="radio"]:checked + .user-type-label {
-            border-color: #ffa500;
-            background: #fffaf0;
-        }
-
-        .user-type-icon {
-            font-size: 2.5rem;
-            color: #ffa500;
-            margin-bottom: 10px;
-        }
-
-        .user-type-label:hover {
-            border-color: #ffa500;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #1a1a1a;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #ffa500;
-            box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.1);
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 5px;
-            transition: color 0.3s ease;
-        }
-
-        .toggle-password:hover {
-            color: #ffa500;
-        }
-
-        .terms-checkbox {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .terms-checkbox input[type="checkbox"] {
-            margin-top: 4px;
-            cursor: pointer;
-        }
-
-        .terms-checkbox a {
-            color: #ffa500;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .terms-checkbox a:hover {
-            text-decoration: underline;
-        }
-
-        .btn-cadastro {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
-
-        .btn-cadastro:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.3);
-        }
-
-        .btn-cadastro:active {
-            transform: translateY(0);
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 30px 0;
-            color: #999;
-            font-size: 0.9rem;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
             flex: 1;
-            height: 1px;
-            background: #e0e0e0;
-        }
-
-        .divider span {
-            margin: 0 10px;
-        }
-
-        .btn-google {
-            width: 100%;
-            padding: 12px;
-            background: white;
-            color: #1a1a1a;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .btn-google:hover {
-            border-color: #ffa500;
-            background: #fffaf0;
-        }
-
-        .btn-google i {
-            font-size: 1.2rem;
-        }
-
-        .auth-footer {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            color: #666;
-            font-size: 0.95rem;
-        }
-
-        .auth-footer a {
-            color: #ffa500;
+            height: 100%;
+            color: #999;
             text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
+            font-size: 12px;
+            transition: 0.3s;
+            gap: 5px;
         }
 
-        .auth-footer a:hover {
-            color: #ff8c00;
+        .nav-item:hover,
+        .nav-item.active {
+            color: #ffa500;
         }
 
-        .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #c33;
-            font-size: 0.9rem;
+        .nav-item i {
+            font-size: 24px;
         }
-
+        
         @media (max-width: 480px) {
-            .auth-container {
-                border-radius: 12px;
-            }
-
-            .auth-header {
-                padding: 30px 20px;
-            }
-
-            .auth-header h1 {
-                font-size: 1.5rem;
-            }
-
-            .auth-body {
-                padding: 30px 20px;
-            }
-
-            .user-type-selector {
-                grid-template-columns: 1fr;
-            }
+            .auth-card { padding: 25px; }
+            .auth-header h1 { font-size: 24px; }
         }
     </style>
 </head>
 <body>
-    <%- include('../partials/header') %>
+    <nav class="bottom-nav">
+        <a href="/" class="nav-item" title="Inicio">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="/" class="nav-item" title="Busca">
+            <i class="fas fa-search"></i>
+            <span>Busca</span>
+        </a>
+        <a href="/outros" class="nav-item" title="Menu">
+            <i class="fas fa-bars"></i>
+            <span>Menu</span>
+        </a>
+        <a href="/auth/login" class="nav-item active" title="Entrar">
+            <i class="fas fa-user"></i>
+            <span>Entrar</span>
+        </a>
+    </nav>
 
-    <main>
-        <div class="auth-container">
+    <div class="auth-container">
+        <div class="auth-card">
             <div class="auth-header">
-                <h1>Crie sua Conta</h1>
-                <p>Junte-se à comunidade Contrataê</p>
+                <h1>Contrataê</h1>
+                <p>Crie sua conta gratuitamente</p>
             </div>
-
-            <div class="auth-body">
-                <% if (typeof erro !== 'undefined' && erro) { %>
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i> <%= erro %>
-                    </div>
-                <% } %>
-
-                <form method="POST" action="/auth/cadastro" id="cadastroForm">
-                    <label style="display: block; margin-bottom: 15px; color: #1a1a1a; font-weight: 600;">Você é:</label>
-                    
-                    <div class="user-type-selector">
-                        <div class="user-type-option">
-                            <input type="radio" id="client" name="user_type" value="client" checked>
-                            <label for="client" class="user-type-label">
-                                <i class="fas fa-user user-type-icon"></i>
-                                <span>Cliente</span>
-                                <small style="font-size: 0.8rem; color: #999; margin-top: 5px;">Buscar profissionais</small>
-                            </label>
-                        </div>
-
-                        <div class="user-type-option">
-                            <input type="radio" id="professional" name="user_type" value="professional">
-                            <label for="professional" class="user-type-label">
-                                <i class="fas fa-briefcase user-type-icon"></i>
-                                <span>Profissional</span>
-                                <small style="font-size: 0.8rem; color: #999; margin-top: 5px;">Oferecer serviços</small>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="full_name">Nome Completo</label>
-                        <input type="text" id="full_name" name="full_name" required placeholder="Seu nome completo">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">E-mail</label>
-                        <input type="email" id="email" name="email" required placeholder="seu@email.com">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone_number">Telefone (WhatsApp)</label>
-                        <input type="tel" id="phone_number" name="phone_number" placeholder="(16) 99999-9999">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">Senha</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="password" name="password" required placeholder="••••••••">
-                            <button type="button" class="toggle-password" onclick="togglePassword('password')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password_confirm">Confirmar Senha</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="password_confirm" name="password_confirm" required placeholder="••••••••">
-                            <button type="button" class="toggle-password" onclick="togglePassword('password_confirm')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="terms-checkbox">
-                        <input type="checkbox" id="terms" name="terms" required>
-                        <label for="terms">
-                            Concordo com os <a href="/termos">Termos de Uso</a> e <a href="/privacidade">Política de Privacidade</a>
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn-cadastro">
-                        <i class="fas fa-user-plus"></i> Criar Conta
-                    </button>
-                </form>
-
-                <div class="divider">
-                    <span>ou</span>
+            
+            <% if (erro) { %>
+                <div class="error-message"><%= erro %></div>
+            <% } %>
+            
+            <form method="POST" action="/auth/registro">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" name="full_name" required placeholder="Seu nome">
                 </div>
-
-                <a href="/auth/google" class="btn-google">
-                    <i class="fab fa-google"></i> Cadastrar com Google
-                </a>
-
-                <div class="auth-footer">
-                    Já tem conta? <a href="/auth/login">Faça login aqui</a>
+                
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" name="email" required placeholder="seu@email.com">
                 </div>
+                
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="tel" name="phone_number" placeholder="(16) 99999-9999">
+                </div>
+                
+                <div class="form-group">
+                    <label>Tipo de Conta</label>
+                    <select name="user_type" required>
+                        <option value="">Selecione...</option>
+                        <option value="client">Cliente (Contratar Serviços)</option>
+                        <option value="professional">Profissional (Prestar Serviços)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Senha</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password-registro" name="password" required placeholder="Crie uma senha">
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('password-registro')"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Confirmar Senha</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password-confirm" name="password_confirm" required placeholder="Confirme a senha">
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('password-confirm')"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Criar Conta</button>
+            </form>
+            
+            <div class="divider">
+                <span></span>
+                <p>ou</p>
+                <span></span>
+            </div>
+            
+            <a href="/auth/google" class="btn btn-google">
+                <i class="fab fa-google"></i> Cadastrar com Google
+            </a>
+            
+            <div class="auth-footer">
+                <p>Já tem uma conta? <a href="/auth/login">Faça login</a></p>
             </div>
         </div>
-    </main>
-
-    <%- include('../partials/footer') %>
-
+    </div>
+    
     <script>
-        function togglePassword(fieldId) {
-            const passwordInput = document.getElementById(fieldId);
-            const toggleBtn = event.target.closest('.toggle-password').querySelector('i');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.classList.remove('fa-eye');
-                toggleBtn.classList.add('fa-eye-slash');
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = event.target;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
-                passwordInput.type = 'password';
-                toggleBtn.classList.remove('fa-eye-slash');
-                toggleBtn.classList.add('fa-eye');
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         }
-
-        document.getElementById('cadastroForm').addEventListener('submit', function(e) {
-            const fullName = document.getElementById('full_name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const passwordConfirm = document.getElementById('password_confirm').value;
-            const terms = document.getElementById('terms').checked;
-
-            if (!fullName || !email || !password || !passwordConfirm) {
-                e.preventDefault();
-                alert('Por favor, preencha todos os campos obrigatórios');
-                return false;
-            }
-
-            if (!email.includes('@')) {
-                e.preventDefault();
-                alert('Por favor, insira um e-mail válido');
-                return false;
-            }
-
-            if (password.length < 6) {
-                e.preventDefault();
-                alert('A senha deve ter no mínimo 6 caracteres');
-                return false;
-            }
-
-            if (password !== passwordConfirm) {
-                e.preventDefault();
-                alert('As senhas não conferem');
-                return false;
-            }
-
-            if (!terms) {
-                e.preventDefault();
-                alert('Você precisa concordar com os Termos de Uso');
-                return false;
-            }
-        });
     </script>
-
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-          new google.translate.TranslateElement({
-              pageLanguage: 'pt', 
-              includedLanguages: 'pt,en', 
-              layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-            }, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script src="/js/theme-toggle.js"></script>
 </body>
 </html>

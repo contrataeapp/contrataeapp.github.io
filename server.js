@@ -19,9 +19,9 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com", "https://apis.google.com", "https://www.gstatic.com", "https://translate.google.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com", "https://apis.google.com", "https://www.gstatic.com", "https://translate.google.com", "https://cdnjs.cloudflare.com"],
             connectSrc: ["'self'", "https://*.supabase.co", "wss://*.supabase.co", "https://accounts.google.com", "https://www.googleapis.com"],
-            imgSrc: ["'self'", "data:", "https:", "https://www.gstatic.com", "https://cdnjs.cloudflare.com"],
+            imgSrc: ["'self'", "data:", "https:", "https://www.gstatic.com", "https://cdnjs.cloudflare.com", "https://*.googleusercontent.com"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
             frameSrc: ["'self'", "https://accounts.google.com", "https://contrataeapp.onrender.com"],
@@ -75,8 +75,13 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             if (error && error.code !== "PGRST116") throw error;
 
             if (user) {
+                // Atualizar google_id se necessário
+                if (!user.google_id) {
+                    await supabase.from("users").update({ google_id: profile.id, avatar_url: profile.photos[0].value }).eq("id", user.id);
+                }
                 return done(null, user);
             } else {
+                // Criar novo usuário
                 const { data: newUser, error: createError } = await supabase
                     .from("users")
                     .insert([{
@@ -84,7 +89,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                         full_name: profile.displayName,
                         google_id: profile.id,
                         avatar_url: profile.photos[0].value,
-                        user_type: "client"
+                        user_type: "client" // Padrão inicial
                     }])
                     .select()
                     .single();
@@ -134,7 +139,13 @@ app.post("/login-adm", (req, res) => {
 
     if (usuario === adminUser && senha === adminPass) {
         req.session.adminLogado = true;
-        res.redirect("/admin");
+        req.session.save((err) => {
+            if (err) {
+                console.error("Erro ao salvar sessão admin:", err);
+                return res.render("login_admin", { erro: "Erro interno ao processar login.", currentPage: "admin" });
+            }
+            res.redirect("/admin");
+        });
     } else {
         res.render("login_admin", { erro: "Usuário ou senha inválidos!", currentPage: "admin" });
     }
@@ -148,29 +159,59 @@ app.get("/logout-adm", (req, res) => {
 app.get("/admin", checkAdmin, async (req, res) => {
     try {
         const { categoria, status, busca, ordenar } = req.query;
-        let query = supabase.from("profissionais").select("*");
-        if (categoria) query = query.eq("profissao", categoria);
-        if (status) query = query.eq("status", status);
+        // Sincronizado com a nova tabela 'professionals' e fazendo join com 'users'
+        let query = supabase.from("professionals").select("*, users(*), categories(*)");
         
-        const { data: profissionais, error } = await query.order("data_cadastro", { ascending: false });
+        const { data: profissionaisRaw, error } = await query.order("created_at", { ascending: false });
         if (error) throw error;
 
-        let filtrados = profissionais || [];
-        if (!status) filtrados = filtrados.filter(p => p.status !== "EXCLUIDO");
-        if (busca) filtrados = filtrados.filter(p => p.nome.toLowerCase().includes(busca.toLowerCase()) || p.profissao.toLowerCase().includes(busca.toLowerCase()));
+        // Mapear para o formato esperado pelo admin.ejs (compatibilidade)
+        let profissionais = (profissionaisRaw || []).map(p => ({
+            id: p.id,
+            nome: p.users ? p.users.full_name : "N/A",
+            email: p.users ? p.users.email : "N/A",
+            foto: p.photo_url || p.users?.avatar_url,
+            profissao: p.categories ? p.categories.name : "N/A",
+            status: p.status ? p.status.toUpperCase() : "PENDENTE",
+            valor_pago: parseFloat(p.valor_pago) || 0,
+            data_vencimento: p.data_vencimento
+        }));
+
+        if (categoria) profissionais = profissionais.filter(p => p.profissao === categoria);
+        if (status) profissionais = profissionais.filter(p => p.status === status);
+        if (busca) {
+            const termo = busca.toLowerCase();
+            profissionais = profissionais.filter(p => 
+                p.nome.toLowerCase().includes(termo) || 
+                p.profissao.toLowerCase().includes(termo) ||
+                p.email.toLowerCase().includes(termo)
+            );
+        }
 
         const totais = {
             ativos: profissionais.filter(p => p.status === "ATIVO").length,
             pendentes: profissionais.filter(p => p.status === "PENDENTE").length,
             pausados: profissionais.filter(p => p.status === "PAUSADO").length,
-            receitaTotal: profissionais.reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
+            receitaTotal: profissionais.reduce((acc, p) => acc + p.valor_pago, 0),
             receitaMes: 0 
         };
 
-        res.render("admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar }, currentPage: "admin", adminLogado: req.session.adminLogado });
+        res.render("admin", { 
+            profissionais, 
+            totais, 
+            filtroAtivo: { categoria, status, busca, ordenar }, 
+            currentPage: "admin", 
+            adminLogado: req.session.adminLogado 
+        });
     } catch (err) { 
-        console.error(err);
-        res.render("admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {}, currentPage: "admin", adminLogado: true }); 
+        console.error("Erro no Admin:", err);
+        res.render("admin", { 
+            profissionais: [], 
+            totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, 
+            filtroAtivo: {}, 
+            currentPage: "admin", 
+            adminLogado: true 
+        }); 
     }
 });
 

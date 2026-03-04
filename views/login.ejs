@@ -157,9 +157,9 @@
                     <span></span>
                 </div>
                 
-                <button class="btn btn-google" onclick="loginComGoogle()">
+                <a href="/auth/google" class="btn btn-google" style="text-decoration: none;">
                     <i class="fab fa-google"></i> Entrar com Google
-                </button>
+                </a>
                 
                 <div class="auth-footer">
                     <p><a href="/esqueci-senha">Esqueceu a senha?</a></p>
@@ -218,9 +218,9 @@
                     <span></span>
                 </div>
                 
-                <button class="btn btn-google" onclick="registroComGoogle()">
+                <a href="/auth/google" class="btn btn-google" style="text-decoration: none;">
                     <i class="fab fa-google"></i> Cadastrar com Google
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -248,11 +248,19 @@
         }
         
         function loginComGoogle() {
-            window.location.href = '/auth/google';
+            // Redirecionar para o Google OAuth
+            const clientId = '897118054266-4ca24s249i84r095ns925g02114no0qq.apps.googleusercontent.com';
+            const redirectUri = encodeURIComponent(window.location.origin + '/auth/google/callback');
+            const scope = encodeURIComponent('openid email profile');
+            const responseType = 'code';
+            const accessType = 'offline';
+            
+            window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&access_type=${accessType}`;
         }
         
         function registroComGoogle() {
-            window.location.href = '/auth/google?signup=true';
+            // Mesmo fluxo do login, o backend detectará se é novo usuário
+            loginComGoogle();
         }
     </script>
 </body>

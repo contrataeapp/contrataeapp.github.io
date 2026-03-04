@@ -1,62 +1,64 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login ADM - Contrataê</title>
+    <title>Contrataê - Login Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        :root { --primary: #002147; --accent: #ffa500; --bg: #f0f2f5; }
-        body { 
-            margin: 0; 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: var(--bg); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-        }
-        .login-card { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            width: 90%; 
-            max-width: 400px; 
-            text-align: center; 
-        }
-        .login-card h1 { color: var(--primary); margin-bottom: 5px; font-size: 24px;}
-        .login-card p { color: #666; margin-bottom: 30px; font-size: 14px; }
-        .form-group { text-align: left; margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary); font-size: 14px;}
-        .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; font-size: 15px; background: #f8f9fa; transition: 0.3s;}
-        .form-group input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(255,165,0,0.1); }
-        .btn-login { background: var(--accent); color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px;}
-        .btn-login:hover { background: #e69500; }
-        .erro { background: rgba(220,53,69,0.1); color: #dc3545; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: bold; border: 1px solid #f5c6cb;}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #002147; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        
+        .auth-container { width: 100%; max-width: 400px; padding: 20px; }
+        .auth-card { background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); padding: 40px; }
+        
+        .auth-header { text-align: center; margin-bottom: 30px; }
+        .auth-header h1 { font-size: 24px; color: #002147; margin-bottom: 10px; }
+        .auth-header i { font-size: 40px; color: #ffa500; margin-bottom: 15px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #002147; font-size: 14px; }
+        .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: 0.3s; }
+        .form-group input:focus { outline: none; border-color: #ffa500; box-shadow: 0 0 0 3px rgba(255,165,0,0.1); }
+        
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 14px; background: #ffa500; color: white; }
+        .btn:hover { background: #ff9500; }
+        
+        .error-message { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; border: 1px solid #f5c6cb; text-align: center; }
+        
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #6c757d; text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: #ffa500; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <i class="fas fa-user-shield" style="font-size: 45px; color: var(--accent); margin-bottom: 15px;"></i>
-        <h1>Gestão Contrataê</h1>
-        <p>Acesso restrito ao administrador</p>
-        
-        <% if (typeof erro !== 'undefined' && erro) { %>
-            <div class="erro"><i class="fas fa-exclamation-triangle"></i> <%= erro %></div>
-        <% } %>
-
-        <form action="/login-adm" method="POST">
-            <div class="form-group">
-                <label>Usuário Administrador</label>
-                <input type="text" name="usuario" required placeholder="Digite o usuário">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <i class="fas fa-user-shield"></i>
+                <h1>Painel Admin</h1>
+                <p>Acesso restrito</p>
             </div>
-            <div class="form-group">
-                <label>Senha de Acesso</label>
-                <input type="password" name="senha" required placeholder="Digite a senha">
-            </div>
-            <button type="submit" class="btn-login">Entrar no Painel</button>
-        </form>
+            
+            <% if (erro) { %>
+                <div class="error-message"><%= erro %></div>
+            <% } %>
+            
+            <form method="POST" action="/login-adm">
+                <div class="form-group">
+                    <label>Usuário</label>
+                    <input type="text" name="usuario" required placeholder="Usuário admin">
+                </div>
+                
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" name="senha" required placeholder="Sua senha">
+                </div>
+                
+                <button type="submit" class="btn">Entrar no Painel</button>
+            </form>
+            
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Voltar para o site</a>
+        </div>
     </div>
 </body>
 </html>
