@@ -15,15 +15,16 @@ const port = process.env.PORT || 3000;
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // MIDDLEWARES
+// Configuração de CSP mais permissiva para evitar bloqueios de recursos essenciais
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com", "https://apis.google.com", "https://www.gstatic.com", "https://translate.google.com", "https://cdnjs.cloudflare.com"],
+            defaultSrc: ["'self'", "https:"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://accounts.google.com", "https://apis.google.com", "https://www.gstatic.com", "https://cdnjs.cloudflare.com"],
             connectSrc: ["'self'", "https://*.supabase.co", "wss://*.supabase.co", "https://accounts.google.com", "https://www.googleapis.com"],
-            imgSrc: ["'self'", "data:", "https:", "https://www.gstatic.com", "https://cdnjs.cloudflare.com", "https://*.googleusercontent.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
+            imgSrc: ["'self'", "data:", "https:", "https://*.googleusercontent.com", "https://www.gstatic.com", "https://cdnjs.cloudflare.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
+            fontSrc: ["'self'", "data:", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             frameSrc: ["'self'", "https://accounts.google.com", "https://contrataeapp.onrender.com"],
             objectSrc: ["'none'"],
             upgradeInsecureRequests: [],
@@ -137,17 +138,21 @@ app.post("/login-adm", (req, res) => {
     const adminUser = process.env.ADMIN_USER || "admin";
     const adminPass = process.env.ADMIN_PASS || "#Relaxsempre153143";
 
+    console.log("Tentativa de login admin:", usuario);
+
     if (usuario === adminUser && senha === adminPass) {
         req.session.adminLogado = true;
         req.session.save((err) => {
             if (err) {
                 console.error("Erro ao salvar sessão admin:", err);
-                return res.render("login_admin", { erro: "Erro interno ao processar login.", currentPage: "admin" });
+                return res.render("login_admin", { erro: "Erro interno ao processar login.", currentPage: "admin", adminLogado: false });
             }
+            console.log("Login admin bem-sucedido!");
             res.redirect("/admin");
         });
     } else {
-        res.render("login_admin", { erro: "Usuário ou senha inválidos!", currentPage: "admin" });
+        console.log("Login admin falhou: credenciais incorretas");
+        res.render("login_admin", { erro: "Usuário ou senha inválidos!", currentPage: "admin", adminLogado: false });
     }
 });
 

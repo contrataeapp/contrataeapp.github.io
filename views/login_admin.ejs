@@ -7,26 +7,78 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #002147; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #121212; 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
         
         .auth-container { width: 100%; max-width: 400px; padding: 20px; }
-        .auth-card { background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); padding: 40px; }
+        .auth-card { 
+            background: #1e1e1e; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+            padding: 40px; 
+            border: 1px solid #333;
+        }
         
         .auth-header { text-align: center; margin-bottom: 30px; }
-        .auth-header h1 { font-size: 24px; color: #002147; margin-bottom: 10px; }
+        .auth-header h1 { font-size: 24px; color: #ffa500; margin-bottom: 10px; font-weight: 800; }
         .auth-header i { font-size: 40px; color: #ffa500; margin-bottom: 15px; }
+        .auth-header p { color: #ccc; font-size: 14px; }
         
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #002147; font-size: 14px; }
-        .form-group input { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: 0.3s; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #fff; font-size: 14px; }
+        .form-group input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 1px solid #444; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            transition: 0.3s; 
+            background: #2c2c2c;
+            color: #fff;
+        }
         .form-group input:focus { outline: none; border-color: #ffa500; box-shadow: 0 0 0 3px rgba(255,165,0,0.1); }
         
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 14px; background: #ffa500; color: white; }
-        .btn:hover { background: #ff9500; }
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-size: 15px; 
+            background: #ffa500; 
+            color: #000; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn:hover { background: #ffb733; transform: translateY(-2px); }
         
-        .error-message { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; border: 1px solid #f5c6cb; text-align: center; }
+        .error-message { 
+            background: rgba(220, 53, 69, 0.1); 
+            color: #ff4d4d; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            font-size: 13px; 
+            border: 1px solid rgba(220, 53, 69, 0.2); 
+            text-align: center; 
+        }
         
-        .back-link { display: block; text-align: center; margin-top: 20px; color: #6c757d; text-decoration: none; font-size: 14px; }
+        .back-link { 
+            display: block; 
+            text-align: center; 
+            margin-top: 20px; 
+            color: #999; 
+            text-decoration: none; 
+            font-size: 14px; 
+        }
         .back-link:hover { color: #ffa500; }
     </style>
 </head>
