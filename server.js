@@ -94,15 +94,14 @@ app.get("/admin", checkAdmin, async (req, res) => {
         let query = supabase.from("profissionais").select("*");
         if (categoria) query = query.eq('profissao', categoria);
         if (status) query = query.eq('status', status);
-        
-        const { data: profissionais, error } = await query.order("data_cadastro", { ascending: false });
+            const { data: profissionais, error } = await query.order("data_cadastro", { ascending: false });
         if (error) throw error;
 
-        let filtrados = profissionais || [];
-        if (!status) filtrados = filtrados.filter(p => p.status !== 'EXCLUIDO');
-        if (busca) filtrados = filtrados.filter(p => p.nome.toLowerCase().includes(busca.toLowerCase()) || p.profissao.toLowerCase().includes(busca.toLowerCase()));
+        // Filtrar apenas o que realmente existe no banco e não é fictício
+        let filtrados = (profissionais || []).filter(p => p.id && p.nome);
         
-        if (ordenar === 'vencimento') filtrados.sort((a, b) => {
+        if (!status) filtrados = filtrados.filter(p => p.status !== 'EXCLUIDO');
+        if (busca) filtrados = filtrados.filter(p => p.nome.toLowerCase().includes(busca.toLowerCase()) || p.profissao.toLowerCase().includes(busca.toLowerCase()));   if (ordenar === 'vencimento') filtrados.sort((a, b) => {
             const dataA = a.data_vencimento ? new Date(a.data_vencimento) : new Date('2099-12-31');
             const dataB = b.data_vencimento ? new Date(b.data_vencimento) : new Date('2099-12-31');
             return dataA - dataB;
@@ -175,8 +174,16 @@ app.get("/api/relatorios/geral", checkAdminAPI, async (req, res) => { /*... (Có
 	        if (req.file) {
 	            const ext = path.extname(req.file.originalname);
 	            const fileName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
-	            // Usando o bucket 'banners' que é o padrão do projeto
-	            const { data, error: uploadError } = await supabase.storage.from('banners').upload(fileName, req.file.buffer, { contentType: req.file.mimetype, upsert: false });
+	            // Tentando bucket 'banners' ou 'contratae-imagens'
+            let bucketName = 'banners';
+            let { data, error: uploadError } = await supabase.storage.from(bucketName).upload(fileName, req.file.buffer, { contentType: req.file.mimetype, upsert: false });
+            
+            if (uploadError && uploadError.message.includes('not found')) {
+                bucketName = 'contratae-imagens';
+                const retry = await supabase.storage.from(bucketName).upload(fileName, req.file.buffer, { contentType: req.file.mimetype, upsert: false });
+                data = retry.data;
+                uploadError = retry.error;
+            }
 	            if (uploadError) throw uploadError;
 	            const { data: publicUrlData } = supabase.storage.from('banners').getPublicUrl(fileName);
 	            bannerData.imagem_url = publicUrlData.publicUrl;

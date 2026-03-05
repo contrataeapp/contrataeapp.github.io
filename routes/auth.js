@@ -12,11 +12,13 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 // CONFIGURAÇÃO DO PASSPORT - GOOGLE OAUTH2
 // ============================================
 passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: '/auth/google/callback',
-    proxy: true // <--- ESTA É A LINHA MÁGICA QUE CONSERTA O RENDER!
-}, async (accessToken, refreshToken, profile, done) => {
+	    clientID: process.env.GOOGLE_CLIENT_ID,
+	    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+	    callbackURL: process.env.NODE_ENV === 'production' 
+            ? 'https://contrataeapp.onrender.com/auth/google/callback' 
+            : 'http://localhost:3000/auth/google/callback',
+	    proxy: true 
+	}, async (accessToken, refreshToken, profile, done) => {
     try {
         const email = profile.emails[0].value;
         const fullName = profile.displayName;
