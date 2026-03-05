@@ -209,6 +209,80 @@ app.get("/admin", checkAdmin, async (req, res) => {
 });
 
 // ============================================
+// API DE BANNERS
+// ============================================
+app.get("/api/banners", async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from("banners")
+            .select("*")
+            .order("posicao", { ascending: true })
+            .order("ordem", { ascending: true });
+        if (error) throw error;
+        res.json(data || []);
+    } catch (err) {
+        console.error("Erro ao buscar banners:", err);
+        res.status(500).json({ erro: "Erro ao buscar banners" });
+    }
+});
+
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post("/api/banners", checkAdmin, upload.single("imagem"), async (req, res) => {
+    try {
+        const { id, titulo, link_destino, posicao, ordem, ativo } = req.body;
+        let imagem_url = null;
+
+        if (req.file) {
+            const fileExt = req.file.originalname.split(".").pop();
+            const fileName = `banner_${posicao}_${ordem}_${Date.now()}.${fileExt}`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from("banners")
+                .upload(fileName, req.file.buffer, { contentType: req.file.mimetype });
+            
+            if (uploadError) throw uploadError;
+            const { data: publicUrl } = supabase.storage.from("banners").getPublicUrl(fileName);
+            imagem_url = publicUrl.publicUrl;
+        }
+
+        const bannerData = {
+            titulo,
+            link_destino,
+            posicao: parseInt(posicao),
+            ordem: parseInt(ordem),
+            ativo: ativo === "true" || ativo === true
+        };
+        if (imagem_url) bannerData.imagem_url = imagem_url;
+
+        if (id && id !== "") {
+            const { error } = await supabase.from("banners").update(bannerData).eq("id", id);
+            if (error) throw error;
+        } else {
+            const { error } = await supabase.from("banners").insert([bannerData]);
+            if (error) throw error;
+        }
+
+        res.json({ sucesso: true });
+    } catch (err) {
+        console.error("Erro ao salvar banner:", err);
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+app.delete("/api/banners/:id", checkAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { error } = await supabase.from("banners").delete().eq("id", id);
+        if (error) throw error;
+        res.json({ sucesso: true });
+    } catch (err) {
+        console.error("Erro ao deletar banner:", err);
+        res.status(500).json({ erro: "Erro ao deletar banner" });
+    }
+});
+
+// ============================================
 // ROTAS PÚBLICAS
 // ============================================
 app.get("/", async (req, res) => {

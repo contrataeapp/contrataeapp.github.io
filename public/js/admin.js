@@ -31,65 +31,37 @@ function setupTabs() {
                 e.preventDefault();
                 ativarAba(href.replace('#', ''));
                 window.history.pushState(null, null, href); // Atualiza URL sem recarregar
-                
-                // Fechar o menu ao clicar em um item do menu (apenas em mobile)
-                if (window.innerWidth <= 768) {
-                    const sidebar = document.getElementById('sidebar');
-                    const dashboardWrapper = document.querySelector('.dashboard-wrapper');
-                    if (sidebar) sidebar.classList.remove('active');
-                    if (dashboardWrapper) dashboardWrapper.classList.remove('menu-open');
-                }
             }
         });
     });
 }
 
-// Função para alternar seções (usada pela navegação inferior mobile)
-function toggleSection(sectionId) {
-    ativarAba(sectionId);
-    window.history.pushState(null, null, '#' + sectionId);
-    
-    // Atualizar o botão ativo na navegação inferior
-    document.querySelectorAll('.mobile-bottom-nav-admin .nav-item').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    const activeBtn = document.querySelector(`.mobile-bottom-nav-admin .nav-item[onclick="toggleSection('${sectionId}')"]`);
-    if (activeBtn) activeBtn.classList.add('active');
-}
-
 function ativarAba(idAba) {
     document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
     document.querySelectorAll('.sidebar nav ul li a').forEach(link => link.classList.remove('active'));
+    document.querySelectorAll('.mobile-bottom-nav-admin .nav-item').forEach(item => item.classList.remove('active'));
     
     const section = document.getElementById(idAba);
-    if (section) {
-        section.classList.add('active');
-    }
-    const link = document.querySelector(`.sidebar nav ul li a[href="#${idAba}"]`);
-    if (link) {
-        link.classList.add('active');
-    }
+    if (section) section.classList.add('active');
     
-    // Atualizar botão ativo na navegação inferior mobile
-    document.querySelectorAll('.mobile-bottom-nav-admin .nav-item').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    const activeBtn = document.querySelector(`.mobile-bottom-nav-admin .nav-item[onclick="toggleSection('${idAba}')"]`);
-    if (activeBtn) activeBtn.classList.add('active');
+    const link = document.querySelector(`.sidebar nav ul li a[href="#${idAba}"]`);
+    if (link) link.classList.add('active');
+
+    const mobileItem = document.querySelector(`.mobile-bottom-nav-admin .nav-item[onclick="ativarAba('${idAba}')"]`);
+    if (mobileItem) mobileItem.classList.add('active');
+
+    // Fecha o menu lateral no mobile ao clicar
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('active');
+    }
 }
 
-// ============================================
-// MENU HAMBÚRGUER (MOBILE)
-// ============================================
 function setupMobileMenu() {
-    const menuToggle = document.getElementById('menu-toggle');
+    const toggle = document.getElementById('menu-toggle');
     const sidebar = document.getElementById('sidebar');
-    const dashboardWrapper = document.querySelector('.dashboard-wrapper');
-
-    if (menuToggle && sidebar && dashboardWrapper) {
-        menuToggle.addEventListener('click', function() {
+    if (toggle && sidebar) {
+        toggle.addEventListener('click', () => {
             sidebar.classList.toggle('active');
-            dashboardWrapper.classList.toggle('menu-open');
         });
     }
 }
@@ -111,7 +83,7 @@ function setupEventListeners() {
     document.getElementById('form-aprovar')?.addEventListener('submit', submeterAprovar);
     document.getElementById('form-editar')?.addEventListener('submit', submeterEditar);
     document.getElementById('form-reativar')?.addEventListener('submit', submeterReativar);
-    document.getElementById('form-excluir')?.addEventListener('submit', submeterExcluir); // Form de exclusão
+    document.getElementById('form-excluir')?.addEventListener('submit', submeterExcluir);
     document.getElementById('form-banner')?.addEventListener('submit', submeterBannerViaUpload);
 }
 
@@ -159,315 +131,7 @@ function fecharModal(idModal) {
 }
 
 // ============================================
-// GESTÃO DE PROFISSIONAIS E REATIVAÇÃO
-// ============================================
-function abrirModalAprovar(id, nome) {
-    document.getElementById('id-prof-aprovar').value = id;
-    document.getElementById('nome-prof-aprovar').textContent = nome;
-    document.getElementById('form-aprovar').reset();
-    atualizarCampoPrazo('aprovar'); 
-    abrirModal('modal-aprovar');
-}
-
-function abrirModalEditar(id, nome, valor, dataVenc) {
-    document.getElementById('id-prof-editar').value = id;
-    document.getElementById('nome-prof-editar').textContent = nome;
-    document.getElementById('valor-editar').value = valor;
-    document.getElementById('tipo-prazo-editar').value = ""; 
-    document.getElementById('motivo-editar').value = "";
-    atualizarCampoPrazo('editar');
-    abrirModal('modal-editar');
-}
-
-function abrirModalReativar(id, nome) {
-    document.getElementById('id-prof-reativar').value = id;
-    document.getElementById('nome-prof-reativar').textContent = nome;
-    document.getElementById('form-reativar').reset();
-    atualizarCamposReativacao();
-    atualizarCampoPrazo('reativar');
-    abrirModal('modal-reativar');
-}
-
-function abrirModalExcluir(id, nome) {
-    document.getElementById('id-prof-excluir').value = id;
-    document.getElementById('nome-prof-excluir').textContent = nome;
-    document.getElementById('form-excluir').reset();
-    abrirModal('modal-excluir');
-}
-
-function atualizarCamposReativacao() {
-    const tipo = document.getElementById('tipo-reativacao').value;
-    const grupo = document.getElementById('grupo-renovacao');
-    const valor = document.getElementById('valor-reativar');
-    const prazo = document.getElementById('prazo-reativar');
-
-    if (tipo === 'renovar') {
-        grupo.style.display = 'block';
-        valor.required = true;
-        prazo.required = true;
-    } else {
-        grupo.style.display = 'none';
-        valor.required = false;
-        prazo.required = false;
-    }
-}
-
-function atualizarCampoPrazo(tipo) {
-    const select = document.getElementById(`tipo-prazo-${tipo}`);
-    const input = document.getElementById(`prazo-${tipo}`);
-    const label = document.getElementById(`label-prazo-${tipo}`);
-    const grupo = document.getElementById(`grupo-prazo-${tipo}`);
-    
-    const valor = select.value;
-    
-    if (tipo === 'editar' && !valor) {
-        if (grupo) grupo.style.display = 'none';
-        return;
-    }
-    if (tipo === 'editar' && grupo) {
-        grupo.style.display = 'block';
-    }
-
-    if (input && input._flatpickr) {
-        input._flatpickr.destroy();
-    }
-    if (input) input.readOnly = false; 
-    
-    if (valor === 'dias' && label && input) {
-        label.textContent = 'Quantidade de Dias (Ex: 30)';
-        input.type = 'number';
-        input.min = '1';
-        input.value = '30';
-    } else if (valor === 'meses' && label && input) {
-        label.textContent = 'Quantidade de Meses (Ex: 1)';
-        input.type = 'number';
-        input.min = '1';
-        input.value = '1';
-    } else if (valor === 'data' && label && input) {
-        label.textContent = 'Selecione a Data no Calendário';
-        input.type = 'text'; 
-        input.value = '';
-        
-        flatpickr(input, {
-            mode: 'single',
-            dateFormat: 'Y-m-d',
-            minDate: 'today'
-        });
-    }
-}
-
-async function submeterAprovar(event) {
-    event.preventDefault();
-    const id = document.getElementById('id-prof-aprovar').value;
-    const valor = document.getElementById('valor-aprovar').value;
-    const tipoPrazo = document.getElementById('tipo-prazo-aprovar').value;
-    const prazo = document.getElementById('prazo-aprovar').value;
-    const motivo = document.getElementById('motivo-aprovar') ? document.getElementById('motivo-aprovar').value : '';
-    
-    try {
-        const response = await fetch(`/api/profissionais/${id}/aprovar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ valor: parseFloat(valor), tipo_prazo: tipoPrazo, prazo: prazo, motivo: motivo })
-        });
-        const res = await response.json();
-        if (res.sucesso) {
-            window.location.hash = '#profissionais';
-            location.reload();
-        }
-    } catch (erro) { alert('Erro ao aprovar'); }
-}
-
-async function submeterEditar(event) {
-    event.preventDefault();
-    const id = document.getElementById('id-prof-editar').value;
-    const valor = document.getElementById('valor-editar').value;
-    const tipoPrazo = document.getElementById('tipo-prazo-editar').value;
-    const prazo = document.getElementById('prazo-editar').value;
-    const motivo = document.getElementById('motivo-editar') ? document.getElementById('motivo-editar').value : '';
-    
-    try {
-        const response = await fetch(`/api/profissionais/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ valor: valor ? parseFloat(valor) : undefined, tipo_prazo: tipoPrazo, prazo: prazo, motivo: motivo })
-        });
-        const res = await response.json();
-        if (res.sucesso) {
-            window.location.hash = '#profissionais';
-            location.reload();
-        }
-    } catch (erro) { alert('Erro ao editar'); }
-}
-
-async function submeterReativar(event) {
-    event.preventDefault();
-    const id = document.getElementById('id-prof-reativar').value;
-    const tipoReativacao = document.getElementById('tipo-reativacao').value;
-    const motivo = document.getElementById('motivo-reativar').value;
-    
-    let bodyData = { novoStatus: 'ATIVO', motivo: motivo, renovar: false };
-
-    if (tipoReativacao === 'renovar') {
-        bodyData.renovar = true;
-        bodyData.valor = document.getElementById('valor-reativar').value;
-        bodyData.tipo_prazo = document.getElementById('tipo-prazo-reativar').value;
-        bodyData.prazo = document.getElementById('prazo-reativar').value;
-    }
-
-    try {
-        const response = await fetch(`/api/profissionais/${id}/status`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bodyData)
-        });
-        const res = await response.json();
-        if (res.sucesso) {
-            window.location.hash = '#profissionais';
-            location.reload();
-        }
-    } catch (erro) { alert('Erro ao reativar'); }
-}
-
-async function alterarStatusPausar(id) {
-    const motivo = prompt('Motivo da pausa (Opcional):');
-    try {
-        const response = await fetch(`/api/profissionais/${id}/status`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ novoStatus: 'PAUSADO', motivo: motivo || 'Pausado pelo Admin' })
-        });
-        const res = await response.json();
-        if (res.sucesso) location.reload();
-    } catch (erro) { alert('Erro ao pausar'); }
-}
-
-async function submeterExcluir(event) {
-    event.preventDefault();
-    const id = document.getElementById('id-prof-excluir').value;
-    const senha = document.getElementById('senha-excluir').value;
-    const motivo = document.getElementById('motivo-excluir').value;
-    
-    try {
-        const response = await fetch(`/api/profissionais/${id}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ senha, motivo })
-        });
-        const res = await response.json();
-        if (res.sucesso) {
-            fecharModal('modal-excluir');
-            location.reload();
-        } else {
-            alert(res.erro || 'Erro ao excluir');
-        }
-    } catch (erro) { alert('Erro de conexão ao excluir'); }
-}
-
-async function abrirModalLogs(id, nome) {
-    document.getElementById('nome-prof-logs').textContent = nome;
-    const tbody = document.getElementById('tabela-logs');
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Carregando...</td></tr>';
-    abrirModal('modal-logs');
-    
-    try {
-        const response = await fetch(`/api/profissionais/${id}/logs`);
-        const logs = await response.json();
-        tbody.innerHTML = '';
-        
-        if (logs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">Nenhum histórico encontrado.</td></tr>';
-            return;
-        }
-        
-        logs.forEach(log => {
-            const data = new Date(log.data_acao).toLocaleString('pt-BR');
-            tbody.innerHTML += `
-                <tr>
-                    <td>${data}</td>
-                    <td><strong>${log.tipo_acao}</strong></td>
-                    <td>${log.motivo_edicao || '---'}</td>
-                    <td>${log.realizado_por}</td>
-                </tr>
-            `;
-        });
-    } catch (erro) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Erro ao carregar logs.</td></tr>'; }
-}
-
-function abrirWhatsApp(numero, nome, alerta) {
-    if (!numero) return alert('WhatsApp não cadastrado');
-    let msg = `Olá ${nome}, aqui é do Contrataê!`;
-    if (alerta === 'vencido') msg = `Olá ${nome}, notamos que sua assinatura no Contrataê venceu. Vamos renovar?`;
-    else if (alerta === 'critico') msg = `Olá ${nome}, sua assinatura no Contrataê vence em breve. Gostaria de renovar agora?`;
-    
-    window.open(`https://wa.me/55${numero.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-// ============================================
-// RELATÓRIOS (PDF E EXCEL)
-// ============================================
-async function baixarRelatorioGeralExcel() {
-    try {
-        const response = await fetch('/api/relatorios/geral');
-        const logs = await response.json();
-        
-        let csv = 'Data;Profissional;Categoria;Ação;Valor;Motivo;Admin\n';
-        logs.forEach(l => {
-            const data = new Date(l.data_acao).toLocaleString('pt-BR');
-            const valor = l.valores_novos?.valor_pago || 0;
-            csv += `${data};${l.profissionais?.nome || '---'};${l.profissionais?.profissao || '---'};${l.tipo_acao};${valor};${l.motivo_edicao || ''};${l.realizado_por}\n`;
-        });
-        
-        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `Relatorio_Financeiro_Contratae_${new Date().toLocaleDateString()}.csv`;
-        link.click();
-    } catch(e) { alert('Erro ao gerar Excel'); }
-}
-
-async function baixarRelatorioGeralPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    try {
-        const response = await fetch('/api/relatorios/geral');
-        const logs = await response.json();
-        
-        doc.setFontSize(18);
-        doc.text("Relatório de Faturamento - Contrataê", 14, 20);
-        doc.setFontSize(10);
-        doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 28);
-        
-        const tableData = logs.map(l => [
-            new Date(l.data_acao).toLocaleDateString('pt-BR'),
-            l.profissionais?.nome || '---',
-            l.tipo_acao,
-            `R$ ${(l.valores_novos?.valor_pago || 0).toFixed(2).replace('.', ',')}`
-        ]);
-        
-        const totalSoma = logs.reduce((acc, l) => acc + (parseFloat(l.valores_novos?.valor_pago) || 0), 0);
-        
-        doc.autoTable({
-            startY: 35,
-            head: [['Data', 'Profissional', 'Ação', 'Valor']],
-            body: tableData,
-            theme: 'striped',
-            headStyles: { fillColor: [0, 33, 71] }
-        });
-        
-        const finalY = doc.lastAutoTable.finalY || 35;
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text(`Soma Total Histórica: R$ ${totalSoma.toFixed(2).replace('.', ',')}`, 14, finalY + 10);
-        
-        doc.save(`Faturamento_Geral_Contratae.pdf`);
-    } catch(e) { alert('Erro ao gerar PDF.'); }
-}
-
-
-// ============================================
-// GESTÃO DE BANNERS E COMENTÁRIOS
+// GESTÃO DE BANNERS
 // ============================================
 async function carregarBannersVisuais() {
     try {
@@ -609,6 +273,203 @@ async function deletarBanner(id) {
     } catch (erro) { alert('Erro ao deletar'); }
 }
 
+// ============================================
+// GESTÃO DE PROFISSIONAIS
+// ============================================
+function abrirModalAprovar(id, nome) {
+    document.getElementById('id-prof-aprovar').value = id;
+    document.getElementById('nome-prof-aprovar').textContent = nome;
+    document.getElementById('form-aprovar').reset();
+    atualizarCampoPrazo('aprovar'); 
+    abrirModal('modal-aprovar');
+}
+
+function abrirModalEditar(id, nome, valor, dataVenc) {
+    document.getElementById('id-prof-editar').value = id;
+    document.getElementById('nome-prof-editar').textContent = nome;
+    document.getElementById('valor-editar').value = valor;
+    document.getElementById('tipo-prazo-editar').value = ""; 
+    document.getElementById('motivo-editar').value = "";
+    atualizarCampoPrazo('editar');
+    abrirModal('modal-editar');
+}
+
+function abrirModalReativar(id, nome) {
+    document.getElementById('id-prof-reativar').value = id;
+    document.getElementById('nome-prof-reativar').textContent = nome;
+    document.getElementById('form-reativar').reset();
+    atualizarCamposReativacao();
+    atualizarCampoPrazo('reativar');
+    abrirModal('modal-reativar');
+}
+
+function abrirModalExcluir(id, nome) {
+    document.getElementById('id-prof-excluir').value = id;
+    document.getElementById('nome-prof-excluir').textContent = nome;
+    document.getElementById('form-excluir').reset();
+    abrirModal('modal-excluir');
+}
+
+function atualizarCamposReativacao() {
+    const tipo = document.getElementById('tipo-reativacao').value;
+    const grupo = document.getElementById('grupo-renovacao');
+    const valor = document.getElementById('valor-reativar');
+    const prazo = document.getElementById('prazo-reativar');
+
+    if (tipo === 'renovar') {
+        grupo.style.display = 'block';
+        valor.required = true;
+        prazo.required = true;
+    } else {
+        grupo.style.display = 'none';
+        valor.required = false;
+        prazo.required = false;
+    }
+}
+
+function atualizarCampoPrazo(tipo) {
+    const select = document.getElementById(`tipo-prazo-${tipo}`);
+    const input = document.getElementById(`prazo-${tipo}`);
+    const label = document.getElementById(`label-prazo-${tipo}`);
+    const grupo = document.getElementById(`grupo-prazo-${tipo}`);
+    
+    if (!select) return;
+    const valor = select.value;
+    
+    if (tipo === 'editar' && !valor) {
+        if (grupo) grupo.style.display = 'none';
+        return;
+    }
+    if (tipo === 'editar' && grupo) {
+        grupo.style.display = 'block';
+    }
+
+    if (input && input._flatpickr) {
+        input._flatpickr.destroy();
+    }
+    if (input) input.readOnly = false; 
+    
+    if (valor === 'dias' && label && input) {
+        label.textContent = 'Quantidade de Dias (Ex: 30)';
+        input.type = 'number';
+        input.min = '1';
+        input.value = '30';
+    } else if (valor === 'meses' && label && input) {
+        label.textContent = 'Quantidade de Meses (Ex: 1)';
+        input.type = 'number';
+        input.min = '1';
+        input.value = '1';
+    } else if (valor === 'data' && label && input) {
+        label.textContent = 'Selecione a Data no Calendário';
+        input.type = 'text'; 
+        input.value = '';
+        
+        flatpickr(input, {
+            mode: 'single',
+            dateFormat: 'Y-m-d',
+            minDate: 'today'
+        });
+    }
+}
+
+async function submeterAprovar(event) {
+    event.preventDefault();
+    const id = document.getElementById('id-prof-aprovar').value;
+    const valor = document.getElementById('valor-aprovar').value;
+    const tipoPrazo = document.getElementById('tipo-prazo-aprovar').value;
+    const prazo = document.getElementById('prazo-aprovar').value;
+    const motivo = document.getElementById('motivo-aprovar') ? document.getElementById('motivo-aprovar').value : '';
+    
+    try {
+        const response = await fetch(`/api/profissionais/${id}/aprovar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ valor: parseFloat(valor), tipo_prazo: tipoPrazo, prazo: prazo, motivo: motivo })
+        });
+        const res = await response.json();
+        if (res.sucesso) {
+            window.location.hash = '#profissionais';
+            location.reload();
+        }
+    } catch (erro) { alert('Erro ao aprovar'); }
+}
+
+async function submeterEditar(event) {
+    event.preventDefault();
+    const id = document.getElementById('id-prof-editar').value;
+    const valor = document.getElementById('valor-editar').value;
+    const tipoPrazo = document.getElementById('tipo-prazo-editar').value;
+    const prazo = document.getElementById('prazo-editar').value;
+    const motivo = document.getElementById('motivo-editar') ? document.getElementById('motivo-editar').value : '';
+    
+    try {
+        const response = await fetch(`/api/profissionais/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ valor: valor ? parseFloat(valor) : undefined, tipo_prazo: tipoPrazo, prazo: prazo, motivo: motivo })
+        });
+        const res = await response.json();
+        if (res.sucesso) {
+            window.location.hash = '#profissionais';
+            location.reload();
+        }
+    } catch (erro) { alert('Erro ao editar'); }
+}
+
+async function submeterReativar(event) {
+    event.preventDefault();
+    const id = document.getElementById('id-prof-reativar').value;
+    const tipoReativacao = document.getElementById('tipo-reativacao').value;
+    const motivo = document.getElementById('motivo-reativar').value;
+    
+    let bodyData = { novoStatus: 'ATIVO', motivo: motivo, renovar: false };
+
+    if (tipoReativacao === 'renovar') {
+        bodyData.renovar = true;
+        bodyData.valor = document.getElementById('valor-reativar').value;
+        bodyData.tipo_prazo = document.getElementById('tipo-prazo-reativar').value;
+        bodyData.prazo = document.getElementById('prazo-reativar').value;
+    }
+
+    try {
+        const response = await fetch(`/api/profissionais/${id}/reativar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+        });
+        const res = await response.json();
+        if (res.sucesso) {
+            window.location.hash = '#profissionais';
+            location.reload();
+        }
+    } catch (erro) { alert('Erro ao reativar'); }
+}
+
+async function submeterExcluir(event) {
+    event.preventDefault();
+    const id = document.getElementById('id-prof-excluir').value;
+    const motivo = document.getElementById('motivo-excluir').value;
+    const senha = document.getElementById('senha-excluir').value;
+    
+    try {
+        const response = await fetch(`/api/profissionais/${id}/excluir`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motivo, senha })
+        });
+        const res = await response.json();
+        if (res.sucesso) {
+            window.location.hash = '#profissionais';
+            location.reload();
+        } else {
+            alert(res.erro || 'Erro ao excluir');
+        }
+    } catch (erro) { alert('Erro ao excluir'); }
+}
+
+// ============================================
+// MODERAÇÃO DE COMENTÁRIOS
+// ============================================
 async function carregarComentarios() {
     try {
         const response = await fetch('/api/comentarios');
@@ -656,4 +517,20 @@ async function moderarComentario(id, status) {
         const res = await response.json();
         if(res.sucesso) carregarComentarios();
     } catch(e) { alert('Erro ao moderar comentário'); }
+}
+
+// ============================================
+// WHATSAPP E RELATÓRIOS
+// ============================================
+function abrirWhatsApp(numero, nome, alerta) {
+    if (!numero) { alert('Número não cadastrado'); return; }
+    const msg = encodeURIComponent(`Olá ${nome}, tudo bem? Sou da equipe Contrataê...`);
+    window.open(`https://wa.me/55${numero.replace(/\D/g, '')}?text=${msg}`, '_blank');
+}
+
+function abrirModalLogs(id, nome) {
+    document.getElementById('nome-prof-logs').textContent = nome;
+    document.getElementById('logs-container').innerHTML = '<p style="color: #999;">Carregando histórico...</p>';
+    abrirModal('modal-logs');
+    // Aqui você chamaria a API de logs se existir
 }

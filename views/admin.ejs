@@ -18,12 +18,11 @@
         </div>
         
         <nav class="mobile-bottom-nav-admin" id="mobile-bottom-nav-admin">
-            <button class="nav-item" onclick="toggleSection('dashboard')"><i class="fas fa-chart-line"></i><span>Dashboard</span></button>
-            <button class="nav-item" onclick="toggleSection('profissionais')"><i class="fas fa-tools"></i><span>Profissionais</span></button>
-            <button class="nav-item" onclick="toggleSection('banners')"><i class="fas fa-ad"></i><span>Banners</span></button>
-            <button class="nav-item" onclick="toggleSection('comentarios')"><i class="fas fa-star"></i><span>Moderação</span></button>
-            <button class="nav-item" onclick="toggleSection('mensagens')"><i class="fas fa-envelope"></i><span>Mensagens</span></button>
-            <button class="nav-item" onclick="toggleSection('relatorios')"><i class="fas fa-file-pdf"></i><span>Relatórios</span></button>
+            <button class="nav-item" onclick="ativarAba('dashboard')"><i class="fas fa-chart-line"></i><span>Dashboard</span></button>
+            <button class="nav-item" onclick="ativarAba('profissionais')"><i class="fas fa-tools"></i><span>Profissionais</span></button>
+            <button class="nav-item" onclick="ativarAba('banners')"><i class="fas fa-ad"></i><span>Banners</span></button>
+            <button class="nav-item" onclick="ativarAba('comentarios')"><i class="fas fa-star"></i><span>Moderação</span></button>
+            <button class="nav-item" onclick="ativarAba('relatorios')"><i class="fas fa-file-pdf"></i><span>Relatórios</span></button>
         </nav>
         
         <aside class="sidebar" id="sidebar">
@@ -34,9 +33,8 @@
                     <li><a href="#profissionais"><i class="fas fa-tools"></i> Profissionais</a></li>
                     <li><a href="#banners"><i class="fas fa-ad"></i> Banners</a></li>
                     <li><a href="#comentarios"><i class="fas fa-star"></i> Moderação</a></li>
-                    <li><a href="#mensagens"><i class="fas fa-envelope"></i> Mensagens</a></li>
                     <li><a href="#relatorios"><i class="fas fa-file-pdf"></i> Relatórios</a></li>
-                    <li><a href="/logout-adm" onclick="logout()"><i class="fas fa-power-off"></i> Sair</a></li>
+                    <li><a href="/logout-adm"><i class="fas fa-power-off"></i> Sair</a></li>
                 </ul>
             </nav>
         </aside>
@@ -184,50 +182,34 @@
                                         </td>
                                         <td>R$ <%= (Number(p.valor_pago) || 0).toFixed(2).replace('.', ',') %></td>
                                         <td class="acoes-cell">
-                                            
                                             <% if (p.status === 'PENDENTE') { %>
-                                                <button class="btn-action approve" onclick="abrirModalAprovar('<%= p.id %>', '<%= p.nome %>')" title="Aprovar">
+                                                <button class="btn-action approve" onclick="abrirModalAprovar('<%= p.id %>', '<%= p.nome %>')" title="Aprovar Pagamento">
                                                     <i class="fas fa-check"></i>
                                                 </button>
-                                                <button class="btn-action suspend" onclick="abrirModalExcluir('<%= p.id %>', '<%= p.nome %>')" title="Excluir Perfil">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            
-                                            <% } else if (p.status === 'EXCLUIDO') { %>
-                                                <button class="btn-action approve" onclick="abrirModalReativar('<%= p.id %>', '<%= p.nome %>')" title="Reativar e Recuperar Conta">
-                                                    <i class="fas fa-undo"></i> Reativar
-                                                </button>
-                                                <button class="btn-action logs" onclick="abrirModalLogs('<%= p.id %>', '<%= p.nome %>')" title="Ver Histórico e Motivo de Saída">
-                                                    <i class="fas fa-history"></i> Logs
-                                                </button>
-
-                                            <% } else { %>
-                                                <button class="btn-action edit" onclick="abrirModalEditar('<%= p.id %>', '<%= p.nome %>', '<%= p.valor_pago || 0 %>', '<%= p.data_vencimento || '' %>')" title="Editar">
+                                            <% } else if (p.status === 'ATIVO') { %>
+                                                <button class="btn-action edit" onclick="abrirModalEditar('<%= p.id %>', '<%= p.nome %>', '<%= p.valor_pago %>', '<%= p.data_vencimento %>')" title="Editar Prazo/Valor">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
-                                                
-                                                <% if (p.status === 'ATIVO') { %>
-                                                    <button class="btn-action suspend" onclick="alterarStatusPausar('<%= p.id %>')" title="Pausar">
-                                                        <i class="fas fa-pause"></i>
-                                                    </button>
-                                                <% } else { %>
-                                                    <button class="btn-action approve" onclick="abrirModalReativar('<%= p.id %>', '<%= p.nome %>')" title="Reativar e/ou Renovar">
-                                                        <i class="fas fa-play"></i>
-                                                    </button>
-                                                <% } %>
-
-                                                <button class="btn-action whatsapp" onclick="abrirWhatsApp('<%= p.whatsapp %>', '<%= p.nome %>', '<%= p.alerta_status || '' %>')" title="Falar no WhatsApp">
-                                                    <i class="fab fa-whatsapp"></i>
+                                                <button class="btn-action suspend" onclick="abrirModalPausar('<%= p.id %>', '<%= p.nome %>')" title="Pausar Perfil">
+                                                    <i class="fas fa-pause"></i>
                                                 </button>
-                                                
-                                                <button class="btn-action logs" onclick="abrirModalLogs('<%= p.id %>', '<%= p.nome %>')" title="Histórico de Pagamentos">
-                                                    <i class="fas fa-file-invoice-dollar"></i>
-                                                </button>
-                                                
-                                                <button class="btn-action suspend" onclick="abrirModalExcluir('<%= p.id %>', '<%= p.nome %>')" title="Excluir Perfil">
-                                                    <i class="fas fa-trash"></i>
+                                            <% } else if (p.status === 'PAUSADO' || p.status === 'EXCLUIDO') { %>
+                                                <button class="btn-action approve" onclick="abrirModalReativar('<%= p.id %>', '<%= p.nome %>')" title="Reativar Perfil">
+                                                    <i class="fas fa-play"></i>
                                                 </button>
                                             <% } %>
+
+                                            <button class="btn-action whatsapp" onclick="abrirWhatsApp('<%= p.whatsapp %>', '<%= p.nome %>', '<%= p.alerta_status || '' %>')" title="Falar no WhatsApp">
+                                                <i class="fab fa-whatsapp"></i>
+                                            </button>
+                                            
+                                            <button class="btn-action logs" onclick="abrirModalLogs('<%= p.id %>', '<%= p.nome %>')" title="Histórico de Pagamentos">
+                                                <i class="fas fa-file-invoice-dollar"></i>
+                                            </button>
+                                            
+                                            <button class="btn-action suspend" onclick="abrirModalExcluir('<%= p.id %>', '<%= p.nome %>')" title="Excluir Perfil">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 <% }); %>
@@ -302,61 +284,20 @@
                     </div>
                 </div>
             </section>
-
-            <section class="admin-section" id="mensagens">
-                <div class="section-header">
-                    <h2>Mensagens de Contato</h2>
-                    <p>Mensagens enviadas através do formulário de contato do site.</p>
-                </div>
-                <div class="table-container">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Nome</th>
-                                <th>E-mail</th>
-                                <th>Assunto</th>
-                                <th>Mensagem</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-mensagens">
-                            <% if (typeof mensagens !== 'undefined' && mensagens.length > 0) { %>
-                                <% mensagens.forEach(msg => { %>
-                                    <tr>
-                                        <td><%= new Date(msg.data_envio).toLocaleDateString('pt-BR') %></td>
-                                        <td><%= msg.nome %></td>
-                                        <td><%= msg.email %></td>
-                                        <td><%= msg.assunto %></td>
-                                        <td title="<%= msg.mensagem %>"><%= msg.mensagem.substring(0, 30) %>...</td>
-                                        <td>
-                                            <button class="btn-action view" onclick="verMensagem('<%= msg.id %>')"><i class="fas fa-eye"></i></button>
-                                            <button class="btn-action delete" onclick="excluirMensagem('<%= msg.id %>')"><i class="fas fa-trash"></i></button>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr><td colspan="6" style="text-align: center;">Nenhuma mensagem recebida.</td></tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
         </div>
     </div>
 
+    <!-- MODAIS -->
     <div id="modal-aprovar" class="modal">
         <div class="modal-content">
             <span class="close" onclick="fecharModal('modal-aprovar')">&times;</span>
             <h2>Aprovar: <span id="nome-prof-aprovar"></span></h2>
             <form id="form-aprovar">
                 <input type="hidden" id="id-prof-aprovar">
-                
                 <div class="form-group">
                     <label>Valor Pago (R$) *</label>
                     <input type="number" id="valor-aprovar" step="0.01" min="0" required>
                 </div>
-
                 <div class="form-group">
                     <label>Tipo de Prazo *</label>
                     <select id="tipo-prazo-aprovar" onchange="atualizarCampoPrazo('aprovar')">
@@ -365,17 +306,14 @@
                         <option value="data">Data Específica</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label id="label-prazo-aprovar">Quantidade de Dias *</label>
                     <input type="number" id="prazo-aprovar" min="1" value="30" required>
                 </div>
-
                 <div class="form-group">
                     <label>Motivo (Opcional)</label>
                     <textarea id="motivo-aprovar" rows="2" placeholder="Ex: Cadastro novo via Pix"></textarea>
                 </div>
-
                 <div class="modal-buttons">
                     <button type="button" class="btn-cancel" onclick="fecharModal('modal-aprovar')">Cancelar</button>
                     <button type="submit" class="btn-confirm">Aprovar</button>
@@ -390,12 +328,10 @@
             <h2>Editar: <span id="nome-prof-editar"></span></h2>
             <form id="form-editar">
                 <input type="hidden" id="id-prof-editar">
-                
                 <div class="form-group">
                     <label>Novo Valor Pago (R$)</label>
                     <input type="number" id="valor-editar" step="0.01" min="0">
                 </div>
-
                 <div class="form-group">
                     <label>Prorrogar/Alterar Prazo?</label>
                     <select id="tipo-prazo-editar" onchange="atualizarCampoPrazo('editar')">
@@ -405,17 +341,14 @@
                         <option value="data">Nova Data Específica</option>
                     </select>
                 </div>
-
                 <div class="form-group" id="grupo-prazo-editar" style="display: none;">
                     <label id="label-prazo-editar">Quantidade</label>
                     <input type="number" id="prazo-editar" min="1">
                 </div>
-
                 <div class="form-group">
                     <label>Motivo da Edição (Obrigatório) *</label>
                     <textarea id="motivo-editar" rows="2" placeholder="Ex: Renovação mensal, ajuste de erro..." required></textarea>
                 </div>
-
                 <div class="modal-buttons">
                     <button type="button" class="btn-cancel" onclick="fecharModal('modal-editar')">Cancelar</button>
                     <button type="submit" class="btn-confirm">Salvar Edição</button>
@@ -430,7 +363,6 @@
             <h2>Reativar Profissional: <span id="nome-prof-reativar"></span></h2>
             <form id="form-reativar">
                 <input type="hidden" id="id-prof-reativar">
-                
                 <div class="form-group">
                     <label>Ação Desejada</label>
                     <select id="tipo-reativacao" onchange="atualizarCamposReativacao()">
@@ -438,13 +370,11 @@
                         <option value="apenas_reativar">Apenas Reativar (Manter valores e prazos antigos)</option>
                     </select>
                 </div>
-
                 <div id="grupo-renovacao">
                     <div class="form-group">
                         <label>Novo Valor Recebido (R$) *</label>
                         <input type="number" id="valor-reativar" step="0.01" min="0" required>
                     </div>
-
                     <div class="form-group">
                         <label>Prorrogar Vencimento em: *</label>
                         <select id="tipo-prazo-reativar" onchange="atualizarCampoPrazo('reativar')">
@@ -453,18 +383,15 @@
                             <option value="data">Data Específica</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label id="label-prazo-reativar">Quantidade de Dias *</label>
                         <input type="number" id="prazo-reativar" min="1" value="30" required>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label>Motivo da Reativação (Obrigatório) *</label>
                     <textarea id="motivo-reativar" rows="2" placeholder="Ex: Efetuou o pagamento do Pix, Cortesia da gerência..." required></textarea>
                 </div>
-
                 <div class="modal-buttons">
                     <button type="button" class="btn-cancel" onclick="fecharModal('modal-reativar')">Cancelar</button>
                     <button type="submit" class="btn-confirm">Confirmar Reativação</button>
@@ -478,20 +405,16 @@
             <span class="close" onclick="fecharModal('modal-excluir')">&times;</span>
             <h2><i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i> Excluir Conta: <span id="nome-prof-excluir"></span></h2>
             <p style="color: #666; font-size: 14px; margin-bottom: 20px;">O profissional será ocultado da plataforma pública, mas seu histórico financeiro e de avaliações ficará salvo de forma segura no banco de dados. Você poderá recuperá-lo a qualquer momento usando a aba "Excluídos".</p>
-            
             <form id="form-excluir">
                 <input type="hidden" id="id-prof-excluir">
-                
                 <div class="form-group">
                     <label>Motivo da Exclusão (Para os registros) *</label>
                     <textarea id="motivo-excluir" rows="2" placeholder="Ex: Cliente solicitou cancelamento, Perfil inativo..." required></textarea>
                 </div>
-
                 <div class="form-group">
                     <label>Senha do Administrador *</label>
                     <input type="password" id="senha-excluir" required placeholder="Digite sua senha para confirmar a exclusão">
                 </div>
-
                 <div class="modal-buttons">
                     <button type="button" class="btn-cancel" onclick="fecharModal('modal-excluir')">Cancelar</button>
                     <button type="submit" class="btn-confirm" style="background-color: #dc3545;">Ocultar Conta</button>
@@ -507,7 +430,6 @@
             <div id="logs-container" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
                 <p style="color: #999;">Carregando histórico...</p>
             </div>
-            
             <div class="modal-buttons" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 0;">
                 <div style="display: flex; gap: 10px;" id="div-botoes-relatorio">
                     <button type="button" class="btn-confirm" id="btn-baixar-relatorio" style="display: none; background-color: #28a745; margin: 0;" onclick="baixarRelatorioProfissional()">
@@ -526,34 +448,28 @@
         <div class="modal-content">
             <span class="close" onclick="fecharModal('modal-banner')">&times;</span>
             <h2 id="titulo-modal-banner">Upload de Imagem</h2>
-            
             <form id="form-banner">
                 <input type="hidden" id="id-banner">
                 <input type="hidden" id="posicao-banner">
                 <input type="hidden" id="ordem-banner">
-                
                 <div class="form-group">
                     <label>Título / Nome da Empresa (Opcional)</label>
                     <input type="text" id="titulo-banner" placeholder="Ex: Ponto Forte">
                 </div>
-
                 <div class="form-group">
                     <label>Procurar no Computador (Imagem) *</label>
                     <input type="file" id="arquivo-banner" accept="image/png, image/jpeg, image/jpg" style="padding: 10px; border: 1px solid #ccc; width: 100%;">
                 </div>
-
                 <div class="form-group">
                     <label>Link ao clicar na foto (Instagram/WhatsApp)</label>
                     <input type="text" id="link-banner" placeholder="https://...">
                 </div>
-
                 <div class="form-group" style="margin-top: 15px;">
                     <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                         <input type="checkbox" id="ativo-banner" checked style="width: 20px; height: 20px;">
                         <span>Deixar Visível no Site?</span>
                     </label>
                 </div>
-
                 <div class="modal-buttons">
                     <button type="button" class="btn-cancel" onclick="fecharModal('modal-banner')">Cancelar</button>
                     <button type="submit" class="btn-confirm">Fazer Upload</button>
