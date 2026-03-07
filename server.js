@@ -219,11 +219,38 @@ app.use("/auth", authRoutes);
 const dashboardRoutes = require("./routes/dashboards");
 app.use("/", dashboardRoutes);
 
-app.get("/auth/login", (req, res) => res.render("login", { erro: null }));
+app.get("/auth/login", (req, res) => {
+    try {
+        res.render("auth/login", { erro: null, adminLogado: req.session.adminLogado || false });
+    } catch (e) {
+        console.error("ERRO AO RENDERIZAR LOGIN:", e);
+        res.status(500).send("Erro ao carregar a página de login. Tente novamente mais tarde.");
+    }
+});
 app.get("/auth/cadastro", (req, res) => res.render("cadastro", { erro: null }));
 app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
 app.get("/contato", (req, res) => res.render("contato"));
 app.get("/outros", (req, res) => res.render("outros", { banners: [] }));
+
+app.get("/perfil/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { data: profissional, error } = await supabase
+            .from("profissionais")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+        if (error || !profissional) {
+            return res.status(404).send("Profissional não encontrado.");
+        }
+
+        res.render("perfil-profissional", { profissional, adminLogado: req.session.adminLogado || false });
+    } catch (e) {
+        console.error("ERRO AO CARREGAR PERFIL:", e);
+        res.status(500).send("Erro interno ao carregar o perfil.");
+    }
+});
 
 // ROTA DA HOMEPAGE
 app.get("/", async (req, res) => {
