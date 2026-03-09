@@ -210,7 +210,7 @@
         }
     </style>
 </head>
-<body class="dark-mode">
+<body>
     <% const bannerEsq = typeof banners !== 'undefined' && banners.find(b => b.posicao === 3); %>
     <% if (bannerEsq) { %>
     <div class="banner-lateral banner-esquerda" id="banner-mov">
@@ -302,5 +302,21 @@
     </main>
 
     <%- include('partials/footer') %>
+    
+    <!-- Barra de Navegação Inferior (Mobile) -->
+    <nav class="mobile-bottom-nav mobile-only">
+        <a href="/" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="#" class="nav-item" id="mobile-menu-trigger">
+            <i class="fas fa-search"></i>
+            <span>Explorar</span>
+        </a>
+        <a href="/auth/login" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
 </body>
 </html>

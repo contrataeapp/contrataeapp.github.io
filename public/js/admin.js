@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     setupTabs();
     setupEventListeners();
+    setupMobileMenu();
     
     // Mantém a aba certa aberta após recarregar (ex: ao buscar ou salvar dados)
     const hash = window.location.hash || '#dashboard';
@@ -44,6 +45,30 @@ function ativarAba(idAba) {
     
     const link = document.querySelector(`.sidebar nav ul li a[href="#${idAba}"]`);
     if (link) link.classList.add('active');
+}
+
+function setupMobileMenu() {
+    const trigger = document.getElementById('mobile-sidebar-trigger');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (trigger && sidebar) {
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('active');
+        });
+
+        // Fechar ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && e.target !== trigger) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Fechar ao clicar num link
+        sidebar.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => sidebar.classList.remove('active'));
+        });
+    }
 }
 
 // ============================================
