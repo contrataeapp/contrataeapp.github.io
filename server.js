@@ -255,6 +255,8 @@ app.get("/auth/cadastro", (req, res) => {
 app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
 app.get("/contato", (req, res) => res.render("contato"));
 app.get("/outros", (req, res) => res.render("outros", { banners: [] }));
+app.get("/avaliacao", (req, res) => res.render("avaliacao"));
+app.get("/termos-de-uso", (req, res) => res.render("termos_de_uso"));
 
 app.get("/perfil/:id", async (req, res) => {
     try {

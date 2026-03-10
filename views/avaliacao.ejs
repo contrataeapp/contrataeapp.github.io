@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Avaliação</title>
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="dark-mode">
+    <%- include('partials/header') %>
+
+    <main style="min-height: 80vh; padding: 60px 20px;">
+        <div class="container" style="max-width: 600px; background: #222; padding: 40px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;">
+            <h1 style="color: #ffa500; font-size: 2.5rem; margin-bottom: 20px;">Avalie sua Experiência</h1>
+            <p style="color: #ccc; margin-bottom: 40px;">Sua opinião é fundamental para mantermos a qualidade dos profissionais em nossa plataforma.</p>
+            
+            <form action="/api/avaliar" method="POST">
+                <div style="margin-bottom: 30px;">
+                    <p style="color: #fff; margin-bottom: 15px; font-size: 1.1rem;">Como você avalia o profissional contratado?</p>
+                    <div style="display: flex; justify-content: center; gap: 15px; font-size: 2rem; color: #444;">
+                        <i class="fas fa-star star-rating" data-value="1" style="cursor: pointer;"></i>
+                        <i class="fas fa-star star-rating" data-value="2" style="cursor: pointer;"></i>
+                        <i class="fas fa-star star-rating" data-value="3" style="cursor: pointer;"></i>
+                        <i class="fas fa-star star-rating" data-value="4" style="cursor: pointer;"></i>
+                        <i class="fas fa-star star-rating" data-value="5" style="cursor: pointer;"></i>
+                    </div>
+                    <input type="hidden" name="rating" id="rating-value" value="0">
+                </div>
+
+                <div style="margin-bottom: 30px; text-align: left;">
+                    <label style="display: block; color: #fff; margin-bottom: 10px; font-size: 0.9rem;">Deixe um comentário (opcional)</label>
+                    <textarea name="comment" style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #444; background: #333; color: #fff; outline: none; min-height: 120px;" placeholder="Conte-nos como foi o serviço..."></textarea>
+                </div>
+
+                <button type="submit" class="button primary-button" style="width: 100%; padding: 15px; border-radius: 30px; font-size: 1.1rem;">
+                    Enviar Avaliação
+                </button>
+            </form>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="/" style="color: #888; text-decoration: none; font-size: 0.9rem;"><i class="fas fa-arrow-left"></i> Voltar para o Início</a>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+    
+    <script>
+        document.querySelectorAll('.star-rating').forEach(star => {
+            star.addEventListener('click', function() {
+                const val = this.getAttribute('data-value');
+                document.getElementById('rating-value').value = val;
+                
+                document.querySelectorAll('.star-rating').forEach(s => {
+                    if (s.getAttribute('data-value') <= val) {
+                        s.style.color = 'gold';
+                    } else {
+                        s.style.color = '#444';
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="/js/theme-toggle.js"></script>
+    <script src="/js/index.js"></script>
+</body>
+</html>

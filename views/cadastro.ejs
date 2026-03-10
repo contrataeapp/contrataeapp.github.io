@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Criar Conta</title>
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="dark-mode">
+    <%- include('partials/header') %>
+
+    <main style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+        <div class="container" style="max-width: 450px; background: #222; padding: 40px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h2 style="color: #ffa500; font-size: 2rem; margin-bottom: 10px;">Criar Conta</h2>
+                <p style="color: #ccc;">Junte-se à maior rede de profissionais da região.</p>
+            </div>
+
+            <% if (typeof erro !== 'undefined' && erro) { %>
+                <div style="background: rgba(255, 0, 0, 0.1); color: #ff4444; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; border: 1px solid #ff4444;">
+                    <i class="fas fa-exclamation-circle"></i> <%= erro %>
+                </div>
+            <% } %>
+
+            <form action="/auth/cadastro" method="POST">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #fff; margin-bottom: 8px; font-size: 0.9rem;">Nome Completo</label>
+                    <input type="text" name="full_name" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: #fff; outline: none;" placeholder="Seu nome completo">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #fff; margin-bottom: 8px; font-size: 0.9rem;">E-mail</label>
+                    <input type="email" name="email" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: #fff; outline: none;" placeholder="seu@email.com">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #fff; margin-bottom: 8px; font-size: 0.9rem;">Tipo de Conta</label>
+                    <select name="user_type" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: #fff; outline: none;">
+                        <option value="client">Sou Cliente (Quero contratar)</option>
+                        <option value="professional">Sou Profissional (Quero trabalhar)</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; color: #fff; margin-bottom: 8px; font-size: 0.9rem;">Senha</label>
+                    <input type="password" name="password" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: #fff; outline: none;" placeholder="Mínimo 6 caracteres">
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; color: #fff; margin-bottom: 8px; font-size: 0.9rem;">Confirmar Senha</label>
+                    <input type="password" name="password_confirm" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: #fff; outline: none;" placeholder="Repita sua senha">
+                </div>
+
+                <button type="submit" class="button primary-button" style="width: 100%; padding: 15px; border-radius: 30px; font-size: 1rem; margin-bottom: 20px;">
+                    Cadastrar Agora
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-bottom: 20px; position: relative;">
+                <hr style="border: 0; border-top: 1px solid #444;">
+                <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #222; padding: 0 15px; color: #888; font-size: 0.8rem;">OU</span>
+            </div>
+
+            <a href="/auth/google" class="button secondary-button" style="width: 100%; padding: 12px; border-radius: 30px; display: flex; align-items: center; justify-content: center; gap: 10px; border-color: #444; color: #fff;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
+                Entrar com Google
+            </a>
+
+            <p style="text-align: center; margin-top: 30px; color: #888; font-size: 0.9rem;">
+                Já tem uma conta? <a href="/auth/login" style="color: #ffa500; text-decoration: none; font-weight: bold;">Faça Login</a>
+            </p>
+            
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="/" style="color: #888; text-decoration: none; font-size: 0.8rem;"><i class="fas fa-arrow-left"></i> Voltar para o Início</a>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+    
+    <script src="/js/theme-toggle.js"></script>
+    <script src="/js/index.js"></script>
+</body>
+</html>

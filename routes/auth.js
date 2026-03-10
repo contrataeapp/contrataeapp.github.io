@@ -104,10 +104,11 @@ router.post('/cadastro', async (req, res) => {
             .single();
 
         if (error) {
+            console.error("Erro no insert do cadastro:", error);
             if (error.code === '23505') {
                 return res.render('cadastro', { erro: 'E-mail já cadastrado' });
             }
-            throw error;
+            return res.render('cadastro', { erro: 'Erro ao criar conta no banco de dados: ' + error.message });
         }
 
         req.session.userId = data.id;
