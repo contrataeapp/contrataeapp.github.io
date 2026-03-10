@@ -27,6 +27,15 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false
 }));
 
+// Middleware para passar variáveis globais para todas as views
+app.use((req, res, next) => {
+    res.locals.adminLogado = req.session.adminLogado || false;
+    res.locals.userId = req.session.userId || null;
+    res.locals.userType = req.session.userType || null;
+    res.locals.fullName = req.session.fullName || null;
+    next();
+});
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -227,7 +236,14 @@ app.get("/auth/login", (req, res) => {
         res.status(500).send("Erro ao carregar a página de login. Tente novamente mais tarde.");
     }
 });
-app.get("/auth/cadastro", (req, res) => res.render("cadastro", { erro: null }));
+app.get("/auth/cadastro", (req, res) => {
+    try {
+        res.render("cadastro", { erro: null });
+    } catch (e) {
+        console.error("ERRO AO RENDERIZAR CADASTRO:", e);
+        res.status(500).send("Erro ao carregar a página de cadastro.");
+    }
+});
 app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
 app.get("/contato", (req, res) => res.render("contato"));
 app.get("/outros", (req, res) => res.render("outros", { banners: [] }));
@@ -265,29 +281,58 @@ app.get("/", async (req, res) => {
     }
 });
 
-// ROTAS DE CATEGORIAS
-const categoriasMap = [ 
-    { profissao: 'Pintor', rota: 'pintores' }, 
-    { profissao: 'Pedreiro', rota: 'pedreiros' }, 
-    { profissao: 'Eletricista', rota: 'eletricistas' }, 
-    { profissao: 'Encanador', rota: 'encanadores' } 
-];
+// ROTAS DE CATEGORIAS DINÂMICAS
+app.get("/categoria/:slug", async (req, res) => {
+    try {
+        const { slug } = req.params;
+        // Mapeamento de slugs para nomes de profissão (para as 4 principais)
+        const slugsMap = {
+            'pintores': 'Pintor',
+            'pedreiros': 'Pedreiro',
+            'eletricistas': 'Eletricista',
+            'encanadores': 'Encanador'
+        };
 
-categoriasMap.forEach(({ profissao, rota }) => {
-    app.get(`/${rota}`, async (req, res) => {
-        try {
-            const { data, error } = await supabase.from('profissionais').select('*').eq('profissao', profissao).eq('status', 'ATIVO');
-            if (error) throw error;
-            const { data: banners } = await supabase.from('banners').select('*').eq('ativo', true).order('ordem', { ascending: true });
+        const profissao = slugsMap[slug] || slug.charAt(0).toUpperCase() + slug.slice(1);
+        
+        const { data: profissionais, error } = await supabase
+            .from('profissionais')
+            .select('*')
+            .eq('profissao', profissao)
+            .eq('status', 'ATIVO');
             
-            res.render(rota, { 
-                [rota]: data || [], 
-                banners: banners || [] 
-            });
-        } catch (err) { 
-            res.render(rota, { [rota]: [], banners: [] }); 
-        }
-    });
+        if (error) throw error;
+        
+        const { data: banners } = await supabase
+            .from('banners')
+            .select('*')
+            .eq('ativo', true)
+            .order('ordem', { ascending: true });
+
+        // Se for uma das 4 principais, usa a view específica, senão usa uma view genérica 'categoria'
+        const viewName = ['pintores', 'pedreiros', 'eletricistas', 'encanadores'].includes(slug) ? slug : 'categoria';
+        
+        res.render(viewName, { 
+            [slug]: profissionais || [], // Para compatibilidade com views antigas
+            profissionais: profissionais || [], // Para a nova view genérica
+            categoriaNome: profissao,
+            banners: banners || [] 
+        });
+    } catch (err) {
+        console.error("Erro na rota de categoria:", err);
+        res.status(404).render("404", { mensagem: "Categoria não encontrada ou erro no servidor." });
+    }
+});
+
+// Redirecionamentos para manter compatibilidade com links antigos
+app.get("/pintores", (req, res) => res.redirect("/categoria/pintores"));
+app.get("/pedreiros", (req, res) => res.redirect("/categoria/pedreiros"));
+app.get("/eletricistas", (req, res) => res.redirect("/categoria/eletricistas"));
+app.get("/encanadores", (req, res) => res.redirect("/categoria/encanadores"));
+
+// Rota 404 para páginas não encontradas
+app.use((req, res) => {
+    res.status(404).render("404", { mensagem: "Página não encontrada." });
 });
 
 app.listen(port, () => console.log(`🚀 Servidor rodando na porta ${port}`));

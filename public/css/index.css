@@ -199,5 +199,19 @@ body { top: 0 !important; }
     .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
     #mobile-menu-trigger { -webkit-appearance: none; appearance: none; }
     
+    /* Botão WhatsApp Verde no Mobile */
+    .primary-button.trigger-modal {
+        background-color: #25D366 !important;
+        color: #fff !important;
+        border: none !important;
+    }
+    
+    /* Efeito no Ver Perfil */
+    .secondary-button:active {
+        background-color: #ffa500 !important;
+        color: #000 !important;
+        transform: scale(0.95);
+    }
+
     body { padding-bottom: 70px; }
 }

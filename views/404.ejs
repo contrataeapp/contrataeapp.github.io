@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Página Não Encontrada</title>
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body class="dark-mode">
+    <%- include('partials/header') %>
+
+    <main style="min-height: 60vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+        <div class="container">
+            <i class="fas fa-exclamation-triangle" style="font-size: 5rem; color: #ffa500; margin-bottom: 20px;"></i>
+            <h1 style="font-size: 3rem; margin-bottom: 10px;">404</h1>
+            <h2 style="margin-bottom: 20px;"><%= typeof mensagem !== 'undefined' ? mensagem : 'Página não encontrada' %></h2>
+            <p style="color: #ccc; margin-bottom: 30px;">Desculpe, a página que você está procurando não existe ou foi movida.</p>
+            <a href="/" class="button primary-button" style="padding: 15px 40px; border-radius: 30px;">Voltar para o Início</a>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+    
+    <script src="/js/theme-toggle.js"></script>
+    <script src="/js/index.js"></script>
+</body>
+</html>

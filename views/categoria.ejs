@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <%- include('partials/head', { title: 'Contrataê - ' + categoriaNome }) %>
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="/css/pintores.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main>
+        <div class="container" style="margin-top: 10px; margin-bottom: 40px;">
+            <h2 class="section-title" style="text-align: center;"><%= categoriaNome %> Disponíveis</h2>
+            
+            <div class="professionals-grid">
+                <% if (profissionais.length === 0) { %>
+                    <div style="text-align: center; width: 100%; padding: 40px; color: #ccc; grid-column: 1 / -1;">
+                        <i class="fas fa-user-slash" style="font-size: 3rem; margin-bottom: 15px; color: #555;"></i>
+                        <h3>Nenhum profissional encontrado nesta categoria.</h3>
+                        <p>Tente novamente mais tarde.</p>
+                        <a href="/" class="button secondary-button" style="margin-top: 20px;">Voltar ao Início</a>
+                    </div>
+                <% } else { %>
+                    <% profissionais.forEach(function(p) { %>
+                        <div class="professional-card">
+                            <div class="card-header-img">
+                                <img src="<%= p.foto || '/imagens/equipe_site/Mascote.png' %>" alt="<%= p.nome %>">
+                            </div>
+                            <div class="card-body">
+                                <h3><%= p.nome %></h3>
+                                <p class="profissao-tag"><%= p.profissao %></p>
+                                <div class="rating">
+                                    <i class="fas fa-star" style="color: gold;"></i> <%= p.avaliacao || '5.0' %>
+                                </div>
+                                <div class="card-actions">
+                                    <a href="#" 
+                                       class="button primary-button trigger-modal" 
+                                       data-link="https://wa.me/<%= p.whatsapp || '5516996484492' %>?text=Olá, vi seu perfil no Contrataê e gostaria de fazer um orçamento.">
+                                            <i class="fab fa-whatsapp"></i> Contatar
+                                    </a>
+                                    <a href="/perfil/<%= p.id %>" class="button secondary-button">Ver Perfil</a>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+    
+    <!-- Barra de Navegação Inferior (Mobile) -->
+    <nav class="mobile-bottom-nav mobile-only">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="/#busca-rapida" class="nav-item"><i class="fas fa-search"></i><span>Busca</span></a>
+        <button class="nav-item" id="mobile-menu-trigger"><i class="fas fa-bars"></i><span>Menu</span></button>
+        <a href="/auth/login" class="nav-item"><i class="fas fa-user"></i><span>Entrar</span></a>
+    </nav>
+
+    <script src="/js/theme-toggle.js"></script>
+    <script src="/js/index.js"></script>
+</body>
+</html>
