@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
-<body class="dark-mode">
+<body>
     <%- include('partials/header') %>
 
     <main style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
@@ -45,12 +45,37 @@
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; color: #fff; margin-bottom: 8px; font-size: 0.9rem;">Senha</label>
-                    <input type="password" name="password" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: #fff; outline: none;" placeholder="Mínimo 6 caracteres">
+                    <div style="position: relative;">
+                        <input type="password" id="password" name="password" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: #fff; outline: none; padding-right: 45px;" placeholder="Mínimo 6 caracteres">
+                        <button type="button" onclick="togglePassword('password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div style="margin-bottom: 30px;">
                     <label style="display: block; color: #fff; margin-bottom: 8px; font-size: 0.9rem;">Confirmar Senha</label>
-                    <input type="password" name="password_confirm" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: #fff; outline: none;" placeholder="Repita sua senha">
+                    <div style="position: relative;">
+                        <input type="password" id="password_confirm" name="password_confirm" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #333; color: #fff; outline: none; padding-right: 45px;" placeholder="Repita sua senha">
+                        <button type="button" onclick="togglePassword('password_confirm', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer;">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <script>
+                        function togglePassword(inputId, btn) {
+                            const input = document.getElementById(inputId);
+                            const icon = btn.querySelector('i');
+                            if (input.type === 'password') {
+                                input.type = 'text';
+                                icon.classList.remove('fa-eye');
+                                icon.classList.add('fa-eye-slash');
+                            } else {
+                                input.type = 'password';
+                                icon.classList.remove('fa-eye-slash');
+                                icon.classList.add('fa-eye');
+                            }
+                        }
+                    </script>
                 </div>
 
                 <button type="submit" class="button primary-button" style="width: 100%; padding: 15px; border-radius: 30px; font-size: 1rem; margin-bottom: 20px;">

@@ -156,12 +156,149 @@ app.get("/admin", checkAdmin, async (req, res) => {
 });
 
 // APIs DO PAINEL ADM
-app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => { res.json({sucesso: true}); });
-app.put("/api/profissionais/:id", checkAdminAPI, async (req, res) => { res.json({sucesso: true}); });
-app.post("/api/profissionais/:id/status", checkAdminAPI, async (req, res) => { res.json({sucesso: true}); });
-app.delete("/api/profissionais/:id", checkAdminAPI, async (req, res) => { res.json({sucesso: true}); });
-app.get("/api/profissionais/:id/logs", checkAdminAPI, async (req, res) => { res.json([]); });
-app.get("/api/relatorios/geral", checkAdminAPI, async (req, res) => { res.json([]); });
+app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
+    try {
+        const { valor, tipo_prazo, prazo, motivo } = req.body;
+        const id = req.params.id;
+        let dataVencimento = new Date();
+
+        if (tipo_prazo === 'dias') dataVencimento.setDate(dataVencimento.getDate() + parseInt(prazo));
+        else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
+        else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
+
+        const { error: errorAtualizar } = await supabase.from("profissionais")
+            .update({ status: "ATIVO", data_vencimento: dataVencimento.toISOString(), valor_pago: parseFloat(valor), data_ultima_edicao: new Date().toISOString() })
+            .eq("id", id);
+        if (errorAtualizar) throw errorAtualizar;
+
+        await supabase.from("logs_adm").insert({
+            id_profissional: id, tipo_acao: "APROVAÇÃO",
+            valores_novos: { status: "ATIVO", valor_pago: parseFloat(valor), data_vencimento: dataVencimento.toISOString() },
+            motivo_edicao: motivo || 'Aprovação inicial',
+            realizado_por: 'Admin'
+        });
+        res.json({ sucesso: true });
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.put("/api/profissionais/:id", checkAdminAPI, async (req, res) => {
+    try {
+        const { valor, tipo_prazo, prazo, motivo } = req.body;
+        const id = req.params.id;
+        let updateData = { data_ultima_edicao: new Date().toISOString() };
+        let tipoAcaoText = "EDIÇÃO";
+
+        if (valor !== undefined && prazo) tipoAcaoText = "VALOR E VENCIMENTO";
+        else if (valor !== undefined) tipoAcaoText = "APENAS VALOR";
+        else if (prazo) tipoAcaoText = "APENAS VENCIMENTO";
+
+        if (valor !== undefined) updateData.valor_pago = parseFloat(valor);
+        if (prazo) {
+            let dataVencimento = new Date();
+            if (tipo_prazo === 'dias') dataVencimento.setDate(dataVencimento.getDate() + parseInt(prazo));
+            else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
+            else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
+            updateData.data_vencimento = dataVencimento.toISOString();
+        }
+
+        await supabase.from("profissionais").update(updateData).eq("id", id);
+
+        await supabase.from("logs_adm").insert({
+            id_profissional: id, tipo_acao: tipoAcaoText,
+            valores_novos: updateData,
+            motivo_edicao: motivo || 'Sem motivo registrado',
+            realizado_por: 'Admin'
+        });
+        res.json({ sucesso: true });
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.post("/api/profissionais/:id/status", checkAdminAPI, async (req, res) => {
+    try {
+        const { novoStatus, motivo, renovar, valor, tipo_prazo, prazo } = req.body;
+        const id = req.params.id;
+
+        const { data: profAtual } = await supabase.from("profissionais").select("*").eq("id", id).single();
+        
+        let updateData = { status: novoStatus, data_ultima_edicao: new Date().toISOString() };
+        let tipoAcao = novoStatus === 'PAUSADO' ? 'CONTA PAUSADA' : 'CONTA REATIVADA';
+        
+        if (novoStatus === 'ATIVO' && renovar) {
+            updateData.valor_pago = parseFloat(valor);
+            let dataVencimento = new Date();
+            if (tipo_prazo === 'dias') dataVencimento.setDate(dataVencimento.getDate() + parseInt(prazo));
+            else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
+            else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
+            updateData.data_vencimento = dataVencimento.toISOString();
+            tipoAcao = 'REATIVADA COM RENOVAÇÃO';
+        }
+
+        const { error } = await supabase.from("profissionais").update(updateData).eq("id", id);
+        if (error) throw error;
+        
+        await supabase.from("logs_adm").insert({
+            id_profissional: id, 
+            tipo_acao: tipoAcao,
+            valores_anteriores: { status: profAtual.status },
+            valores_novos: updateData,
+            motivo_edicao: motivo || 'Ação de status', 
+            realizado_por: 'Admin'
+        });
+        res.json({ sucesso: true });
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.delete("/api/profissionais/:id", checkAdminAPI, async (req, res) => {
+    try {
+        const { senha, motivo } = req.body;
+        const adminPass = process.env.ADMIN_PASS || '#Relaxsempre153143';
+
+        if (senha !== adminPass) {
+            return res.status(401).json({ erro: 'Senha de administrador incorreta!' });
+        }
+
+        const id = req.params.id;
+        const { data: profAtual } = await supabase.from("profissionais").select("*").eq("id", id).single();
+
+        const { error } = await supabase.from("profissionais").update({ status: 'EXCLUIDO', data_ultima_edicao: new Date().toISOString() }).eq("id", id);
+        if (error) throw error;
+        
+        await supabase.from("logs_adm").insert({
+            id_profissional: id, 
+            tipo_acao: 'EXCLUSÃO DE CONTA',
+            valores_anteriores: { status: profAtual.status },
+            valores_novos: { status: 'EXCLUIDO' },
+            motivo_edicao: motivo || 'Excluído pelo Administrador', 
+            realizado_por: 'Admin'
+        });
+        
+        res.json({ sucesso: true });
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.get("/api/profissionais/:id/logs", checkAdminAPI, async (req, res) => {
+    try {
+        const { data: logs, error } = await supabase.from("logs_adm").select("*").eq("id_profissional", req.params.id).order("data_acao", { ascending: false });
+        if (error) throw error;
+        res.json(logs);
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.get("/api/relatorios/geral", checkAdminAPI, async (req, res) => {
+    try {
+        const { data, error } = await supabase.from("logs_adm").select(`*, profissionais (nome, profissao)`).order("data_acao", { ascending: false });
+        if (error) throw error;
+        res.json(data);
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.get("/api/comentarios", checkAdminAPI, async (req, res) => {
+    try {
+        const { data, error } = await supabase.from("comments").select(`*, users (full_name), profissionais (nome)`).order("created_at", { ascending: false });
+        if (error) throw error;
+        res.json(data || []);
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
 
 // APIs DE BANNERS DO PAINEL ADM
 app.get("/api/banners", checkAdminAPI, async (req, res) => {
