@@ -25,42 +25,44 @@ passport.use(new GoogleStrategy({
         const googleId = profile.id;
         const avatarUrl = profile.photos[0]?.value || null;
 
-        // Buscar ou criar usuário
-        let { data: user, error: selectError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('email', email)
+        // 1. Procurar usuário pelo email
+        const { data: existingUser, error: selectError } = await supabase
+            .from("users")
+            .select("*")
+            .eq("email", email)
             .single();
 
-        if (selectError && selectError.code !== 'PGRST116') {
-            throw selectError;
-        }
-
-        if (!user) {
-            // Criar novo usuário como cliente por padrão
+        let user;
+        if (existingUser) {
+            // 2. Se existir → atualizar google_id e avatar se necessário
+            const { data: updatedUser, error: updateError } = await supabase
+                .from("users")
+                .update({
+                    google_id: googleId,
+                    avatar_url: existingUser.avatar_url || avatarUrl
+                })
+                .eq("email", email)
+                .select()
+                .single();
+            
+            if (updateError) throw updateError;
+            user = updatedUser;
+        } else {
+            // 3. Se não existir → criar novo usuário como cliente por padrão
             const { data: newUser, error: insertError } = await supabase
-                .from('users')
-                .insert([{
-                    email,
+                .from("users")
+                .insert({
+                    email: email,
                     full_name: fullName,
                     google_id: googleId,
                     avatar_url: avatarUrl,
                     user_type: 'client'
-                }])
+                })
                 .select()
                 .single();
-                
+            
             if (insertError) throw insertError;
-            return done(null, newUser);
-        }
-
-        // Se o usuário já existe, mas logou com Google pela primeira vez
-        if (!user.google_id) {
-            const { error: updateError } = await supabase
-                .from('users')
-                .update({ google_id: googleId, avatar_url: user.avatar_url || avatarUrl })
-                .eq('id', user.id);
-            if (updateError) throw updateError;
+            user = newUser;
         }
 
         return done(null, user);

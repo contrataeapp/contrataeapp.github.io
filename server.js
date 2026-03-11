@@ -34,12 +34,17 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // 2. CONFIGURAÇÃO DE SESSÃO (Deve vir ANTES de qualquer middleware que use req.session)
+if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+}
+
 app.use(session({
     secret: process.env.SESSION_SECRET || "contratae_secret_key_2026",
     resave: false,
     saveUninitialized: false,
     cookie: { 
         secure: process.env.NODE_ENV === "production", // Render usa HTTPS
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 1000 * 60 * 60 * 24 // 24 horas
     }
 }));
@@ -47,6 +52,10 @@ app.use(session({
 // 3. CONFIGURAÇÃO PASSPORT (Deve vir DEPOIS da sessão)
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Importar Rotas de Autenticação
+const authRoutes = require("./routes/auth");
+app.use("/auth", authRoutes);
 
 // 4. MIDDLEWARE DE VARIÁVEIS GLOBAIS (Agora com verificação de segurança)
 app.use((req, res, next) => {
