@@ -374,8 +374,6 @@ app.delete("/api/banners/:id", checkAdminAPI, async (req, res) => {
 // ============================================
 // ROTAS DOS USUÁRIOS E PÁGINAS PÚBLICAS
 // ============================================
-const authRoutes = require("./routes/auth");
-app.use("/auth", authRoutes);
 
 const dashboardRoutes = require("./routes/dashboards");
 app.use("/", dashboardRoutes);
