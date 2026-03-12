@@ -24,6 +24,28 @@
                     <span class="login-text">Painel ADM</span>
                     <span class="login-icon"><i class="fas fa-user-shield"></i></span>
                 </a>
+            <% } else if (typeof user !== 'undefined' && user) { %>
+                <div class="user-dropdown">
+                    <button class="login-pill dropdown-trigger">
+                        <span class="login-text"><%= user.full_name.split(' ')[0] %></span>
+                        <span class="login-icon">
+                            <% if (user.avatar_url) { %>
+                                <img src="<%= user.avatar_url %>" alt="Avatar" style="width: 24px; height: 24px; border-radius: 50%;">
+                            <% } else { %>
+                                <div style="width: 24px; height: 24px; border-radius: 50%; background: #ffa500; color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">
+                                    <%= user.full_name.charAt(0).toUpperCase() %>
+                                </div>
+                            <% } %>
+                        </span>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="/perfil"><i class="fas fa-user"></i> Meu Perfil</a>
+                        <a href="/solicitacoes"><i class="fas fa-list"></i> Minhas Solicitações</a>
+                        <a href="/favoritos"><i class="fas fa-heart"></i> Favoritos</a>
+                        <hr>
+                        <a href="/auth/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Sair</a>
+                    </div>
+                </div>
             <% } else { %>
                 <a href="/auth/login" class="login-pill">
                     <span class="login-text">Entrar / Cadastrar</span>

@@ -75,6 +75,30 @@
                             <p>R$ <%= typeof totais !== 'undefined' ? totais.receitaMes.toFixed(2).replace('.', ',') : '0,00' %></p>
                         </div>
                     </div>
+
+                    <div class="card finance" style="border-left: 4px solid #2ecc71;">
+                        <div class="icon"><i class="fas fa-history"></i></div>
+                        <div class="details">
+                            <h3>Últimos 30 Dias</h3>
+                            <p>R$ <%= typeof totais !== 'undefined' ? totais.receita30d.toFixed(2).replace('.', ',') : '0,00' %></p>
+                        </div>
+                    </div>
+
+                    <div class="card finance" style="border-left: 4px solid #3498db;">
+                        <div class="icon"><i class="fas fa-calendar-week"></i></div>
+                        <div class="details">
+                            <h3>Última Semana</h3>
+                            <p>R$ <%= typeof totais !== 'undefined' ? totais.receita7d.toFixed(2).replace('.', ',') : '0,00' %></p>
+                        </div>
+                    </div>
+
+                    <div class="card finance" style="border-left: 4px solid #f1c40f;">
+                        <div class="icon"><i class="fas fa-bolt"></i></div>
+                        <div class="details">
+                            <h3>Hoje</h3>
+                            <p>R$ <%= typeof totais !== 'undefined' ? totais.receitaHoje.toFixed(2).replace('.', ',') : '0,00' %></p>
+                        </div>
+                    </div>
       
                     <div class="card active-users">
                         <div class="icon"><i class="fas fa-check-circle"></i></div>

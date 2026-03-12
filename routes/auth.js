@@ -46,7 +46,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
             if (updateError) throw updateError;
             user = updatedUser;
         } else {
-            // 3. Se não existir → criar novo usuário como cliente por padrão
+            // 3. Se não existir → criar novo usuário (user_type será NULL para forçar onboarding)
             const { data: newUser, error: insertError } = await supabase
                 .from("users")
                 .insert({
@@ -54,7 +54,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
                     full_name: fullName,
                     google_id: googleId,
                     avatar_url: avatarUrl,
-                    user_type: 'client'
+                    user_type: null // Força o onboarding
                 })
                 .select()
                 .single();
@@ -170,14 +170,22 @@ router.get('/google', passport.authenticate('google', {
 router.get('/google/callback', passport.authenticate('google', {
     failureRedirect: '/auth/login'
 }), (req, res) => {
+    // Sincronizar sessão manual com Passport
     req.session.userId = req.user.id;
     req.session.userType = req.user.user_type;
     req.session.fullName = req.user.full_name;
 
+    // Lógica de Redirecionamento MVP
+    if (!req.user.user_type) {
+        return res.redirect('/onboarding');
+    }
+
     if (req.user.user_type === 'professional') {
-        res.redirect('/profissional/dashboard');
+        // Verificar se o perfil profissional existe e está completo
+        res.redirect('/profissional/completar-perfil');
     } else {
-        res.redirect('/cliente/dashboard');
+        // Clientes vão direto para a home
+        res.redirect('/');
     }
 });
 

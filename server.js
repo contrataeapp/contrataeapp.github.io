@@ -65,6 +65,17 @@ app.use((req, res, next) => {
     res.locals.userId = sess.userId || null;
     res.locals.userType = sess.userType || null;
     res.locals.fullName = sess.fullName || null;
+    
+    // Adicionar objeto user global para todas as views EJS
+    res.locals.user = req.user || null;
+    
+    // Lógica de Redirecionamento Inteligente (Onboarding)
+    if (req.user && !req.path.startsWith('/auth') && !req.path.startsWith('/onboarding') && !req.path.startsWith('/public')) {
+        if (!req.user.user_type) {
+            return res.redirect('/onboarding');
+        }
+    }
+    
     next();
 });
 
@@ -131,17 +142,36 @@ app.get("/admin", checkAdmin, async (req, res) => {
             return dataA - dataB;
         });
 
+        // BUSCAR TODOS OS PROFISSIONAIS PARA O RESUMO GLOBAL (Independente de filtros)
+        const { data: todosProfissionais } = await supabase.from("profissionais").select("*");
+        const hoje = new Date();
+        const trintaDiasAtras = new Date(new Date().setDate(hoje.getDate() - 30));
+        const seteDiasAtras = new Date(new Date().setDate(hoje.getDate() - 7));
+
         const totais = {
-            ativos: profissionais.filter(p => p.status === 'ATIVO').length,
-            pendentes: profissionais.filter(p => p.status === 'PENDENTE').length,
-            pausados: profissionais.filter(p => p.status === 'PAUSADO').length,
-            receitaTotal: profissionais.reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
-            receitaMes: profissionais.filter(p => {
+            ativos: todosProfissionais.filter(p => p.status === 'ATIVO').length,
+            pendentes: todosProfissionais.filter(p => p.status === 'PENDENTE').length,
+            pausados: todosProfissionais.filter(p => p.status === 'PAUSADO').length,
+            receitaTotal: todosProfissionais.reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
+            receitaMes: todosProfissionais.filter(p => {
                 const dataRef = p.data_ultima_edicao || p.data_cadastro;
                 if (!dataRef) return false;
                 const data = new Date(dataRef);
-                const hoje = new Date();
                 return data.getMonth() === hoje.getMonth() && data.getFullYear() === hoje.getFullYear();
+            }).reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
+            receita30d: todosProfissionais.filter(p => {
+                const dataRef = p.data_ultima_edicao || p.data_cadastro;
+                return dataRef && new Date(dataRef) >= trintaDiasAtras;
+            }).reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
+            receita7d: todosProfissionais.filter(p => {
+                const dataRef = p.data_ultima_edicao || p.data_cadastro;
+                return dataRef && new Date(dataRef) >= seteDiasAtras;
+            }).reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
+            receitaHoje: todosProfissionais.filter(p => {
+                const dataRef = p.data_ultima_edicao || p.data_cadastro;
+                if (!dataRef) return false;
+                const data = new Date(dataRef);
+                return data.toDateString() === hoje.toDateString();
             }).reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0)
         };
 
@@ -396,11 +426,93 @@ app.get("/auth/cadastro", (req, res) => {
     }
 });
 
+// ROTA DE ONBOARDING
+app.get("/onboarding", (req, res) => {
+    if (!req.user) return res.redirect("/auth/login");
+    if (req.user.user_type) return res.redirect("/");
+    res.render("onboarding", { erro: null });
+});
+
+app.post("/onboarding", async (req, res) => {
+    if (!req.user) return res.status(401).send("Não autorizado");
+    const { user_type } = req.body;
+    
+    if (user_type !== 'client' && user_type !== 'professional') {
+        return res.render("onboarding", { erro: "Escolha uma opção válida" });
+    }
+
+    try {
+        const { error } = await supabase
+            .from("users")
+            .update({ user_type })
+            .eq("id", req.user.id);
+        
+        if (error) throw error;
+        
+        // Atualizar objeto na sessão
+        req.user.user_type = user_type;
+        
+        if (user_type === 'professional') {
+            res.redirect("/profissional/completar-perfil");
+        } else {
+            res.redirect("/");
+        }
+    } catch (err) {
+        console.error("Erro no onboarding:", err);
+        res.render("onboarding", { erro: "Erro ao salvar sua escolha" });
+    }
+});
+
 app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
 app.get("/contato", (req, res) => res.render("contato"));
 app.get("/outros", (req, res) => res.render("outros", { banners: [] }));
 app.get("/avaliacao", (req, res) => res.render("avaliacao"));
 app.get("/termos-de-uso", (req, res) => res.render("termos_de_uso"));
+
+// ROTA PARA COMPLETAR PERFIL PROFISSIONAL
+app.get("/profissional/completar-perfil", async (req, res) => {
+    if (!req.user || req.user.user_type !== 'professional') return res.redirect("/");
+    
+    // Verificar se já existe perfil profissional
+    const { data: prof } = await supabase
+        .from("profissionais")
+        .select("*")
+        .eq("user_id", req.user.id)
+        .single();
+        
+    res.render("completar_perfil", { profissional: prof || {}, erro: null });
+});
+
+app.post("/profissional/completar-perfil", async (req, res) => {
+    if (!req.user || req.user.user_type !== 'professional') return res.status(401).send("Não autorizado");
+    
+    const { nome, profissao, telefone, cidade, descricao, preco_medio } = req.body;
+    
+    try {
+        const profData = {
+            user_id: req.user.id,
+            nome,
+            profissao,
+            telefone,
+            cidade,
+            descricao,
+            preco_medio: parseFloat(preco_medio) || 0,
+            status: 'PENDENTE',
+            data_cadastro: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+            .from("profissionais")
+            .upsert(profData, { onConflict: 'user_id' });
+            
+        if (error) throw error;
+        
+        res.render("completar_perfil_sucesso");
+    } catch (err) {
+        console.error("Erro ao completar perfil:", err);
+        res.render("completar_perfil", { profissional: req.body, erro: "Erro ao salvar seu perfil profissional." });
+    }
+});
 
 app.get("/perfil/:id", async (req, res) => {
     try {
