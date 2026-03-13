@@ -19,6 +19,26 @@
 </head>
 <body>
 
+    <% const bannerEsq = typeof banners !== 'undefined' && banners.find(b => b.posicao === 3); %>
+    <% if (bannerEsq) { %>
+    <div class="banner-lateral banner-esquerda" id="banner-mov">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerEsq.link_destino || '#' %>">
+            <img src="<%= bannerEsq.imagem_url %>" alt="<%= bannerEsq.titulo || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
+    <% const bannerDir = typeof banners !== 'undefined' && banners.find(b => b.posicao === 4); %>
+    <% if (bannerDir) { %>
+    <div class="banner-lateral banner-direita" id="banner-speed">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerDir.link_destino || '#' %>">
+            <img src="<%= bannerDir.imagem_url %>" alt="<%= bannerDir.titulo || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
     <% if (typeof adminLogado !== 'undefined' && adminLogado) { %>
     <div class="admin-top-bar" style="background: #ffa500; color: #000; padding: 10px 0; text-align: center; font-weight: bold;">
         <div class="container">
@@ -39,19 +59,19 @@
         <section class="carousel-section" id="carousel-topo">
             <div class="carousel-container">
                 
-                <% const bannersTopo = typeof banners !== 'undefined' ? banners.filter(b => b.position === 'home') : []; %>
+                <% const bannersTopo = typeof banners !== 'undefined' ? banners.filter(b => b.posicao === 1) : []; %>
                 
                 <% if (bannersTopo.length > 0) { %>
                     <% bannersTopo.forEach(function(banner, index) { %>
                         <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                            <a href="<%= banner.link_destination || '#' %>">
-                                <img src="<%= banner.image_url %>" alt="<%= banner.title || 'Banner' %>" style="width:100%; height:100%;">
+                            <a href="#" class="trigger-modal" data-link="<%= banner.link_destino || '#' %>">
+                                <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo || 'Banner' %>" style="width:100%; height:100%;">
                             </a>
                         </div>
                     <% }); %>
                 <% } else { %>
                     <div class="carousel-item active">
-                        <a href="#">
+                        <a href="#" class="trigger-modal" data-link="https://wa.me/5516996484492?text=Olá, vi o anúncio do Ponto Forte no Contrataê e gostaria de mais informações!">
                             <img src="/imagens/parceiros/ponto_forte.png" alt="Ponto Forte" style="width:100%; height:100%;">
                         </a>
                     </div>
@@ -82,30 +102,71 @@
         <section class="container content-section">
             <h2 class="section-title" style="text-align: center;">Serviços Mais Procurados</h2>
             <div class="service-cards">
-                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-                    <% categories.slice(0, 4).forEach(function(cat) { %>
-                        <a href="/categoria/<%= cat.slug %>" class="card">
-                            <i class="<%= cat.icon_url || 'fas fa-tools' %>"></i>
-                            <h4><%= cat.name %></h4>
-                        </a>
-                    <% }); %>
-                <% } else { %>
-                    <a href="/categoria/pedreiros" class="card"><i class="fa-solid fa-trowel-bricks"></i><h4>Pedreiros</h4></a>
-                    <a href="/categoria/pintores" class="card"><i class="fas fa-paint-roller"></i><h4>Pintores</h4></a>
-                    <a href="/categoria/eletricistas" class="card"><i class="fas fa-bolt"></i><h4>Eletricistas</h4></a>
-                    <a href="/categoria/encanadores" class="card"><i class="fas fa-wrench"></i><h4>Encanadores</h4></a>
-                <% } %>
+                <a href="/pedreiros" class="card"><i class="fa-solid fa-trowel-bricks"></i><h4>Pedreiros</h4></a>
+                <a href="/pintores" class="card"><i class="fas fa-paint-roller"></i><h4>Pintores</h4></a>
+                <a href="/eletricistas" class="card"><i class="fas fa-bolt"></i><h4>Eletricistas</h4></a>
+                <a href="/encanadores" class="card"><i class="fas fa-wrench"></i><h4>Encanadores</h4></a>
             </div>
             <div style="text-align: center; margin-top: 30px;">
                 <a href="/outros" class="button secondary-button">Ver Todas as Categorias</a>
             </div>
         </section>
+
+        <section class="container" style="margin-top: 50px; margin-bottom: 50px; text-align: center;">
+            <h2 style="color: #ffa500; margin-bottom: 20px;">Como Funciona?</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+                <div style="background: #222; padding: 30px; border-radius: 12px; border: 1px solid #333;">
+                    <i class="fas fa-search" style="font-size: 40px; color: #ffa500; margin-bottom: 15px;"></i>
+                    <h3 style="color: #fff; margin-bottom: 10px;">1. Busque</h3>
+                    <p style="color: #ccc; font-size: 14px;">Encontre profissionais qualificados em sua região para o serviço que você precisa.</p>
+                </div>
+                <div style="background: #222; padding: 30px; border-radius: 12px; border: 1px solid #333;">
+                    <i class="fas fa-comments" style="font-size: 40px; color: #ffa500; margin-bottom: 15px;"></i>
+                    <h3 style="color: #fff; margin-bottom: 10px;">2. Contate</h3>
+                    <p style="color: #ccc; font-size: 14px;">Fale diretamente com o profissional e tire suas dúvidas sobre o serviço.</p>
+                </div>
+                <div style="background: #222; padding: 30px; border-radius: 12px; border: 1px solid #333;">
+                    <i class="fas fa-check-double" style="font-size: 40px; color: #ffa500; margin-bottom: 15px;"></i>
+                    <h3 style="color: #fff; margin-bottom: 10px;">3. Contrate</h3>
+                    <p style="color: #ccc; font-size: 14px;">Combine os detalhes e realize o serviço com segurança e transparência.</p>
+                </div>
+            </div>
+        </section>
     </main>
+
+    <nav class="mobile-bottom-nav mobile-only">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="/#busca-rapida" class="nav-item"><i class="fas fa-search"></i><span>Busca</span></a>
+        <button class="nav-item" id="mobile-menu-trigger"><i class="fas fa-bars"></i><span>Menu</span></button>
+        <a href="/auth/login" class="nav-item"><i class="fas fa-user"></i><span>Entrar</span></a>
+    </nav>
 
     <%- include('partials/footer') %>
 
+    <!-- Google Translate Script (Apenas um) -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          if (!document.querySelector('.goog-te-gadget')) {
+            new google.translate.TranslateElement({
+                pageLanguage: 'pt', 
+                includedLanguages: 'pt,en', 
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+              }, 'google_translate_element');
+          }
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <script src="/js/theme-toggle.js"></script>
     <script src="/js/search.js"></script>
     <script src="/js/index.js"></script>
+    
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+            <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
 </body>
 </html>

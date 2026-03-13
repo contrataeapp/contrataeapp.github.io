@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 
-// CONFIGURAÇÃO SUPABASE - Usando estritamente process.env
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // Middleware para verificar se o usuário está logado
 const checkAuth = (req, res, next) => {
-    if (req.session.userId) return next();
+    if (req.session && req.session.userId) return next();
     res.redirect('/auth/login');
 };
 
@@ -18,44 +17,46 @@ router.get('/profissional/dashboard', checkAuth, async (req, res) => {
             return res.redirect('/cliente/dashboard');
         }
         
-        // Join com users para pegar dados básicos
-        const { data: profissional, error: profError } = await supabase
+        // Buscar dados do profissional com join em users e categories
+        const { data: profissional, error } = await supabase
             .from('professionals')
-            .select(`
-                *,
-                users (full_name, email, phone_number, avatar_url),
-                categories (name)
-            `)
+            .select('*, users(full_name, email, phone_number, avatar_url), categories(name)')
             .eq('id', req.session.userId)
-            .single();
+            .maybeSingle();
         
-        if (profError) throw profError;
+        if (error) throw error;
+
+        // Se não existir perfil profissional, criar um básico
+        if (!profissional) {
+            await supabase.from('professionals').insert([{ id: req.session.userId, status: 'pending' }]);
+        }
         
-        const { data: servicos } = await supabase
-            .from('services')
+        const { data: categorias } = await supabase.from('categories').select('*');
+        
+        // Buscar avaliações (reviews)
+        const { data: reviews } = await supabase
+            .from('reviews')
             .select('*')
             .eq('professional_id', req.session.userId);
         
-        const { data: categorias } = await supabase
-            .from('categories')
-            .select('*');
-        
+        const avaliacaoMedia = reviews && reviews.length > 0 
+            ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+            : '0';
+
         res.render('profissional-dashboard', {
             fullName: req.session.fullName,
             profissional: profissional || {},
-            servicos: servicos || [],
             categorias: categorias || [],
-            contatosRecebidos: servicos ? servicos.length : 0,
-            servicosConcluidos: servicos ? servicos.filter(s => s.status === 'completed').length : 0,
-            faturamentoMes: '0,00',
-            avaliacaoMedia: '0'
+            contatosRecebidos: 0, // Ajustar conforme tabela de contatos se existir
+            servicosConcluidos: 0,
+            faturamentoMes: profissional?.valor_pago || '0,00',
+            avaliacaoMedia: avaliacaoMedia
         });
     } catch (err) {
-        console.error(err);
+        console.error("Erro no dashboard profissional:", err);
         res.render('profissional-dashboard', { 
             fullName: req.session.fullName,
             profissional: {},
-            servicos: [],
             categorias: [],
             contatosRecebidos: 0,
             servicosConcluidos: 0,
@@ -72,40 +73,24 @@ router.get('/cliente/dashboard', checkAuth, async (req, res) => {
             return res.redirect('/profissional/dashboard');
         }
         
-        // Join com users para pegar dados básicos
+        // Profissionais recomendados (ativos)
         const { data: profissionaisRecomendados } = await supabase
             .from('professionals')
-            .select(`
-                *,
-                users (full_name, avatar_url),
-                categories (name)
-            `)
+            .select('*, users(full_name, avatar_url), categories(name)')
             .eq('status', 'active')
-            .limit(5);
-        
-        const { data: favoritos } = await supabase
-            .from('favorites')
-            .select(`
-                *,
-                professionals (
-                    *,
-                    users (full_name, avatar_url),
-                    categories (name)
-                )
-            `)
-            .eq('client_id', req.session.userId);
+            .limit(6);
         
         res.render('cliente-dashboard', {
             fullName: req.session.fullName,
             profissionaisRecomendados: profissionaisRecomendados || [],
-            favoritos: favoritos || [],
-            favoritosCont: favoritos ? favoritos.length : 0,
+            favoritos: [], // Implementar se houver tabela de favoritos
+            favoritosCont: 0,
             servicosContratados: 0,
             avaliacoesFeiras: 0,
             historico: []
         });
     } catch (err) {
-        console.error(err);
+        console.error("Erro no dashboard cliente:", err);
         res.render('cliente-dashboard', {
             fullName: req.session.fullName,
             profissionaisRecomendados: [],
@@ -118,106 +103,30 @@ router.get('/cliente/dashboard', checkAuth, async (req, res) => {
     }
 });
 
-// Registrar novo serviço
-router.post('/profissional/novo-servico', checkAuth, async (req, res) => {
-    try {
-        const { client_name, service_description, value } = req.body;
-        
-        const { data, error } = await supabase
-            .from('services')
-            .insert([{
-                professional_id: req.session.userId,
-                client_name,
-                service_description,
-                value,
-                status: 'pending'
-            }]);
-        
-        if (error) throw error;
-        
-        res.json({ sucesso: true, mensagem: 'Serviço registrado com sucesso' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ erro: 'Erro ao registrar serviço' });
-    }
-});
-
-// Marcar serviço como concluído
-router.post('/profissional/servico/:id/concluir', checkAuth, async (req, res) => {
-    try {
-        const { data, error } = await supabase
-            .from('services')
-            .update({ status: 'completed' })
-            .eq('id', req.params.id) // UUID
-            .eq('professional_id', req.session.userId);
-        
-        if (error) throw error;
-        
-        res.json({ sucesso: true });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ erro: 'Erro ao atualizar serviço' });
-    }
-});
-
-// Favoritar profissional
-router.post('/cliente/favoritar/:profissionalId', checkAuth, async (req, res) => {
-    try {
-        const { data, error } = await supabase
-            .from('favorites')
-            .insert([{
-                client_id: req.session.userId,
-                professional_id: req.params.profissionalId // UUID
-            }]);
-        
-        if (error) throw error;
-        
-        res.json({ sucesso: true });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ erro: 'Erro ao favoritar' });
-    }
-});
-
-// Remover favorito
-router.post('/cliente/remover-favorito/:profissionalId', checkAuth, async (req, res) => {
-    try {
-        const { data, error } = await supabase
-            .from('favorites')
-            .delete()
-            .eq('client_id', req.session.userId)
-            .eq('professional_id', req.params.profissionalId); // UUID
-        
-        if (error) throw error;
-        
-        res.json({ sucesso: true });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ erro: 'Erro ao remover favorito' });
-    }
-});
-
 // Atualizar perfil do profissional
 router.post('/profissional/atualizar-perfil', checkAuth, async (req, res) => {
     try {
-        const { category_id, description, price_info, availability } = req.body;
+        const { category_id, description, phone_number } = req.body;
         
-        const { data, error } = await supabase
+        // Atualizar tabela professionals
+        const { error: profError } = await supabase
             .from('professionals')
             .update({
-                category_id,
-                description,
-                price_info,
-                availability,
-                updated_at: new Date().toISOString()
+                category_id: category_id || null,
+                description: description || ''
             })
             .eq('id', req.session.userId);
         
-        if (error) throw error;
+        if (profError) throw profError;
+
+        // Atualizar telefone na tabela users
+        if (phone_number) {
+            await supabase.from('users').update({ phone_number }).eq('id', req.session.userId);
+        }
         
         res.redirect('/profissional/dashboard');
     } catch (err) {
-        console.error(err);
+        console.error("Erro ao atualizar perfil:", err);
         res.redirect('/profissional/dashboard');
     }
 });

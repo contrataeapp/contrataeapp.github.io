@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 // O PULO DO GATO PRO RENDER FUNCIONAR (Google Login e Sessão Segura)
 app.set('trust proxy', 1);
 
-// CONFIGURAÇÃO SUPABASE - Usando estritamente process.env para segurança no Render
+// CONFIGURAÇÃO SUPABASE
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // CONFIGURAÇÃO MULTER PARA BANNERS
@@ -33,19 +33,23 @@ app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// 2. CONFIGURAÇÃO DE SESSÃO
+// 2. CONFIGURAÇÃO DE SESSÃO (Deve vir ANTES de qualquer middleware que use req.session)
+if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+}
+
 app.use(session({
     secret: process.env.SESSION_SECRET || "contratae_secret_key_2026",
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: process.env.NODE_ENV === "production",
+        secure: process.env.NODE_ENV === "production", // Render usa HTTPS
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 1000 * 60 * 60 * 24 // 24 horas
     }
 }));
 
-// 3. CONFIGURAÇÃO PASSPORT
+// 3. CONFIGURAÇÃO PASSPORT (Deve vir DEPOIS da sessão)
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -53,19 +57,18 @@ app.use(passport.session());
 const authRoutes = require("./routes/auth");
 app.use("/auth", authRoutes);
 
-// 4. MIDDLEWARE DE VARIÁVEIS GLOBAIS
+// 4. MIDDLEWARE DE VARIÁVEIS GLOBAIS (Agora com verificação de segurança)
 app.use((req, res, next) => {
     const sess = req.session || {};
     res.locals.adminLogado = sess.adminLogado || false;
     res.locals.userId = sess.userId || null;
     res.locals.userType = sess.userType || null;
     res.locals.fullName = sess.fullName || null;
-    res.locals.user = req.user || null;
     next();
 });
 
 // ============================================
-// SISTEMA DE LOGIN DO ADMINISTRADOR
+// SISTEMA DE LOGIN DO ADMINISTRADOR (Painel Antigo)
 // ============================================
 const checkAdmin = (req, res, next) => {
     if (req.session && req.session.adminLogado) return next();
@@ -109,43 +112,50 @@ app.get("/admin", checkAdmin, async (req, res) => {
     try {
         const { categoria, status, busca, ordenar } = req.query;
         
-        // Join com users e categories
-        let query = supabase
-            .from("professionals")
-            .select(`
-                *,
-                users (full_name, email, phone_number),
-                categories (name)
-            `);
-
+        // Join com users para pegar o nome e email
+        let query = supabase.from("professionals").select(`
+            *,
+            users (full_name, email, phone_number),
+            categories (name)
+        `);
+        
         if (categoria) query = query.eq('category_id', categoria);
-        if (status) query = query.eq('status', status.toLowerCase());
+        if (status) query = query.eq('status', status);
         
         const { data: professionals, error } = await query.order("created_at", { ascending: false });
         if (error) throw error;
 
-        let filtrados = (professionals || []).filter(p => p.id && p.users);
-        
-        if (!status) filtrados = filtrados.filter(p => p.status !== 'excluded');
+        // Mapear para o formato esperado pela view admin.ejs (se necessário)
+        let filtrados = (professionals || []).map(p => ({
+            id: p.id,
+            nome: p.users?.full_name || 'Sem Nome',
+            email: p.users?.email,
+            profissao: p.categories?.name || 'Sem Categoria',
+            status: p.status.toUpperCase(),
+            data_cadastro: p.created_at,
+            valor_pago: p.valor_pago || 0,
+            data_vencimento: p.data_vencimento
+        }));
         
         if (busca) {
-            const term = busca.toLowerCase();
+            const b = busca.toLowerCase();
             filtrados = filtrados.filter(p => 
-                p.users.full_name.toLowerCase().includes(term) || 
-                (p.categories && p.categories.name.toLowerCase().includes(term))
+                p.nome.toLowerCase().includes(b) || 
+                p.profissao.toLowerCase().includes(b) ||
+                p.email.toLowerCase().includes(b)
             );
         }
-
+        
         const totais = {
-            ativos: professionals.filter(p => p.status === 'active').length,
-            pendentes: professionals.filter(p => p.status === 'pending').length,
-            pausados: professionals.filter(p => p.status === 'paused').length,
-            receitaTotal: professionals.reduce((acc, p) => acc + (parseFloat(p.payment_value) || 0), 0),
-            receitaMes: professionals.filter(p => {
-                const data = new Date(p.updated_at || p.created_at);
+            ativos: filtrados.filter(p => p.status === 'ACTIVE' || p.status === 'ATIVO').length,
+            pendentes: filtrados.filter(p => p.status === 'PENDING' || p.status === 'PENDENTE').length,
+            pausados: filtrados.filter(p => p.status === 'PAUSED' || p.status === 'PAUSADO').length,
+            receitaTotal: filtrados.reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0),
+            receitaMes: filtrados.filter(p => {
+                const data = new Date(p.data_cadastro);
                 const hoje = new Date();
                 return data.getMonth() === hoje.getMonth() && data.getFullYear() === hoje.getFullYear();
-            }).reduce((acc, p) => acc + (parseFloat(p.payment_value) || 0), 0)
+            }).reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0)
         };
 
         res.render("admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar } });
@@ -159,78 +169,112 @@ app.get("/admin", checkAdmin, async (req, res) => {
 app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
     try {
         const { valor, tipo_prazo, prazo, motivo } = req.body;
-        const id = req.params.id; // UUID
-        let plan_expires_at = new Date();
+        const id = req.params.id;
+        let dataVencimento = new Date();
 
-        if (tipo_prazo === 'dias') plan_expires_at.setDate(plan_expires_at.getDate() + parseInt(prazo));
-        else if (tipo_prazo === 'meses') plan_expires_at.setDate(plan_expires_at.getDate() + (parseInt(prazo) * 30));
-        else if (tipo_prazo === 'data') plan_expires_at = new Date(prazo);
+        if (tipo_prazo === 'dias') dataVencimento.setDate(dataVencimento.getDate() + parseInt(prazo));
+        else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
+        else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
 
         const { error: errorAtualizar } = await supabase.from("professionals")
             .update({ 
                 status: "active", 
-                plan_expires_at: plan_expires_at.toISOString(), 
-                payment_value: parseFloat(valor), 
-                updated_at: new Date().toISOString() 
+                data_vencimento: dataVencimento.toISOString(), 
+                valor_pago: parseFloat(valor)
             })
             .eq("id", id);
         if (errorAtualizar) throw errorAtualizar;
 
-        await supabase.from("admin_logs").insert({
-            professional_id: id, 
-            action_type: "APROVAÇÃO",
-            new_values: { status: "active", payment_value: parseFloat(valor), plan_expires_at: plan_expires_at.toISOString() },
-            edit_reason: motivo || 'Aprovação inicial',
-            performed_by: 'Admin'
-        });
         res.json({ sucesso: true });
     } catch (err) { res.status(500).json({ erro: err.message }); }
 });
 
+// APIs DE BANNERS
+app.get("/api/banners", checkAdminAPI, async (req, res) => {
+    try {
+        const { data: banners, error } = await supabase
+            .from("banners")
+            .select("*")
+            .order("position", { ascending: true });
+        if (error) throw error;
+        res.json(banners || []);
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
 // ============================================
-// ROTAS PÚBLICAS E CATEGORIAS
+// ROTAS DOS USUÁRIOS E PÁGINAS PÚBLICAS
 // ============================================
+const dashboardRoutes = require("./routes/dashboards");
+app.use("/", dashboardRoutes);
+
+app.get("/auth/login", (req, res) => res.render("auth/login", { erro: null }));
+app.get("/auth/cadastro", (req, res) => res.render("auth/cadastro", { erro: null }));
+app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
+app.get("/contato", (req, res) => res.render("contato"));
+app.get("/termos-de-uso", (req, res) => res.render("termos_de_uso"));
+
+// ROTA DA HOMEPAGE
 app.get("/", async (req, res) => {
     try {
-        const { data: banners } = await supabase.from("banners").select("*").eq("is_active", true).order("order", { ascending: true });
-        const { data: categories } = await supabase.from("categories").select("*").order("name", { ascending: true });
-        res.render("index", { banners: banners || [], categories: categories || [], currentPage: 'index' });
+        const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('position', { ascending: true });
+        const { data: categories } = await supabase.from('categories').select('*');
+        res.render("index", { 
+            banners: banners || [],
+            categories: categories || [],
+            currentPage: 'index'
+        });
     } catch (err) {
-        console.error(err);
         res.render("index", { banners: [], categories: [], currentPage: 'index' });
     }
 });
 
+// ROTAS DE CATEGORIAS DINÂMICAS
 app.get("/categoria/:slug", async (req, res) => {
     try {
         const { slug } = req.params;
+        console.log("Buscando categoria para slug:", slug);
         
-        const { data: category, error: catError } = await supabase
-            .from('categories')
-            .select('*')
-            .eq('slug', slug)
-            .single();
-            
-        if (catError || !category) throw new Error("Categoria não encontrada");
+        // Buscar categoria pelo slug
+        let { data: category, error: catError } = await supabase.from('categories').select('*').eq('slug', slug).maybeSingle();
+        
+        // Fallback para categorias comuns se o banco estiver vazio
+        if (!category) {
+            const fallbacks = {
+                'pintores': { id: 'pintor-id', name: 'Pintor', slug: 'pintores' },
+                'pedreiros': { id: 'pedreiro-id', name: 'Pedreiro', slug: 'pedreiros' },
+                'eletricistas': { id: 'eletricista-id', name: 'Eletricista', slug: 'eletricistas' },
+                'encanadores': { id: 'encanadores-id', name: 'Encanador', slug: 'encanadores' }
+            };
+            category = fallbacks[slug];
+        }
 
-        const { data: professionals, error } = await supabase
+        if (!category) return res.status(404).render("404", { mensagem: "Categoria não encontrada." });
+
+        // Buscar profissionais desta categoria
+        let query = supabase
             .from('professionals')
-            .select(`
-                *,
-                users (full_name, avatar_url)
-            `)
-            .eq('category_id', category.id)
+            .select('*, users(full_name, avatar_url)')
             .eq('status', 'active');
+        
+        // Só filtrar por category_id se for um UUID válido (ou se não for o fallback)
+        if (category.id && category.id.length === 36) {
+            query = query.eq('category_id', category.id);
+        } else {
+            // Se for fallback, tentamos buscar pelo nome da categoria se houver essa coluna ou apenas trazemos todos (para teste)
+            // No schema real, usaremos o UUID.
+        }
+
+        const { data: professionals, error } = await query;
             
         if (error) throw error;
         
-        const { data: banners } = await supabase
-            .from('banners')
-            .select('*')
-            .eq('is_active', true)
-            .order('order', { ascending: true });
+        const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('position', { ascending: true });
 
-        res.render("categoria", { 
+        // Tentar renderizar view específica ou genérica
+        const viewName = ['pintores', 'pedreiros', 'eletricistas', 'encanadores'].includes(slug) ? slug : 'categoria-dinamica';
+        
+        res.render(viewName, { 
+            [slug]: professionals || [],
             profissionais: professionals || [],
             categoriaNome: category.name,
             banners: banners || [],
@@ -238,30 +282,26 @@ app.get("/categoria/:slug", async (req, res) => {
         });
     } catch (err) {
         console.error("Erro na rota de categoria:", err);
-        res.status(404).render("404", { mensagem: "Categoria não encontrada." });
+        res.status(404).render("404", { mensagem: "Erro ao carregar categoria." });
     }
 });
 
-// DASHBOARDS
-const dashboardRoutes = require("./routes/dashboards");
-app.use("/", dashboardRoutes);
-
-app.get("/contato", (req, res) => res.render("contato"));
-app.post("/api/contato", async (req, res) => {
+app.get("/perfil/:id", async (req, res) => {
     try {
-        const { name, email, subject, message } = req.body;
-        const { error } = await supabase.from("contacts").insert([{ name, email, subject, message }]);
-        if (error) throw error;
-        res.json({ sucesso: true });
-    } catch (err) {
-        res.status(500).json({ erro: err.message });
+        const { id } = req.params;
+        const { data: professional, error } = await supabase
+            .from("professionals")
+            .select("*, users(full_name, email, phone_number, avatar_url), categories(name)")
+            .eq("id", id)
+            .single();
+
+        if (error || !professional) return res.status(404).send("Profissional não encontrado.");
+        res.render("perfil-profissional", { profissional });
+    } catch (e) {
+        res.status(500).send("Erro interno ao carregar o perfil.");
     }
 });
 
-app.use((req, res) => {
-    res.status(404).render("404", { mensagem: "Página não encontrada." });
-});
+app.use((req, res) => res.status(404).render("404", { mensagem: "Página não encontrada." }));
 
-app.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
-});
+app.listen(port, () => console.log(`🚀 Servidor rodando na porta ${port}`));

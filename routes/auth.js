@@ -5,18 +5,18 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-// CONFIGURAÇÃO SUPABASE - Usando estritamente process.env
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // ============================================
 // CONFIGURAÇÃO DO PASSPORT - GOOGLE OAUTH2
 // ============================================
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://contrataeapp.onrender.com/auth/google/callback",
-    proxy: true 
-}, async (accessToken, refreshToken, profile, done) => {
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: "https://contrataeapp.onrender.com/auth/google/callback",
+        proxy: true 
+    }, async (accessToken, refreshToken, profile, done) => {
     try {
         const email = profile.emails[0].value;
         const fullName = profile.displayName;
@@ -28,7 +28,7 @@ passport.use(new GoogleStrategy({
             .from("users")
             .select("*")
             .eq("email", email)
-            .single();
+            .maybeSingle();
 
         let user;
         if (existingUser) {
@@ -68,7 +68,10 @@ passport.use(new GoogleStrategy({
         console.error('Erro no Google Strategy:', err);
         return done(err, null);
     }
-}));
+    }));
+} else {
+    console.warn("⚠️ Google OAuth desativado: GOOGLE_CLIENT_ID ou GOOGLE_CLIENT_SECRET não configurados.");
+}
 
 passport.serializeUser((user, done) => {
     done(null, user.id);
@@ -92,13 +95,13 @@ router.post('/cadastro', async (req, res) => {
         const { full_name, email, password, password_confirm, user_type } = req.body;
         
         if (password !== password_confirm) {
-            return res.render('cadastro', { erro: 'As senhas não coincidem' });
+            return res.render('auth/cadastro', { erro: 'As senhas não coincidem' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 1. Criar registro na tabela users
-        const { data: user, error: userError } = await supabase
+        // 1. Criar usuário na tabela users
+        const { data: userData, error: userError } = await supabase
             .from('users')
             .insert([{ 
                 full_name, 
@@ -112,42 +115,38 @@ router.post('/cadastro', async (req, res) => {
         if (userError) {
             console.error("Erro no insert do cadastro:", userError);
             if (userError.code === '23505') {
-                return res.render('cadastro', { erro: 'E-mail já cadastrado' });
+                return res.render('auth/cadastro', { erro: 'E-mail já cadastrado' });
             }
-            return res.render('cadastro', { erro: 'Erro ao criar conta: ' + userError.message });
+            return res.render('auth/cadastro', { erro: 'Erro ao criar conta: ' + userError.message });
         }
 
-        // 2. Se for profissional, criar registro na tabela professionals
+        // 2. Se for profissional, criar entrada na tabela professionals
         if (user_type === 'professional') {
-            // Buscar uma categoria padrão ou deixar para o onboarding
-            const { data: category } = await supabase.from('categories').select('id').limit(1).single();
-            
             const { error: profError } = await supabase
                 .from('professionals')
-                .insert([{
-                    id: user.id, // UUID do usuário
-                    category_id: category ? category.id : null,
+                .insert([{ 
+                    id: userData.id, // UUID do usuário
                     status: 'pending'
                 }]);
             
             if (profError) {
                 console.error("Erro ao criar perfil profissional:", profError);
-                // Opcional: deletar o usuário se falhar aqui, ou tratar no dashboard
+                // Opcional: deletar o usuário se falhar aqui, ou apenas logar
             }
         }
 
-        req.session.userId = user.id;
-        req.session.userType = user.user_type;
-        req.session.fullName = user.full_name;
+        req.session.userId = userData.id;
+        req.session.userType = userData.user_type;
+        req.session.fullName = userData.full_name;
 
-        if (user.user_type === 'professional') {
+        if (user_type === 'professional') {
             res.redirect('/profissional/dashboard');
         } else {
             res.redirect('/cliente/dashboard');
         }
     } catch (err) {
         console.error(err);
-        res.render('cadastro', { erro: 'Erro ao criar conta' });
+        res.render('auth/cadastro', { erro: 'Erro ao criar conta' });
     }
 });
 
@@ -159,15 +158,15 @@ router.post('/login', async (req, res) => {
             .from('users')
             .select('*')
             .eq('email', email)
-            .single();
+            .maybeSingle();
 
         if (error || !user || !user.password) {
-            return res.render('login', { erro: 'E-mail ou senha inválidos' });
+            return res.render('auth/login', { erro: 'E-mail ou senha inválidos' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.render('login', { erro: 'E-mail ou senha inválidos' });
+            return res.render('auth/login', { erro: 'E-mail ou senha inválidos' });
         }
 
         req.session.userId = user.id;
@@ -181,7 +180,7 @@ router.post('/login', async (req, res) => {
         }
     } catch (err) {
         console.error(err);
-        res.render('login', { erro: 'Erro ao fazer login' });
+        res.render('auth/login', { erro: 'Erro ao fazer login' });
     }
 });
 
