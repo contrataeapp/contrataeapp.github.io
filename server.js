@@ -137,7 +137,7 @@ app.get("/admin", checkAdmin, async (req, res) => {
 
         // Mapear para o formato esperado pela view admin.ejs (se necessário)
         let filtrados = (professionals || []).map(p => ({
-            id: p.id,
+            id: p.id || p.user_id, // Suporte a ambas as colunas
             nome: p.users?.full_name || 'Sem Nome',
             email: p.users?.email,
             profissao: p.categories?.name || 'Sem Categoria',
@@ -186,13 +186,21 @@ app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
         else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
         else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
 
-        const { error: errorAtualizar } = await supabase.from("professionals")
-            .update({ 
-                status: "active", 
-                data_vencimento: dataVencimento.toISOString(), 
-                valor_pago: parseFloat(valor)
-            })
+        const updateData = { 
+            status: "active", 
+            data_vencimento: dataVencimento.toISOString(), 
+            valor_pago: parseFloat(valor)
+        };
+        let { error: errorAtualizar } = await supabase.from("professionals")
+            .update(updateData)
             .eq("id", id);
+        
+        if (errorAtualizar && errorAtualizar.message.includes("column professionals.id does not exist")) {
+            const { error: retryError } = await supabase.from("professionals")
+                .update(updateData)
+                .eq("user_id", id);
+            errorAtualizar = retryError;
+        }
         if (errorAtualizar) throw errorAtualizar;
 
         res.json({ sucesso: true });

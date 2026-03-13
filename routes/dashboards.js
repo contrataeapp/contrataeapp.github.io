@@ -18,17 +18,35 @@ router.get('/profissional/dashboard', checkAuth, async (req, res) => {
         }
         
         // Buscar dados do profissional com join em users e categories
-        const { data: profissional, error } = await supabase
+        let { data: profissional, error } = await supabase
             .from('professionals')
             .select('*, users(full_name, email, avatar_url), categories(name)')
             .eq('id', req.session.userId)
             .maybeSingle();
         
-        if (error) throw error;
+        // Se der erro de coluna 'id' inexistente, tentar 'user_id'
+        if (error && error.message.includes("column professionals.id does not exist")) {
+            console.log("Tentando buscar por user_id na tabela professionals...");
+            const { data: retryData, error: retryError } = await supabase
+                .from('professionals')
+                .select('*, users(full_name, email, avatar_url), categories(name)')
+                .eq('user_id', req.session.userId)
+                .maybeSingle();
+            
+            if (retryError) throw retryError;
+            profissional = retryData;
+        } else if (error) {
+            throw error;
+        }
 
         // Se não existir perfil profissional, criar um básico
         if (!profissional) {
-            await supabase.from('professionals').insert([{ id: req.session.userId, status: 'pending' }]);
+            const insertData = { status: 'pending' };
+            // Tentar inserir com 'id', se falhar tentar 'user_id'
+            const { error: insertError } = await supabase.from('professionals').insert([{ id: req.session.userId, ...insertData }]);
+            if (insertError && insertError.message.includes("column \"id\" of relation \"professionals\" does not exist")) {
+                await supabase.from('professionals').insert([{ user_id: req.session.userId, ...insertData }]);
+            }
         }
         
         const { data: categorias } = await supabase.from('categories').select('*');
@@ -42,13 +60,14 @@ router.get('/profissional/dashboard', checkAuth, async (req, res) => {
         const avaliacaoMedia = reviews && reviews.length > 0 
             ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
             : '0';
-
+        
         res.render('profissional-dashboard', {
             fullName: req.session.fullName,
             profissional: profissional || {},
             categorias: categorias || [],
-            servicos: [], // Variável faltante corrigida
-            contatosRecebidos: 0, // Ajustar conforme tabela de contatos se existir
+            servicos: [], 
+            avaliacoes: reviews || [], // Variável faltante corrigida
+            contatosRecebidos: 0, 
             servicosConcluidos: 0,
             faturamentoMes: profissional?.valor_pago || '0,00',
             avaliacaoMedia: avaliacaoMedia
@@ -59,7 +78,8 @@ router.get('/profissional/dashboard', checkAuth, async (req, res) => {
             fullName: req.session.fullName,
             profissional: {},
             categorias: [],
-            servicos: [], // Variável faltante corrigida no catch
+            servicos: [], 
+            avaliacoes: [], // Variável faltante corrigida no catch
             contatosRecebidos: 0,
             servicosConcluidos: 0,
             faturamentoMes: '0,00',
@@ -111,20 +131,27 @@ router.post('/profissional/atualizar-perfil', checkAuth, async (req, res) => {
         const { category_id, description, phone_number } = req.body;
         
         // Atualizar tabela professionals
-        const { error: profError } = await supabase
+        const updateData = {
+            category_id: category_id || null,
+            description: description || ''
+        };
+        if (phone_number) updateData.phone_number = phone_number;
+
+        let { error: profError } = await supabase
             .from('professionals')
-            .update({
-                category_id: category_id || null,
-                description: description || ''
-            })
+            .update(updateData)
             .eq('id', req.session.userId);
         
-        if (profError) throw profError;
-
-        // Atualizar telefone na tabela professionals (onde a coluna realmente existe)
-        if (phone_number) {
-            await supabase.from('professionals').update({ phone_number }).eq('id', req.session.userId);
+        // Se der erro de coluna 'id' inexistente, tentar 'user_id'
+        if (profError && profError.message.includes("column professionals.id does not exist")) {
+            const { error: retryError } = await supabase
+                .from('professionals')
+                .update(updateData)
+                .eq('user_id', req.session.userId);
+            profError = retryError;
         }
+        
+        if (profError) throw profError;
         
         res.redirect('/profissional/dashboard');
     } catch (err) {
