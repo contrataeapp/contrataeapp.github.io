@@ -2,21 +2,21 @@ const express = require('express');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
+// CONFIGURAÇÃO SUPABASE - Usando estritamente process.env
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // ============================================
 // CONFIGURAÇÃO DO PASSPORT - GOOGLE OAUTH2
 // ============================================
-	passport.use(new GoogleStrategy({
-		    clientID: process.env.GOOGLE_CLIENT_ID,
-		    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-		    callbackURL: "https://contrataeapp.onrender.com/auth/google/callback",
-		    proxy: true 
-		}, async (accessToken, refreshToken, profile, done) => {
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "https://contrataeapp.onrender.com/auth/google/callback",
+    proxy: true 
+}, async (accessToken, refreshToken, profile, done) => {
     try {
         const email = profile.emails[0].value;
         const fullName = profile.displayName;
@@ -46,7 +46,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
             if (updateError) throw updateError;
             user = updatedUser;
         } else {
-            // 3. Se não existir → criar novo usuário (user_type será NULL para forçar onboarding)
+            // 3. Se não existir → criar novo usuário como cliente por padrão
             const { data: newUser, error: insertError } = await supabase
                 .from("users")
                 .insert({
@@ -54,7 +54,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
                     full_name: fullName,
                     google_id: googleId,
                     avatar_url: avatarUrl,
-                    user_type: null // Força o onboarding
+                    user_type: 'client'
                 })
                 .select()
                 .single();
@@ -97,25 +97,50 @@ router.post('/cadastro', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const { data, error } = await supabase
+        // 1. Criar registro na tabela users
+        const { data: user, error: userError } = await supabase
             .from('users')
-            .insert([{ full_name, email, password: hashedPassword, user_type }])
+            .insert([{ 
+                full_name, 
+                email, 
+                password: hashedPassword, 
+                user_type: user_type || 'client' 
+            }])
             .select()
             .single();
 
-        if (error) {
-            console.error("Erro no insert do cadastro:", error);
-            if (error.code === '23505') {
+        if (userError) {
+            console.error("Erro no insert do cadastro:", userError);
+            if (userError.code === '23505') {
                 return res.render('cadastro', { erro: 'E-mail já cadastrado' });
             }
-            return res.render('cadastro', { erro: 'Erro ao criar conta no banco de dados: ' + error.message });
+            return res.render('cadastro', { erro: 'Erro ao criar conta: ' + userError.message });
         }
 
-        req.session.userId = data.id;
-        req.session.userType = data.user_type;
-        req.session.fullName = data.full_name;
-
+        // 2. Se for profissional, criar registro na tabela professionals
         if (user_type === 'professional') {
+            // Buscar uma categoria padrão ou deixar para o onboarding
+            const { data: category } = await supabase.from('categories').select('id').limit(1).single();
+            
+            const { error: profError } = await supabase
+                .from('professionals')
+                .insert([{
+                    id: user.id, // UUID do usuário
+                    category_id: category ? category.id : null,
+                    status: 'pending'
+                }]);
+            
+            if (profError) {
+                console.error("Erro ao criar perfil profissional:", profError);
+                // Opcional: deletar o usuário se falhar aqui, ou tratar no dashboard
+            }
+        }
+
+        req.session.userId = user.id;
+        req.session.userType = user.user_type;
+        req.session.fullName = user.full_name;
+
+        if (user.user_type === 'professional') {
             res.redirect('/profissional/dashboard');
         } else {
             res.redirect('/cliente/dashboard');
@@ -170,22 +195,14 @@ router.get('/google', passport.authenticate('google', {
 router.get('/google/callback', passport.authenticate('google', {
     failureRedirect: '/auth/login'
 }), (req, res) => {
-    // Sincronizar sessão manual com Passport
     req.session.userId = req.user.id;
     req.session.userType = req.user.user_type;
     req.session.fullName = req.user.full_name;
 
-    // Lógica de Redirecionamento MVP
-    if (!req.user.user_type) {
-        return res.redirect('/onboarding');
-    }
-
     if (req.user.user_type === 'professional') {
-        // Verificar se o perfil profissional existe e está completo
-        res.redirect('/profissional/completar-perfil');
+        res.redirect('/profissional/dashboard');
     } else {
-        // Clientes vão direto para a home
-        res.redirect('/');
+        res.redirect('/cliente/dashboard');
     }
 });
 

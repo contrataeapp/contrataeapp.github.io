@@ -12,7 +12,6 @@
         </div>
 
         <div class="header-right">
-            <!-- Google Translate Element (Apenas um) -->
             <div id="google_translate_element" class="desktop-only"></div>
             
             <button id="theme-toggle" class="icon-btn" title="Alternar Tema">
@@ -25,8 +24,8 @@
                     <span class="login-icon"><i class="fas fa-user-shield"></i></span>
                 </a>
             <% } else if (typeof user !== 'undefined' && user) { %>
-                <div class="user-dropdown">
-                    <button class="login-pill dropdown-trigger">
+                <div class="user-dropdown" style="position: relative; display: inline-block;">
+                    <button class="login-pill dropdown-trigger" style="display: flex; align-items: center; gap: 10px; background: #222; border: 1px solid #333; padding: 5px 15px; border-radius: 20px; cursor: pointer; color: #fff;">
                         <span class="login-text"><%= user.full_name.split(' ')[0] %></span>
                         <span class="login-icon">
                             <% if (user.avatar_url) { %>
@@ -38,14 +37,22 @@
                             <% } %>
                         </span>
                     </button>
-                    <div class="dropdown-content">
-                        <a href="/perfil"><i class="fas fa-user"></i> Meu Perfil</a>
-                        <a href="/solicitacoes"><i class="fas fa-list"></i> Minhas Solicitações</a>
-                        <a href="/favoritos"><i class="fas fa-heart"></i> Favoritos</a>
-                        <hr>
-                        <a href="/auth/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Sair</a>
+                    <div class="dropdown-content" style="display: none; position: absolute; right: 0; background: #222; min-width: 160px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 1000; border-radius: 8px; border: 1px solid #333; margin-top: 5px;">
+                        <a href="/<%= user.user_type %>-dashboard" style="color: #fff; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem;"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        <hr style="border: 0; border-top: 1px solid #333; margin: 0;">
+                        <a href="/auth/logout" style="color: #ff4444; padding: 12px 16px; text-decoration: none; display: block; font-size: 0.9rem;"><i class="fas fa-sign-out-alt"></i> Sair</a>
                     </div>
                 </div>
+                <script>
+                    document.querySelector('.dropdown-trigger').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const content = document.querySelector('.dropdown-content');
+                        content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                    });
+                    document.addEventListener('click', function() {
+                        document.querySelector('.dropdown-content').style.display = 'none';
+                    });
+                </script>
             <% } else { %>
                 <a href="/auth/login" class="login-pill">
                     <span class="login-text">Entrar / Cadastrar</span>
@@ -63,13 +70,15 @@
             </div>
             <ul>
                 <li><a href="/" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'index') ? 'active' : '' %>"><i class="fas fa-home"></i> Início</a></li>
-                <li><a href="/pintores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pintores') ? 'active' : '' %>"><i class="fas fa-paint-roller"></i> Pintores</a></li>
-                <li><a href="/pedreiros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pedreiros') ? 'active' : '' %>"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
-                <li><a href="/eletricistas" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'eletricistas') ? 'active' : '' %>"><i class="fas fa-bolt"></i> Eletricistas</a></li>
-                <li><a href="/encanadores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'encanadores') ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
+                <li><a href="/categoria/pintores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pintores') ? 'active' : '' %>"><i class="fas fa-paint-roller"></i> Pintores</a></li>
+                <li><a href="/categoria/pedreiros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pedreiros') ? 'active' : '' %>"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
+                <li><a href="/categoria/eletricistas" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'eletricistas') ? 'active' : '' %>"><i class="fas fa-bolt"></i> Eletricistas</a></li>
+                <li><a href="/categoria/encanadores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'encanadores') ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
                 <li><a href="/outros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'outros') ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
                 <li><a href="/contato" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'contato') ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
-                <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                <% if (typeof user === 'undefined' || !user) { %>
+                    <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                <% } %>
             </ul>
         </div>
     </nav>

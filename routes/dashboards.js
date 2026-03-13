@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 
+// CONFIGURAÇÃO SUPABASE - Usando estritamente process.env
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // Middleware para verificar se o usuário está logado
@@ -17,11 +18,18 @@ router.get('/profissional/dashboard', checkAuth, async (req, res) => {
             return res.redirect('/cliente/dashboard');
         }
         
-        const { data: profissional } = await supabase
+        // Join com users para pegar dados básicos
+        const { data: profissional, error: profError } = await supabase
             .from('professionals')
-            .select('*')
+            .select(`
+                *,
+                users (full_name, email, phone_number, avatar_url),
+                categories (name)
+            `)
             .eq('id', req.session.userId)
             .single();
+        
+        if (profError) throw profError;
         
         const { data: servicos } = await supabase
             .from('services')
@@ -64,15 +72,27 @@ router.get('/cliente/dashboard', checkAuth, async (req, res) => {
             return res.redirect('/profissional/dashboard');
         }
         
+        // Join com users para pegar dados básicos
         const { data: profissionaisRecomendados } = await supabase
             .from('professionals')
-            .select('*')
+            .select(`
+                *,
+                users (full_name, avatar_url),
+                categories (name)
+            `)
             .eq('status', 'active')
             .limit(5);
         
         const { data: favoritos } = await supabase
             .from('favorites')
-            .select('*')
+            .select(`
+                *,
+                professionals (
+                    *,
+                    users (full_name, avatar_url),
+                    categories (name)
+                )
+            `)
             .eq('client_id', req.session.userId);
         
         res.render('cliente-dashboard', {
@@ -128,7 +148,7 @@ router.post('/profissional/servico/:id/concluir', checkAuth, async (req, res) =>
         const { data, error } = await supabase
             .from('services')
             .update({ status: 'completed' })
-            .eq('id', req.params.id)
+            .eq('id', req.params.id) // UUID
             .eq('professional_id', req.session.userId);
         
         if (error) throw error;
@@ -147,7 +167,7 @@ router.post('/cliente/favoritar/:profissionalId', checkAuth, async (req, res) =>
             .from('favorites')
             .insert([{
                 client_id: req.session.userId,
-                professional_id: req.params.profissionalId
+                professional_id: req.params.profissionalId // UUID
             }]);
         
         if (error) throw error;
@@ -166,7 +186,7 @@ router.post('/cliente/remover-favorito/:profissionalId', checkAuth, async (req, 
             .from('favorites')
             .delete()
             .eq('client_id', req.session.userId)
-            .eq('professional_id', req.params.profissionalId);
+            .eq('professional_id', req.params.profissionalId); // UUID
         
         if (error) throw error;
         
@@ -188,7 +208,8 @@ router.post('/profissional/atualizar-perfil', checkAuth, async (req, res) => {
                 category_id,
                 description,
                 price_info,
-                availability
+                availability,
+                updated_at: new Date().toISOString()
             })
             .eq('id', req.session.userId);
         

@@ -1,41 +1,111 @@
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-          if (typeof google !== 'undefined' && google.translate) {
-            new google.translate.TranslateElement({
-                pageLanguage: 'pt', 
-                includedLanguages: 'pt,en', 
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-              }, 'google_translate_element');
-          }
-        }
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QJ7GX28055"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-QJ7GX28055');
     </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script src="/js/theme-toggle.js"></script>
-    <script src="/js/index.js"></script>
-    
-    <div vw class="enabled">
-        <div vw-access-button class="active"></div>
-        <div vw-plugin-wrapper>
-            <div class="vw-plugin-top-wrapper"></div>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Página Inicial</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+
+    <% if (typeof adminLogado !== 'undefined' && adminLogado) { %>
+    <div class="admin-top-bar" style="background: #ffa500; color: #000; padding: 10px 0; text-align: center; font-weight: bold;">
+        <div class="container">
+            <span><i class="fas fa-user-shield"></i> Modo Administrador Ativo</span>
+            <a href="/admin" style="margin-left: 15px; background: #000; color: #fff; padding: 5px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8rem;">Acessar Painel</a>
         </div>
     </div>
-    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-    <script>
-        window.addEventListener("load", function () {
-            if (window.VLibras && window.VLibras.Widget) {
-                new window.VLibras.Widget('https://vlibras.gov.br/app');
-            }
-            
-            // Garantir que o botão de tema funcione se não tiver carregado
-            const themeToggle = document.getElementById("theme-toggle");
-            if (themeToggle) {
-                themeToggle.addEventListener("click", function() {
-                    document.body.classList.toggle("light-mode");
-                    const isLight = document.body.classList.contains("light-mode");
-                    localStorage.setItem("theme", isLight ? "light" : "dark");
-                });
-            }
-        });
-    </script>
+    <% } %>
+
+    <%- include('partials/header', { currentPage: 'index' }) %>
+
+    <main>
+        <div class="container" style="text-align: center; margin-top: 20px;">
+            <h1>Encontre o Profissional Ideal</h1>
+            <p style="color: #ccc;">Rápido, fácil e seguro.</p>
+        </div>
+
+        <section class="carousel-section" id="carousel-topo">
+            <div class="carousel-container">
+                
+                <% const bannersTopo = typeof banners !== 'undefined' ? banners.filter(b => b.position === 'home') : []; %>
+                
+                <% if (bannersTopo.length > 0) { %>
+                    <% bannersTopo.forEach(function(banner, index) { %>
+                        <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                            <a href="<%= banner.link_destination || '#' %>">
+                                <img src="<%= banner.image_url %>" alt="<%= banner.title || 'Banner' %>" style="width:100%; height:100%;">
+                            </a>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="carousel-item active">
+                        <a href="#">
+                            <img src="/imagens/parceiros/ponto_forte.png" alt="Ponto Forte" style="width:100%; height:100%;">
+                        </a>
+                    </div>
+                <% } %>
+
+                <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                
+                <div class="carousel-dots">
+                    <% if (bannersTopo.length > 0) { %>
+                        <% bannersTopo.forEach(function(_, index) { %>
+                            <span class="dot <%= index === 0 ? 'active' : '' %>"></span>
+                        <% }); %>
+                    <% } else { %>
+                        <span class="dot active"></span>
+                    <% } %>
+                </div>
+            </div>
+        </section>
+
+        <section class="hero-section container" id="busca-rapida">
+            <div class="search-box-wrapper">
+                <input type="text" class="search-input" placeholder="O que você precisa? Ex: Pintor...">
+                <button class="search-btn"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+        </section>
+
+        <section class="container content-section">
+            <h2 class="section-title" style="text-align: center;">Serviços Mais Procurados</h2>
+            <div class="service-cards">
+                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                    <% categories.slice(0, 4).forEach(function(cat) { %>
+                        <a href="/categoria/<%= cat.slug %>" class="card">
+                            <i class="<%= cat.icon_url || 'fas fa-tools' %>"></i>
+                            <h4><%= cat.name %></h4>
+                        </a>
+                    <% }); %>
+                <% } else { %>
+                    <a href="/categoria/pedreiros" class="card"><i class="fa-solid fa-trowel-bricks"></i><h4>Pedreiros</h4></a>
+                    <a href="/categoria/pintores" class="card"><i class="fas fa-paint-roller"></i><h4>Pintores</h4></a>
+                    <a href="/categoria/eletricistas" class="card"><i class="fas fa-bolt"></i><h4>Eletricistas</h4></a>
+                    <a href="/categoria/encanadores" class="card"><i class="fas fa-wrench"></i><h4>Encanadores</h4></a>
+                <% } %>
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="/outros" class="button secondary-button">Ver Todas as Categorias</a>
+            </div>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+
+    <script src="/js/theme-toggle.js"></script>
+    <script src="/js/search.js"></script>
+    <script src="/js/index.js"></script>
 </body>
 </html>
