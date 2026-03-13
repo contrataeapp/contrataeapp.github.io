@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('tabela-comentarios')) {
         carregarComentarios();
     }
+    if (document.getElementById('tabela-categorias')) {
+        carregarCategorias();
+    }
 });
 
 // ============================================
@@ -90,6 +93,7 @@ function setupEventListeners() {
     document.getElementById('form-reativar')?.addEventListener('submit', submeterReativar);
     document.getElementById('form-excluir')?.addEventListener('submit', submeterExcluir); 
     document.getElementById('form-banner')?.addEventListener('submit', submeterBannerViaUpload);
+    document.getElementById('form-categoria')?.addEventListener('submit', submeterCategoria);
 }
 
 function aplicarFiltros() {
@@ -537,6 +541,160 @@ async function baixarRelatorioGeralPDF() {
     } catch(e) { alert('Erro ao gerar PDF.'); }
 }
 
+
+// ============================================
+// GESTÃO DE CATEGORIAS
+// ============================================
+async function carregarCategorias() {
+    try {
+        const response = await fetch('/api/categories');
+        const categories = await response.json();
+        const tbody = document.getElementById('tabela-categorias');
+        const repCat = document.getElementById('rep-categoria');
+        if(!tbody) return;
+        
+        tbody.innerHTML = '';
+        if(repCat) repCat.innerHTML = '<option value="">Todas</option>';
+
+        categories.forEach(c => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>${c.slug}</td>
+                    <td><i class="${c.icon_class || 'fas fa-tag'}"></i> ${c.icon_class || '---'}</td>
+                    <td class="acoes-cell">
+                        <button class="btn-action edit" onclick='abrirModalCategoria(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
+                        <button class="btn-action suspend" onclick="deletarCategoria('${c.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+            if(repCat) repCat.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+    } catch(e) { console.error('Erro ao carregar categorias', e); }
+}
+
+function abrirModalCategoria(cat = null) {
+    document.getElementById('form-categoria').reset();
+    if(cat) {
+        document.getElementById('id-categoria').value = cat.id;
+        document.getElementById('nome-categoria').value = cat.name;
+        document.getElementById('slug-categoria').value = cat.slug;
+        document.getElementById('icon-categoria').value = cat.icon_class || '';
+        document.getElementById('titulo-modal-categoria').textContent = 'Editar Categoria';
+    } else {
+        document.getElementById('id-categoria').value = '';
+        document.getElementById('titulo-modal-categoria').textContent = 'Nova Categoria';
+    }
+    abrirModal('modal-categoria');
+}
+
+async function submeterCategoria(e) {
+    e.preventDefault();
+    const id = document.getElementById('id-categoria').value;
+    const data = {
+        name: document.getElementById('nome-categoria').value,
+        slug: document.getElementById('slug-categoria').value,
+        icon_class: document.getElementById('icon-categoria').value
+    };
+
+    try {
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/categories/${id}` : '/api/categories';
+        const response = await fetch(url, {
+            method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        const res = await response.json();
+        if(res.sucesso) {
+            fecharModal('modal-categoria');
+            carregarCategorias();
+        }
+    } catch(e) { alert('Erro ao salvar categoria'); }
+}
+
+async function deletarCategoria(id) {
+    if(!confirm('Deseja excluir esta categoria? Profissionais vinculados podem ficar sem categoria.')) return;
+    try {
+        await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+        carregarCategorias();
+    } catch(e) { alert('Erro ao deletar'); }
+}
+
+// ============================================
+// RELATÓRIOS AVANÇADOS
+// ============================================
+async function gerarRelatorioAvancado(formato) {
+    const start = document.getElementById('rep-data-inicio').value;
+    const end = document.getElementById('rep-data-fim').value;
+    const cat = document.getElementById('rep-categoria').value;
+    const st = document.getElementById('rep-status').value;
+
+    let url = `/api/admin/reports?`;
+    if(start) url += `start_date=${start}&`;
+    if(end) url += `end_date=${end}&`;
+    if(cat) url += `category_id=${cat}&`;
+    if(st) url += `status=${st}&`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        const tbody = document.getElementById('tbody-relatorio');
+        tbody.innerHTML = '';
+
+        if(data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum dado encontrado</td></tr>';
+            return;
+        }
+
+        data.forEach(p => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${new Date(p.created_at).toLocaleDateString('pt-BR')}</td>
+                    <td>${p.users?.full_name || '---'}</td>
+                    <td>${p.categories?.name || '---'}</td>
+                    <td><span class="badge ${p.status}">${p.status.toUpperCase()}</span></td>
+                    <td>R$ ${(p.valor_pago || 0).toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        if(formato === 'pdf') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Relatório de Profissionais - Contrataê", 14, 20);
+            const tableData = data.map(p => [
+                new Date(p.created_at).toLocaleDateString('pt-BR'),
+                p.users?.full_name || '---',
+                p.categories?.name || '---',
+                p.status.toUpperCase(),
+                `R$ ${(p.valor_pago || 0).toFixed(2)}`
+            ]);
+            doc.autoTable({
+                startY: 30,
+                head: [['Data', 'Nome', 'Categoria', 'Status', 'Valor']],
+                body: tableData
+            });
+            doc.save("relatorio_contratae.pdf");
+        } else if(formato === 'csv') {
+            let csv = "Data;Nome;Categoria;Status;Valor\n";
+            data.forEach(p => {
+                csv += `${new Date(p.created_at).toLocaleDateString('pt-BR')};${p.users?.full_name};${p.categories?.name};${p.status};${p.valor_pago}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'relatorio_contratae.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+    } catch(e) { alert('Erro ao gerar relatório'); }
+}
 
 // ============================================
 // GESTÃO DE BANNERS E COMENTÁRIOS

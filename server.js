@@ -34,18 +34,19 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // 2. CONFIGURAÇÃO DE SESSÃO (Deve vir ANTES de qualquer middleware que use req.session)
-if (process.env.NODE_ENV === "production") {
-    app.set("trust proxy", 1);
-}
+// No Render, trust proxy deve estar ativo para cookies seguros funcionarem
+app.set("trust proxy", 1);
 
 app.use(session({
     secret: process.env.SESSION_SECRET || "contratae_secret_key_2026",
-    resave: false,
+    resave: true, // Forçar salvamento para garantir persistência em proxies
     saveUninitialized: false,
+    proxy: true, // Informar ao express-session que estamos atrás de um proxy
     cookie: { 
-        secure: process.env.NODE_ENV === "production", // Render usa HTTPS
+        secure: process.env.NODE_ENV === "production", // true apenas em produção (HTTPS)
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 1000 * 60 * 60 * 24 // 24 horas
+        maxAge: 1000 * 60 * 60 * 24 * 7, // Aumentado para 7 dias
+        httpOnly: true
     }
 }));
 
@@ -64,6 +65,15 @@ app.use((req, res, next) => {
     res.locals.userId = sess.userId || null;
     res.locals.userType = sess.userType || null;
     res.locals.fullName = sess.fullName || null;
+    
+    // Gerar avatar com inicial se não houver foto
+    res.locals.getAvatar = (user) => {
+        if (user && user.avatar_url) return user.avatar_url;
+        const name = (user && user.full_name) || (sess.fullName) || "Usuário";
+        const initial = name.charAt(0).toUpperCase();
+        return `https://ui-avatars.com/api/?name=${initial}&background=ffa500&color=000&bold=true`;
+    };
+    
     next();
 });
 
@@ -198,6 +208,64 @@ app.get("/api/banners", checkAdminAPI, async (req, res) => {
             .order("position", { ascending: true });
         if (error) throw error;
         res.json(banners || []);
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+// APIs DE CATEGORIAS
+app.get("/api/categories", checkAdminAPI, async (req, res) => {
+    try {
+        const { data, error } = await supabase.from("categories").select("*").order("name");
+        if (error) throw error;
+        res.json(data || []);
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.post("/api/categories", checkAdminAPI, async (req, res) => {
+    try {
+        const { name, slug, icon_class } = req.body;
+        const { data, error } = await supabase.from("categories").insert([{ name, slug, icon_class }]).select().single();
+        if (error) throw error;
+        res.json({ sucesso: true, data });
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.put("/api/categories/:id", checkAdminAPI, async (req, res) => {
+    try {
+        const { name, slug, icon_class } = req.body;
+        const { error } = await supabase.from("categories").update({ name, slug, icon_class }).eq("id", req.params.id);
+        if (error) throw error;
+        res.json({ sucesso: true });
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.delete("/api/categories/:id", checkAdminAPI, async (req, res) => {
+    try {
+        const { error } = await supabase.from("categories").delete().eq("id", req.params.id);
+        if (error) throw error;
+        res.json({ sucesso: true });
+    } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+// API DE RELATÓRIOS AVANÇADOS
+app.get("/api/admin/reports", checkAdminAPI, async (req, res) => {
+    try {
+        const { start_date, end_date, category_id, status } = req.query;
+        
+        let query = supabase.from("professionals").select(`
+            *,
+            users (full_name, email),
+            categories (name)
+        `);
+        
+        if (start_date) query = query.gte('created_at', start_date);
+        if (end_date) query = query.lte('created_at', end_date);
+        if (category_id) query = query.eq('category_id', category_id);
+        if (status) query = query.eq('status', status);
+        
+        const { data, error } = await query.order("created_at", { ascending: false });
+        if (error) throw error;
+        
+        res.json(data || []);
     } catch (err) { res.status(500).json({ erro: err.message }); }
 });
 

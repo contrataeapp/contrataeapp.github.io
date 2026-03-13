@@ -219,9 +219,23 @@
                 <span></span>
             </div>
             
-            <a href="/auth/google" class="btn btn-google">
+            <a href="/auth/google" class="btn btn-google" id="google-signup-btn">
                 <i class="fab fa-google"></i> Cadastrar com Google
             </a>
+            
+            <script>
+                // Atualizar o link do Google com base no tipo de conta selecionado
+                const userTypeSelect = document.querySelector('select[name="user_type"]');
+                const googleBtn = document.getElementById('google-signup-btn');
+                
+                function updateGoogleLink() {
+                    const type = userTypeSelect.value || 'client';
+                    googleBtn.href = `/auth/google?type=${type}`;
+                }
+                
+                userTypeSelect.addEventListener('change', updateGoogleLink);
+                updateGoogleLink(); // Inicializar
+            </script>
             
             <div class="auth-footer">
                 <p>Já tem uma conta? <a href="/auth/login">Faça login</a></p>

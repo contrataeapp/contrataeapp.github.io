@@ -46,7 +46,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             if (updateError) throw updateError;
             user = updatedUser;
         } else {
-            // 3. Se não existir → criar novo usuário como cliente por padrão
+            // 3. Se não existir → criar novo usuário
+            // O tipo de usuário será definido no callback baseado no parâmetro 'state' ou 'prompt'
             const { data: newUser, error: insertError } = await supabase
                 .from("users")
                 .insert({
@@ -54,7 +55,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                     full_name: fullName,
                     google_id: googleId,
                     avatar_url: avatarUrl,
-                    user_type: 'client'
+                    user_type: 'client' // Padrão inicial
                 })
                 .select()
                 .single();
@@ -187,21 +188,63 @@ router.post('/login', async (req, res) => {
 // ============================================
 // ROTAS DO GOOGLE OAUTH2
 // ============================================
-router.get('/google', passport.authenticate('google', {
-    scope: ['profile', 'email']
-}));
+router.get('/google', (req, res, next) => {
+    const userType = req.query.type || 'client';
+    passport.authenticate('google', {
+        scope: ['profile', 'email'],
+        state: userType // Passamos o tipo de usuário no state do OAuth
+    })(req, res, next);
+});
 
 router.get('/google/callback', passport.authenticate('google', {
     failureRedirect: '/auth/login'
-}), (req, res) => {
-    req.session.userId = req.user.id;
-    req.session.userType = req.user.user_type;
-    req.session.fullName = req.user.full_name;
+}), async (req, res) => {
+    try {
+        const userTypeRequested = req.query.state || 'client';
+        const user = req.user;
 
-    if (req.user.user_type === 'professional') {
-        res.redirect('/profissional/dashboard');
-    } else {
+        // Atualizar o tipo de usuário se for um novo cadastro e ele escolheu ser profissional
+        if (user.user_type === 'client' && userTypeRequested === 'professional') {
+            const { data: updatedUser } = await supabase
+                .from('users')
+                .update({ user_type: 'professional' })
+                .eq('id', user.id)
+                .select()
+                .single();
+            
+            if (updatedUser) {
+                req.user.user_type = 'professional';
+            }
+        }
+
+        // Sincronizar sessão
+        req.session.userId = req.user.id;
+        req.session.userType = req.user.user_type;
+        req.session.fullName = req.user.full_name;
+
+        // Se for profissional, verificar se já tem perfil na tabela professionals
+        if (req.user.user_type === 'professional') {
+            const { data: prof } = await supabase
+                .from('professionals')
+                .select('category_id')
+                .eq('id', req.user.id)
+                .maybeSingle();
+            
+            if (!prof) {
+                // Criar entrada pendente se não existir
+                await supabase.from('professionals').insert([{ id: req.user.id, status: 'pending' }]);
+                return res.redirect('/profissional/dashboard#perfil'); // Redirecionar para completar perfil
+            } else if (!prof.category_id) {
+                // Se existe mas não tem categoria, forçar completar perfil
+                return res.redirect('/profissional/dashboard#perfil');
+            }
+            return res.redirect('/profissional/dashboard');
+        }
+
         res.redirect('/cliente/dashboard');
+    } catch (err) {
+        console.error("Erro no callback do Google:", err);
+        res.redirect('/auth/login');
     }
 });
 

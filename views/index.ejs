@@ -143,30 +143,6 @@
 
     <%- include('partials/footer') %>
 
-    <!-- Google Translate Script (Apenas um) -->
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-          if (!document.querySelector('.goog-te-gadget')) {
-            new google.translate.TranslateElement({
-                pageLanguage: 'pt', 
-                includedLanguages: 'pt,en', 
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-              }, 'google_translate_element');
-          }
-        }
-    </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script src="/js/theme-toggle.js"></script>
     <script src="/js/search.js"></script>
-    <script src="/js/index.js"></script>
-    
-    <div vw class="enabled">
-        <div vw-access-button class="active"></div>
-        <div vw-plugin-wrapper>
-            <div class="vw-plugin-top-wrapper"></div>
-        </div>
-    </div>
-    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-    <script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
 </body>
 </html>
