@@ -189,10 +189,14 @@ router.post('/login', async (req, res) => {
 // ROTAS DO GOOGLE OAUTH2
 // ============================================
 router.get('/google', (req, res, next) => {
-    const userType = req.query.type || 'client';
+    const userType = req.query.type;
+    if (!userType) {
+        // Se não houver tipo, redirecionar para selecionar antes de ir pro Google
+        return res.render("auth/selecionar-tipo", { actionUrl: "/auth/google" });
+    }
     passport.authenticate('google', {
         scope: ['profile', 'email'],
-        state: userType // Passamos o tipo de usuário no state do OAuth
+        state: userType 
     })(req, res, next);
 });
 

@@ -125,7 +125,7 @@ app.get("/admin", checkAdmin, async (req, res) => {
         // Join com users para pegar o nome e email
         let query = supabase.from("professionals").select(`
             *,
-            users (full_name, email, phone_number),
+            users (full_name, email),
             categories (name)
         `);
         
@@ -276,7 +276,11 @@ const dashboardRoutes = require("./routes/dashboards");
 app.use("/", dashboardRoutes);
 
 app.get("/auth/login", (req, res) => res.render("auth/login", { erro: null }));
-app.get("/auth/cadastro", (req, res) => res.render("auth/cadastro", { erro: null }));
+app.get("/auth/cadastro", (req, res) => res.render("auth/selecionar-tipo", { actionUrl: "/auth/cadastro-form" }));
+app.get("/auth/cadastro-form", (req, res) => {
+    const type = req.query.type || 'client';
+    res.render("auth/cadastro", { erro: null, userType: type });
+});
 app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
 app.get("/contato", (req, res) => res.render("contato"));
 app.get("/termos-de-uso", (req, res) => res.render("termos_de_uso"));

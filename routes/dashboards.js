@@ -20,7 +20,7 @@ router.get('/profissional/dashboard', checkAuth, async (req, res) => {
         // Buscar dados do profissional com join em users e categories
         const { data: profissional, error } = await supabase
             .from('professionals')
-            .select('*, users(full_name, email, phone_number, avatar_url), categories(name)')
+            .select('*, users(full_name, email, avatar_url), categories(name)')
             .eq('id', req.session.userId)
             .maybeSingle();
         
@@ -47,6 +47,7 @@ router.get('/profissional/dashboard', checkAuth, async (req, res) => {
             fullName: req.session.fullName,
             profissional: profissional || {},
             categorias: categorias || [],
+            servicos: [], // Variável faltante corrigida
             contatosRecebidos: 0, // Ajustar conforme tabela de contatos se existir
             servicosConcluidos: 0,
             faturamentoMes: profissional?.valor_pago || '0,00',
@@ -58,6 +59,7 @@ router.get('/profissional/dashboard', checkAuth, async (req, res) => {
             fullName: req.session.fullName,
             profissional: {},
             categorias: [],
+            servicos: [], // Variável faltante corrigida no catch
             contatosRecebidos: 0,
             servicosConcluidos: 0,
             faturamentoMes: '0,00',
@@ -119,9 +121,9 @@ router.post('/profissional/atualizar-perfil', checkAuth, async (req, res) => {
         
         if (profError) throw profError;
 
-        // Atualizar telefone na tabela users
+        // Atualizar telefone na tabela professionals (onde a coluna realmente existe)
         if (phone_number) {
-            await supabase.from('users').update({ phone_number }).eq('id', req.session.userId);
+            await supabase.from('professionals').update({ phone_number }).eq('id', req.session.userId);
         }
         
         res.redirect('/profissional/dashboard');

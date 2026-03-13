@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Escolha seu perfil</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #121212; 
+            color: white;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh;
+        }
+        .container { width: 100%; max-width: 500px; padding: 20px; text-align: center; }
+        h1 { color: #ffa500; margin-bottom: 10px; }
+        p { color: #ccc; margin-bottom: 30px; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .option-card {
+            background: #1e1e1e;
+            border: 2px solid #333;
+            border-radius: 15px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .option-card:hover { border-color: #ffa500; transform: translateY(-5px); background: #252525; }
+        .option-card i { font-size: 40px; color: #ffa500; }
+        .option-card h3 { font-size: 18px; }
+        .option-card p { font-size: 12px; margin-bottom: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bem-vindo ao Contrataê</h1>
+        <p>Como você deseja utilizar a plataforma?</p>
+        
+        <div class="options">
+            <a href="<%= actionUrl %>?type=client" class="option-card">
+                <i class="fas fa-user"></i>
+                <h3>Cliente</h3>
+                <p>Quero contratar serviços</p>
+            </a>
+            
+            <a href="<%= actionUrl %>?type=professional" class="option-card">
+                <i class="fas fa-tools"></i>
+                <h3>Profissional</h3>
+                <p>Quero oferecer meus serviços</p>
+            </a>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <a href="/auth/login" style="color: #999; text-decoration: none; font-size: 14px;">Já tem uma conta? Faça login</a>
+        </div>
+    </div>
+</body>
+</html>
