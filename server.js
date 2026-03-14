@@ -91,12 +91,13 @@ const checkAdminAPI = (req, res, next) => {
     res.status(401).json({ erro: 'Acesso negado. Faça login.' });
 };
 
-app.get('/login-adm', (req, res) => {
+// Rota de Login Admin (SaaS)
+app.get('/admin/login', (req, res) => {
     if (req.session && req.session.adminLogado) return res.redirect('/admin');
-    res.render('login_admin', { erro: null });
+    res.render('admin/login_admin', { erro: null });
 });
 
-app.post('/login-adm', (req, res) => {
+app.post('/admin/login', (req, res) => {
     const { usuario, senha } = req.body;
     const adminUser = process.env.ADMIN_USER || 'admin';
     const adminPass = process.env.ADMIN_PASS || '#Relaxsempre153143';
@@ -105,16 +106,21 @@ app.post('/login-adm', (req, res) => {
         req.session.adminLogado = true;
         res.redirect('/admin');
     } else {
-        res.render('login_admin', { erro: 'Usuário ou senha inválidos!' });
+        res.render('admin/login_admin', { erro: 'Usuário ou senha inválidos!' });
     }
 });
 
-app.get('/logout-adm', (req, res) => {
+// Fallback para rotas antigas de admin
+app.get('/login-adm', (req, res) => res.redirect('/admin/login'));
+app.post('/login-adm', (req, res) => res.redirect(307, '/admin/login'));
+
+app.get('/admin/logout', (req, res) => {
     if (req.session) {
         req.session.destroy(); 
     }
-    res.redirect('/login-adm');
+    res.redirect('/admin/login');
 });
+app.get('/logout-adm', (req, res) => res.redirect('/admin/logout'));
 
 // ============================================
 // ROTAS DO PAINEL ADM (Refatorado para Novo Schema)
@@ -170,10 +176,10 @@ app.get("/admin", checkAdmin, async (req, res) => {
             }).reduce((acc, p) => acc + (parseFloat(p.valor_pago) || 0), 0)
         };
 
-        res.render("admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar } });
+        res.render("admin/admin", { profissionais: filtrados, totais, filtroAtivo: { categoria, status, busca, ordenar } });
     } catch (err) { 
         console.error("Erro no painel admin:", err);
-        res.render("admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {} }); 
+        res.render("admin/admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {} }); 
     }
 });
 
@@ -336,7 +342,7 @@ app.get("/auth/completar-perfil", async (req, res) => {
     }
 });
 
-app.post("/auth/completar-perfil", async (req, res) => {
+app.post("/auth/completar-perfil", upload.none(), async (req, res) => {
     if (!req.session.userId) return res.redirect('/auth/login');
     try {
         const { avatar_url, phone_number, city, state, cep, categories, specialties, description, services_offered } = req.body;

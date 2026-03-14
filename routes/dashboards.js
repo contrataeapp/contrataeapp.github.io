@@ -46,7 +46,7 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     const { data: pagamentos } = await supabase.from('payment_history').select('*, plans(name)').eq('professional_id', req.session.userId).order('payment_date', { ascending: false });
     const { data: portfolio } = await supabase.from('professional_portfolio').select('*').eq('professional_id', req.session.userId).order('created_at', { ascending: false });
     
-    res.render('profissional-dashboard', {
+    res.render('dashboards/profissional-dashboard', {
         fullName: req.session.fullName,
         profissional: profissional || {},
         categorias: categorias || [],
@@ -71,7 +71,7 @@ router.get('/cliente/dashboard', requireAuth, catchAsync(async (req, res) => {
         .eq('status', 'active')
         .limit(6);
     
-    res.render('cliente-dashboard', {
+    res.render('dashboards/cliente-dashboard', {
         fullName: req.session.fullName,
         profissionaisRecomendados: profissionaisRecomendados || [],
         favoritos: [], // Implementar se houver tabela de favoritos
