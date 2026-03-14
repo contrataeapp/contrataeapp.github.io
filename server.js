@@ -44,13 +44,13 @@ app.set("trust proxy", 1);
 
 app.use(session({
     secret: process.env.SESSION_SECRET || "contratae_secret_key_2026",
-    resave: true, // Forçar salvamento para garantir persistência em proxies
+    resave: true,
     saveUninitialized: false,
-    proxy: true, // Informar ao express-session que estamos atrás de um proxy
+    proxy: true,
     cookie: { 
-        secure: process.env.NODE_ENV === "production", // true apenas em produção (HTTPS)
+        secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // Aumentado para 7 dias
+        maxAge: 1000 * 60 * 60 * 24 * 7,
         httpOnly: true
     }
 }));
@@ -218,7 +218,7 @@ app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: err.message }); }
 });
 
-// APIs DE BANNERS
+// APIs DE BANNERS (SaaS - Com Upload para Supabase Storage)
 app.get("/api/banners", checkAdminAPI, async (req, res) => {
     try {
         const { data: banners, error } = await supabase
@@ -228,6 +228,61 @@ app.get("/api/banners", checkAdminAPI, async (req, res) => {
         if (error) throw error;
         res.json(banners || []);
     } catch (err) { res.status(500).json({ erro: err.message }); }
+});
+
+app.post("/api/banners", checkAdminAPI, upload.single('imagem'), async (req, res) => {
+    try {
+        const { id, titulo, link_destino, posicao, ordem, ativo } = req.body;
+        let imagem_url = req.body.imagem_url;
+
+        // Se houver novo arquivo, fazer upload para o Supabase Storage
+        if (req.file) {
+            const file = req.file;
+            const fileExt = file.originalname.split('.').pop();
+            const fileName = `banner_${Date.now()}.${fileExt}`;
+            const filePath = `public/${fileName}`;
+
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('banners')
+                .upload(filePath, file.buffer, {
+                    contentType: file.mimetype,
+                    upsert: true
+                });
+
+            if (uploadError) throw uploadError;
+
+            // Pegar URL pública
+            const { data: urlData } = supabase.storage
+                .from('banners')
+                .getPublicUrl(filePath);
+            
+            imagem_url = urlData.publicUrl;
+        }
+
+        const bannerData = {
+            titulo,
+            link_destino,
+            posicao: parseInt(posicao),
+            ordem: parseInt(ordem),
+            is_active: ativo === 'true' || ativo === true,
+            image_url: imagem_url
+        };
+
+        if (id && id !== 'null' && id !== '') {
+            // Update
+            const { error } = await supabase.from('banners').update(bannerData).eq('id', id);
+            if (error) throw error;
+        } else {
+            // Insert
+            const { error } = await supabase.from('banners').insert([bannerData]);
+            if (error) throw error;
+        }
+
+        res.json({ sucesso: true });
+    } catch (err) {
+        console.error("Erro ao salvar banner:", err);
+        res.status(500).json({ sucesso: false, erro: err.message });
+    }
 });
 
 // APIs DE CATEGORIAS
@@ -342,10 +397,13 @@ app.get("/auth/completar-perfil", async (req, res) => {
     }
 });
 
-app.post("/auth/completar-perfil", upload.none(), async (req, res) => {
-    if (!req.session.userId) return res.redirect('/auth/login');
+app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
+    if (!req.session.userId || req.session.userType !== 'professional') {
+        return res.redirect('/');
+    }
     try {
-        const { avatar_url, phone_number, city, state, cep, categories, specialties, description, services_offered } = req.body;
+        const body = req.body || {};
+        const { avatar_url, phone_number, city, state, cep, categories, specialties, description, services_offered } = body;
         
         // 1. Atualizar avatar na tabela users
         if (avatar_url) {

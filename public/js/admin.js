@@ -28,7 +28,10 @@ document.addEventListener('DOMContentLoaded', function() {
 async function carregarSolicitacoes() {
     try {
         const response = await fetch('/admin/api/solicitacoes');
-        const solicitacoes = await response.json();
+        if (!response.ok) throw new Error("Erro na API de solicitações");
+        
+        let solicitacoes = await response.json();
+        if (!Array.isArray(solicitacoes)) solicitacoes = [];
         
         const tbody = document.getElementById('tabela-solicitacoes');
         const badgeCount = document.getElementById('count-solicitacoes');

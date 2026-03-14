@@ -232,7 +232,6 @@ router.get('/google/callback', passport.authenticate('google', {
         req.session.fullName = req.user.full_name;
 
         // Se for profissional, verificar se já tem perfil na tabela professionals
-        // Padronizado para usar user_id
         if (req.user.user_type === 'professional') {
             const { data: prof, error: profError } = await supabase
                 .from('professionals')
@@ -243,7 +242,7 @@ router.get('/google/callback', passport.authenticate('google', {
             if (profError) throw profError;
             
             if (!prof) {
-                // Criar entrada pendente se não existir
+                // Criar entrada pendente se não existir (SaaS Fix)
                 await supabase.from('professionals').insert([{ 
                     user_id: req.user.id, 
                     status: 'pending',
