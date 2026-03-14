@@ -324,7 +324,11 @@ app.get("/auth/completar-perfil", async (req, res) => {
         const { data: profissional } = await supabase.from('professionals').select('*').eq('user_id', req.session.userId).single();
         const { data: categorias } = await supabase.from('categories').select('*').order('name');
         
-        res.render("auth/completar-perfil", { user, profissional, categorias });
+        res.render("auth/completar-perfil", { 
+            user: user || {}, 
+            profissional: profissional || {}, 
+            categorias: categorias || [] 
+        });
     } catch (err) {
         console.error("Erro ao carregar completar perfil:", err);
         res.redirect('/profissional/dashboard');

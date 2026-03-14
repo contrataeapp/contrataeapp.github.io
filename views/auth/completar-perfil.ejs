@@ -41,14 +41,14 @@
         <form action="/auth/completar-perfil" method="POST">
             <div class="avatar-upload">
                 <div class="avatar-preview" id="preview">
-                    <% if (user.avatar_url) { %>
+                    <% if (user && user.avatar_url) { %>
                         <img src="<%= user.avatar_url %>" alt="Avatar">
                     <% } else { %>
                         <i class="fas fa-user"></i>
                     <% } %>
                 </div>
                 <label for="avatar_url">URL da Foto de Perfil</label>
-                <input type="url" name="avatar_url" id="avatar_url" placeholder="https://link-da-sua-foto.jpg" value="<%= user.avatar_url %>" onchange="updatePreview(this.value)">
+                <input type="url" name="avatar_url" id="avatar_url" placeholder="https://link-da-sua-foto.jpg" value="<%= (user && user.avatar_url) || '' %>" onchange="updatePreview(this.value)">
             </div>
 
             <div class="form-section">
@@ -56,21 +56,21 @@
                 <div class="grid">
                     <div class="form-group">
                         <label>Nome Completo</label>
-                        <input type="text" value="<%= user.full_name %>" disabled style="background: #1a1a1a; color: #888;">
+                        <input type="text" value="<%= (user && user.full_name) || '' %>" disabled style="background: #1a1a1a; color: #888;">
                     </div>
                     <div class="form-group">
                         <label>E-mail</label>
-                        <input type="email" value="<%= user.email %>" disabled style="background: #1a1a1a; color: #888;">
+                        <input type="email" value="<%= (user && user.email) || '' %>" disabled style="background: #1a1a1a; color: #888;">
                     </div>
                 </div>
                 <div class="grid">
                     <div class="form-group">
                         <label>Telefone / WhatsApp</label>
-                        <input type="tel" name="phone_number" required placeholder="(16) 99999-9999" value="<%= profissional.phone_number || '' %>">
+                        <input type="tel" name="phone_number" required placeholder="(16) 99999-9999" value="<%= (profissional && profissional.phone_number) || '' %>">
                     </div>
                     <div class="form-group">
                         <label>Cidade</label>
-                        <input type="text" name="city" required placeholder="Sua cidade" value="<%= profissional.city || '' %>">
+                        <input type="text" name="city" required placeholder="Sua cidade" value="<%= (profissional && profissional.city) || '' %>">
                     </div>
                 </div>
             </div>
@@ -81,18 +81,20 @@
                     <label>Categoria Principal</label>
                     <select name="category_id" required>
                         <option value="">Selecione sua especialidade...</option>
-                        <% categorias.forEach(cat => { %>
-                            <option value="<%= cat.id %>" <%= profissional.category_id == cat.id ? 'selected' : '' %>><%= cat.name %></option>
-                        <% }); %>
+                        <% if (typeof categorias !== 'undefined' && categorias) { %>
+                            <% categorias.forEach(cat => { %>
+                                <option value="<%= cat.id %>" <%= (profissional && profissional.category_id == cat.id) ? 'selected' : '' %>><%= cat.name %></option>
+                            <% }); %>
+                        <% } %>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Descrição Profissional (Conte sobre sua experiência)</label>
-                    <textarea name="description" rows="4" required placeholder="Ex: Sou eletricista há 10 anos, especializado em instalações residenciais e comerciais..."><%= profissional.description || '' %></textarea>
+                    <textarea name="description" rows="4" required placeholder="Ex: Sou eletricista há 10 anos, especializado em instalações residenciais e comerciais..."><%= (profissional && profissional.description) || '' %></textarea>
                 </div>
                 <div class="form-group">
                     <label>Serviços Oferecidos (Separe por vírgula)</label>
-                    <input type="text" name="services_offered" placeholder="Ex: Pintura, Textura, Grafiato" value="<%= profissional.services_offered || '' %>">
+                    <input type="text" name="services_offered" placeholder="Ex: Pintura, Textura, Grafiato" value="<%= (profissional && profissional.services_offered) || '' %>">
                 </div>
             </div>
 

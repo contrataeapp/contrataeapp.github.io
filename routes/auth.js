@@ -141,7 +141,7 @@ router.post('/cadastro', async (req, res) => {
         req.session.fullName = userData.full_name;
 
         if (user_type === 'professional') {
-            res.redirect('/profissional/dashboard');
+            res.redirect('/auth/completar-perfil');
         } else {
             res.redirect('/cliente/dashboard');
         }
@@ -175,6 +175,11 @@ router.post('/login', async (req, res) => {
         req.session.fullName = user.full_name;
 
         if (user.user_type === 'professional') {
+            // Verificar se perfil está completo
+            const { data: prof } = await supabase.from('professionals').select('profile_completed').eq('user_id', user.id).single();
+            if (prof && !prof.profile_completed) {
+                return res.redirect('/auth/completar-perfil');
+            }
             res.redirect('/profissional/dashboard');
         } else {
             res.redirect('/cliente/dashboard');
@@ -231,7 +236,7 @@ router.get('/google/callback', passport.authenticate('google', {
         if (req.user.user_type === 'professional') {
             const { data: prof, error: profError } = await supabase
                 .from('professionals')
-                .select('category_id')
+                .select('*')
                 .eq('user_id', req.user.id)
                 .maybeSingle();
             
@@ -239,10 +244,15 @@ router.get('/google/callback', passport.authenticate('google', {
             
             if (!prof) {
                 // Criar entrada pendente se não existir
-                await supabase.from('professionals').insert([{ user_id: req.user.id, status: 'pending' }]);
-                return res.redirect('/profissional/dashboard#perfil'); 
-            } else if (!prof.category_id) {
-                return res.redirect('/profissional/dashboard#perfil');
+                await supabase.from('professionals').insert([{ 
+                    user_id: req.user.id, 
+                    status: 'pending',
+                    profile_completed: false,
+                    approval_requested: false
+                }]);
+                return res.redirect('/auth/completar-perfil'); 
+            } else if (!prof.profile_completed) {
+                return res.redirect('/auth/completar-perfil');
             }
             return res.redirect('/profissional/dashboard');
         }
