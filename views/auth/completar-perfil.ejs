@@ -28,7 +28,8 @@
         .avatar-preview .overlay { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5); color: white; font-size: 10px; padding: 2px 0; }
         
         .portfolio-upload { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
-        .portfolio-item { width: 100px; height: 100px; background: #333; border-radius: 8px; border: 2px dashed #444; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .portfolio-item { width: 100px; height: 100px; background: #333; border-radius: 8px; border: 2px dashed #444; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: pointer; transition: transform 0.3s ease, border-color 0.3s ease; }
+        .portfolio-item:hover { transform: scale(1.05); border-color: #ffa500; }
         .portfolio-item img { width: 100%; height: 100%; object-fit: cover; }
         .portfolio-item i { font-size: 24px; color: #666; }
         
@@ -98,7 +99,7 @@
                 <div class="grid">
                     <div class="form-group">
                         <label>Telefone / WhatsApp</label>
-                        <input type="tel" name="phone_number" required placeholder="(00) 00000-0000" value="<%= (profissional && profissional.phone_number) || '' %>">
+                        <input type="tel" name="phone_number" class="mask-phone" inputmode="numeric" pattern="[0-9]*" required placeholder="(00) 00000-0000" value="<%= (profissional && profissional.phone_number) || '' %>">
                     </div>
                     <div class="form-group">
                         <label>CEP</label>
@@ -129,7 +130,7 @@
 
                 <div class="category-tags" id="categoryTags">
                     <!-- Sugestões Iniciais -->
-                    <% const sugestoes = ['Eletricista', 'Encanador', 'Pedreiro', 'Pintor', 'Diarista', 'Jardineiro', 'Montador de móveis', 'Marido de aluguel', 'Técnico em ar condicionado', 'Técnico em geladeira', 'Instalador de TV', 'Instalador de câmeras', 'Chaveiro', 'Serralheiro', 'Babá', 'Pet sitter', 'Cuidador de idosos', 'Frete e mudanças']; %>
+                    <% const sugestoes = ['Eletricista', 'Encanador', 'Pedreiro', 'Pintor', 'Diarista', 'Jardineiro', 'Montador de móveis', 'Técnico em ar condicionado', 'Técnico em geladeira', 'Instalador de TV', 'Instalador de câmeras', 'Chaveiro', 'Serralheiro', 'Babá', 'Pet sitter', 'Cuidador de idosos', 'Frete e mudanças']; %>
                     <% sugestoes.forEach(sug => { %>
                         <div class="category-tag" onclick="toggleCategory(this, '<%= sug %>')">
                             <%= sug %> <i class="fas fa-plus"></i>
@@ -141,6 +142,11 @@
                 <div class="form-group" style="margin-top: 20px;">
                     <label>Especialidades (Ex: Instalação, Manutenção, Residencial)</label>
                     <input type="text" name="specialties" placeholder="Separe por vírgula" value="<%= (profissional && profissional.specialties) || '' %>">
+                </div>
+
+                <div class="form-group">
+                    <label>Preço Médio (R$)</label>
+                    <input type="text" name="price_info" class="mask-number" placeholder="Ex: 100" value="<%= (profissional && profissional.price_info) || '' %>">
                 </div>
 
                 <div class="form-group">
@@ -175,7 +181,7 @@
             <h2>Atenção!</h2>
             <p>Seu perfil ainda não foi enviado para aprovação. Deseja realmente sair?</p>
             <div class="modal-btns">
-                <button class="modal-btn modal-btn-confirm" onclick="window.location.href='/dashboard'">Sair</button>
+                <button class="modal-btn modal-btn-confirm" onclick="window.location.href='/auth/logout'">Sair</button>
                 <button class="modal-btn modal-btn-cancel" onclick="hideCancelModal()">Continuar Preenchendo</button>
             </div>
         </div>

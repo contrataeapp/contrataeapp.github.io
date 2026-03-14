@@ -342,7 +342,7 @@ app.get("/auth/completar-perfil", async (req, res) => {
 app.post("/auth/completar-perfil", async (req, res) => {
     if (!req.session.userId) return res.redirect('/auth/login');
     try {
-        const { avatar_url, phone_number, city, category_id, description, services_offered } = req.body;
+        const { avatar_url, phone_number, city, state, cep, categories, specialties, description, services_offered } = req.body;
         
         // 1. Atualizar avatar na tabela users
         if (avatar_url) {
@@ -350,16 +350,47 @@ app.post("/auth/completar-perfil", async (req, res) => {
         }
         
         // 2. Atualizar dados na tabela professionals
+        // Pegar a primeira categoria da lista (se houver) para manter compatibilidade com a coluna category_id
+        const categoryList = categories ? categories.split(',') : [];
+        let category_id = req.body.category_id; // Fallback para o campo original se existir
+        
+        if (categoryList.length > 0 && !category_id) {
+            // Buscar o ID da primeira categoria pelo nome
+            const { data: catData } = await supabase.from('categories').select('id').eq('name', categoryList[0]).maybeSingle();
+            if (catData) category_id = catData.id;
+        }
+
         const { error } = await supabase.from('professionals').update({
             phone_number,
             city,
+            state,
+            cep,
             category_id,
             description,
             services_offered,
-            profile_completed: true
+            specialties,
+            profile_completed: true,
+            approval_requested: true,
+            status: 'pending'
         }).eq('user_id', req.session.userId);
         
         if (error) throw error;
+        
+        // 3. Salvar múltiplas categorias se houver tabela professional_categories
+        if (categoryList.length > 0) {
+            try {
+                // Primeiro buscar os IDs das categorias
+                const { data: cats } = await supabase.from('categories').select('id, name').in('name', categoryList);
+                if (cats && cats.length > 0) {
+                    const inserts = cats.map(c => ({ professional_id: req.session.userId, category_id: c.id }));
+                    // Limpar antigas e inserir novas
+                    await supabase.from('professional_categories').delete().eq('professional_id', req.session.userId);
+                    await supabase.from('professional_categories').insert(inserts);
+                }
+            } catch (catErr) {
+                console.error("Erro ao salvar categorias extras:", catErr);
+            }
+        }
         
         res.redirect('/profissional/dashboard');
     } catch (err) {

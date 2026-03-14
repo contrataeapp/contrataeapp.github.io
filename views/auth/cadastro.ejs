@@ -102,11 +102,17 @@
             right: 0;
             background: #1e1e1e;
             border-top: 1px solid #333;
-            display: flex;
+            display: none;
             justify-content: space-around;
             align-items: center;
             height: 70px;
             z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .bottom-nav {
+                display: flex;
+            }
         }
 
         .nav-item {
@@ -182,7 +188,7 @@
                 
                 <div class="form-group">
                     <label>Telefone</label>
-                    <input type="tel" name="phone_number" placeholder="(16) 99999-9999">
+                    <input type="tel" name="phone_number" class="mask-phone" inputmode="numeric" pattern="[0-9]*" placeholder="(00) 00000-0000">
                 </div>
                 
                 <input type="hidden" name="user_type" value="<%= userType %>">

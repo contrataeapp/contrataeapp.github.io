@@ -45,7 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Apenas números
+    // Apenas números (mask-number)
+    const maskNumberInputs = document.querySelectorAll('.mask-number');
+    maskNumberInputs.forEach(input => {
+        input.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    });
+
+    // Apenas números (numericInputs genérico)
     numericInputs.forEach(input => {
         input.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/\D/g, '');
