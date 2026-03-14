@@ -620,7 +620,8 @@ async function baixarRelatorioGeralPDF() {
 async function carregarCategorias() {
     try {
         const response = await fetch('/api/categories');
-        const categories = await response.json();
+        if (!response.ok) throw new Error("Erro ao carregar categorias");
+        const categorias = await response.json();
         const tbody = document.getElementById('tabela-categorias');
         const repCat = document.getElementById('rep-categoria');
         if(!tbody) return;
@@ -774,6 +775,7 @@ async function gerarRelatorioAvancado(formato) {
 async function carregarBannersVisuais() {
     try {
         const response = await fetch('/api/banners');
+        if (!response.ok) throw new Error("Erro ao carregar banners");
         const banners = await response.json();
         desenharGavetas('slots-topo', 1, 5, banners, 'Banner Topo');
         desenharGavetas('slots-rodape', 2, 5, banners, 'Banner Rodapé');
@@ -906,7 +908,8 @@ async function submeterBannerViaUpload(e) {
 async function deletarBanner(id) {
     if (!confirm('Deseja excluir permanentemente este banner do site?')) return;
     try {
-        await fetch(`/api/banners/${id}`, { method: 'DELETE' });
+        const response = await fetch(`/api/banners/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error("Erro ao deletar banner");
         carregarBannersVisuais();
     } catch (erro) { alert('Erro ao deletar'); }
 }
@@ -914,6 +917,7 @@ async function deletarBanner(id) {
 async function carregarComentarios() {
     try {
         const response = await fetch('/api/comentarios');
+        if (!response.ok) throw new Error("Erro ao carregar comentários");
         const comentarios = await response.json();
         const tbody = document.getElementById('tabela-comentarios');
         if(!tbody) return;

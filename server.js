@@ -242,6 +242,7 @@ app.post("/api/banners", checkAdminAPI, upload.single('imagem'), async (req, res
             const fileName = `banner_${Date.now()}.${fileExt}`;
             const filePath = `public/${fileName}`;
 
+            // Tentar upload (Bucket 'banners' deve existir no Supabase)
             const { data: uploadData, error: uploadError } = await supabase.storage
                 .from('banners')
                 .upload(filePath, file.buffer, {
@@ -249,7 +250,17 @@ app.post("/api/banners", checkAdminAPI, upload.single('imagem'), async (req, res
                     upsert: true
                 });
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                console.error("Erro no Supabase Storage (Banners):", uploadError);
+                // Se o erro for bucket não encontrado, avisar o admin
+                if (uploadError.message && uploadError.message.includes('Bucket not found')) {
+                    return res.status(400).json({ 
+                        sucesso: false, 
+                        erro: "O bucket 'banners' não foi encontrado no Supabase Storage. Por favor, crie-o com acesso público." 
+                    });
+                }
+                throw uploadError;
+            }
 
             // Pegar URL pública
             const { data: urlData } = supabase.storage
@@ -285,8 +296,8 @@ app.post("/api/banners", checkAdminAPI, upload.single('imagem'), async (req, res
     }
 });
 
-// APIs DE CATEGORIAS
-app.get("/api/categories", checkAdminAPI, async (req, res) => {
+// APIs DE CATEGORIAS (Acesso para Profissionais e Admin)
+app.get("/api/categories", async (req, res) => {
     try {
         const { data, error } = await supabase.from("categories").select("*").order("name");
         if (error) throw error;
@@ -358,7 +369,7 @@ app.get("/auth/cadastro-form", (req, res) => {
 
 // API PARA SOLICITAÇÕES DE APROVAÇÃO (ADMIN)
 app.get("/admin/api/solicitacoes", async (req, res) => {
-    if (!req.session.userId || req.session.userType !== 'admin') {
+    if (!req.session.adminLogado) {
         return res.status(403).json({ erro: "Acesso negado" });
     }
     try {
@@ -403,20 +414,39 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
     }
     try {
         const body = req.body || {};
-        const { avatar_url, phone_number, city, state, cep, categories, specialties, description, services_offered } = body;
+        const { phone_number, city, state, cep, categories, specialties, description } = body;
+        let avatar_url = body.avatar_url;
+
+        // 1. Processar Upload de Avatar (se houver arquivo)
+        const avatarFile = req.files ? req.files.find(f => f.fieldname === 'avatar') : null;
+        if (avatarFile) {
+            const fileExt = avatarFile.originalname.split('.').pop();
+            const fileName = `avatar_${req.session.userId}_${Date.now()}.${fileExt}`;
+            const filePath = `public/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, avatarFile.buffer, {
+                    contentType: avatarFile.mimetype,
+                    upsert: true
+                });
+
+            if (!uploadError) {
+                const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+                avatar_url = urlData.publicUrl;
+            }
+        }
         
-        // 1. Atualizar avatar na tabela users
+        // Atualizar avatar na tabela users se tivermos uma nova URL
         if (avatar_url) {
             await supabase.from('users').update({ avatar_url }).eq('id', req.session.userId);
         }
         
         // 2. Atualizar dados na tabela professionals
-        // Pegar a primeira categoria da lista (se houver) para manter compatibilidade com a coluna category_id
         const categoryList = categories ? categories.split(',') : [];
-        let category_id = req.body.category_id; // Fallback para o campo original se existir
+        let category_id = body.category_id; 
         
         if (categoryList.length > 0 && !category_id) {
-            // Buscar o ID da primeira categoria pelo nome
             const { data: catData } = await supabase.from('categories').select('id').eq('name', categoryList[0]).maybeSingle();
             if (catData) category_id = catData.id;
         }
@@ -428,7 +458,6 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
             cep,
             category_id,
             description,
-            services_offered,
             specialties,
             profile_completed: true,
             approval_requested: true,
