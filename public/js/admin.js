@@ -20,7 +20,76 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('tabela-categorias')) {
         carregarCategorias();
     }
+    
+    carregarSolicitacoes();
+    inicializarGraficos();
 });
+
+async function carregarSolicitacoes() {
+    try {
+        const response = await fetch('/admin/api/solicitacoes');
+        const solicitacoes = await response.json();
+        
+        const tbody = document.getElementById('tabela-solicitacoes');
+        const badgeCount = document.getElementById('count-solicitacoes');
+        
+        if (badgeCount) badgeCount.innerText = solicitacoes.length;
+        if (!tbody) return;
+        
+        if (solicitacoes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 20px;">Nenhuma solicitação pendente</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = solicitacoes.map(s => `
+            <tr>
+                <td>
+                    <div class="profissional-info">
+                        <img src="${s.users?.avatar_url || '/imagens/equipe_site/Mascote.png'}" class="avatar-mini">
+                        <div>
+                            <strong>${s.users?.full_name}</strong>
+                            <small>${s.users?.email}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>${s.categories?.name || 'Não definida'}</td>
+                <td>${new Date(s.updated_at).toLocaleDateString('pt-BR')}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="abrirModalAprovar('${s.user_id}', '${s.users?.full_name}')">
+                        <i class="fas fa-check"></i> Analisar
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error("Erro ao carregar solicitações:", err);
+    }
+}
+
+function inicializarGraficos() {
+    const ctx = document.getElementById('chartReceita');
+    if (!ctx || typeof Chart === 'undefined') return;
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Receita (R$)',
+                data: [1200, 1900, 3000, 2500, 4200, 4800],
+                borderColor: '#ffa500',
+                backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
 
 // ============================================
 // SISTEMA DE ABAS (PÁGINAS OCULTAS)

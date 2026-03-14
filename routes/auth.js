@@ -122,21 +122,16 @@ router.post('/cadastro', async (req, res) => {
         }
 
         // 2. Se for profissional, criar entrada na tabela professionals
+        // Padronizado para usar user_id (PK da tabela professionals)
         if (user_type === 'professional') {
-            const insertData = { status: 'pending' };
             const { error: profError } = await supabase
                 .from('professionals')
                 .insert([{ 
-                    id: userData.id, 
-                    ...insertData
+                    user_id: userData.id, 
+                    status: 'pending'
                 }]);
             
-            if (profError && profError.message.includes("column \"id\" of relation \"professionals\" does not exist")) {
-                await supabase.from('professionals').insert([{ 
-                    user_id: userData.id, 
-                    ...insertData
-                }]);
-            } else if (profError) {
+            if (profError) {
                 console.error("Erro ao criar perfil profissional:", profError);
             }
         }
@@ -232,30 +227,19 @@ router.get('/google/callback', passport.authenticate('google', {
         req.session.fullName = req.user.full_name;
 
         // Se for profissional, verificar se já tem perfil na tabela professionals
+        // Padronizado para usar user_id
         if (req.user.user_type === 'professional') {
-            let { data: prof, error: profError } = await supabase
+            const { data: prof, error: profError } = await supabase
                 .from('professionals')
                 .select('category_id')
-                .eq('id', req.user.id)
+                .eq('user_id', req.user.id)
                 .maybeSingle();
             
-            // Tentar user_id se id falhar
-            if (profError && profError.message.includes("column professionals.id does not exist")) {
-                const { data: retryProf } = await supabase
-                    .from('professionals')
-                    .select('category_id')
-                    .eq('user_id', req.user.id)
-                    .maybeSingle();
-                prof = retryProf;
-            }
+            if (profError) throw profError;
             
             if (!prof) {
                 // Criar entrada pendente se não existir
-                const insertData = { status: 'pending' };
-                const { error: insertError } = await supabase.from('professionals').insert([{ id: req.user.id, ...insertData }]);
-                if (insertError && insertError.message.includes("column \"id\" of relation \"professionals\" does not exist")) {
-                    await supabase.from('professionals').insert([{ user_id: req.user.id, ...insertData }]);
-                }
+                await supabase.from('professionals').insert([{ user_id: req.user.id, status: 'pending' }]);
                 return res.redirect('/profissional/dashboard#perfil'); 
             } else if (!prof.category_id) {
                 return res.redirect('/profissional/dashboard#perfil');

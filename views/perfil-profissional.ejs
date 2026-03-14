@@ -52,10 +52,21 @@
 
         <div class="gallery-grid">
             <img src="<%= profissional.users?.avatar_url || '/imagens/default-avatar.png' %>" class="gallery-item main-img" alt="Foto Principal">
-            <img src="/imagens/trabalhos/trabalho1.jpg" class="gallery-item" alt="Trabalho 1">
-            <img src="/imagens/trabalhos/trabalho2.jpg" class="gallery-item" alt="Trabalho 2">
-            <img src="/imagens/trabalhos/trabalho3.jpg" class="gallery-item" alt="Trabalho 3">
-            <img src="/imagens/trabalhos/trabalho4.jpg" class="gallery-item" alt="Trabalho 4">
+            <% if (typeof portfolio !== 'undefined' && portfolio.length > 0) { %>
+                <% portfolio.slice(0, 4).forEach(item => { %>
+                    <img src="<%= item.image_url %>" class="gallery-item" alt="Trabalho">
+                <% }); %>
+                <% if (portfolio.length < 4) { %>
+                    <% for(let i=0; i < (4 - portfolio.length); i++) { %>
+                        <img src="/imagens/trabalhos/trabalho<%= i+1 %>.jpg" class="gallery-item" alt="Exemplo">
+                    <% } %>
+                <% } %>
+            <% } else { %>
+                <img src="/imagens/trabalhos/trabalho1.jpg" class="gallery-item" alt="Exemplo 1">
+                <img src="/imagens/trabalhos/trabalho2.jpg" class="gallery-item" alt="Exemplo 2">
+                <img src="/imagens/trabalhos/trabalho3.jpg" class="gallery-item" alt="Exemplo 3">
+                <img src="/imagens/trabalhos/trabalho4.jpg" class="gallery-item" alt="Exemplo 4">
+            <% } %>
         </div>
 
         <div class="perfil-content">

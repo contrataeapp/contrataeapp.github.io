@@ -10,6 +10,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="dashboard-wrapper">
@@ -19,6 +20,7 @@
                 <ul>
                     <li><a href="#dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                     <li><a href="#profissionais"><i class="fas fa-tools"></i> Profissionais</a></li>
+                    <li><a href="#solicitacoes"><i class="fas fa-user-check"></i> Solicitações <span class="badge-count" id="count-solicitacoes">0</span></a></li>
                     <li><a href="#banners"><i class="fas fa-ad"></i> Banners</a></li>
                     <li><a href="#categorias"><i class="fas fa-list"></i> Categorias</a></li>
                     <li><a href="#comentarios"><i class="fas fa-star"></i> Moderação</a></li>
@@ -68,6 +70,12 @@
                             <p>R$ <%= typeof totais !== 'undefined' ? totais.receitaTotal.toFixed(2).replace('.', ',') : '0,00' %></p>
                         </div>
                     </div>
+                    
+                    <!-- GRÁFICO DE RECEITA -->
+                    <div class="card chart-card" style="grid-column: span 2;">
+                        <h3>Receita Mensal</h3>
+                        <canvas id="chartReceita"></canvas>
+                    </div>
  
                     <div class="card monthly">
                         <div class="icon"><i class="fas fa-calendar-alt"></i></div>
@@ -98,6 +106,28 @@
                             <p><%= typeof totais !== 'undefined' ? totais.pausados : '0' %></p>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <section class="admin-section" id="solicitacoes">
+                <div class="section-header">
+                    <h2>Solicitações de Aprovação</h2>
+                    <p>Profissionais que completaram o perfil e aguardam ativação.</p>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Profissional</th>
+                                <th>Categoria</th>
+                                <th>Data Solicitação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-solicitacoes">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
 

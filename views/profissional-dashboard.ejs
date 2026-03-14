@@ -91,6 +91,9 @@
                     <li><a href="#" class="tab-btn" onclick="mudarAba('servicos')"><i class="fas fa-briefcase"></i> Meus Serviços</a></li>
                     <li><a href="#" class="tab-btn" onclick="mudarAba('avaliacoes')"><i class="fas fa-star"></i> Avaliações</a></li>
                     <li><a href="#" class="tab-btn" onclick="mudarAba('perfil')"><i class="fas fa-user"></i> Meu Perfil</a></li>
+                    <li><a href="#" class="tab-btn" onclick="mudarAba('portfolio')"><i class="fas fa-images"></i> Meu Portfólio</a></li>
+                    <li><a href="#" class="tab-btn" onclick="mudarAba('planos')"><i class="fas fa-credit-card"></i> Meu Plano</a></li>
+                    <li><a href="#" class="tab-btn" onclick="mudarAba('pagamentos')"><i class="fas fa-history"></i> Pagamentos</a></li>
                     <li><a href="/auth/logout"><i class="fas fa-power-off"></i> Sair</a></li>
                 </ul>
             </nav>
@@ -105,9 +108,42 @@
                     <div class="avatar"><%= fullName.charAt(0).toUpperCase() %></div>
                 </div>
             </header>
-            
-            <!-- ABA RESUMO -->
+                        <!-- ABA RESUMO -->
             <div id="resumo" class="tab-content active">
+                <% if (profissional.data_vencimento) { %>
+                    <% 
+                        const hoje = new Date();
+                        const venc = new Date(profissional.data_vencimento);
+                        const diffDays = Math.ceil((venc - hoje) / (1000 * 60 * 60 * 24));
+                    %>
+                    <% if (diffDays <= 5 && diffDays > 0) { %>
+                        <div class="alert alert-warning" style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ffeeba;">
+                            <i class="fas fa-exclamation-triangle"></i> <strong>Atenção:</strong> Seu plano vence em <%= diffDays %> dias. <a href="#" onclick="mudarAba('planos')" style="color: #856404; font-weight: bold;">Renove agora</a> para não perder visibilidade!
+                        </div>
+                    <% } else if (diffDays <= 0) { %>
+                        <div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #f5c6cb;">
+                            <i class="fas fa-times-circle"></i> <strong>Plano Vencido:</strong> Seu perfil está oculto para clientes. <a href="#" onclick="mudarAba('planos')" style="color: #721c24; font-weight: bold;">Renove seu plano</a> para voltar a aparecer nas buscas.
+                        </div>
+                    <% } %>
+                <% } %>
+
+                <div class="summary-cards">ofissional.approval_requested && profissional.status === 'pending') { %>
+                    <div class="card" style="background: #fff8e1; border: 1px solid #ffe082; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="color: #856404; margin-bottom: 5px;"><i class="fas fa-exclamation-triangle"></i> Perfil Pronto para Análise</h3>
+                            <p style="color: #856404; font-size: 14px;">Seu perfil está completo! Clique no botão ao lado para solicitar a aprovação da plataforma.</p>
+                        </div>
+                        <form action="/profissional/solicitar-aprovacao" method="POST">
+                            <button type="submit" class="btn btn-primary">Solicitar Aprovação</button>
+                        </form>
+                    </div>
+                <% } else if (profissional && profissional.approval_requested && profissional.status === 'pending') { %>
+                    <div class="card" style="background: #e3f2fd; border: 1px solid #bbdefb; margin-bottom: 30px;">
+                        <h3 style="color: #0d47a1; margin-bottom: 5px;"><i class="fas fa-clock"></i> Perfil em Análise</h3>
+                        <p style="color: #0d47a1; font-size: 14px;">Seu perfil foi enviado para análise. Em breve nossa equipe entrará em contato.</p>
+                    </div>
+                <% } %>
+
                 <div class="cards-grid">
                     <div class="card">
                         <div class="icon"><i class="fas fa-phone"></i></div>
@@ -201,6 +237,33 @@
                 </div>
             </div>
             
+            <!-- ABA PORTFÓLIO -->
+            <div id="portfolio" class="tab-content">
+                <h2>Meu Portfólio</h2>
+                <p style="color: #6c757d; margin-bottom: 25px;">Adicione fotos dos seus melhores trabalhos para atrair mais clientes (máx. 10 fotos).</p>
+                
+                <form action="/profissional/portfolio/adicionar" method="POST" style="margin-bottom: 30px; display: flex; gap: 10px;">
+                    <input type="url" name="image_url" placeholder="URL da imagem (ex: https://imgur.com/foto.jpg)" required style="flex: 1;">
+                    <button type="submit" class="btn btn-primary">Adicionar Foto</button>
+                </form>
+
+                <div class="cards-grid" id="galeria-portfolio">
+                    <% if (typeof portfolio !== 'undefined' && portfolio.length > 0) { %>
+                        <% portfolio.forEach(item => { %>
+                            <div class="card" style="padding: 10px; position: relative;">
+                                <img src="<%= item.image_url %>" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px;">
+                                <form action="/profissional/portfolio/remover" method="POST" style="position: absolute; top: 15px; right: 15px;">
+                                    <input type="hidden" name="id" value="<%= item.id %>">
+                                    <button type="submit" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p style="grid-column: 1/-1; text-align: center; color: #999;">Nenhuma foto no portfólio ainda.</p>
+                    <% } %>
+                </div>
+            </div>
+
             <!-- ABA PERFIL -->
             <div id="perfil" class="tab-content">
                 <h2>Meu Perfil Profissional</h2>
@@ -235,8 +298,70 @@
                     <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                 </form>
             </div>
+
+            <!-- ABA PLANOS -->
+            <div id="planos" class="tab-content">
+                <h2>Ativar Perfil na Plataforma</h2>
+                <p style="color: #6c757d; margin-bottom: 30px;">Escolha um plano para manter seu perfil ativo e visível para os clientes.</p>
+                
+                <div class="cards-grid">
+                    <% if (typeof planos !== 'undefined' && planos.length > 0) { %>
+                        <% planos.forEach(plano => { %>
+                            <div class="card" style="text-align: center; border: 2px solid #e2e8f0; transition: 0.3s;">
+                                <h3 style="font-size: 20px; color: #002147; margin-bottom: 15px;"><%= plano.name %></h3>
+                                <div class="value" style="color: #ffa500; margin-bottom: 10px;">R$ <%= plano.price %></div>
+                                <p style="color: #6c757d; margin-bottom: 20px;">Duração: <%= plano.duration_months %> <%= plano.duration_months > 1 ? 'meses' : 'mês' %></p>
+                                <button class="btn btn-primary" onclick="pagarViaPix('<%= plano.name %>', '<%= plano.price %>')">Pagar via PIX</button>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p>Nenhum plano disponível no momento.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- ABA PAGAMENTOS -->
+            <div id="pagamentos" class="tab-content">
+                <h2>Histórico de Pagamentos</h2>
+                <div class="table-responsive" style="margin-top: 25px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Plano</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (typeof pagamentos !== 'undefined' && pagamentos.length > 0) { %>
+                                <% pagamentos.forEach(pag => { %>
+                                    <tr>
+                                        <td><%= new Date(pag.payment_date).toLocaleDateString('pt-BR') %></td>
+                                        <td><%= pag.plans?.name %></td>
+                                        <td>R$ <%= pag.amount %></td>
+                                        <td><span class="badge <%= pag.status %>"><%= pag.status === 'completed' ? 'Concluído' : 'Pendente' %></span></td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr><td colspan="4" style="text-align: center; color: #6c757d;">Nenhum pagamento registrado</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        function pagarViaPix(plano, valor) {
+            const nome = "<%= fullName %>";
+            const categoria = "<%= profissional.categories?.name || 'Não definida' %>";
+            const mensagem = `Olá, sou PROFISSIONAL da plataforma Contrataê.\n\nNome: ${nome}\nCategoria: ${categoria}\nPlano escolhido: ${plano}\nValor: R$ ${valor}\n\nEstou enviando o comprovante de pagamento.`;
+            const whatsappUrl = `https://wa.me/5516999999999?text=${encodeURIComponent(mensagem)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+    </script>
     
     <!-- MODAL NOVO SERVIÇO -->
     <div id="modalServico" class="modal">

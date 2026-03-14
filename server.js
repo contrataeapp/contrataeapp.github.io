@@ -136,8 +136,9 @@ app.get("/admin", checkAdmin, async (req, res) => {
         if (error) throw error;
 
         // Mapear para o formato esperado pela view admin.ejs (se necessário)
+        // Padronizado para usar user_id
         let filtrados = (professionals || []).map(p => ({
-            id: p.id || p.user_id, // Suporte a ambas as colunas
+            id: p.user_id, 
             nome: p.users?.full_name || 'Sem Nome',
             email: p.users?.email,
             profissao: p.categories?.name || 'Sem Categoria',
@@ -186,22 +187,25 @@ app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
         else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
         else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
 
+        // Padronizado para usar user_id
         const updateData = { 
             status: "active", 
             data_vencimento: dataVencimento.toISOString(), 
             valor_pago: parseFloat(valor)
         };
-        let { error: errorAtualizar } = await supabase.from("professionals")
+        const { error: errorAtualizar } = await supabase.from("professionals")
             .update(updateData)
-            .eq("id", id);
+            .eq("user_id", id);
         
-        if (errorAtualizar && errorAtualizar.message.includes("column professionals.id does not exist")) {
-            const { error: retryError } = await supabase.from("professionals")
-                .update(updateData)
-                .eq("user_id", id);
-            errorAtualizar = retryError;
-        }
         if (errorAtualizar) throw errorAtualizar;
+
+        // Registrar Log
+        await supabase.from('admin_logs').insert([{
+            admin_id: req.session.userId,
+            action: 'aprovação',
+            target_id: id,
+            details: `Profissional aprovado com valor R$ ${valor} e vencimento em ${dataVencimento.toLocaleDateString('pt-BR')}`
+        }]);
 
         res.json({ sucesso: true });
     } catch (err) { res.status(500).json({ erro: err.message }); }
@@ -289,6 +293,72 @@ app.get("/auth/cadastro-form", (req, res) => {
     const type = req.query.type || 'client';
     res.render("auth/cadastro", { erro: null, userType: type });
 });
+
+// API PARA SOLICITAÇÕES DE APROVAÇÃO (ADMIN)
+app.get("/admin/api/solicitacoes", async (req, res) => {
+    if (!req.session.userId || req.session.userType !== 'admin') {
+        return res.status(403).json({ erro: "Acesso negado" });
+    }
+    try {
+        const { data, error } = await supabase
+            .from('professionals')
+            .select('*, users(full_name, email, avatar_url), categories(name)')
+            .eq('approval_requested', true)
+            .eq('status', 'pending')
+            .order('updated_at', { ascending: false });
+        
+        if (error) throw error;
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+// ROTA PARA COMPLETAR PERFIL (OBRIGATÓRIA PARA PROFISSIONAIS)
+app.get("/auth/completar-perfil", async (req, res) => {
+    if (!req.session.userId || req.session.userType !== 'professional') {
+        return res.redirect('/');
+    }
+    try {
+        const { data: user } = await supabase.from('users').select('*').eq('id', req.session.userId).single();
+        const { data: profissional } = await supabase.from('professionals').select('*').eq('user_id', req.session.userId).single();
+        const { data: categorias } = await supabase.from('categories').select('*').order('name');
+        
+        res.render("auth/completar-perfil", { user, profissional, categorias });
+    } catch (err) {
+        console.error("Erro ao carregar completar perfil:", err);
+        res.redirect('/profissional/dashboard');
+    }
+});
+
+app.post("/auth/completar-perfil", async (req, res) => {
+    if (!req.session.userId) return res.redirect('/auth/login');
+    try {
+        const { avatar_url, phone_number, city, category_id, description, services_offered } = req.body;
+        
+        // 1. Atualizar avatar na tabela users
+        if (avatar_url) {
+            await supabase.from('users').update({ avatar_url }).eq('id', req.session.userId);
+        }
+        
+        // 2. Atualizar dados na tabela professionals
+        const { error } = await supabase.from('professionals').update({
+            phone_number,
+            city,
+            category_id,
+            description,
+            services_offered,
+            profile_completed: true
+        }).eq('user_id', req.session.userId);
+        
+        if (error) throw error;
+        
+        res.redirect('/profissional/dashboard');
+    } catch (err) {
+        console.error("Erro ao salvar perfil:", err);
+        res.redirect('/auth/completar-perfil');
+    }
+});
 app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
 app.get("/contato", (req, res) => res.render("contato"));
 app.get("/termos-de-uso", (req, res) => res.render("termos_de_uso"));
@@ -369,15 +439,36 @@ app.get("/categoria/:slug", async (req, res) => {
 app.get("/perfil/:id", async (req, res) => {
     try {
         const { id } = req.params;
+        // Padronizado para usar user_id
         const { data: professional, error } = await supabase
             .from("professionals")
-            .select("*, users(full_name, email, phone_number, avatar_url), categories(name)")
-            .eq("id", id)
+            .select("*, users(full_name, email, avatar_url), categories(name)")
+            .eq("user_id", id)
             .single();
 
         if (error || !professional) return res.status(404).send("Profissional não encontrado.");
-        res.render("perfil-profissional", { profissional });
+
+        // Buscar Portfólio
+        const { data: portfolio } = await supabase
+            .from('professional_portfolio')
+            .select('*')
+            .eq('professional_id', id)
+            .order('created_at', { ascending: false });
+
+        // Buscar Avaliações
+        const { data: reviews } = await supabase
+            .from('reviews')
+            .select('*')
+            .eq('professional_id', id)
+            .order('created_at', { ascending: false });
+
+        res.render("perfil-profissional", { 
+            profissional, 
+            portfolio: portfolio || [],
+            reviews: reviews || []
+        });
     } catch (e) {
+        console.error("Erro ao carregar perfil:", e);
         res.status(500).send("Erro interno ao carregar o perfil.");
     }
 });
