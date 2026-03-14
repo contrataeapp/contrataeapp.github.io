@@ -863,8 +863,8 @@ function abrirModalGaveta(posicao, ordem, bannerData) {
     if (bannerData) {
         document.getElementById('id-banner').value = bannerData.id;
         document.getElementById('titulo-banner').value = bannerData.titulo || '';
-        document.getElementById('link-banner').value = bannerData.link_destino || '';
-        document.getElementById('ativo-banner').checked = bannerData.ativo;
+        document.getElementById('link-banner').value = bannerData.link_destination || '';
+        document.getElementById('ativo-banner').checked = bannerData.is_active;
         document.getElementById('arquivo-banner').required = false; 
         document.getElementById('titulo-modal-banner').textContent = 'Editar Parceiro';
     } else {
@@ -878,16 +878,16 @@ function abrirModalGaveta(posicao, ordem, bannerData) {
 async function submeterBannerViaUpload(e) {
     e.preventDefault();
     
-    let linkDestinoOriginal = document.getElementById('link-banner').value.trim();
-    if (/^\d{10,13}$/.test(linkDestinoOriginal)) {
-        linkDestinoOriginal = `https://wa.me/55${linkDestinoOriginal}`;
+    let linkDestinationOriginal = document.getElementById('link-banner').value.trim();
+    if (/^\d{10,13}$/.test(linkDestinationOriginal)) {
+        linkDestinationOriginal = `https://wa.me/55${linkDestinationOriginal}`;
     }
 
     const arquivoInput = document.getElementById('arquivo-banner');
     const formData = new FormData();
     formData.append('id', document.getElementById('id-banner').value);
     formData.append('titulo', document.getElementById('titulo-banner').value);
-    formData.append('link_destino', linkDestinoOriginal); 
+    formData.append('link_destination', linkDestinationOriginal); 
     formData.append('posicao', document.getElementById('posicao-banner').value);
     formData.append('ordem', document.getElementById('ordem-banner').value);
     formData.append('ativo', document.getElementById('ativo-banner').checked);

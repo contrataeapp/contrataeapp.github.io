@@ -233,6 +233,7 @@ router.get('/google/callback', passport.authenticate('google', {
 
         // Se for profissional, verificar se já tem perfil na tabela professionals
         if (req.user.user_type === 'professional') {
+            console.log("Usuário Google é profissional. Verificando perfil...");
             const { data: prof, error: profError } = await supabase
                 .from('professionals')
                 .select('*')
@@ -242,7 +243,7 @@ router.get('/google/callback', passport.authenticate('google', {
             if (profError) throw profError;
             
             if (!prof) {
-                // Criar entrada pendente se não existir (SaaS Fix)
+                console.log("Perfil profissional não existe. Criando e redirecionando para completar-perfil...");
                 await supabase.from('professionals').insert([{ 
                     user_id: req.user.id, 
                     status: 'pending',
@@ -251,11 +252,14 @@ router.get('/google/callback', passport.authenticate('google', {
                 }]);
                 return res.redirect('/auth/completar-perfil'); 
             } else if (!prof.profile_completed) {
+                console.log("Perfil profissional incompleto. Redirecionando para completar-perfil...");
                 return res.redirect('/auth/completar-perfil');
             }
+            console.log("Perfil profissional completo. Redirecionando para dashboard...");
             return res.redirect('/profissional/dashboard');
         }
 
+        console.log("Usuário Google é cliente. Redirecionando para dashboard...");
         res.redirect('/cliente/dashboard');
     } catch (err) {
         console.error("Erro no callback do Google:", err);

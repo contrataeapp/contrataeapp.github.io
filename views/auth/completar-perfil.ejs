@@ -179,9 +179,10 @@
     <div id="cancelModal" class="modal">
         <div class="modal-content">
             <h2>Atenção!</h2>
-            <p>Seu perfil ainda não foi enviado para aprovação. Deseja realmente sair?</p>
+            <p>Seu perfil ainda não foi enviado para aprovação. Deseja realmente cancelar seu cadastro como profissional e voltar a ser um cliente comum?</p>
             <div class="modal-btns">
-                <button class="modal-btn modal-btn-confirm" onclick="window.location.href='/auth/logout'">Sair</button>
+                <form id="form-cancelar" action="/auth/cancelar-profissional" method="POST" style="display:none;"></form>
+                <button class="modal-btn modal-btn-confirm" onclick="document.getElementById('form-cancelar').submit()">Sim, Cancelar</button>
                 <button class="modal-btn modal-btn-cancel" onclick="hideCancelModal()">Continuar Preenchendo</button>
             </div>
         </div>

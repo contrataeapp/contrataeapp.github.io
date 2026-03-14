@@ -231,8 +231,10 @@ app.get("/api/banners", checkAdminAPI, async (req, res) => {
 });
 
 app.post("/api/banners", checkAdminAPI, upload.single('imagem'), async (req, res) => {
+    console.log("--- INÍCIO POST /api/banners ---");
+    console.log("Dados recebidos:", req.body);
     try {
-        const { id, titulo, link_destino, posicao, ordem, ativo } = req.body;
+        const { id, titulo, link_destination, posicao, ordem, ativo } = req.body;
         let imagem_url = req.body.imagem_url;
 
         // Se houver novo arquivo, fazer upload para o Supabase Storage
@@ -272,7 +274,7 @@ app.post("/api/banners", checkAdminAPI, upload.single('imagem'), async (req, res
 
         const bannerData = {
             titulo,
-            link_destino,
+            link_destination,
             posicao: parseInt(posicao),
             ordem: parseInt(ordem),
             is_active: ativo === 'true' || ativo === true,
@@ -408,18 +410,55 @@ app.get("/auth/completar-perfil", async (req, res) => {
     }
 });
 
+app.post("/auth/cancelar-profissional", async (req, res) => {
+    console.log("--- INÍCIO POST /auth/cancelar-profissional ---");
+    if (!req.session.userId) return res.redirect('/');
+    
+    try {
+        console.log("Cancelando cadastro profissional para UserID:", req.session.userId);
+        
+        // 1. Atualizar tabela users para 'client'
+        await supabase.from('users').update({ user_type: 'client' }).eq('id', req.session.userId);
+        
+        // 2. Atualizar tabela professionals para resetar solicitação
+        await supabase.from('professionals').update({ 
+            approval_requested: false,
+            profile_completed: false,
+            status: 'pending' 
+        }).eq('user_id', req.session.userId);
+        
+        // 3. Atualizar sessão
+        req.session.userType = 'client';
+        
+        console.log("Cadastro cancelado com sucesso. Redirecionando para home...");
+        res.redirect('/');
+    } catch (err) {
+        console.error("Erro ao cancelar cadastro profissional:", err);
+        res.redirect('/');
+    }
+});
+
 app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
+    console.log("--- INÍCIO POST /auth/completar-perfil ---");
+    console.log("UserID na Sessão:", req.session.userId);
+    console.log("UserType na Sessão:", req.session.userType);
+    
     if (!req.session.userId || req.session.userType !== 'professional') {
+        console.log("Acesso negado: Usuário não logado ou não é profissional");
         return res.redirect('/');
     }
+    
     try {
         const body = req.body || {};
+        console.log("Dados recebidos (body):", body);
+        
         const { phone_number, city, state, cep, categories, specialties, description } = body;
         let avatar_url = body.avatar_url;
 
         // 1. Processar Upload de Avatar (se houver arquivo)
         const avatarFile = req.files ? req.files.find(f => f.fieldname === 'avatar') : null;
         if (avatarFile) {
+            console.log("Processando upload de avatar...");
             const fileExt = avatarFile.originalname.split('.').pop();
             const fileName = `avatar_${req.session.userId}_${Date.now()}.${fileExt}`;
             const filePath = `public/${fileName}`;
@@ -434,15 +473,20 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
             if (!uploadError) {
                 const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
                 avatar_url = urlData.publicUrl;
+                console.log("Avatar enviado com sucesso:", avatar_url);
+            } else {
+                console.error("Erro no upload do avatar:", uploadError);
             }
         }
         
         // Atualizar avatar na tabela users se tivermos uma nova URL
         if (avatar_url) {
+            console.log("Atualizando avatar_url na tabela users...");
             await supabase.from('users').update({ avatar_url }).eq('id', req.session.userId);
         }
         
         // 2. Atualizar dados na tabela professionals
+        console.log("Atualizando dados na tabela professionals...");
         const categoryList = categories ? categories.split(',') : [];
         let category_id = body.category_id; 
         
@@ -464,16 +508,18 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
             status: 'pending'
         }).eq('user_id', req.session.userId);
         
-        if (error) throw error;
+        if (error) {
+            console.error("Erro ao atualizar tabela professionals:", error);
+            throw error;
+        }
         
         // 3. Salvar múltiplas categorias se houver tabela professional_categories
         if (categoryList.length > 0) {
             try {
-                // Primeiro buscar os IDs das categorias
+                console.log("Salvando categorias extras...");
                 const { data: cats } = await supabase.from('categories').select('id, name').in('name', categoryList);
                 if (cats && cats.length > 0) {
                     const inserts = cats.map(c => ({ professional_id: req.session.userId, category_id: c.id }));
-                    // Limpar antigas e inserir novas
                     await supabase.from('professional_categories').delete().eq('professional_id', req.session.userId);
                     await supabase.from('professional_categories').insert(inserts);
                 }
@@ -481,11 +527,12 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
                 console.error("Erro ao salvar categorias extras:", catErr);
             }
         }
-        
-        res.redirect('/profissional/dashboard');
+
+        console.log("Perfil salvo com sucesso! Redirecionando para dashboard...");
+        return res.redirect('/profissional/dashboard');
     } catch (err) {
-        console.error("Erro ao salvar perfil:", err);
-        res.redirect('/auth/completar-perfil');
+        console.error("ERRO CRÍTICO no POST /auth/completar-perfil:", err);
+        return res.redirect('/auth/completar-perfil');
     }
 });
 app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
