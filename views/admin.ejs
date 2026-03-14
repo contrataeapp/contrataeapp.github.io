@@ -152,6 +152,8 @@
                             <option value="PAUSADO" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.status === 'PAUSADO' ? 'selected' : '' %>>Pausados</option>
                             <option value="EXCLUIDO" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.status === 'EXCLUIDO' ? 'selected' : '' %>>Contas Excluídas</option>
                         </select>
+
+                        <input type="text" id="filtro-cidade" class="search-input" placeholder="Filtrar por cidade..." value="<%= typeof filtroAtivo !== 'undefined' ? filtroAtivo.cidade || '' : '' %>">
                         
                         <select id="ordenar" class="filter-select">
                             <option value="" <%= typeof filtroAtivo !== 'undefined' && !filtroAtivo.ordenar ? 'selected' : '' %>>Ordenação Padrão</option>

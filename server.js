@@ -58,6 +58,10 @@ app.use(passport.session());
 const authRoutes = require("./routes/auth");
 app.use("/auth", authRoutes);
 
+// Importar Rotas de Avaliações
+const reviewRoutes = require("./routes/reviews");
+app.use("/api/reviews", reviewRoutes);
+
 // 4. MIDDLEWARE DE VARIÁVEIS GLOBAIS (Agora com verificação de segurança)
 app.use((req, res, next) => {
     const sess = req.session || {};

@@ -22,14 +22,42 @@
         input:focus, textarea:focus, select:focus { border-color: #ffa500; outline: none; }
         
         .avatar-upload { text-align: center; margin-bottom: 30px; }
-        .avatar-preview { width: 120px; height: 120px; border-radius: 50%; background: #333; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid #ffa500; }
+        .avatar-preview { width: 120px; height: 120px; border-radius: 50%; background: #333; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid #ffa500; cursor: pointer; position: relative; }
         .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
         .avatar-preview i { font-size: 50px; color: #666; }
+        .avatar-preview .overlay { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.5); color: white; font-size: 10px; padding: 2px 0; }
         
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 16px; text-transform: uppercase; }
+        .portfolio-upload { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
+        .portfolio-item { width: 100px; height: 100px; background: #333; border-radius: 8px; border: 2px dashed #444; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .portfolio-item img { width: 100%; height: 100%; object-fit: cover; }
+        .portfolio-item i { font-size: 24px; color: #666; }
+        
+        .category-search { position: relative; margin-bottom: 15px; }
+        .category-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; }
+        .category-search input { padding-left: 35px; }
+        
+        .category-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .category-tag { background: #333; padding: 5px 12px; border-radius: 20px; font-size: 12px; display: flex; align-items: center; gap: 8px; border: 1px solid #444; cursor: pointer; }
+        .category-tag.selected { background: #ffa500; color: #000; border-color: #ffa500; }
+        .category-tag i { font-size: 10px; }
+        
+        .btn-container { display: flex; gap: 15px; margin-top: 30px; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 16px; text-transform: uppercase; }
         .btn-primary { background: #ffa500; color: #000; }
         .btn-primary:hover { background: #ffb733; transform: translateY(-2px); }
+        .btn-secondary { background: #333; color: white; border: 1px solid #444; }
+        .btn-secondary:hover { background: #444; }
         
+        /* Modal Styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: #1e1e1e; padding: 30px; border-radius: 15px; max-width: 400px; width: 90%; text-align: center; border: 1px solid #333; }
+        .modal-content h2 { color: #ffa500; margin-bottom: 15px; }
+        .modal-content p { margin-bottom: 25px; color: #ccc; line-height: 1.5; }
+        .modal-btns { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+        .modal-btn-confirm { background: #ff4444; color: white; }
+        .modal-btn-cancel { background: #333; color: white; }
+
         @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -38,19 +66,23 @@
         <h1>Complete seu Perfil</h1>
         <p class="subtitle">Para começar a oferecer seus serviços, precisamos de mais algumas informações.</p>
         
-        <form action="/auth/completar-perfil" method="POST">
+        <form id="profileForm" action="/auth/completar-perfil" method="POST" enctype="multipart/form-data">
+            <!-- Foto de Perfil -->
             <div class="avatar-upload">
-                <div class="avatar-preview" id="preview">
+                <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('avatarInput').click()">
                     <% if (user && user.avatar_url) { %>
                         <img src="<%= user.avatar_url %>" alt="Avatar">
                     <% } else { %>
                         <i class="fas fa-user"></i>
                     <% } %>
+                    <div class="overlay">ALTERAR</div>
                 </div>
-                <label for="avatar_url">URL da Foto de Perfil</label>
-                <input type="url" name="avatar_url" id="avatar_url" placeholder="https://link-da-sua-foto.jpg" value="<%= (user && user.avatar_url) || '' %>" onchange="updatePreview(this.value)">
+                <label>Foto de Perfil</label>
+                <input type="file" name="avatar" id="avatarInput" accept="image/*" style="display: none;" onchange="previewImage(this, 'avatarPreview')">
+                <input type="hidden" name="avatar_url" value="<%= (user && user.avatar_url) || '' %>">
             </div>
 
+            <!-- Informações Básicas -->
             <div class="form-section">
                 <h3><i class="fas fa-info-circle"></i> Informações Básicas</h3>
                 <div class="grid">
@@ -66,49 +98,163 @@
                 <div class="grid">
                     <div class="form-group">
                         <label>Telefone / WhatsApp</label>
-                        <input type="tel" name="phone_number" required placeholder="(16) 99999-9999" value="<%= (profissional && profissional.phone_number) || '' %>">
+                        <input type="tel" name="phone_number" required placeholder="(00) 00000-0000" value="<%= (profissional && profissional.phone_number) || '' %>">
                     </div>
+                    <div class="form-group">
+                        <label>CEP</label>
+                        <input type="text" name="cep" class="mask-cep" required placeholder="00000-000" value="<%= (profissional && profissional.cep) || '' %>">
+                    </div>
+                </div>
+                <div class="grid">
                     <div class="form-group">
                         <label>Cidade</label>
                         <input type="text" name="city" required placeholder="Sua cidade" value="<%= (profissional && profissional.city) || '' %>">
                     </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <input type="text" name="state" required placeholder="UF" maxlength="2" value="<%= (profissional && profissional.state) || '' %>">
+                    </div>
                 </div>
             </div>
 
+            <!-- Categorias e Especialidades -->
             <div class="form-section">
-                <h3><i class="fas fa-tools"></i> Especialidade</h3>
-                <div class="form-group">
-                    <label>Categoria Principal</label>
-                    <select name="category_id" required>
-                        <option value="">Selecione sua especialidade...</option>
-                        <% if (typeof categorias !== 'undefined' && categorias) { %>
-                            <% categorias.forEach(cat => { %>
-                                <option value="<%= cat.id %>" <%= (profissional && profissional.category_id == cat.id) ? 'selected' : '' %>><%= cat.name %></option>
-                            <% }); %>
-                        <% } %>
-                    </select>
+                <h3><i class="fas fa-tools"></i> Categorias e Especialidades</h3>
+                <p style="font-size: 12px; color: #888; margin-bottom: 10px;">Escolha até 3 categorias principais.</p>
+                
+                <div class="category-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="categorySearch" placeholder="Buscar categoria (ex: Eletricista, Pintor...)">
                 </div>
+
+                <div class="category-tags" id="categoryTags">
+                    <!-- Sugestões Iniciais -->
+                    <% const sugestoes = ['Eletricista', 'Encanador', 'Pedreiro', 'Pintor', 'Diarista', 'Jardineiro', 'Montador de móveis', 'Marido de aluguel', 'Técnico em ar condicionado', 'Técnico em geladeira', 'Instalador de TV', 'Instalador de câmeras', 'Chaveiro', 'Serralheiro', 'Babá', 'Pet sitter', 'Cuidador de idosos', 'Frete e mudanças']; %>
+                    <% sugestoes.forEach(sug => { %>
+                        <div class="category-tag" onclick="toggleCategory(this, '<%= sug %>')">
+                            <%= sug %> <i class="fas fa-plus"></i>
+                        </div>
+                    <% }); %>
+                </div>
+                <input type="hidden" name="categories" id="selectedCategoriesInput">
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Especialidades (Ex: Instalação, Manutenção, Residencial)</label>
+                    <input type="text" name="specialties" placeholder="Separe por vírgula" value="<%= (profissional && profissional.specialties) || '' %>">
+                </div>
+
                 <div class="form-group">
                     <label>Descrição Profissional (Conte sobre sua experiência)</label>
                     <textarea name="description" rows="4" required placeholder="Ex: Sou eletricista há 10 anos, especializado em instalações residenciais e comerciais..."><%= (profissional && profissional.description) || '' %></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Serviços Oferecidos (Separe por vírgula)</label>
-                    <input type="text" name="services_offered" placeholder="Ex: Pintura, Textura, Grafiato" value="<%= (profissional && profissional.services_offered) || '' %>">
-                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Salvar e Continuar</button>
+            <!-- Portfólio -->
+            <div class="form-section">
+                <h3><i class="fas fa-images"></i> Portfólio (Até 10 imagens)</h3>
+                <p style="font-size: 12px; color: #888;">Mostre seus melhores trabalhos. Máximo 3MB por imagem.</p>
+                
+                <div class="portfolio-upload" id="portfolioGrid">
+                    <div class="portfolio-item" onclick="document.getElementById('portfolioInput').click()">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                </div>
+                <input type="file" name="portfolio" id="portfolioInput" accept="image/*" multiple style="display: none;" onchange="handlePortfolio(this)">
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn btn-secondary" onclick="showCancelModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Salvar e Enviar para Aprovação</button>
+            </div>
         </form>
     </div>
 
+    <!-- Modal de Cancelamento -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <h2>Atenção!</h2>
+            <p>Seu perfil ainda não foi enviado para aprovação. Deseja realmente sair?</p>
+            <div class="modal-btns">
+                <button class="modal-btn modal-btn-confirm" onclick="window.location.href='/dashboard'">Sair</button>
+                <button class="modal-btn modal-btn-cancel" onclick="hideCancelModal()">Continuar Preenchendo</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/form-validation.js"></script>
     <script>
-        function updatePreview(url) {
-            const preview = document.getElementById('preview');
-            if (url) {
-                preview.innerHTML = `<img src="${url}" alt="Avatar">`;
+        // Gerenciamento de Categorias
+        const selectedCategories = [];
+        const maxCategories = 3;
+
+        function toggleCategory(el, category) {
+            const index = selectedCategories.indexOf(category);
+            if (index > -1) {
+                selectedCategories.splice(index, 1);
+                el.classList.remove('selected');
+                el.querySelector('i').className = 'fas fa-plus';
             } else {
-                preview.innerHTML = `<i class="fas fa-user"></i>`;
+                if (selectedCategories.length >= maxCategories) {
+                    alert('Você pode selecionar no máximo 3 categorias.');
+                    return;
+                }
+                selectedCategories.push(category);
+                el.classList.add('selected');
+                el.querySelector('i').className = 'fas fa-check';
+            }
+            document.getElementById('selectedCategoriesInput').value = selectedCategories.join(',');
+        }
+
+        // Busca de Categorias
+        document.getElementById('categorySearch').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            const tags = document.querySelectorAll('.category-tag');
+            tags.forEach(tag => {
+                const text = tag.textContent.toLowerCase();
+                tag.style.display = text.includes(term) ? 'flex' : 'none';
+            });
+        });
+
+        // Gerenciamento de Portfólio
+        function handlePortfolio(input) {
+            if (!validateFileSize(input, 3)) return;
+            
+            const grid = document.getElementById('portfolioGrid');
+            const existingItems = grid.querySelectorAll('.portfolio-item:not(:first-child)');
+            existingItems.forEach(item => item.remove());
+
+            if (input.files.length > 10) {
+                alert('Você pode enviar no máximo 10 imagens.');
+                input.value = '';
+                return;
+            }
+
+            Array.from(input.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'portfolio-item';
+                    div.innerHTML = `<img src="${e.target.result}">`;
+                    grid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Modal de Cancelamento
+        function showCancelModal() {
+            document.getElementById('cancelModal').style.display = 'flex';
+        }
+
+        function hideCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('cancelModal');
+            if (event.target == modal) {
+                hideCancelModal();
             }
         }
     </script>

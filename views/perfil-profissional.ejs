@@ -30,6 +30,33 @@
         .price-info span { font-size: 16px; color: #ccc; font-weight: normal; }
         .btn-contact { background: #ffa500; color: #000; width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
         .btn-contact:hover { background: #ff8c00; transform: translateY(-2px); }
+        
+        /* Reviews Section */
+        .reviews-section { margin-top: 60px; border-top: 1px solid #333; padding-top: 40px; }
+        .review-item { background: #1a1a1a; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #333; }
+        .review-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .review-user { font-weight: bold; color: #ffa500; }
+        .review-rating { color: #ffa500; }
+        .review-comment { color: #ccc; font-size: 14px; line-height: 1.5; }
+        .btn-review { background: transparent; border: 1px solid #ffa500; color: #ffa500; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-bottom: 30px; }
+        .btn-review:hover { background: #ffa500; color: #000; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; }
+        .modal-content { background: #1e1e1e; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; border: 1px solid #333; position: relative; }
+        .modal-content h2 { color: #ffa500; margin-bottom: 15px; }
+        .modal-content p { color: #ccc; margin-bottom: 20px; line-height: 1.5; }
+        .modal-close { position: absolute; top: 15px; right: 15px; color: #888; cursor: pointer; font-size: 20px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #fff; }
+        .form-group select, .form-group textarea { width: 100%; padding: 12px; background: #2c2c2c; border: 1px solid #444; border-radius: 8px; color: white; }
+        
+        .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-modal { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-modal-primary { background: #ffa500; color: #000; }
+        .btn-modal-secondary { background: #333; color: #fff; }
+
         @media (max-width: 768px) {
             .gallery-grid { grid-template-columns: 1fr; grid-template-rows: 300px; }
             .gallery-item:not(.main-img) { display: none; }
@@ -45,27 +72,17 @@
         <div class="perfil-header">
             <h1><%= profissional.users?.full_name %> - <%= profissional.categories?.name || 'Profissional' %></h1>
             <div class="perfil-meta">
-                <span class="rating"><i class="fas fa-star"></i> 5.0 (Novo)</span>
-                <span><i class="fas fa-map-marker-alt"></i> Taquaritinga, SP</span>
+                <span class="rating"><i class="fas fa-star"></i> <%= (typeof reviews !== 'undefined' && reviews.length > 0) ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) : '5.0' %></span>
+                <span><i class="fas fa-map-marker-alt"></i> <%= profissional.city %>, <%= profissional.state %></span>
             </div>
         </div>
 
         <div class="gallery-grid">
-            <img src="<%= profissional.users?.avatar_url || '/imagens/default-avatar.png' %>" class="gallery-item main-img" alt="Foto Principal">
+            <img src="<%= profissional.users?.avatar_url || '/imagens/equipe_site/Mascote.png' %>" class="gallery-item main-img" alt="Foto Principal">
             <% if (typeof portfolio !== 'undefined' && portfolio.length > 0) { %>
                 <% portfolio.slice(0, 4).forEach(item => { %>
                     <img src="<%= item.image_url %>" class="gallery-item" alt="Trabalho">
                 <% }); %>
-                <% if (portfolio.length < 4) { %>
-                    <% for(let i=0; i < (4 - portfolio.length); i++) { %>
-                        <img src="/imagens/trabalhos/trabalho<%= i+1 %>.jpg" class="gallery-item" alt="Exemplo">
-                    <% } %>
-                <% } %>
-            <% } else { %>
-                <img src="/imagens/trabalhos/trabalho1.jpg" class="gallery-item" alt="Exemplo 1">
-                <img src="/imagens/trabalhos/trabalho2.jpg" class="gallery-item" alt="Exemplo 2">
-                <img src="/imagens/trabalhos/trabalho3.jpg" class="gallery-item" alt="Exemplo 3">
-                <img src="/imagens/trabalhos/trabalho4.jpg" class="gallery-item" alt="Exemplo 4">
             <% } %>
         </div>
 
@@ -87,9 +104,39 @@
                     <div class="feature-item">
                         <i class="fas fa-tools"></i>
                         <div class="feature-text">
-                            <h4>Equipamento Próprio</h4>
-                            <p>O profissional possui todas as ferramentas necessárias.</p>
+                            <h4>Especialidades</h4>
+                            <p><%= profissional.specialties || 'Serviços gerais de alta qualidade.' %></p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Seção de Avaliações -->
+                <div class="reviews-section">
+                    <h2>Avaliações</h2>
+                    <% if (userId) { %>
+                        <button class="btn-review" onclick="showReviewModal()">Deixar uma Avaliação</button>
+                    <% } else { %>
+                        <p style="color: #888; margin-bottom: 20px;"><a href="/auth/login" style="color: #ffa500;">Faça login</a> para avaliar este profissional.</p>
+                    <% } %>
+
+                    <div id="reviewsList">
+                        <% if (typeof reviews !== 'undefined' && reviews.length > 0) { %>
+                            <% reviews.filter(r => r.status === 'visible').forEach(review => { %>
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <span class="review-user">Cliente Verificado</span>
+                                        <span class="review-rating">
+                                            <% for(let i=0; i<5; i++) { %>
+                                                <i class="fas fa-star" style="color: <%= i < review.rating ? '#ffa500' : '#444' %>"></i>
+                                            <% } %>
+                                        </span>
+                                    </div>
+                                    <p class="review-comment"><%= review.comment %></p>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p style="color: #666;">Nenhuma avaliação ainda. Seja o primeiro a avaliar!</p>
+                        <% } %>
                     </div>
                 </div>
             </div>
@@ -97,19 +144,107 @@
             <div class="booking-sidebar">
                 <div class="booking-card">
                     <div class="price-info">
-                        A partir de R$ <%= profissional.price_info || '80' %> <span>/ serviço</span>
+                        Atendimento em <span><%= profissional.city %></span>
                     </div>
-                    <a href="https://wa.me/<%= profissional.users?.phone_number %>" class="btn-contact" target="_blank">
+                    <button onclick="handleWhatsAppClick()" class="btn-contact">
                         <i class="fab fa-whatsapp"></i> Contratar Agora
-                    </a>
+                    </button>
                     <p style="text-align: center; color: #ccc; font-size: 12px; margin-top: 16px;">
-                        Você não será cobrado agora.
+                        Mascote Contrataê garante sua segurança.
                     </p>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Modal de Segurança WhatsApp -->
+    <div id="whatsappModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="hideModal('whatsappModal')">&times;</span>
+            <h2>Dica de Segurança</h2>
+            <p>Para sua segurança, mantenha a conversa até o término do serviço. Evite pagamentos antecipados sem garantias.</p>
+            <div class="modal-footer">
+                <a id="whatsappLink" href="https://wa.me/<%= profissional.phone_number?.replace(/\D/g, '') %>" class="btn-modal btn-modal-primary" style="text-align: center; text-decoration: none;" target="_blank" onclick="hideModal('whatsappModal')">Entendi, ir para o WhatsApp</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Avaliação -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="hideModal('reviewModal')">&times;</span>
+            <h2>Avaliar Profissional</h2>
+            <p style="font-size: 13px; color: #ff4444;">"Avaliações devem ser feitas com responsabilidade. Comentários ofensivos podem resultar em banimento da conta."</p>
+            
+            <form id="reviewForm">
+                <input type="hidden" name="professional_id" value="<%= profissional.user_id %>">
+                <div class="form-group">
+                    <label>Sua Nota</label>
+                    <select name="rating" required>
+                        <option value="5">5 Estrelas - Excelente</option>
+                        <option value="4">4 Estrelas - Muito Bom</option>
+                        <option value="3">3 Estrelas - Bom</option>
+                        <option value="2">2 Estrelas - Regular</option>
+                        <option value="1">1 Estrela - Ruim</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Seu Comentário</label>
+                    <textarea name="comment" rows="4" placeholder="Conte como foi sua experiência..." required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modal btn-modal-secondary" onclick="hideModal('reviewModal')">Cancelar</button>
+                    <button type="submit" class="btn-modal btn-modal-primary">Enviar Avaliação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <%- include('partials/footer') %>
+
+    <script>
+        function showReviewModal() {
+            document.getElementById('reviewModal').style.display = 'flex';
+        }
+
+        function handleWhatsAppClick() {
+            document.getElementById('whatsappModal').style.display = 'flex';
+        }
+
+        function hideModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        document.getElementById('reviewForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (result.sucesso) {
+                    alert(result.mensagem);
+                    location.reload();
+                } else {
+                    alert(result.erro || 'Erro ao enviar avaliação.');
+                }
+            } catch (err) {
+                alert('Erro de conexão.');
+            }
+        };
+
+        // Fechar modais ao clicar fora
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
