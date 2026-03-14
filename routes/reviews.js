@@ -15,6 +15,96 @@ const checkAuth = (req, res, next) => {
 };
 
 /**
+ * Rota para listar avaliações (Admin)
+ * GET /api/comentarios
+ */
+router.get('/admin/list', async (req, res) => {
+    console.log("--- INÍCIO GET /api/comentarios (Reviews Admin) ---");
+    if (!req.session || !req.session.adminLogado) {
+        return res.status(401).json({ erro: 'Acesso negado.' });
+    }
+
+    try {
+        // Buscar reviews com dados do cliente e do profissional
+        // Nota: reviewer_id liga com users, professional_id liga com professionals que liga com users
+        const { data, error } = await supabase
+            .from('reviews')
+            .select(`
+                id,
+                rating,
+                comment,
+                status,
+                created_at,
+                reviewer:users!reviewer_id(full_name),
+                professional:professionals!professional_id(
+                    user:users!user_id(full_name)
+                )
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Mapear para o formato esperado pelo frontend
+        const comentarios = (data || []).map(r => {
+            let statusTraduzido = 'PENDENTE';
+            if (r.status === 'visible') statusTraduzido = 'APROVADO';
+            if (r.status === 'hidden') statusTraduzido = 'OCULTO';
+
+            return {
+                id: r.id,
+                cliente_nome: r.reviewer?.full_name || 'Cliente Anônimo',
+                profissional_nome: r.professional?.user?.full_name || 'Profissional',
+                nota: r.rating,
+                comentario: r.comment,
+                status: statusTraduzido,
+                data: r.created_at
+            };
+        });
+
+        console.log(`Retornando ${comentarios.length} comentários para o admin.`);
+        res.json(comentarios);
+    } catch (err) {
+        console.error('Erro ao listar comentários:', err);
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+/**
+ * Rota para alterar status da avaliação (Admin)
+ * POST /api/comentarios/:id/status
+ */
+router.post('/:id/status', async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    console.log(`--- INÍCIO POST /api/comentarios/${id}/status ---`);
+    console.log("Novo status recebido:", status);
+
+    if (!req.session || !req.session.adminLogado) {
+        return res.status(401).json({ erro: 'Acesso negado.' });
+    }
+
+    try {
+        // Mapear status do frontend para o banco
+        let statusBanco = 'pending';
+        if (status === 'APROVADO') statusBanco = 'visible';
+        if (status === 'OCULTO') statusBanco = 'hidden';
+
+        const { error } = await supabase
+            .from('reviews')
+            .update({ status: statusBanco })
+            .eq('id', id);
+
+        if (error) throw error;
+
+        console.log(`Status do comentário ${id} atualizado para ${statusBanco} com sucesso.`);
+        res.json({ sucesso: true });
+    } catch (err) {
+        console.error('Erro ao atualizar status do comentário:', err);
+        res.status(500).json({ erro: err.message });
+    }
+});
+
+/**
  * Rota para criar uma avaliação
  */
 router.post('/', checkAuth, async (req, res) => {

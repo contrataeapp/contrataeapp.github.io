@@ -66,6 +66,8 @@ app.use("/auth", authRoutes);
 // Importar Rotas de Avaliações
 const reviewRoutes = require("./routes/reviews");
 app.use("/api/reviews", reviewRoutes);
+app.get("/api/comentarios", (req, res) => res.redirect(307, "/api/reviews/admin/list"));
+app.post("/api/comentarios/:id/status", (req, res) => res.redirect(307, `/api/reviews/${req.params.id}/status`));
 
 // 4. MIDDLEWARE DE VARIÁVEIS GLOBAIS (SaaS)
 app.use(injectUserVars);
@@ -273,10 +275,10 @@ app.post("/api/banners", checkAdminAPI, upload.single('imagem'), async (req, res
         }
 
         const bannerData = {
-            titulo,
+            title: titulo,
             link_destination,
-            posicao: parseInt(posicao),
-            ordem: parseInt(ordem),
+            position: parseInt(posicao) || 0,
+            order: parseInt(ordem) || 0,
             is_active: ativo === 'true' || ativo === true,
             image_url: imagem_url
         };

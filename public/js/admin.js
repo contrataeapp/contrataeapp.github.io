@@ -621,7 +621,7 @@ async function carregarCategorias() {
     try {
         const response = await fetch('/api/categories');
         if (!response.ok) throw new Error("Erro ao carregar categorias");
-        const categorias = await response.json();
+        const categories = await response.json();
         const tbody = document.getElementById('tabela-categorias');
         const repCat = document.getElementById('rep-categoria');
         if(!tbody) return;
