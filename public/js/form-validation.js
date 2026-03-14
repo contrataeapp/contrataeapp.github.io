@@ -127,3 +127,38 @@ function validateFileSize(input, maxSizeMB = 3) {
     }
     return true;
 }
+
+// Validação de formulário antes do envio (SaaS UX)
+document.addEventListener('submit', (e) => {
+    const form = e.target;
+    if (form.tagName === 'FORM') {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.style.borderColor = 'red';
+            } else {
+                field.style.borderColor = '#444';
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Por favor, preencha todos os campos obrigatórios.');
+        } else {
+            // Feedback visual de carregamento
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn && !submitBtn.classList.contains('no-loader')) {
+                // Prevenir múltiplos cliques
+                if (submitBtn.disabled) return;
+                
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.setAttribute('data-original-text', originalText);
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+            }
+        }
+    }
+});

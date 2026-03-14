@@ -1,17 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
+const { requireAuth, requireProfessional } = require('../middlewares/authMiddleware');
+const { catchAsync } = require('../middlewares/errorHandler');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-// Middleware para verificar se o usuário está logado
-const checkAuth = (req, res, next) => {
-    if (req.session && req.session.userId) return next();
-    res.redirect('/auth/login');
-};
-
-// Dashboard do Profissional
-router.get('/profissional/dashboard', checkAuth, async (req, res) => {
+// Dashboard do Profissional (SaaS - Protegido)
+router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req, res) => {
     try {
         if (req.session.userType !== 'professional') {
             return res.redirect('/cliente/dashboard');
@@ -85,8 +81,8 @@ router.get('/profissional/dashboard', checkAuth, async (req, res) => {
     }
 });
 
-// Dashboard do Cliente
-router.get('/cliente/dashboard', checkAuth, async (req, res) => {
+// Dashboard do Cliente (SaaS - Protegido)
+router.get('/cliente/dashboard', requireAuth, catchAsync(async (req, res) => {
     try {
         if (req.session.userType !== 'client') {
             return res.redirect('/profissional/dashboard');

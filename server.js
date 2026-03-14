@@ -8,6 +8,11 @@ const cors = require("cors");
 const helmet = require("helmet");
 const multer = require('multer');
 
+// Importar Middlewares e Controllers (Arquitetura SaaS)
+const { injectUserVars, requireAuth, requireProfessional, requireAdmin } = require('./middlewares/authMiddleware');
+const { errorHandler, catchAsync } = require('./middlewares/errorHandler');
+const authController = require('./controllers/authController');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -62,14 +67,10 @@ app.use("/auth", authRoutes);
 const reviewRoutes = require("./routes/reviews");
 app.use("/api/reviews", reviewRoutes);
 
-// 4. MIDDLEWARE DE VARIÁVEIS GLOBAIS (Agora com verificação de segurança)
+// 4. MIDDLEWARE DE VARIÁVEIS GLOBAIS (SaaS)
+app.use(injectUserVars);
 app.use((req, res, next) => {
     const sess = req.session || {};
-    res.locals.adminLogado = sess.adminLogado || false;
-    res.locals.userId = sess.userId || null;
-    res.locals.userType = sess.userType || null;
-    res.locals.fullName = sess.fullName || null;
-    
     // Gerar avatar com inicial se não houver foto
     res.locals.getAvatar = (user) => {
         if (user && user.avatar_url) return user.avatar_url;
@@ -77,18 +78,14 @@ app.use((req, res, next) => {
         const initial = name.charAt(0).toUpperCase();
         return `https://ui-avatars.com/api/?name=${initial}&background=ffa500&color=000&bold=true`;
     };
-    
     next();
 });
 
 // ============================================
 // SISTEMA DE LOGIN DO ADMINISTRADOR (Painel Antigo)
 // ============================================
-const checkAdmin = (req, res, next) => {
-    if (req.session && req.session.adminLogado) return next();
-    res.redirect('/login-adm'); 
-};
-
+// Middlewares Admin (SaaS)
+const checkAdmin = requireAdmin;
 const checkAdminAPI = (req, res, next) => {
     if (req.session && req.session.adminLogado) return next();
     res.status(401).json({ erro: 'Acesso negado. Faça login.' });
@@ -402,20 +399,16 @@ app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null
 app.get("/contato", (req, res) => res.render("contato"));
 app.get("/termos-de-uso", (req, res) => res.render("termos_de_uso"));
 
-// ROTA DA HOMEPAGE
-app.get("/", async (req, res) => {
-    try {
-        const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('position', { ascending: true });
-        const { data: categories } = await supabase.from('categories').select('*');
-        res.render("index", { 
-            banners: banners || [],
-            categories: categories || [],
-            currentPage: 'index'
-        });
-    } catch (err) {
-        res.render("index", { banners: [], categories: [], currentPage: 'index' });
-    }
-});
+// ROTA DA HOMEPAGE (SaaS - Protegida com catchAsync)
+app.get("/", catchAsync(async (req, res) => {
+    const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('position', { ascending: true });
+    const { data: categories } = await supabase.from('categories').select('*');
+    res.render("index", { 
+        banners: banners || [],
+        categories: categories || [],
+        currentPage: 'index'
+    });
+}));
 
 // ROTAS DE CATEGORIAS DINÂMICAS
 app.get("/categoria/:slug", async (req, res) => {
@@ -512,6 +505,11 @@ app.get("/perfil/:id", async (req, res) => {
     }
 });
 
+// Handler Global de Erros (SaaS)
+app.use(errorHandler);
+
+// Página 404 (Fallback)
 app.use((req, res) => res.status(404).render("404", { mensagem: "Página não encontrada." }));
 
-app.listen(port, () => console.log(`🚀 Servidor rodando na porta ${port}`));
+// Iniciar Servidor
+app.listen(port, () => console.log(`🚀 [CONTRATAÊ SaaS]: Servidor rodando na porta ${port}`));
