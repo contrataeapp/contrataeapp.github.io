@@ -257,6 +257,21 @@
             document.getElementById('cancelModal').style.display = 'none';
         }
 
+
+        // Garantir redirect visível após salvar em navegadores que mantêm a página do POST
+        document.getElementById('profileForm').addEventListener('submit', function () {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Salvando...';
+            }
+            setTimeout(() => {
+                if (window.location.pathname === '/auth/completar-perfil') {
+                    window.location.replace('/profissional/dashboard');
+                }
+            }, 1500);
+        });
+
         // Fechar modal ao clicar fora
         window.onclick = function(event) {
             const modal = document.getElementById('cancelModal');

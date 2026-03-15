@@ -27,7 +27,7 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     }
 
     // VERIFICAÇÃO DE PERFIL COMPLETO (OBRIGATÓRIO)
-    if (!profissional.profile_completed) {
+    if (!profissional.profile_completed && req.query.refresh !== '1') {
         return res.redirect('/auth/completar-perfil');
     }
     
@@ -59,7 +59,7 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
         portfolio: portfolio || [],
         contatosRecebidos: 0, 
         servicosConcluidos: 0,
-        faturamentoMes: profissional?.valor_pago || '0,00',
+        faturamentoMes: profissional?.payment_value || profissional?.valor_pago || '0,00',
         avaliacaoMedia: avaliacaoMedia
     });
 }));

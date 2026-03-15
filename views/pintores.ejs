@@ -24,8 +24,8 @@
     <% if (bannerEsq) { %>
     <div class="banner-lateral banner-esquerda" id="banner-mov">
         <button class="close-banner" title="Fechar anúncio">&times;</button>
-        <div class="banner-content" data-link="<%= bannerEsq.link_destino || '#' %>">
-            <img src="<%= bannerEsq.imagem_url %>" alt="<%= bannerEsq.titulo || 'Anúncio' %>">
+        <div class="banner-content" data-link="<%= bannerEsq.link_destino || bannerEsq.link_destination || '#' %>">
+            <img src="<%= bannerEsq.imagem_url || bannerEsq.image_url %>" alt="<%= bannerEsq.titulo || bannerEsq.title || 'Anúncio' %>">
         </div>
     </div>
     <% } %>
@@ -34,8 +34,8 @@
     <% if (bannerDir) { %>
     <div class="banner-lateral banner-direita" id="banner-speed">
         <button class="close-banner" title="Fechar anúncio">&times;</button>
-        <div class="banner-content" data-link="<%= bannerDir.link_destino || '#' %>">
-            <img src="<%= bannerDir.imagem_url %>" alt="<%= bannerDir.titulo || 'Anúncio' %>">
+        <div class="banner-content" data-link="<%= bannerDir.link_destino || bannerDir.link_destination || '#' %>">
+            <img src="<%= bannerDir.imagem_url || bannerDir.image_url %>" alt="<%= bannerDir.titulo || bannerDir.title || 'Anúncio' %>">
         </div>
     </div>
     <% } %>
@@ -75,11 +75,11 @@
                 </div>
                 <ul>
                     <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
-                    <li><a href="/pintores" class="active"><i class="fas fa-paint-roller"></i> Pintores</a></li>
-                    <li><a href="/pedreiros"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
-                    <li><a href="/eletricistas"><i class="fas fa-bolt"></i> Eletricistas</a></li>
-                    <li><a href="/encanadores"><i class="fas fa-wrench"></i> Encanadores</a></li>
-                    <li><a href="/outros"><i class="fas fa-th"></i> Outros</a></li>
+                    <li><a href="/categoria/pintores" class="active"><i class="fas fa-paint-roller"></i> Pintores</a></li>
+                    <li><a href="/categoria/pedreiros"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
+                    <li><a href="/categoria/eletricistas"><i class="fas fa-bolt"></i> Eletricistas</a></li>
+                    <li><a href="/categoria/encanadores"><i class="fas fa-wrench"></i> Encanadores</a></li>
+                    <li><a href="/categoria/outros"><i class="fas fa-th"></i> Outros</a></li>
                     <li><a href="/contato"><i class="fas fa-envelope"></i> Contato</a></li>
                     <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
                 </ul>
@@ -164,8 +164,8 @@
                         <% if (bannersRodape.length > 0) { %>
                             <% bannersRodape.forEach(function(banner, index) { %>
                                 <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                                    <a href="#" class="trigger-modal" data-link="<%= banner.link_destino || '#' %>">
-                                        <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo || 'Parceiro' %>" style="width:100%; height:100%;">
+                                    <a href="#" class="trigger-modal" data-link="<%= banner.link_destino || banner.link_destination || '#' %>">
+                                        <img src="<%= banner.imagem_url || banner.image_url %>" alt="<%= banner.titulo || banner.title || 'Parceiro' %>" style="width:100%; height:100%;">
                                     </a>
                                 </div>
                             <% }); %>

@@ -22,6 +22,36 @@ app.set('trust proxy', 1);
 // CONFIGURAÇÃO SUPABASE
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
+
+function normalizeBannerRecord(b) {
+    const rawOrder = Number(b.order ?? 0);
+    let posicao = 1;
+    let ordem = rawOrder;
+    if (rawOrder >= 300) {
+        posicao = 4;
+        ordem = rawOrder - 300;
+    } else if (rawOrder >= 200) {
+        posicao = 3;
+        ordem = rawOrder - 200;
+    } else if (rawOrder >= 100) {
+        posicao = 2;
+        ordem = rawOrder - 100;
+    }
+    return {
+        ...b,
+        titulo: b.title,
+        imagem_url: b.image_url,
+        link_destino: b.link_destination,
+        ativo: b.is_active,
+        posicao,
+        ordem
+    };
+}
+
+function normalizeBanners(records) {
+    return (records || []).map(normalizeBannerRecord);
+}
+
 // CONFIGURAÇÃO MULTER PARA BANNERS
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -123,6 +153,17 @@ app.get('/admin/logout', (req, res) => {
     res.redirect('/admin/login');
 });
 app.get('/logout-adm', (req, res) => res.redirect('/admin/logout'));
+
+
+// Rotas legadas de categorias (mantidas para compatibilidade com links antigos)
+app.get('/pintores', (req, res) => res.redirect(302, '/categoria/pintores'));
+app.get('/pedreiros', (req, res) => res.redirect(302, '/categoria/pedreiros'));
+app.get('/eletricistas', (req, res) => res.redirect(302, '/categoria/eletricistas'));
+app.get('/encanadores', (req, res) => res.redirect(302, '/categoria/encanadores'));
+app.get('/outros', catchAsync(async (req, res) => {
+    const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('order', { ascending: true });
+    res.render('outros', { banners: normalizeBanners(banners || []), currentPage: 'outros' });
+}));
 
 // ============================================
 // ROTAS DO PAINEL ADM (Refatorado para Novo Schema)
@@ -226,7 +267,7 @@ app.get("/api/banners", checkAdminAPI, async (req, res) => {
         const { data: banners, error } = await supabase
             .from("banners")
             .select("*")
-            .order("position", { ascending: true });
+            .order("order", { ascending: true });
         if (error) throw error;
         res.json(banners || []);
     } catch (err) { res.status(500).json({ erro: err.message }); }
@@ -442,10 +483,10 @@ app.post("/auth/cancelar-profissional", async (req, res) => {
         req.session.userType = 'client';
         
         console.log("Cadastro cancelado com sucesso. Redirecionando para home...");
-        res.redirect('/');
+        res.redirect(303, '/');
     } catch (err) {
         console.error("Erro ao cancelar cadastro profissional:", err);
-        res.redirect('/');
+        res.redirect(303, '/');
     }
 });
 
@@ -540,22 +581,22 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
         }
 
         console.log("Perfil salvo com sucesso! Redirecionando para dashboard...");
-        return res.redirect('/profissional/dashboard');
+        return res.redirect(303, '/profissional/dashboard');
     } catch (err) {
         console.error("ERRO CRÍTICO no POST /auth/completar-perfil:", err);
         return res.redirect('/auth/completar-perfil');
     }
 });
 app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
-app.get("/contato", (req, res) => res.render("contato"));
-app.get("/termos-de-uso", (req, res) => res.render("termos_de_uso"));
+app.get("/contato", catchAsync(async (req, res) => { const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('order', { ascending: true }); res.render("contato", { banners: normalizeBanners(banners || []), currentPage: 'contato' }); }));
+app.get("/termos-de-uso", catchAsync(async (req, res) => { const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('order', { ascending: true }); res.render("termos_de_uso", { banners: normalizeBanners(banners || []), currentPage: 'termos' }); }));
 
 // ROTA DA HOMEPAGE (SaaS - Protegida com catchAsync)
 app.get("/", catchAsync(async (req, res) => {
-    const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('position', { ascending: true });
+    const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('order', { ascending: true });
     const { data: categories } = await supabase.from('categories').select('*');
     res.render("index", { 
-        banners: banners || [],
+        banners: normalizeBanners(banners || []),
         categories: categories || [],
         currentPage: 'index'
     });
@@ -601,7 +642,7 @@ app.get("/categoria/:slug", async (req, res) => {
             
         if (error) throw error;
         
-        const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('position', { ascending: true });
+        const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('order', { ascending: true });
 
         // Tentar renderizar view específica ou genérica
         const viewName = ['pintores', 'pedreiros', 'eletricistas', 'encanadores'].includes(slug) ? slug : 'categoria-dinamica';
@@ -610,7 +651,7 @@ app.get("/categoria/:slug", async (req, res) => {
             [slug]: professionals || [],
             profissionais: professionals || [],
             categoriaNome: category.name,
-            banners: banners || [],
+            banners: normalizeBanners(banners || []),
             currentPage: slug
         });
     } catch (err) {
