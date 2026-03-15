@@ -1,6 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -129,7 +127,7 @@
                     <% } %>
                 <% } %>
 
-                <div class="summary-cards">ofissional.approval_requested && profissional.status === 'pending') { %>
+                <% if (profissional && !profissional.approval_requested && profissional.status === 'pending') { %>
                     <div class="card" style="background: #fff8e1; border: 1px solid #ffe082; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <h3 style="color: #856404; margin-bottom: 5px;"><i class="fas fa-exclamation-triangle"></i> Perfil Pronto para Análise</h3>

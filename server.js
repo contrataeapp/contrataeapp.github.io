@@ -272,12 +272,18 @@ app.post('/api/banners', upload.single('imagem'), async (req, res) => {
       '3': 'category',
       '4': 'category'
     };
+    const numericOrder = parseInt(ordem) || 0;
+    let normalizedOrder = numericOrder;
+    if (String(posicao) === '2') normalizedOrder = 100 + numericOrder;
+    else if (String(posicao) === '3') normalizedOrder = 200 + numericOrder;
+    else if (String(posicao) === '4') normalizedOrder = 300 + numericOrder;
+
     const bannerData = {
       title: titulo,
       image_url: image_url,
       link_destination: link_destination || null,
       position: positionMap[posicao] || 'home',
-      order: parseInt(ordem) || 0,
+      order: normalizedOrder,
       is_active: ativo === 'true' || ativo === true,
       edited_by: 'admin'
     };
@@ -292,6 +298,7 @@ app.post('/api/banners', upload.single('imagem'), async (req, res) => {
     console.log('Banner salvo com sucesso');
     res.json({
       success: true,
+      sucesso: true,
       message: 'Banner criado com sucesso'
     });
   } catch (err) {

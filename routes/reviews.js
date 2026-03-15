@@ -25,35 +25,39 @@ router.get('/admin/list', async (req, res) => {
     }
 
     try {
-        // Buscar reviews com dados do cliente e do profissional
-        // Schema real: client_id, professional_id
-        const { data, error } = await supabase
+        const { data: reviews, error } = await supabase
             .from('reviews')
-            .select(`
-                id,
-                rating,
-                comment,
-                status,
-                created_at,
-                client:users!client_id(full_name),
-                professional:professionals!professional_id(
-                    user:users!user_id(full_name)
-                )
-            `)
+            .select('id, professional_id, client_id, rating, comment, status, created_at')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        // Mapear para o formato esperado pelo frontend
-        const comentarios = (data || []).map(r => {
+        const clientIds = [...new Set((reviews || []).map(r => r.client_id).filter(Boolean))];
+        const professionalIds = [...new Set((reviews || []).map(r => r.professional_id).filter(Boolean))];
+
+        const { data: clients } = clientIds.length
+            ? await supabase.from('users').select('id, full_name').in('id', clientIds)
+            : { data: [] };
+
+        const { data: professionals } = professionalIds.length
+            ? await supabase.from('professionals').select('user_id').in('user_id', professionalIds)
+            : { data: [] };
+
+        const { data: professionalUsers } = professionalIds.length
+            ? await supabase.from('users').select('id, full_name').in('id', professionalIds)
+            : { data: [] };
+
+        const clientsMap = Object.fromEntries((clients || []).map(u => [u.id, u.full_name]));
+        const prosMap = Object.fromEntries((professionalUsers || []).map(u => [u.id, u.full_name]));
+
+        const comentarios = (reviews || []).map(r => {
             let statusTraduzido = 'PENDENTE';
             if (r.status === 'visible') statusTraduzido = 'APROVADO';
             if (r.status === 'hidden') statusTraduzido = 'OCULTO';
-
             return {
                 id: r.id,
-                cliente_nome: r.client?.full_name || 'Cliente Anônimo',
-                profissional_nome: r.professional?.user?.full_name || 'Profissional',
+                cliente_nome: clientsMap[r.client_id] || 'Cliente Anônimo',
+                profissional_nome: prosMap[r.professional_id] || 'Profissional',
                 nota: r.rating,
                 comentario: r.comment,
                 status: statusTraduzido,
@@ -110,7 +114,7 @@ router.post('/:id/status', async (req, res) => {
 router.post('/', checkAuth, async (req, res) => {
     try {
         const { professional_id, rating, comment } = req.body;
-        const reviewer_id = req.session.userId;
+        const client_id = req.session.userId;
 
         if (!professional_id || !rating) {
             return res.status(400).json({ erro: 'Dados incompletos.' });
@@ -129,7 +133,7 @@ router.post('/', checkAuth, async (req, res) => {
             .from('reviews')
             .insert([{
                 professional_id,
-                reviewer_id,
+                client_id,
                 rating: parseInt(rating),
                 comment,
                 status,

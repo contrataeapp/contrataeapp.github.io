@@ -94,6 +94,32 @@ function inicializarGraficos() {
     });
 }
 
+
+function normalizeBannerRecord(b) {
+    const rawOrder = Number(b.order ?? 0);
+    let posicao = 1;
+    let ordem = rawOrder;
+    if (rawOrder >= 300) {
+        posicao = 4;
+        ordem = rawOrder - 300;
+    } else if (rawOrder >= 200) {
+        posicao = 3;
+        ordem = rawOrder - 200;
+    } else if (rawOrder >= 100) {
+        posicao = 2;
+        ordem = rawOrder - 100;
+    }
+    return {
+        ...b,
+        titulo: b.title,
+        imagem_url: b.image_url,
+        link_destino: b.link_destination,
+        ativo: b.is_active,
+        posicao,
+        ordem
+    };
+}
+
 // ============================================
 // SISTEMA DE ABAS (PÁGINAS OCULTAS)
 // ============================================
@@ -776,7 +802,7 @@ async function carregarBannersVisuais() {
     try {
         const response = await fetch('/api/banners');
         if (!response.ok) throw new Error("Erro ao carregar banners");
-        const banners = await response.json();
+        const banners = (await response.json()).map(normalizeBannerRecord);
         desenharGavetas('slots-topo', 1, 5, banners, 'Banner Topo');
         desenharGavetas('slots-rodape', 2, 5, banners, 'Banner Rodapé');
         desenharGavetasLaterais('slots-laterais', banners);
@@ -789,7 +815,7 @@ function desenharGavetas(containerId, posicaoID, quantidade, bannersData, titulo
     container.innerHTML = '';
     
     for(let ordem = 1; ordem <= quantidade; ordem++) {
-        const bannerSalvo = bannersData.find(b => b.posicao === posicaoID && b.ordem === ordem);
+        const bannerSalvo = bannersData.find(b => Number(b.posicao) === posicaoID && Number(b.ordem) === ordem);
         const div = document.createElement('div');
         div.className = `banner-slot ${bannerSalvo ? 'filled' : 'empty'}`;
         const nomeSlot = `${tituloPrefixo} ${ordem}`;
@@ -822,10 +848,10 @@ function desenharGavetasLaterais(containerId, bannersData) {
     if (!container) return;
     container.innerHTML = '';
     
-    const bannerEsq = bannersData.find(b => b.posicao === 3);
+    const bannerEsq = bannersData.find(b => Number(b.posicao) === 3);
     container.appendChild(criarSlotLateral(3, 'Fixo Esquerda', bannerEsq));
     
-    const bannerDir = bannersData.find(b => b.posicao === 4);
+    const bannerDir = bannersData.find(b => Number(b.posicao) === 4);
     container.appendChild(criarSlotLateral(4, 'Fixo Direita', bannerDir));
 }
 
@@ -862,9 +888,9 @@ function abrirModalGaveta(posicao, ordem, bannerData) {
     
     if (bannerData) {
         document.getElementById('id-banner').value = bannerData.id;
-        document.getElementById('titulo-banner').value = bannerData.titulo || '';
-        document.getElementById('link-banner').value = bannerData.link_destination || '';
-        document.getElementById('ativo-banner').checked = bannerData.is_active;
+        document.getElementById('titulo-banner').value = bannerData.titulo || bannerData.title || '';
+        document.getElementById('link-banner').value = bannerData.link_destination || bannerData.link_destino || '';
+        document.getElementById('ativo-banner').checked = bannerData.is_active ?? bannerData.ativo ?? true;
         document.getElementById('arquivo-banner').required = false; 
         document.getElementById('titulo-modal-banner').textContent = 'Editar Parceiro';
     } else {
@@ -899,10 +925,12 @@ async function submeterBannerViaUpload(e) {
     try {
         const response = await fetch('/api/banners', { method: 'POST', body: formData });
         const res = await response.json();
-        if (res.sucesso) { 
-            fecharModal('modal-banner'); carregarBannersVisuais(); 
-        } else { alert('Erro no Servidor: ' + res.erro); }
-    } catch (erro) { alert('Erro de conexão ao enviar o banner.'); }
+        if (res.sucesso || res.success) { 
+            fecharModal('modal-banner');
+            await carregarBannersVisuais();
+            alert('Banner salvo com sucesso');
+        } else { alert('Erro no Servidor: ' + (res.erro || res.error || res.message)); }
+    } catch (erro) { console.error('Falha upload banner', erro); alert('Erro de conexão ao enviar o banner.'); }
 }
 
 async function deletarBanner(id) {

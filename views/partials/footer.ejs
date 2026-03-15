@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<!DOCTYPE html>
 <footer>
     <div class="footer-partners-area">
         <div class="container">
@@ -7,13 +5,13 @@
             <section class="carousel-section footer-carousel" id="carousel-baixo">
                 <div class="carousel-container">
                    
-                    <% const bannersRodape = typeof banners !== 'undefined' ? banners.filter(b => b.posicao === 2) : []; %>
+                    <% const bannersRodape = typeof banners !== 'undefined' ? banners.filter(b => b.position === 'home' && Number(b.order) >= 100 && Number(b.order) < 200).sort((a,b)=>Number(a.order)-Number(b.order)) : []; %>
                     
                     <% if (bannersRodape.length > 0) { %>
                         <% bannersRodape.forEach(function(banner, index) { %>
                             <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                                <a href="#" class="trigger-modal" data-link="<%= banner.link_destino || '#' %>">
-                                    <img src="<%= banner.imagem_url %>" alt="<%= banner.titulo || 'Parceiro' %>" style="width:100%; height:100%;">
+                                <a href="#" class="trigger-modal" data-link="<%= banner.link_destination || '#' %>">
+                                    <img src="<%= banner.image_url %>" alt="<%= banner.title || 'Parceiro' %>" style="width:100%; height:100%;">
                                 </a>
                             </div>
                         <% }); %>
