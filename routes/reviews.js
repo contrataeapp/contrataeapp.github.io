@@ -26,7 +26,7 @@ router.get('/admin/list', async (req, res) => {
 
     try {
         // Buscar reviews com dados do cliente e do profissional
-        // Nota: reviewer_id liga com users, professional_id liga com professionals que liga com users
+        // Schema real: client_id, professional_id
         const { data, error } = await supabase
             .from('reviews')
             .select(`
@@ -35,7 +35,7 @@ router.get('/admin/list', async (req, res) => {
                 comment,
                 status,
                 created_at,
-                reviewer:users!reviewer_id(full_name),
+                client:users!client_id(full_name),
                 professional:professionals!professional_id(
                     user:users!user_id(full_name)
                 )
@@ -52,7 +52,7 @@ router.get('/admin/list', async (req, res) => {
 
             return {
                 id: r.id,
-                cliente_nome: r.reviewer?.full_name || 'Cliente Anônimo',
+                cliente_nome: r.client?.full_name || 'Cliente Anônimo',
                 profissional_nome: r.professional?.user?.full_name || 'Profissional',
                 nota: r.rating,
                 comentario: r.comment,

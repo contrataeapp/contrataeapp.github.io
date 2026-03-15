@@ -8,6 +8,8 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 
 // Dashboard do Profissional (SaaS - Protegido)
 router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req, res) => {
+    console.log("--- INÍCIO GET /profissional/dashboard ---");
+    console.log("UserID na Sessão:", req.session.userId);
     // Buscar dados do profissional com join em users e categories
     // Padronizado para usar user_id (PK da tabela professionals)
     const { data: profissional, error } = await supabase

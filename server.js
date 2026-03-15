@@ -232,72 +232,74 @@ app.get("/api/banners", checkAdminAPI, async (req, res) => {
     } catch (err) { res.status(500).json({ erro: err.message }); }
 });
 
-app.post("/api/banners", checkAdminAPI, upload.single('imagem'), async (req, res) => {
-    console.log("--- INÍCIO POST /api/banners ---");
-    console.log("Dados recebidos:", req.body);
-    try {
-        const { id, titulo, link_destination, posicao, ordem, ativo } = req.body;
-        let imagem_url = req.body.imagem_url;
-
-        // Se houver novo arquivo, fazer upload para o Supabase Storage
-        if (req.file) {
-            const file = req.file;
-            const fileExt = file.originalname.split('.').pop();
-            const fileName = `banner_${Date.now()}.${fileExt}`;
-            const filePath = `public/${fileName}`;
-
-            // Tentar upload (Bucket 'banners' deve existir no Supabase)
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('banners')
-                .upload(filePath, file.buffer, {
-                    contentType: file.mimetype,
-                    upsert: true
-                });
-
-            if (uploadError) {
-                console.error("Erro no Supabase Storage (Banners):", uploadError);
-                // Se o erro for bucket não encontrado, avisar o admin
-                if (uploadError.message && uploadError.message.includes('Bucket not found')) {
-                    return res.status(400).json({ 
-                        sucesso: false, 
-                        erro: "O bucket 'banners' não foi encontrado no Supabase Storage. Por favor, crie-o com acesso público." 
-                    });
-                }
-                throw uploadError;
-            }
-
-            // Pegar URL pública
-            const { data: urlData } = supabase.storage
-                .from('banners')
-                .getPublicUrl(filePath);
-            
-            imagem_url = urlData.publicUrl;
-        }
-
-        const bannerData = {
-            title: titulo,
-            link_destination,
-            position: parseInt(posicao) || 0,
-            order: parseInt(ordem) || 0,
-            is_active: ativo === 'true' || ativo === true,
-            image_url: imagem_url
-        };
-
-        if (id && id !== 'null' && id !== '') {
-            // Update
-            const { error } = await supabase.from('banners').update(bannerData).eq('id', id);
-            if (error) throw error;
-        } else {
-            // Insert
-            const { error } = await supabase.from('banners').insert([bannerData]);
-            if (error) throw error;
-        }
-
-        res.json({ sucesso: true });
-    } catch (err) {
-        console.error("Erro ao salvar banner:", err);
-        res.status(500).json({ sucesso: false, erro: err.message });
+app.post('/api/banners', upload.single('imagem'), async (req, res) => {
+  console.log('--- INÍCIO POST /api/banners ---');
+  console.log('Dados recebidos:', req.body);
+  try {
+    const {
+      titulo,
+      link_destination,
+      posicao,
+      ordem,
+      ativo
+    } = req.body;
+    let image_url = null;
+    // upload imagem se existir
+    if (req.file) {
+      const fileName = `banner_${Date.now()}_${req.file.originalname}`;
+      const { error: uploadError } = await supabase
+        .storage
+        .from('banners')
+        .upload(fileName, req.file.buffer, {
+          contentType: req.file.mimetype,
+          upsert: true
+        });
+      if (uploadError) {
+        console.error('Erro upload banner:', uploadError);
+        return res.status(500).json({ error: 'Erro upload imagem' });
+      }
+      const { data } = supabase
+        .storage
+        .from('banners')
+        .getPublicUrl(fileName);
+      image_url = data.publicUrl;
+      console.log('Imagem enviada:', image_url);
     }
+    // converter posição numérica → enum
+    const positionMap = {
+      '1': 'home',
+      '2': 'home',
+      '3': 'category',
+      '4': 'category'
+    };
+    const bannerData = {
+      title: titulo,
+      image_url: image_url,
+      link_destination: link_destination || null,
+      position: positionMap[posicao] || 'home',
+      order: parseInt(ordem) || 0,
+      is_active: ativo === 'true' || ativo === true,
+      edited_by: 'admin'
+    };
+    console.log('Dados enviados ao banco:', bannerData);
+    const { error } = await supabase
+      .from('banners')
+      .insert(bannerData);
+    if (error) {
+      console.error('Erro ao salvar banner:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    console.log('Banner salvo com sucesso');
+    res.json({
+      success: true,
+      message: 'Banner criado com sucesso'
+    });
+  } catch (err) {
+    console.error('Erro geral banner:', err);
+    res.status(500).json({
+      error: 'Erro interno servidor'
+    });
+  }
 });
 
 // APIs DE CATEGORIAS (Acesso para Profissionais e Admin)
