@@ -117,60 +117,19 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Categorias e Especialidades -->
+            <!-- Dados mínimos -->
             <div class="form-section">
-                <h3><i class="fas fa-tools"></i> Categorias e Especialidades</h3>
-                <p style="font-size: 12px; color: #888; margin-bottom: 10px;">Escolha até 3 categorias principais.</p>
-                
-                <div class="category-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="categorySearch" placeholder="Buscar categoria (ex: Eletricista, Pintor...)">
-                </div>
-
-                <div class="category-tags" id="categoryTags">
-                    <!-- Sugestões Iniciais -->
-                    <% const sugestoes = ['Eletricista', 'Encanador', 'Pedreiro', 'Pintor', 'Diarista', 'Jardineiro', 'Montador de móveis', 'Técnico em ar condicionado', 'Técnico em geladeira', 'Instalador de TV', 'Instalador de câmeras', 'Chaveiro', 'Serralheiro', 'Babá', 'Pet sitter', 'Cuidador de idosos', 'Frete e mudanças']; %>
-                    <% sugestoes.forEach(sug => { %>
-                        <div class="category-tag" onclick="toggleCategory(this, '<%= sug %>')">
-                            <%= sug %> <i class="fas fa-plus"></i>
-                        </div>
-                    <% }); %>
-                </div>
-                <input type="hidden" name="categories" id="selectedCategoriesInput">
-
-                <div class="form-group" style="margin-top: 20px;">
-                    <label>Especialidades (Ex: Instalação, Manutenção, Residencial)</label>
-                    <input type="text" name="specialties" placeholder="Separe por vírgula" value="<%= (profissional && profissional.specialties) || '' %>">
-                </div>
-
+                <h3><i class="fas fa-clipboard-check"></i> Dados mínimos para iniciar</h3>
+                <p style="font-size: 13px; color: #bbb; margin-bottom: 15px;">Nesta etapa você só precisa salvar seus dados básicos. As profissões, fotos e detalhes completos serão configurados dentro da sua dashboard profissional.</p>
                 <div class="form-group">
-                    <label>Preço Médio (R$)</label>
-                    <input type="text" name="price_info" class="mask-number" placeholder="Ex: 100" value="<%= (profissional && profissional.price_info) || '' %>">
+                    <label>Descrição Inicial (opcional)</label>
+                    <textarea name="description" rows="4" placeholder="Conte rapidamente o que você faz."><%= (profissional && profissional.description) || '' %></textarea>
                 </div>
-
-                <div class="form-group">
-                    <label>Descrição Profissional (Conte sobre sua experiência)</label>
-                    <textarea name="description" rows="4" required placeholder="Ex: Sou eletricista há 10 anos, especializado em instalações residenciais e comerciais..."><%= (profissional && profissional.description) || '' %></textarea>
-                </div>
-            </div>
-
-            <!-- Portfólio -->
-            <div class="form-section">
-                <h3><i class="fas fa-images"></i> Portfólio (Até 10 imagens)</h3>
-                <p style="font-size: 12px; color: #888;">Mostre seus melhores trabalhos. Máximo 3MB por imagem.</p>
-                
-                <div class="portfolio-upload" id="portfolioGrid">
-                    <div class="portfolio-item" onclick="document.getElementById('portfolioInput').click()">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                </div>
-                <input type="file" name="portfolio" id="portfolioInput" accept="image/*" multiple style="display: none;" onchange="handlePortfolio(this)">
             </div>
 
             <div class="btn-container">
                 <button type="button" class="btn btn-secondary" onclick="showCancelModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Salvar e Enviar para Aprovação</button>
+                <button type="submit" class="btn btn-primary">Salvar dados básicos</button>
             </div>
         </form>
     </div>
@@ -179,7 +138,7 @@
     <div id="cancelModal" class="modal">
         <div class="modal-content">
             <h2>Atenção!</h2>
-            <p>Seu perfil ainda não foi enviado para aprovação. Deseja realmente cancelar seu cadastro como profissional e voltar a ser um cliente comum?</p>
+            <p>Se você cancelar agora, sairá da conta profissional. Depois poderá entrar novamente e continuar pela dashboard.</p>
             <div class="modal-btns">
                 <form id="form-cancelar" action="/auth/cancelar-profissional" method="POST" style="display:none;"></form>
                 <button class="modal-btn modal-btn-confirm" onclick="document.getElementById('form-cancelar').submit()">Sim, Cancelar</button>
@@ -190,65 +149,6 @@
 
     <script src="/js/form-validation.js"></script>
     <script>
-        // Gerenciamento de Categorias
-        const selectedCategories = [];
-        const maxCategories = 3;
-
-        function toggleCategory(el, category) {
-            const index = selectedCategories.indexOf(category);
-            if (index > -1) {
-                selectedCategories.splice(index, 1);
-                el.classList.remove('selected');
-                el.querySelector('i').className = 'fas fa-plus';
-            } else {
-                if (selectedCategories.length >= maxCategories) {
-                    alert('Você pode selecionar no máximo 3 categorias.');
-                    return;
-                }
-                selectedCategories.push(category);
-                el.classList.add('selected');
-                el.querySelector('i').className = 'fas fa-check';
-            }
-            document.getElementById('selectedCategoriesInput').value = selectedCategories.join(',');
-        }
-
-        // Busca de Categorias
-        document.getElementById('categorySearch').addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            const tags = document.querySelectorAll('.category-tag');
-            tags.forEach(tag => {
-                const text = tag.textContent.toLowerCase();
-                tag.style.display = text.includes(term) ? 'flex' : 'none';
-            });
-        });
-
-        // Gerenciamento de Portfólio
-        function handlePortfolio(input) {
-            if (!validateFileSize(input, 3)) return;
-            
-            const grid = document.getElementById('portfolioGrid');
-            const existingItems = grid.querySelectorAll('.portfolio-item:not(:first-child)');
-            existingItems.forEach(item => item.remove());
-
-            if (input.files.length > 10) {
-                alert('Você pode enviar no máximo 10 imagens.');
-                input.value = '';
-                return;
-            }
-
-            Array.from(input.files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = 'portfolio-item';
-                    div.innerHTML = `<img src="${e.target.result}">`;
-                    grid.appendChild(div);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // Modal de Cancelamento
         function showCancelModal() {
             document.getElementById('cancelModal').style.display = 'flex';
         }
@@ -257,8 +157,6 @@
             document.getElementById('cancelModal').style.display = 'none';
         }
 
-
-        // Submit com fetch para garantir redirecionamento visual correto após salvar
         document.getElementById('profileForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const submitBtn = this.querySelector('button[type="submit"]');
@@ -274,21 +172,20 @@
                     return;
                 }
                 if (response.ok) {
-                    window.location.replace('/?professional=1');
+                    window.location.replace('/?professional=1&basic=1');
                     return;
                 }
-                throw new Error('Falha ao salvar perfil');
+                throw new Error('Falha ao salvar dados básicos');
             } catch (err) {
                 console.error(err);
-                alert('Não foi possível salvar seu perfil agora. Tente novamente.');
+                alert('Não foi possível salvar seus dados básicos agora. Tente novamente.');
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'SALVAR E ENVIAR PARA APROVAÇÃO';
+                    submitBtn.textContent = 'Salvar dados básicos';
                 }
             }
         });
 
-        // Fechar modal ao clicar fora
         window.onclick = function(event) {
             const modal = document.getElementById('cancelModal');
             if (event.target == modal) {

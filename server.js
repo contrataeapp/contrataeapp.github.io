@@ -467,13 +467,14 @@ app.get("/auth/completar-perfil", async (req, res) => {
     }
     try {
         const { data: user } = await supabase.from('users').select('*').eq('id', req.session.userId).single();
-        const { data: profissional } = await supabase.from('professionals').select('*').eq('user_id', req.session.userId).single();
-        const { data: categorias } = await supabase.from('categories').select('*').order('name');
-        
+        const { data: profissional } = await supabase.from('professionals').select('*').eq('user_id', req.session.userId).maybeSingle();
+        const basicProfileComplete = Boolean(profissional && profissional.phone_number && profissional.cep && profissional.city && profissional.state);
+        if (basicProfileComplete) {
+            return res.redirect('/profissional/dashboard#perfil');
+        }
         res.render("auth/completar-perfil", { 
             user: user || {}, 
-            profissional: profissional || {}, 
-            categorias: categorias || [] 
+            profissional: profissional || {}
         });
     } catch (err) {
         console.error("Erro ao carregar completar perfil:", err);
@@ -561,41 +562,26 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
             if (catData) category_id = catData.id;
         }
 
-        const { error } = await supabase.from('professionals').update({
+        const { error } = await supabase.from('professionals').upsert({
+            user_id: req.session.userId,
             phone_number,
             city,
             state,
             cep,
-            category_id,
-            description,
-            specialties,
-            profile_completed: true,
-            approval_requested: true,
+            description: description || null,
+            specialties: specialties || null,
+            profile_completed: false,
+            approval_requested: false,
             status: 'pending'
-        }).eq('user_id', req.session.userId);
+        }, { onConflict: 'user_id' });
         
         if (error) {
             console.error("Erro ao atualizar tabela professionals:", error);
             throw error;
         }
         
-        // 3. Salvar múltiplas categorias se houver tabela professional_categories
-        if (categoryList.length > 0) {
-            try {
-                console.log("Salvando categorias extras...");
-                const { data: cats } = await supabase.from('categories').select('id, name').in('name', categoryList);
-                if (cats && cats.length > 0) {
-                    const inserts = cats.map(c => ({ professional_id: req.session.userId, category_id: c.id }));
-                    await supabase.from('professional_categories').delete().eq('professional_id', req.session.userId);
-                    await supabase.from('professional_categories').insert(inserts);
-                }
-            } catch (catErr) {
-                console.error("Erro ao salvar categorias extras:", catErr);
-            }
-        }
-
-        console.log("Perfil salvo com sucesso! Redirecionando para index...");
-        return res.redirect(303, '/?professional=1');
+        console.log("Dados básicos salvos com sucesso! Redirecionando para index...");
+        return res.redirect(303, '/?professional=1&basic=1');
     } catch (err) {
         console.error("ERRO CRÍTICO no POST /auth/completar-perfil:", err);
         return res.redirect('/auth/completar-perfil');

@@ -5,68 +5,94 @@ const { requireAuth, requireProfessional } = require('../middlewares/authMiddlew
 const { catchAsync } = require('../middlewares/errorHandler');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Dashboard do Profissional (SaaS - Protegido)
 router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req, res) => {
     console.log("--- INÍCIO GET /profissional/dashboard ---");
     console.log("UserID na Sessão:", req.session.userId);
-    // Buscar dados do profissional com join em users e categories
-    // Padronizado para usar user_id (PK da tabela professionals)
-    const { data: profissional, error } = await supabase
+
+    let { data: profissional, error } = await supabase
         .from('professionals')
         .select('*, users(full_name, email, avatar_url), categories(name)')
         .eq('user_id', req.session.userId)
         .maybeSingle();
-    
+
     if (error) throw error;
 
-    // Se não existir perfil profissional, criar um básico sem forçar loop
-    let profissionalData = profissional;
-    if (!profissionalData) {
-        await supabase.from('professionals').insert([{ 
-            user_id: req.session.userId, 
-            status: 'pending',
-            profile_completed: false,
-            approval_requested: false
-        }]);
-        profissionalData = {
+    if (!profissional) {
+        const { data: created, error: createError } = await supabase
+            .from('professionals')
+            .upsert({
+                user_id: req.session.userId,
+                status: 'pending',
+                profile_completed: false,
+                approval_requested: false
+            }, { onConflict: 'user_id' })
+            .select('*, users(full_name, email, avatar_url), categories(name)')
+            .eq('user_id', req.session.userId)
+            .maybeSingle();
+        if (createError) throw createError;
+        profissional = created || {
             user_id: req.session.userId,
             status: 'pending',
             profile_completed: false,
             approval_requested: false
         };
     }
-    
-    const { data: categorias } = await supabase.from('categories').select('*');
-    
-    // Buscar avaliações (reviews)
+
+    const { data: categorias } = await supabase.from('categories').select('*').order('name', { ascending: true });
+    const { data: categoriasExtras } = await supabase
+        .from('professional_categories')
+        .select('category_id, categories(id, name, slug)')
+        .eq('professional_id', req.session.userId);
+    const categoriasSelecionadas = (categoriasExtras || []).map(item => item.category_id);
+
     const { data: reviews } = await supabase
         .from('reviews')
         .select('*')
         .eq('professional_id', req.session.userId);
-    
-    const avaliacaoMedia = reviews && reviews.length > 0 
+
+    const avaliacaoMedia = reviews && reviews.length > 0
         ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
         : '0';
 
-    // Buscar Planos, Pagamentos e Portfólio
-    const { data: planos } = await supabase.from('plans').select('*').eq('active', true);
-    const { data: pagamentos } = await supabase.from('payment_history').select('*, plans(name)').eq('professional_id', req.session.userId).order('payment_date', { ascending: false });
-    const { data: portfolio } = await supabase.from('professional_portfolio').select('*').eq('professional_id', req.session.userId).order('created_at', { ascending: false });
-    
+    const { data: pagamentos } = await supabase
+        .from('payment_history')
+        .select('*, plans(name)')
+        .eq('professional_id', req.session.userId)
+        .order('payment_date', { ascending: false });
+
+    const { data: portfolio } = await supabase
+        .from('professional_portfolio')
+        .select('*')
+        .eq('professional_id', req.session.userId)
+        .order('created_at', { ascending: false });
+
+    const basicProfileComplete = Boolean(profissional.phone_number && profissional.cep && profissional.city && profissional.state);
+    const profileReadyForApproval = Boolean(
+        basicProfileComplete &&
+        profissional.description &&
+        profissional.category_id
+    );
+
     res.render('dashboards/profissional-dashboard', {
         fullName: req.session.fullName,
-        profissional: profissionalData || {},
+        profissional: profissional || {},
         categorias: categorias || [],
-        servicos: [], 
+        categoriasSelecionadas,
+        servicos: [],
         avaliacoes: reviews || [],
-        planos: planos || [],
+        planos: [],
         pagamentos: pagamentos || [],
         portfolio: portfolio || [],
-        contatosRecebidos: 0, 
+        contatosRecebidos: 0,
         servicosConcluidos: 0,
-        faturamentoMes: profissionalData?.payment_value || profissionalData?.valor_pago || '0,00',
-        avaliacaoMedia: avaliacaoMedia
+        faturamentoMes: profissional?.payment_value || profissional?.valor_pago || '0,00',
+        avaliacaoMedia: avaliacaoMedia,
+        basicProfileComplete,
+        profileReadyForApproval
     });
 }));
 
@@ -92,24 +118,41 @@ router.get('/cliente/dashboard', requireAuth, catchAsync(async (req, res) => {
 
 // Atualizar perfil do profissional
 router.post('/profissional/atualizar-perfil', requireProfessional, catchAsync(async (req, res) => {
-    const { category_id, description, phone_number } = req.body;
-    
-    // Atualizar tabela professionals
-    // Padronizado para usar user_id
-    const updateData = {
-        category_id: category_id || null,
-        description: description || ''
+    const { category_id, description, phone_number, cep, city, state, specialties, price_info, availability, categories } = req.body;
+
+    const selectedCategories = Array.isArray(categories) ? categories : (categories ? [categories] : []);
+    const uniqueSelected = Array.from(new Set(selectedCategories.filter(Boolean)));
+    const finalSelected = Array.from(new Set([category_id, ...uniqueSelected].filter(Boolean))).slice(0, 3);
+    const finalCategoryId = category_id || finalSelected[0] || null;
+    const profileReadyForApproval = Boolean(phone_number && cep && city && state && description && finalCategoryId);
+
+    const payload = {
+        user_id: req.session.userId,
+        category_id: finalCategoryId,
+        description: description || '',
+        phone_number: phone_number || null,
+        cep: cep || null,
+        city: city || null,
+        state: state || null,
+        specialties: specialties || null,
+        price_info: price_info || null,
+        availability: availability || null,
+        profile_completed: profileReadyForApproval
     };
-    if (phone_number) updateData.phone_number = phone_number;
 
     const { error: profError } = await supabase
         .from('professionals')
-        .update(updateData)
-        .eq('user_id', req.session.userId);
-    
+        .upsert(payload, { onConflict: 'user_id' });
+
     if (profError) throw profError;
-    
-    res.redirect('/profissional/dashboard');
+
+    await supabase.from('professional_categories').delete().eq('professional_id', req.session.userId);
+    if (finalSelected.length > 0) {
+        const rows = finalSelected.map(catId => ({ professional_id: req.session.userId, category_id: catId }));
+        await supabase.from('professional_categories').insert(rows);
+    }
+
+    res.redirect('/profissional/dashboard#perfil');
 }));
 
 // Solicitar aprovação do perfil
@@ -127,12 +170,27 @@ router.post('/profissional/solicitar-aprovacao', requireProfessional, catchAsync
 }));
 
 // Adicionar foto ao portfólio
-router.post('/profissional/portfolio/adicionar', requireProfessional, catchAsync(async (req, res) => {
-    const { image_url } = req.body;
+router.post('/profissional/portfolio/adicionar', requireProfessional, upload.single('portfolio_image'), catchAsync(async (req, res) => {
+    let image_url = (req.body && req.body.image_url) ? req.body.image_url.trim() : '';
+
+    if (req.file) {
+        const fileExt = (req.file.originalname.split('.').pop() || 'jpg').toLowerCase();
+        const fileName = `portfolio_${req.session.userId}_${Date.now()}.${fileExt}`;
+        const filePath = `portfolio/${fileName}`;
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, req.file.buffer, { contentType: req.file.mimetype, upsert: true });
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+        image_url = urlData.publicUrl;
+    }
+
+    if (!image_url) return res.redirect('/profissional/dashboard#portfolio');
+
     const { error } = await supabase
         .from('professional_portfolio')
         .insert([{ professional_id: req.session.userId, image_url }]);
-    
+
     if (error) throw error;
     res.redirect('/profissional/dashboard#portfolio');
 }));

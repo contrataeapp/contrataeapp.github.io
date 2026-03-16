@@ -32,7 +32,7 @@
                         <span class="caret"><i class="fas fa-chevron-down"></i></span>
                     </button>
                     <div class="user-dropdown" id="userDropdown">
-                        <a href="<%= userType === 'professional' ? '/auth/completar-perfil' : '/cliente/dashboard#perfil' %>"><i class="fas fa-id-card"></i> Perfil</a>
+                        <a href="<%= userType === 'professional' ? '/profissional/dashboard#perfil' : '/cliente/dashboard#perfil' %>"><i class="fas fa-id-card"></i> Perfil</a>
                         <a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>"><i class="fas fa-gauge-high"></i> Dashboard</a>
                         <a href="/auth/logout"><i class="fas fa-right-from-bracket"></i> Sair</a>
                     </div>

@@ -239,12 +239,12 @@ router.get('/google/callback', passport.authenticate('google', {
             
             if (!prof) {
                 console.log("Perfil profissional não existe. Criando registro base e redirecionando para home profissional...");
-                await supabase.from('professionals').insert([{ 
+                await supabase.from('professionals').upsert({ 
                     user_id: req.user.id, 
                     status: 'pending',
                     profile_completed: false,
                     approval_requested: false
-                }]);
+                }, { onConflict: 'user_id' });
             }
             console.log("Usuário profissional autenticado. Redirecionando para home profissional...");
             return res.redirect('/?professional=1');
