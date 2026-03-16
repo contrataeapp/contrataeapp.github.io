@@ -143,7 +143,7 @@ router.post('/cadastro', async (req, res) => {
         if (user_type === 'professional') {
             res.redirect('/auth/completar-perfil');
         } else {
-            res.redirect('/cliente/dashboard');
+            res.redirect('/');
         }
     } catch (err) {
         console.error(err);
@@ -180,9 +180,9 @@ router.post('/login', async (req, res) => {
             if (prof && !prof.profile_completed) {
                 return res.redirect('/auth/completar-perfil');
             }
-            res.redirect('/profissional/dashboard');
+            res.redirect('/?professional=1');
         } else {
-            res.redirect('/cliente/dashboard');
+            res.redirect('/');
         }
     } catch (err) {
         console.error(err);
@@ -256,11 +256,11 @@ router.get('/google/callback', passport.authenticate('google', {
                 return res.redirect('/auth/completar-perfil');
             }
             console.log("Perfil profissional completo. Redirecionando para dashboard...");
-            return res.redirect('/profissional/dashboard');
+            return res.redirect('/?professional=1');
         }
 
-        console.log("Usuário Google é cliente. Redirecionando para dashboard...");
-        res.redirect('/cliente/dashboard');
+        console.log("Usuário Google é cliente. Redirecionando para home...");
+        res.redirect('/');
     } catch (err) {
         console.error("Erro no callback do Google:", err);
         res.redirect('/auth/login');

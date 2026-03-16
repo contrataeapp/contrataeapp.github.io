@@ -52,6 +52,24 @@ function normalizeBanners(records) {
     return (records || []).map(normalizeBannerRecord);
 }
 
+async function loadPublicBanners() {
+    const { data } = await supabase
+        .from('banners')
+        .select('*')
+        .eq('is_active', true)
+        .order('order', { ascending: true });
+    return normalizeBanners(data || []);
+}
+
+async function loadOtherCategories() {
+    const excluded = ['pintores','pedreiros','eletricistas','encanadores','outros'];
+    const { data } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name', { ascending: true });
+    return (data || []).filter(c => !excluded.includes(String(c.slug || '').toLowerCase()));
+}
+
 // CONFIGURAÇÃO MULTER PARA BANNERS
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -161,8 +179,9 @@ app.get('/pedreiros', (req, res) => res.redirect(302, '/categoria/pedreiros'));
 app.get('/eletricistas', (req, res) => res.redirect(302, '/categoria/eletricistas'));
 app.get('/encanadores', (req, res) => res.redirect(302, '/categoria/encanadores'));
 app.get('/outros', catchAsync(async (req, res) => {
-    const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('order', { ascending: true });
-    res.render('outros', { banners: normalizeBanners(banners || []), currentPage: 'outros' });
+    const banners = await loadPublicBanners();
+    const extraCategories = await loadOtherCategories();
+    res.render('outros', { banners, currentPage: 'outros', extraCategories });
 }));
 
 // ============================================
@@ -465,28 +484,23 @@ app.get("/auth/completar-perfil", async (req, res) => {
 app.post("/auth/cancelar-profissional", async (req, res) => {
     console.log("--- INÍCIO POST /auth/cancelar-profissional ---");
     if (!req.session.userId) return res.redirect('/');
-    
     try {
         console.log("Cancelando cadastro profissional para UserID:", req.session.userId);
-        
-        // 1. Atualizar tabela users para 'client'
         await supabase.from('users').update({ user_type: 'client' }).eq('id', req.session.userId);
-        
-        // 2. Atualizar tabela professionals para resetar solicitação
-        await supabase.from('professionals').update({ 
-            approval_requested: false,
-            profile_completed: false,
-            status: 'pending' 
-        }).eq('user_id', req.session.userId);
-        
-        // 3. Atualizar sessão
-        req.session.userType = 'client';
-        
-        console.log("Cadastro cancelado com sucesso. Redirecionando para home...");
-        res.redirect(303, '/');
+        await supabase.from('professional_categories').delete().eq('professional_id', req.session.userId);
+        await supabase.from('professional_specialties').delete().eq('professional_id', req.session.userId);
+        await supabase.from('professionals').delete().eq('user_id', req.session.userId);
+        req.session.destroy(() => {
+            console.log("Cadastro cancelado com sucesso. Logout realizado. Redirecionando para home...");
+            return res.redirect(303, '/');
+        });
     } catch (err) {
         console.error("Erro ao cancelar cadastro profissional:", err);
-        res.redirect(303, '/');
+        if (req.session) {
+            req.session.destroy(() => res.redirect(303, '/'));
+        } else {
+            res.redirect(303, '/');
+        }
     }
 });
 
@@ -580,8 +594,8 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
             }
         }
 
-        console.log("Perfil salvo com sucesso! Redirecionando para dashboard...");
-        return res.redirect(303, '/profissional/dashboard');
+        console.log("Perfil salvo com sucesso! Redirecionando para index...");
+        return res.redirect(303, '/?professional=1');
     } catch (err) {
         console.error("ERRO CRÍTICO no POST /auth/completar-perfil:", err);
         return res.redirect('/auth/completar-perfil');
@@ -608,21 +622,35 @@ app.get("/categoria/:slug", async (req, res) => {
         const { slug } = req.params;
         console.log("Buscando categoria para slug:", slug);
         
+        const banners = await loadPublicBanners();
+
+        if (slug === 'outros') {
+            const extraCategories = await loadOtherCategories();
+            return res.render('outros', { banners, currentPage: 'outros', extraCategories });
+        }
+
         // Buscar categoria pelo slug
-        let { data: category, error: catError } = await supabase.from('categories').select('*').eq('slug', slug).maybeSingle();
-        
+        let { data: category } = await supabase.from('categories').select('*').eq('slug', slug).maybeSingle();
+
         // Fallback para categorias comuns se o banco estiver vazio
         if (!category) {
             const fallbacks = {
-                'pintores': { id: 'pintor-id', name: 'Pintor', slug: 'pintores' },
-                'pedreiros': { id: 'pedreiro-id', name: 'Pedreiro', slug: 'pedreiros' },
-                'eletricistas': { id: 'eletricista-id', name: 'Eletricista', slug: 'eletricistas' },
-                'encanadores': { id: 'encanadores-id', name: 'Encanador', slug: 'encanadores' }
+                'pintores': { id: 'pintor-id', name: 'Pintores', slug: 'pintores' },
+                'pedreiros': { id: 'pedreiro-id', name: 'Pedreiros', slug: 'pedreiros' },
+                'eletricistas': { id: 'eletricista-id', name: 'Eletricistas', slug: 'eletricistas' },
+                'encanadores': { id: 'encanadores-id', name: 'Encanadores', slug: 'encanadores' }
             };
             category = fallbacks[slug];
         }
 
-        if (!category) return res.status(404).render("404", { mensagem: "Categoria não encontrada." });
+        if (!category) {
+            return res.status(200).render('categoria-vazia', {
+                banners,
+                currentPage: slug,
+                categoriaNome: slug,
+                categoriaSlug: slug
+            });
+        }
 
         // Buscar profissionais desta categoria
         let query = supabase
@@ -642,8 +670,6 @@ app.get("/categoria/:slug", async (req, res) => {
             
         if (error) throw error;
         
-        const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('order', { ascending: true });
-
         // Tentar renderizar view específica ou genérica
         const viewName = ['pintores', 'pedreiros', 'eletricistas', 'encanadores'].includes(slug) ? slug : 'categoria-dinamica';
         
@@ -651,7 +677,7 @@ app.get("/categoria/:slug", async (req, res) => {
             [slug]: professionals || [],
             profissionais: professionals || [],
             categoriaNome: category.name,
-            banners: normalizeBanners(banners || []),
+            banners,
             currentPage: slug
         });
     } catch (err) {

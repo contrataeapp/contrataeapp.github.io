@@ -153,41 +153,21 @@
             </div>
 
             <div class="categorias-grid">
-                <a href="/categoria/jardineiro" class="categoria-card">
-                    <i class="fas fa-leaf categoria-icon"></i>
-                    <h3>Jardineiro</h3>
-                    <p>Cuidados com plantas e paisagismo</p>
-                </a>
-
-                <a href="/categoria/barbeiro" class="categoria-card">
-                    <i class="fas fa-cut categoria-icon"></i>
-                    <h3>Barbeiro</h3>
-                    <p>Cortes e cuidados com cabelo</p>
-                </a>
-
-                <a href="/categoria/mecanico" class="categoria-card">
-                    <i class="fas fa-wrench categoria-icon"></i>
-                    <h3>Mecânico</h3>
-                    <p>Serviços automotivos</p>
-                </a>
-
-                <a href="/categoria/diarista" class="categoria-card">
-                    <i class="fas fa-broom categoria-icon"></i>
-                    <h3>Diarista</h3>
-                    <p>Limpeza e organização</p>
-                </a>
-
-                <a href="/categoria/consultor" class="categoria-card">
-                    <i class="fas fa-briefcase categoria-icon"></i>
-                    <h3>Consultor</h3>
-                    <p>Consultoria profissional</p>
-                </a>
-
-                <a href="/categoria/professor" class="categoria-card">
-                    <i class="fas fa-chalkboard-user categoria-icon"></i>
-                    <h3>Professor</h3>
-                    <p>Aulas particulares</p>
-                </a>
+                <% const extras = (typeof extraCategories !== 'undefined' && extraCategories.length > 0) ? extraCategories : null; %>
+                <% if (extras) { %>
+                    <% extras.forEach(cat => { %>
+                        <a href="/categoria/<%= cat.slug %>" class="categoria-card">
+                            <i class="fas fa-briefcase categoria-icon"></i>
+                            <h3><%= cat.name %></h3>
+                            <p>Profissionais disponíveis nesta categoria</p>
+                        </a>
+                    <% }) %>
+                <% } else { %>
+                    <div class="info-section" style="grid-column: 1/-1;">
+                        <h2>Nenhuma subcategoria cadastrada ainda</h2>
+                        <p>As novas profissões adicionadas à plataforma aparecerão aqui como cards dentro de Outros.</p>
+                    </div>
+                <% } %>
             </div>
 
             <div class="info-section">

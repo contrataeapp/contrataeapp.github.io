@@ -258,18 +258,34 @@
         }
 
 
-        // Garantir redirect visível após salvar em navegadores que mantêm a página do POST
-        document.getElementById('profileForm').addEventListener('submit', function () {
+        // Submit com fetch para garantir redirecionamento visual correto após salvar
+        document.getElementById('profileForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
             const submitBtn = this.querySelector('button[type="submit"]');
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Salvando...';
             }
-            setTimeout(() => {
-                if (window.location.pathname === '/auth/completar-perfil') {
-                    window.location.replace('/profissional/dashboard');
+            try {
+                const formData = new FormData(this);
+                const response = await fetch(this.action, { method: 'POST', body: formData, redirect: 'follow' });
+                if (response.redirected) {
+                    window.location.replace(response.url);
+                    return;
                 }
-            }, 1500);
+                if (response.ok) {
+                    window.location.replace('/?professional=1');
+                    return;
+                }
+                throw new Error('Falha ao salvar perfil');
+            } catch (err) {
+                console.error(err);
+                alert('Não foi possível salvar seu perfil agora. Tente novamente.');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'SALVAR E ENVIAR PARA APROVAÇÃO';
+                }
+            }
         });
 
         // Fechar modal ao clicar fora
