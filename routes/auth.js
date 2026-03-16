@@ -141,7 +141,7 @@ router.post('/cadastro', async (req, res) => {
         req.session.fullName = userData.full_name;
 
         if (user_type === 'professional') {
-            res.redirect('/auth/completar-perfil');
+            res.redirect('/?professional=1');
         } else {
             res.redirect('/');
         }
@@ -175,14 +175,9 @@ router.post('/login', async (req, res) => {
         req.session.fullName = user.full_name;
 
         if (user.user_type === 'professional') {
-            // Verificar se perfil está completo
-            const { data: prof } = await supabase.from('professionals').select('profile_completed').eq('user_id', user.id).single();
-            if (prof && !prof.profile_completed) {
-                return res.redirect('/auth/completar-perfil');
-            }
-            res.redirect('/?professional=1');
+            return res.redirect('/?professional=1');
         } else {
-            res.redirect('/');
+            return res.redirect('/');
         }
     } catch (err) {
         console.error(err);
@@ -243,19 +238,15 @@ router.get('/google/callback', passport.authenticate('google', {
             if (profError) throw profError;
             
             if (!prof) {
-                console.log("Perfil profissional não existe. Criando e redirecionando para completar-perfil...");
+                console.log("Perfil profissional não existe. Criando registro base e redirecionando para home profissional...");
                 await supabase.from('professionals').insert([{ 
                     user_id: req.user.id, 
                     status: 'pending',
                     profile_completed: false,
                     approval_requested: false
                 }]);
-                return res.redirect('/auth/completar-perfil'); 
-            } else if (!prof.profile_completed) {
-                console.log("Perfil profissional incompleto. Redirecionando para completar-perfil...");
-                return res.redirect('/auth/completar-perfil');
             }
-            console.log("Perfil profissional completo. Redirecionando para dashboard...");
+            console.log("Usuário profissional autenticado. Redirecionando para home profissional...");
             return res.redirect('/?professional=1');
         }
 

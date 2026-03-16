@@ -20,15 +20,21 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     
     if (error) throw error;
 
-    // Se não existir perfil profissional, criar um básico
-    if (!profissional) {
-        await supabase.from('professionals').insert([{ user_id: req.session.userId, status: 'pending' }]);
-        return res.redirect('/auth/completar-perfil');
-    }
-
-    // VERIFICAÇÃO DE PERFIL COMPLETO (OBRIGATÓRIO)
-    if (!profissional.profile_completed && req.query.refresh !== '1') {
-        return res.redirect('/auth/completar-perfil');
+    // Se não existir perfil profissional, criar um básico sem forçar loop
+    let profissionalData = profissional;
+    if (!profissionalData) {
+        await supabase.from('professionals').insert([{ 
+            user_id: req.session.userId, 
+            status: 'pending',
+            profile_completed: false,
+            approval_requested: false
+        }]);
+        profissionalData = {
+            user_id: req.session.userId,
+            status: 'pending',
+            profile_completed: false,
+            approval_requested: false
+        };
     }
     
     const { data: categorias } = await supabase.from('categories').select('*');
@@ -50,7 +56,7 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     
     res.render('dashboards/profissional-dashboard', {
         fullName: req.session.fullName,
-        profissional: profissional || {},
+        profissional: profissionalData || {},
         categorias: categorias || [],
         servicos: [], 
         avaliacoes: reviews || [],
@@ -59,7 +65,7 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
         portfolio: portfolio || [],
         contatosRecebidos: 0, 
         servicosConcluidos: 0,
-        faturamentoMes: profissional?.payment_value || profissional?.valor_pago || '0,00',
+        faturamentoMes: profissionalData?.payment_value || profissionalData?.valor_pago || '0,00',
         avaliacaoMedia: avaliacaoMedia
     });
 }));

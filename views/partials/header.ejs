@@ -25,11 +25,18 @@
                     <span class="login-icon"><i class="fas fa-user-shield"></i></span>
                 </a>
             <% } else if (typeof userId !== 'undefined' && userId) { %>
-                <a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>" class="login-pill">
-                    <span class="login-text"><%= fullName ? fullName.split(' ')[0] : 'Minha Conta' %></span>
-                    <span class="login-icon"><i class="fas fa-user-circle"></i></span>
-                </a>
-                <a href="/auth/logout" style="margin-left: 10px; color: #ccc; font-size: 0.8rem;"><i class="fas fa-sign-out-alt"></i></a>
+                <div class="user-menu-wrapper">
+                    <button type="button" class="login-pill user-menu-toggle" id="userMenuToggle">
+                        <span class="login-text"><%= fullName ? fullName.split(' ')[0] : 'Minha Conta' %></span>
+                        <span class="login-icon"><i class="fas fa-user-circle"></i></span>
+                        <span class="caret"><i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="<%= userType === 'professional' ? '/auth/completar-perfil' : '/cliente/dashboard#perfil' %>"><i class="fas fa-id-card"></i> Perfil</a>
+                        <a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>"><i class="fas fa-gauge-high"></i> Dashboard</a>
+                        <a href="/auth/logout"><i class="fas fa-right-from-bracket"></i> Sair</a>
+                    </div>
+                </div>
             <% } else { %>
                 <a href="/auth/login" class="login-pill">
                     <span class="login-text">Entrar / Cadastrar</span>
@@ -57,4 +64,21 @@
             </ul>
         </div>
     </nav>
+    <script>
+        (function(){
+            const toggle = document.getElementById('userMenuToggle');
+            const menu = document.getElementById('userDropdown');
+            if (!toggle || !menu) return;
+            toggle.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                menu.classList.toggle('open');
+            });
+            document.addEventListener('click', function(e){
+                if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+                    menu.classList.remove('open');
+                }
+            });
+        })();
+    </script>
 </header>

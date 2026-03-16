@@ -87,7 +87,7 @@
             <div class="logo"><a href="/" style="color:#ffa500;text-decoration:none;">Contrataê</a></div>
             <nav>
                 <ul>
-                    <li><a href="/" class="active"><i class="fas fa-home"></i> Início</a></li>
+                    <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
                     <li><a href="#" class="tab-btn active" onclick="mudarAba('resumo')"><i class="fas fa-chart-line"></i> Resumo</a></li>
                     <li><a href="#" class="tab-btn" onclick="mudarAba('servicos')"><i class="fas fa-briefcase"></i> Meus Serviços</a></li>
                     <li><a href="#" class="tab-btn" onclick="mudarAba('avaliacoes')"><i class="fas fa-star"></i> Avaliações</a></li>
@@ -110,6 +110,15 @@
                 </div>
             </header>
                         <!-- ABA RESUMO -->
+            <% if (!profissional.profile_completed) { %>
+                <div class="card" style="background:#2a2112;border:1px solid #6b4d14;margin-bottom:24px;">
+                    <h3 style="color:#ffa500;margin-bottom:8px;"><i class="fas fa-user-pen"></i> Complete seu perfil profissional</h3>
+                    <p style="color:#ddd; margin-bottom:14px;">Seu cadastro profissional foi criado, mas ainda faltam informações importantes para análise. Complete seu perfil para enviar à aprovação.</p>
+                    <a href="/auth/completar-perfil" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Completar Perfil</a>
+                </div>
+            <% } %>
+
+            <!-- ABA RESUMO -->
             <div id="resumo" class="tab-content active">
                 <% if (profissional.data_vencimento) { %>
                     <% 
@@ -267,6 +276,11 @@
 
             <!-- ABA PERFIL -->
             <div id="perfil" class="tab-content">
+                <div class="card" style="margin-bottom:20px;">
+                    <h3 style="color:#ffa500;margin-bottom:8px;">Seu perfil profissional</h3>
+                    <p style="color:#ccc; margin-bottom:12px;">Gerencie suas informações, categorias e portfólio.</p>
+                    <a href="/auth/completar-perfil" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Abrir tela de perfil</a>
+                </div>
                 <h2>Meu Perfil Profissional</h2>
                 <form method="POST" action="/profissional/atualizar-perfil" style="margin-top: 25px;">
                     <div class="form-group">
