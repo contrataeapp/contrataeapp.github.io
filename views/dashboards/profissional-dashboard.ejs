@@ -53,7 +53,7 @@
         .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
         .btn-primary { background: #ffa500; color: white; }
         .btn-primary:hover { background: #ff9500; }
-        .btn-secondary { background: #e2e8f0; color: #002147; }
+        .btn-secondary { background: #e2e8f0; color: #f5f5f5; }
         .btn-secondary:hover { background: #cbd5e0; }
         .btn-danger { background: #dc3545; color: white; }
         .btn-danger:hover { background: #c82333; }
@@ -69,8 +69,8 @@
         .close { float: right; font-size: 24px; font-weight: bold; color: #a0aec0; cursor: pointer; }
         
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #002147; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #f5f5f5; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; }
         
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); position: fixed; z-index: 1000; }
@@ -113,8 +113,8 @@
             <% if (!basicProfileComplete) { %>
                 <div class="card" style="background:#2a2112;border:1px solid #6b4d14;margin-bottom:24px;">
                     <h3 style="color:#ffa500;margin-bottom:8px;"><i class="fas fa-user-pen"></i> Complete seu perfil profissional</h3>
-                    <p style="color:#ddd; margin-bottom:14px;">Seu cadastro profissional foi criado. Salve seus dados básicos para continuar e depois complete o perfil dentro da dashboard.</p>
-                    <a href="/auth/completar-perfil" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Salvar dados básicos</a>
+                    <p style="color:#ddd; margin-bottom:14px;">Sua conta profissional já foi criada. Complete o cadastro inicial para liberar a configuração do seu perfil, profissões e portfólio.</p>
+                    <a href="/auth/completar-perfil" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Completar cadastro inicial</a>
                 </div>
             <% } %>
 
@@ -250,11 +250,11 @@
             <!-- ABA PORTFÓLIO -->
             <div id="portfolio" class="tab-content">
                 <h2>Meu Portfólio</h2>
-                <p style="color: #6c757d; margin-bottom: 25px;">Adicione fotos dos seus melhores trabalhos para atrair mais clientes (máx. 10 fotos).</p>
+                <p style="color: #6c757d; margin-bottom: 25px;">Adicione fotos do seu portfólio para mostrar seus melhores trabalhos (máx. 10 imagens).</p>
                 
                 <form action="/profissional/portfolio/adicionar" method="POST" enctype="multipart/form-data" style="margin-bottom: 30px; display: flex; gap: 10px; align-items:center;">
                     <input type="file" name="portfolio_image" accept="image/*" required style="flex: 1;">
-                    <button type="submit" class="btn btn-primary">Adicionar Foto</button>
+                    <button type="submit" class="btn btn-primary">Adicionar ao Portfólio</button>
                 </form>
                 <p style="color:#999; font-size:12px; margin-top:-15px; margin-bottom:20px;">Envie até 10 imagens. Se a foto estiver pesada, reduza o tamanho em ferramentas como TinyJPG ou Squoosh.</p>
 
@@ -280,9 +280,10 @@
                 <div class="card" style="margin-bottom:20px;">
                     <h3 style="color:#ffa500;margin-bottom:8px;">Seu perfil profissional</h3>
                     <p style="color:#ccc; margin-bottom:12px;">Gerencie suas informações, categorias e portfólio.</p>
-                    <a href="#perfil" class="btn btn-primary" style="display:inline-block;text-decoration:none;" onclick="mudarAba('perfil'); return false;">Abrir Meu Perfil</a>
+                    <a href="/profissional/dashboard?tab=perfil" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Abrir Meu Perfil</a>
                 </div>
                 <h2 id="perfil">Meu Perfil Profissional</h2>
+                <p style="color:#bbb; margin-bottom:14px;">Seu nome completo fica preservado na conta. Aqui você completa os dados que vão aparecer para clientes e para análise da plataforma.</p>
                 <div class="card" style="margin:20px 0;">
                     <h3 style="color:#ffa500; margin-bottom:12px;">Prévia do perfil</h3>
                     <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:15px;">
@@ -311,7 +312,7 @@
                         <input type="text" name="state" maxlength="2" value="<%= profissional && profissional.state ? profissional.state : '' %>" required>
                     </div>
                     <div class="form-group">
-                        <label>Profissão principal</label>
+                        <label>Profissão principal</label><small style="display:block; color:#999; margin-bottom:6px;">Escolha a principal. Ela será a categoria usada como destaque do seu perfil.</small>
                         <select name="category_id" required>
                             <option value="">Selecione uma categoria</option>
                             <% if (categorias) { %>
@@ -322,18 +323,17 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Outras profissões (até 3 no total)</label>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:10px; background:#111; padding:15px; border-radius:10px; border:1px solid #333; max-height:220px; overflow:auto;">
+                        <label>Profissões adicionais (até 2 além da principal)</label>
+                        <select name="categories" multiple size="6" style="min-height: 140px;">
                             <% if (categorias) { %>
                                 <% categorias.forEach(cat => { %>
-                                    <label style="display:flex; align-items:center; gap:8px; margin:0;">
-                                        <input type="checkbox" name="categories" value="<%= cat.id %>" <%= (categoriasSelecionadas && categoriasSelecionadas.includes(cat.id)) || (profissional && profissional.category_id === cat.id) ? 'checked' : '' %>>
-                                        <span><%= cat.name %></span>
-                                    </label>
+                                    <% if (!profissional || profissional.category_id !== cat.id) { %>
+                                        <option value="<%= cat.id %>" <%= categoriasSelecionadas && categoriasSelecionadas.includes(cat.id) ? 'selected' : '' %>><%= cat.name %></option>
+                                    <% } %>
                                 <% }); %>
                             <% } %>
-                        </div>
-                        <small style="color:#999; display:block; margin-top:8px;">Escolha no máximo 3 profissões. Alterações futuras poderão ser limitadas por prazo administrativo.</small>
+                        </select>
+                        <small style="color:#999; display:block; margin-top:8px;">Use Ctrl/Cmd para escolher mais de uma. Você poderá manter até 3 profissões no total.</small>
                     </div>
                     <div class="form-group">
                         <label>Especialidades</label>
@@ -481,7 +481,7 @@
             document.getElementById(id).classList.remove('active');
         }
         
-        document.addEventListener('DOMContentLoaded', function(){ atualizarPlanoMeses(); const hash = window.location.hash.replace('#',''); if(hash && document.getElementById(hash)) mudarAba(hash); });
+        document.addEventListener('DOMContentLoaded', function(){ atualizarPlanoMeses(); const params = new URLSearchParams(window.location.search); const requestedTab = params.get('tab'); const hash = window.location.hash.replace('#',''); const target = requestedTab || hash; if(target && document.getElementById(target)) mudarAba(target); });
 
         function marcarConcluido(servicoId) {
             if (confirm('Marcar este serviço como concluído?')) {

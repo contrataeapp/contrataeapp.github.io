@@ -470,10 +470,10 @@ app.get("/auth/completar-perfil", async (req, res) => {
         const { data: profissional } = await supabase.from('professionals').select('*').eq('user_id', req.session.userId).maybeSingle();
         const basicProfileComplete = Boolean(profissional && profissional.phone_number && profissional.cep && profissional.city && profissional.state);
         if (basicProfileComplete) {
-            return res.redirect('/profissional/dashboard#perfil');
+            return res.redirect('/profissional/dashboard?tab=perfil');
         }
-        res.render("auth/completar-perfil", { 
-            user: user || {}, 
+        res.render("auth/completar-perfil", {
+            user: user || {},
             profissional: profissional || {}
         });
     } catch (err) {
@@ -509,34 +509,31 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
     console.log("--- INÍCIO POST /auth/completar-perfil ---");
     console.log("UserID na Sessão:", req.session.userId);
     console.log("UserType na Sessão:", req.session.userType);
-    
+
     if (!req.session.userId || req.session.userType !== 'professional') {
         console.log("Acesso negado: Usuário não logado ou não é profissional");
         return res.redirect('/');
     }
-    
+
     try {
         const body = req.body || {};
         console.log("Dados recebidos (body):", body);
-        
-        const { phone_number, city, state, cep, categories, specialties, description } = body;
+
+        const { phone_number, city, state, cep, description } = body;
         let avatar_url = body.avatar_url;
 
-        // 1. Processar Upload de Avatar (se houver arquivo)
         const avatarFile = req.files ? req.files.find(f => f.fieldname === 'avatar') : null;
         if (avatarFile) {
             console.log("Processando upload de avatar...");
             const fileExt = avatarFile.originalname.split('.').pop();
             const fileName = `avatar_${req.session.userId}_${Date.now()}.${fileExt}`;
             const filePath = `public/${fileName}`;
-
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
                 .upload(filePath, avatarFile.buffer, {
                     contentType: avatarFile.mimetype,
                     upsert: true
                 });
-
             if (!uploadError) {
                 const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
                 avatar_url = urlData.publicUrl;
@@ -545,48 +542,38 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
                 console.error("Erro no upload do avatar:", uploadError);
             }
         }
-        
-        // Atualizar avatar na tabela users se tivermos uma nova URL
+
         if (avatar_url) {
             console.log("Atualizando avatar_url na tabela users...");
             await supabase.from('users').update({ avatar_url }).eq('id', req.session.userId);
         }
-        
-        // 2. Atualizar dados na tabela professionals
-        console.log("Atualizando dados na tabela professionals...");
-        const categoryList = categories ? categories.split(',') : [];
-        let category_id = body.category_id; 
-        
-        if (categoryList.length > 0 && !category_id) {
-            const { data: catData } = await supabase.from('categories').select('id').eq('name', categoryList[0]).maybeSingle();
-            if (catData) category_id = catData.id;
-        }
 
+        console.log("Atualizando dados básicos na tabela professionals...");
         const { error } = await supabase.from('professionals').upsert({
             user_id: req.session.userId,
-            phone_number,
-            city,
-            state,
-            cep,
+            phone_number: phone_number || null,
+            city: city || null,
+            state: state || null,
+            cep: cep || null,
             description: description || null,
-            specialties: specialties || null,
             profile_completed: false,
             approval_requested: false,
             status: 'pending'
         }, { onConflict: 'user_id' });
-        
+
         if (error) {
             console.error("Erro ao atualizar tabela professionals:", error);
             throw error;
         }
-        
-        console.log("Dados básicos salvos com sucesso! Redirecionando para index...");
-        return res.redirect(303, '/?professional=1&basic=1');
+
+        console.log("Dados básicos salvos com sucesso! Redirecionando para dashboard...");
+        return res.redirect(303, '/profissional/dashboard?tab=perfil&basic=1');
     } catch (err) {
         console.error("ERRO CRÍTICO no POST /auth/completar-perfil:", err);
         return res.redirect('/auth/completar-perfil');
     }
 });
+
 app.get("/esqueci-senha", (req, res) => res.render("esqueci-senha", { erro: null, sucesso: null }));
 app.get("/contato", catchAsync(async (req, res) => { const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('order', { ascending: true }); res.render("contato", { banners: normalizeBanners(banners || []), currentPage: 'contato' }); }));
 app.get("/termos-de-uso", catchAsync(async (req, res) => { const { data: banners } = await supabase.from('banners').select('*').eq('is_active', true).order('order', { ascending: true }); res.render("termos_de_uso", { banners: normalizeBanners(banners || []), currentPage: 'termos' }); }));

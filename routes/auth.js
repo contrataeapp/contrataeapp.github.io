@@ -7,6 +7,10 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
+function basicProfessionalProfileComplete(prof) {
+    return Boolean(prof && prof.phone_number && prof.cep && prof.city && prof.state);
+}
+
 // ============================================
 // CONFIGURAÇÃO DO PASSPORT - GOOGLE OAUTH2
 // ============================================
@@ -15,60 +19,60 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: "https://contrataeapp.onrender.com/auth/google/callback",
-        proxy: true 
-    }, async (accessToken, refreshToken, profile, done) => {
-    try {
-        const email = profile.emails[0].value;
-        const fullName = profile.displayName;
-        const googleId = profile.id;
-        const avatarUrl = profile.photos[0]?.value || null;
+        proxy: true,
+        passReqToCallback: true
+    }, async (req, accessToken, refreshToken, profile, done) => {
+        try {
+            const email = profile.emails[0].value;
+            const fullName = profile.displayName;
+            const googleId = profile.id;
+            const avatarUrl = profile.photos[0]?.value || null;
+            const requestedType = req.query.state === 'professional' ? 'professional' : 'client';
 
-        // 1. Procurar usuário pelo email
-        const { data: existingUser, error: selectError } = await supabase
-            .from("users")
-            .select("*")
-            .eq("email", email)
-            .maybeSingle();
+            const { data: existingUser, error: selectError } = await supabase
+                .from('users')
+                .select('*')
+                .eq('email', email)
+                .maybeSingle();
 
-        let user;
-        if (existingUser) {
-            // 2. Se existir → atualizar google_id e avatar se necessário
-            const { data: updatedUser, error: updateError } = await supabase
-                .from("users")
-                .update({
-                    google_id: googleId,
-                    avatar_url: existingUser.avatar_url || avatarUrl
-                })
-                .eq("email", email)
-                .select()
-                .single();
-            
-            if (updateError) throw updateError;
-            user = updatedUser;
-        } else {
-            // 3. Se não existir → criar novo usuário
-            // O tipo de usuário será definido no callback baseado no parâmetro 'state' ou 'prompt'
-            const { data: newUser, error: insertError } = await supabase
-                .from("users")
-                .insert({
-                    email: email,
-                    full_name: fullName,
-                    google_id: googleId,
-                    avatar_url: avatarUrl,
-                    user_type: 'client' // Padrão inicial
-                })
-                .select()
-                .single();
-            
-            if (insertError) throw insertError;
-            user = newUser;
+            if (selectError) throw selectError;
+
+            let user;
+            if (existingUser) {
+                const { data: updatedUser, error: updateError } = await supabase
+                    .from('users')
+                    .update({
+                        google_id: googleId,
+                        avatar_url: existingUser.avatar_url || avatarUrl
+                    })
+                    .eq('email', email)
+                    .select()
+                    .single();
+
+                if (updateError) throw updateError;
+                user = { ...updatedUser, _wasNew: false };
+            } else {
+                const { data: newUser, error: insertError } = await supabase
+                    .from('users')
+                    .insert({
+                        email,
+                        full_name: fullName,
+                        google_id: googleId,
+                        avatar_url: avatarUrl,
+                        user_type: requestedType
+                    })
+                    .select()
+                    .single();
+
+                if (insertError) throw insertError;
+                user = { ...newUser, _wasNew: true };
+            }
+
+            return done(null, user);
+        } catch (err) {
+            console.error('Erro no Google Strategy:', err);
+            return done(err, null);
         }
-
-        return done(null, user);
-    } catch (err) {
-        console.error('Erro no Google Strategy:', err);
-        return done(err, null);
-    }
     }));
 } else {
     console.warn("⚠️ Google OAuth desativado: GOOGLE_CLIENT_ID ou GOOGLE_CLIENT_SECRET não configurados.");
@@ -94,14 +98,13 @@ passport.deserializeUser(async (id, done) => {
 router.post('/cadastro', async (req, res) => {
     try {
         const { full_name, email, password, password_confirm, user_type } = req.body;
-        
+
         if (password !== password_confirm) {
-            return res.render('auth/cadastro', { erro: 'As senhas não coincidem' });
+            return res.render('auth/cadastro', { erro: 'As senhas não coincidem', userType: user_type || 'client' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 1. Criar usuário na tabela users
         const { data: userData, error: userError } = await supabase
             .from('users')
             .insert([{ 
@@ -116,24 +119,18 @@ router.post('/cadastro', async (req, res) => {
         if (userError) {
             console.error("Erro no insert do cadastro:", userError);
             if (userError.code === '23505') {
-                return res.render('auth/cadastro', { erro: 'E-mail já cadastrado' });
+                return res.render('auth/cadastro', { erro: 'E-mail já cadastrado', userType: user_type || 'client' });
             }
-            return res.render('auth/cadastro', { erro: 'Erro ao criar conta: ' + userError.message });
+            return res.render('auth/cadastro', { erro: 'Erro ao criar conta: ' + userError.message, userType: user_type || 'client' });
         }
 
-        // 2. Se for profissional, criar entrada na tabela professionals
-        // Padronizado para usar user_id (PK da tabela professionals)
         if (user_type === 'professional') {
-            const { error: profError } = await supabase
-                .from('professionals')
-                .insert([{ 
-                    user_id: userData.id, 
-                    status: 'pending'
-                }]);
-            
-            if (profError) {
-                console.error("Erro ao criar perfil profissional:", profError);
-            }
+            await supabase.from('professionals').upsert([{ 
+                user_id: userData.id, 
+                status: 'pending',
+                profile_completed: false,
+                approval_requested: false
+            }], { onConflict: 'user_id' });
         }
 
         req.session.userId = userData.id;
@@ -141,13 +138,12 @@ router.post('/cadastro', async (req, res) => {
         req.session.fullName = userData.full_name;
 
         if (user_type === 'professional') {
-            res.redirect('/?professional=1');
-        } else {
-            res.redirect('/');
+            return res.redirect('/auth/completar-perfil');
         }
+        return res.redirect('/cliente/dashboard');
     } catch (err) {
         console.error(err);
-        res.render('auth/cadastro', { erro: 'Erro ao criar conta' });
+        res.render('auth/cadastro', { erro: 'Erro ao criar conta', userType: req.body.user_type || 'client' });
     }
 });
 
@@ -175,10 +171,13 @@ router.post('/login', async (req, res) => {
         req.session.fullName = user.full_name;
 
         if (user.user_type === 'professional') {
-            return res.redirect('/?professional=1');
-        } else {
-            return res.redirect('/');
+            const { data: prof } = await supabase.from('professionals').select('*').eq('user_id', user.id).maybeSingle();
+            if (!basicProfessionalProfileComplete(prof)) {
+                return res.redirect('/auth/completar-perfil');
+            }
+            return res.redirect('/profissional/dashboard');
         }
+        return res.redirect('/cliente/dashboard');
     } catch (err) {
         console.error(err);
         res.render('auth/login', { erro: 'Erro ao fazer login' });
@@ -191,12 +190,11 @@ router.post('/login', async (req, res) => {
 router.get('/google', (req, res, next) => {
     const userType = req.query.type;
     if (!userType) {
-        // Se não houver tipo, redirecionar para selecionar antes de ir pro Google
-        return res.render("auth/selecionar-tipo", { actionUrl: "/auth/google" });
+        return res.render('auth/selecionar-tipo', { actionUrl: '/auth/google' });
     }
     passport.authenticate('google', {
         scope: ['profile', 'email'],
-        state: userType 
+        state: userType
     })(req, res, next);
 });
 
@@ -204,56 +202,44 @@ router.get('/google/callback', passport.authenticate('google', {
     failureRedirect: '/auth/login'
 }), async (req, res) => {
     try {
-        const userTypeRequested = req.query.state || 'client';
         const user = req.user;
+        req.session.userId = user.id;
+        req.session.userType = user.user_type;
+        req.session.fullName = user.full_name;
 
-        // Atualizar o tipo de usuário se for um novo cadastro e ele escolheu ser profissional
-        if (user.user_type === 'client' && userTypeRequested === 'professional') {
-            const { data: updatedUser } = await supabase
-                .from('users')
-                .update({ user_type: 'professional' })
-                .eq('id', user.id)
-                .select()
-                .single();
-            
-            if (updatedUser) {
-                req.user.user_type = 'professional';
-            }
-        }
-
-        // Sincronizar sessão
-        req.session.userId = req.user.id;
-        req.session.userType = req.user.user_type;
-        req.session.fullName = req.user.full_name;
-
-        // Se for profissional, verificar se já tem perfil na tabela professionals
-        if (req.user.user_type === 'professional') {
-            console.log("Usuário Google é profissional. Verificando perfil...");
-            const { data: prof, error: profError } = await supabase
+        if (user.user_type === 'professional') {
+            console.log('Usuário Google é profissional. Verificando perfil...');
+            let { data: prof, error: profError } = await supabase
                 .from('professionals')
                 .select('*')
-                .eq('user_id', req.user.id)
+                .eq('user_id', user.id)
                 .maybeSingle();
-            
             if (profError) throw profError;
-            
+
             if (!prof) {
-                console.log("Perfil profissional não existe. Criando registro base e redirecionando para home profissional...");
-                await supabase.from('professionals').upsert({ 
-                    user_id: req.user.id, 
-                    status: 'pending',
-                    profile_completed: false,
-                    approval_requested: false
-                }, { onConflict: 'user_id' });
+                const { data: createdProf, error: createProfError } = await supabase
+                    .from('professionals')
+                    .upsert({
+                        user_id: user.id,
+                        status: 'pending',
+                        profile_completed: false,
+                        approval_requested: false
+                    }, { onConflict: 'user_id' })
+                    .select()
+                    .single();
+                if (createProfError) throw createProfError;
+                prof = createdProf;
             }
-            console.log("Usuário profissional autenticado. Redirecionando para home profissional...");
-            return res.redirect('/?professional=1');
+
+            if (user._wasNew || !basicProfessionalProfileComplete(prof)) {
+                return res.redirect('/auth/completar-perfil');
+            }
+            return res.redirect('/profissional/dashboard');
         }
 
-        console.log("Usuário Google é cliente. Redirecionando para home...");
-        res.redirect('/');
+        return res.redirect('/cliente/dashboard');
     } catch (err) {
-        console.error("Erro no callback do Google:", err);
+        console.error('Erro no callback do Google:', err);
         res.redirect('/auth/login');
     }
 });
@@ -262,8 +248,9 @@ router.get('/google/callback', passport.authenticate('google', {
 // LOGOUT GERAL
 // ============================================
 router.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
+    req.session.destroy(() => {
+        res.redirect('/');
+    });
 });
 
 module.exports = router;
