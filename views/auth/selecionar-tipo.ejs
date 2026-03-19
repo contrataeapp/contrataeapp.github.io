@@ -3,65 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contrataê - Escolha seu perfil</title>
+    <title>Contrataê · Escolha seu perfil</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: #121212; 
-            color: white;
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh;
-        }
-        .container { width: 100%; max-width: 500px; padding: 20px; text-align: center; }
-        h1 { color: #ffa500; margin-bottom: 10px; }
-        p { color: #ccc; margin-bottom: 30px; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .option-card {
-            background: #1e1e1e;
-            border: 2px solid #333;
-            border-radius: 15px;
-            padding: 30px 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-        .option-card:hover { border-color: #ffa500; transform: translateY(-5px); background: #252525; }
-        .option-card i { font-size: 40px; color: #ffa500; }
-        .option-card h3 { font-size: 18px; }
-        .option-card p { font-size: 12px; margin-bottom: 0; }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#1f1f22 0%,#0b0b0c 65%);color:#fff;min-height:100vh;display:grid;place-items:center;padding:20px}
+        .wrap{width:100%;max-width:980px;display:grid;grid-template-columns:.95fr 1.05fr;gap:22px}
+        .lead,.panel{background:linear-gradient(180deg,rgba(28,28,30,.96),rgba(20,20,22,.98));border:1px solid rgba(255,255,255,.08);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+        .lead{padding:34px 28px}
+        .panel{padding:28px}
+        .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,178,30,.1);border:1px solid rgba(255,178,30,.25);color:#ffd58a;font-size:13px;font-weight:700;margin-bottom:16px}
+        h1{font-size:40px;line-height:1.05;color:#ffb21e;margin-bottom:14px}
+        p{color:#d5d5da;line-height:1.6}
+        .mini-grid{display:grid;gap:14px;margin-top:24px}
+        .mini-box{padding:16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .mini-box strong{display:block;color:#ffb21e;margin-bottom:6px}
+        .panel h2{font-size:30px;color:#ffb21e;margin-bottom:10px}
+        .panel p{margin-bottom:24px}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+        .option-card{background:#151517;border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:26px 18px;text-decoration:none;color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:12px;transition:.2s ease}
+        .option-card:hover{transform:translateY(-3px);border-color:#ffb21e;box-shadow:0 0 0 1px rgba(255,178,30,.18) inset}
+        .option-card i{font-size:34px;color:#ffb21e}
+        .option-card h3{font-size:21px}
+        .option-card span{color:#c9c9d1;line-height:1.45}
+        .foot{margin-top:26px;font-size:14px;color:#a7a7af}
+        @media (max-width: 840px){.wrap{grid-template-columns:1fr}.options{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Bem-vindo ao Contrataê</h1>
-        <p>Como você deseja utilizar a plataforma?</p>
-        
-        <div class="options">
-            <a href="<%= actionUrl %>?type=client" class="option-card">
-                <i class="fas fa-user"></i>
-                <h3>Cliente</h3>
-                <p>Quero contratar serviços</p>
-            </a>
-            
-            <a href="<%= actionUrl %>?type=professional" class="option-card">
-                <i class="fas fa-tools"></i>
-                <h3>Profissional</h3>
-                <p>Quero oferecer meus serviços</p>
-            </a>
-        </div>
-        
-        <div style="margin-top: 40px;">
-            <a href="/auth/login" style="color: #999; text-decoration: none; font-size: 14px;">Já tem uma conta? Faça login</a>
-        </div>
+    <div class="wrap">
+        <section class="lead">
+            <span class="badge">Contrataê · cadastro simples</span>
+            <h1>Escolha como você quer entrar e siga um caminho claro.</h1>
+            <p>No Contrataê, cliente entra rápido para contratar. Profissional entra para montar um perfil forte, mostrar seus serviços e crescer com presença local.</p>
+            <div class="mini-grid">
+                <div class="mini-box">
+                    <strong>Para clientes</strong>
+                    Entrar, buscar profissionais, favoritar e acompanhar contratações com facilidade.
+                </div>
+                <div class="mini-box">
+                    <strong>Para profissionais</strong>
+                    Criar conta, completar o onboarding, selecionar profissões, montar portfólio e solicitar aprovação.
+                </div>
+                <div class="mini-box">
+                    <strong>Objetivo da plataforma</strong>
+                    Fazer negócios locais acontecerem com mais confiança, mais organização e mais visibilidade.
+                </div>
+            </div>
+        </section>
+        <section class="panel">
+            <span class="badge">Primeiro passo</span>
+            <h2>Como você deseja usar a plataforma?</h2>
+            <p>Escolha seu perfil abaixo. Se for profissional, o próximo passo será o cadastro inicial para liberar sua dashboard.</p>
+            <div class="options">
+                <a href="<%= actionUrl %>?type=client" class="option-card">
+                    <i class="fas fa-user"></i>
+                    <h3>Cliente</h3>
+                    <span>Quero encontrar profissionais, comparar opções e contratar com mais praticidade.</span>
+                </a>
+                <a href="<%= actionUrl %>?type=professional" class="option-card">
+                    <i class="fas fa-tools"></i>
+                    <h3>Profissional</h3>
+                    <span>Quero oferecer meus serviços, montar meu perfil e ganhar visibilidade na plataforma.</span>
+                </a>
+            </div>
+            <div class="foot"><a href="/auth/login" style="color:#bdbdc5;text-decoration:none;">Já tem uma conta? Faça login</a></div>
+        </section>
     </div>
 </body>
 </html>

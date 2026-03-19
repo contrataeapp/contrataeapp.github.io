@@ -6,90 +6,33 @@
     <title>Contrataê - Dashboard do Profissional</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: Inter, Arial, sans-serif; background: #0f0f10; color: #f5f5f5; }
-        .dashboard-container { display:flex; min-height:100vh; }
-        .sidebar { width:250px; background:#111; padding:24px 12px; position:fixed; inset:0 auto 0 0; border-right:1px solid #232323; }
-        .logo { font-size:22px; font-weight:800; margin-bottom:28px; text-align:center; }
-        .logo a { color:#ffb020; text-decoration:none; }
-        .sidebar ul { list-style:none; }
-        .sidebar li { margin-bottom:8px; }
-        .sidebar a { display:flex; align-items:center; gap:12px; color:#b8c0cc; text-decoration:none; padding:12px 14px; border-radius:12px; transition:.2s; }
-        .sidebar a:hover, .sidebar a.active { background:rgba(255,176,32,.12); color:#ffb020; }
-        .main { margin-left:250px; width:calc(100% - 250px); padding:28px; }
-        header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
-        h1 { color:#ffb020; font-size:24px; }
-        h2 { font-size:18px; margin-bottom:8px; }
-        .user-chip { display:flex; align-items:center; gap:12px; }
-        .avatar { width:42px; height:42px; border-radius:50%; background:#ffb020; color:#111; font-weight:700; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-        .avatar img { width:100%; height:100%; object-fit:cover; }
-        .panel, .card { background:linear-gradient(180deg, #171717, #141414); border:1px solid #252525; border-radius:18px; padding:18px; }
-        .stack { display:grid; gap:18px; }
-        .cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
-        .metric .icon { color:#ffb020; font-size:30px; margin-bottom:10px; }
-        .metric h3 { color:#c2c9d1; font-size:13px; margin-bottom:8px; }
-        .metric .value { color:#ffb020; font-size:26px; font-weight:800; }
-        .banner { padding:18px 20px; border-radius:16px; border:1px solid #67491a; background:#2b1f0c; margin-bottom:20px; }
-        .banner h3 { color:#ffb020; margin-bottom:6px; font-size:15px; }
-        .banner p { color:#f2e7d3; line-height:1.5; }
-        .tab-content { display:none; }
-        .tab-content.active { display:block; }
-        .alert { padding:14px 16px; border-radius:12px; margin-bottom:18px; border:1px solid #444; }
-        .alert.success { background:#142513; border-color:#285c27; color:#b9efb7; }
-        .alert.error { background:#291717; border-color:#6e2d2d; color:#ffb5b5; }
-        .alert.info { background:#1f1c12; border-color:#6b5828; color:#ffe2a4; }
-        .small { color:#a9b0ba; font-size:13px; }
-        .muted { color:#98a0aa; }
-        .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; border-radius:12px; padding:11px 16px; font-weight:700; cursor:pointer; text-decoration:none; }
-        .btn-primary { background:#ffb020; color:#111; }
-        .btn-primary:hover { background:#ffc04a; }
-        .btn-secondary { background:#24262b; color:#fff; border:1px solid #393c44; }
-        .btn-danger { background:#ad3030; color:#fff; }
-        .form-shell { display:grid; gap:16px; }
-        .grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
-        .grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
-        .field { display:grid; gap:6px; }
-        .field label { font-size:13px; color:#e8edf2; font-weight:700; }
-        .field input, .field textarea, .field select { width:100%; background:#0f1012; color:#fff; border:1px solid #303238; border-radius:12px; padding:11px 12px; min-height:44px; }
-        .field textarea { min-height:110px; resize:vertical; }
-        .field small { color:#8d96a2; }
-        .wizard-shell { display:grid; gap:18px; }
-        .wizard-progress { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-        .wizard-progress .step-pill { padding:12px; border-radius:14px; border:1px solid #2f3136; background:#141517; color:#a5adb7; font-size:13px; }
-        .wizard-progress .step-pill.active { border-color:#ffb020; color:#ffb020; background:rgba(255,176,32,.08); }
-        .wizard-step { display:none; }
-        .wizard-step.active { display:block; }
-        .wizard-nav { display:flex; justify-content:space-between; gap:12px; margin-top:10px; }
-        .summary-grid { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
-        .summary-box { background:rgba(255,255,255,.02); border:1px solid #2a2d33; border-radius:14px; padding:14px; }
-        .plan-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-        .plan-card { position:relative; border:1px solid #333; border-radius:16px; padding:16px; cursor:pointer; background:#121316; }
-        .plan-card input { position:absolute; opacity:0; pointer-events:none; }
-        .plan-card.active { border-color:#ffb020; box-shadow:0 0 0 1px rgba(255,176,32,.2) inset; }
-        .plan-card .title { color:#ffb020; font-weight:700; font-size:14px; }
-        .plan-card .count { font-size:16px; font-weight:800; margin:6px 0; }
-        .plan-card .price { color:#d8dee5; font-size:13px; }
-        .summary-strip { border:1px solid #47421f; background:rgba(255,176,32,.08); color:#ffd07a; border-radius:12px; padding:12px 14px; }
-        .choice-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
-        .checkbox-group { display:flex; flex-wrap:wrap; gap:10px; }
-        .chip { display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:999px; background:#181a1f; border:1px solid #2c3037; }
-        .preview-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
-        .preview-item { border:1px solid #2d3138; background:#151618; border-radius:14px; padding:12px; }
-        .portfolio-upload-box { border:1px dashed #4b4f56; border-radius:16px; padding:16px; text-align:center; background:#101113; }
-        .portfolio-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-top:14px; }
-        .portfolio-thumb { position:relative; border:1px solid #2c3037; border-radius:14px; overflow:hidden; background:#121316; min-height:140px; display:flex; align-items:center; justify-content:center; }
-        .portfolio-thumb img { width:100%; height:140px; object-fit:cover; }
-        .table-wrap { overflow:auto; }
-        table { width:100%; border-collapse:collapse; }
-        th, td { padding:12px; border-bottom:1px solid #282b31; text-align:left; }
-        th { color:#a8b0ba; font-size:12px; text-transform:uppercase; }
-        .badge { padding:6px 10px; border-radius:999px; font-size:12px; display:inline-block; }
-        .badge.pending { background:#463514; color:#ffd27d; }
-        .badge.completed { background:#15331a; color:#a2f0b1; }
-        .top-actions { display:flex; gap:10px; flex-wrap:wrap; }
-        .hide { display:none !important; }
-        @media (max-width: 1024px){ .summary-grid, .grid-3, .plan-cards { grid-template-columns:1fr; } }
-        @media (max-width: 820px){ .sidebar{ position:static; width:100%; height:auto; } .dashboard-container{ display:block; } .main{ margin-left:0; width:100%; padding:16px; } .grid-2, .choice-grid, .wizard-progress { grid-template-columns:1fr; } header{ gap:12px; align-items:flex-start; flex-direction:column; } }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Inter,Arial,sans-serif;background:#0f0f10;color:#f5f5f5}
+        .dashboard-container{display:flex;min-height:100vh}
+        .sidebar{width:230px;background:#111;padding:24px 12px;position:fixed;inset:0 auto 0 0;border-right:1px solid #232323}
+        .logo{font-size:22px;font-weight:800;margin-bottom:28px;text-align:center}.logo a{color:#ffb020;text-decoration:none}
+        .sidebar ul{list-style:none}.sidebar li{margin-bottom:8px}
+        .sidebar a{display:flex;align-items:center;gap:12px;color:#b8c0cc;text-decoration:none;padding:12px 14px;border-radius:12px;transition:.2s}
+        .sidebar a:hover,.sidebar a.active{background:rgba(255,176,32,.12);color:#ffb020}
+        .main{margin-left:230px;width:calc(100% - 230px);padding:28px}
+        header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px} h1{color:#ffb020;font-size:24px}
+        .user-chip{display:flex;align-items:center;gap:12px}.avatar{width:42px;height:42px;border-radius:50%;background:#ffb020;color:#111;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}
+        .tab-content{display:none}.tab-content.active{display:block}
+        .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.card,.panel{background:linear-gradient(180deg,#171717,#141414);border:1px solid #252525;border-radius:18px;padding:18px}
+        .metric .icon{color:#ffb020;font-size:30px;margin-bottom:10px}.metric h3{color:#c2c9d1;font-size:13px;margin-bottom:8px}.metric .value{color:#ffb020;font-size:26px;font-weight:800}
+        .banner{padding:18px 20px;border-radius:16px;border:1px solid #67491a;background:#2b1f0c;margin-bottom:20px}.banner h3{color:#ffb020;margin-bottom:6px;font-size:15px}.banner p{color:#f2e7d3;line-height:1.55}
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;text-decoration:none}
+        .btn-primary{background:#ffb020;color:#111}.btn-secondary{background:#24262b;color:#fff;border:1px solid #393c44}.btn-danger{background:#ad3030;color:#fff}
+        .top-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .small{color:#a9b0ba;font-size:13px}.flash{padding:14px 16px;border-radius:12px;margin-bottom:18px;border:1px solid #444}.flash.success{background:#142513;border-color:#285c27;color:#b9efb7}.flash.error{background:#291717;border-color:#6e2d2d;color:#ffb5b5}
+        .summary-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}.detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.detail{padding:14px;border-radius:14px;border:1px solid #2a2d33;background:rgba(255,255,255,.02)}.detail strong{display:block;color:#ffb020;font-size:12px;margin-bottom:6px}
+        .chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.chip{padding:8px 12px;border-radius:999px;background:#181a1f;border:1px solid #2c3037;color:#dde3ea;font-size:13px}
+        .portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}.portfolio-thumb{position:relative;border:1px solid #2c3037;border-radius:14px;overflow:hidden;background:#121316;min-height:140px;display:flex;align-items:center;justify-content:center}.portfolio-thumb img{width:100%;height:140px;object-fit:cover}
+        .table-wrap{overflow:auto} table{width:100%;border-collapse:collapse} th,td{padding:12px;border-bottom:1px solid #282b31;text-align:left} th{color:#a8b0ba;font-size:12px;text-transform:uppercase}
+        .badge{padding:6px 10px;border-radius:999px;font-size:12px;display:inline-block}.badge.pending{background:#463514;color:#ffd27d}.badge.completed{background:#15331a;color:#a2f0b1}
+        .form-inline{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+        @media(max-width:980px){.summary-grid,.detail-grid{grid-template-columns:1fr}}
+        @media(max-width:820px){.sidebar{position:static;width:100%;height:auto}.dashboard-container{display:block}.main{margin-left:0;width:100%;padding:16px}header{flex-direction:column;align-items:flex-start;gap:12px}}
     </style>
 </head>
 <body>
@@ -102,277 +45,106 @@
             <li><a href="#" class="nav-link" data-tab="servicos"><i class="fas fa-briefcase"></i> Meus Serviços</a></li>
             <li><a href="#" class="nav-link" data-tab="avaliacoes"><i class="fas fa-star"></i> Avaliações</a></li>
             <li><a href="#" class="nav-link" data-tab="perfil"><i class="fas fa-user"></i> Meu Perfil</a></li>
-            <li><a href="#" class="nav-link" data-tab="portfolio"><i class="fas fa-images"></i> Meu Portfólio</a></li>
+            <li><a href="#" class="nav-link" data-tab="portfolio"><i class="fas fa-image"></i> Meu Portfólio</a></li>
             <li><a href="#" class="nav-link" data-tab="planos"><i class="fas fa-credit-card"></i> Meu Plano</a></li>
-            <li><a href="#" class="nav-link" data-tab="pagamentos"><i class="fas fa-clock-rotate-left"></i> Pagamentos</a></li>
-            <li><a href="/auth/logout"><i class="fas fa-power-off"></i> Sair</a></li>
+            <li><a href="#" class="nav-link" data-tab="pagamentos"><i class="fas fa-money-check"></i> Pagamentos</a></li>
+            <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
         </ul>
     </aside>
 
     <main class="main">
         <header>
-            <h1>Dashboard do Profissional</h1>
+            <div>
+                <h1>Dashboard do Profissional</h1>
+                <div class="small">Gerencie seu perfil, portfólio e ativação da sua presença na plataforma.</div>
+            </div>
             <div class="user-chip">
-                <strong><%= (profissional && profissional.users && profissional.users.full_name) || fullName %></strong>
+                <div><%= fullName || 'Profissional' %></div>
                 <div class="avatar">
-                    <% if (profissional && profissional.users && profissional.users.avatar_url) { %>
-                        <img src="<%= profissional.users.avatar_url %>" alt="Avatar">
-                    <% } else { %>
-                        <%= ((profissional && profissional.users && profissional.users.full_name) || fullName || 'P').charAt(0).toUpperCase() %>
-                    <% } %>
+                    <% if (profissional?.users?.avatar_url) { %><img src="<%= profissional.users.avatar_url %>" alt="Avatar"><% } else { %><%= (fullName || 'P').charAt(0).toUpperCase() %><% } %>
                 </div>
             </div>
         </header>
 
-        <% if (flashSuccess === 'profile_saved') { %><div class="alert success">Perfil salvo com sucesso. Agora você pode revisar tudo e, quando estiver pronto, solicitar aprovação.</div><% } %>
-        <% if (flashSuccess === 'portfolio_saved') { %><div class="alert success">Imagens adicionadas ao portfólio.</div><% } %>
-        <% if (flashSuccess === 'portfolio_removed') { %><div class="alert success">Imagem removida do portfólio.</div><% } %>
-        <% if (flashSuccess === 'approval_requested') { %><div class="alert success">Solicitação enviada. Seu perfil entrou em análise.</div><% } %>
-        <% if (flashError === 'missing_category') { %><div class="alert error">Escolha pelo menos 1 profissão válida para salvar seu perfil.</div><% } %>
-        <% if (flashError === 'missing_image') { %><div class="alert error">Selecione ao menos 1 imagem antes de enviar.</div><% } %>
-        <% if (justSavedBasic) { %><div class="alert info">Dados básicos salvos. Agora siga as etapas abaixo para definir plano, profissões e imagens.</div><% } %>
+        <% if (flashError) { %><div class="flash error"><%= flashError %></div><% } %>
+        <% if (flashSuccess) { %><div class="flash success"><%= flashSuccess %></div><% } %>
+
+        <% if (!profileReadyForApproval) { %>
+            <div class="banner">
+                <h3>Seu perfil ainda não está pronto para aparecer no site</h3>
+                <p>Finalize o onboarding para definir plano, profissões, descrição e imagens. Depois disso, você poderá revisar tudo com calma e só então solicitar aprovação.</p>
+                <div class="top-actions">
+                    <a href="/profissional/onboarding?step=1" class="btn btn-primary">Continuar onboarding</a>
+                    <form action="/auth/cancelar-profissional" method="POST"><button class="btn btn-secondary" type="submit">Cancelar cadastro</button></form>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="banner">
+                <h3>Seu perfil está pronto para a próxima etapa</h3>
+                <p>Revise as informações abaixo. Quando estiver satisfeito, envie seu perfil para análise da plataforma.</p>
+                <div class="top-actions">
+                    <a href="/profissional/onboarding?step=1" class="btn btn-secondary">Editar onboarding</a>
+                    <form action="/profissional/solicitar-aprovacao" method="POST"><button class="btn btn-primary" type="submit">Solicitar aprovação</button></form>
+                </div>
+            </div>
+        <% } %>
 
         <section id="resumo" class="tab-content">
-            <% if (!basicProfileComplete) { %>
-                <div class="banner">
-                    <h3><i class="fas fa-bolt"></i> Falta concluir seu cadastro inicial</h3>
-                    <p>Você já abriu sua conta profissional. Finalize telefone, CEP, cidade e descrição para liberar o onboarding completo.</p>
-                    <div class="top-actions" style="margin-top:12px;">
-                        <a href="/auth/completar-perfil" class="btn btn-primary">Completar cadastro inicial</a>
-                    </div>
-                </div>
-            <% } else { %>
-                <div class="banner">
-                    <h3><i class="fas fa-route"></i> Caminho profissional</h3>
-                    <p>Seu cadastro básico está pronto. Agora organize plano, profissões, disponibilidade e portfólio para deixar seu perfil forte antes da aprovação.</p>
-                    <div class="top-actions" style="margin-top:12px;">
-                        <a href="/profissional/dashboard?tab=perfil&wizard=1#perfil" class="btn btn-primary">Continuar onboarding</a>
-                        <a href="/profissional/dashboard?tab=portfolio#portfolio" class="btn btn-secondary">Ver portfólio</a>
-                    </div>
-                </div>
-            <% } %>
-
-            <% if (profileReadyForApproval && profissional && !profissional.approval_requested && profissional.status === 'pending') { %>
-                <div class="alert info">Seu perfil já tem o básico para análise. Revise tudo em <strong>Meu Perfil</strong> e depois clique em <strong>Solicitar aprovação</strong>.</div>
-            <% } else if (profissional && profissional.approval_requested && profissional.status === 'pending') { %>
-                <div class="alert success">Seu perfil está em análise. Assim que aprovado, ele poderá aparecer na plataforma.</div>
-            <% } %>
-
             <div class="cards-grid">
-                <div class="card metric"><div class="icon"><i class="fas fa-phone"></i></div><h3>Contatos Recebidos</h3><div class="value"><%= contatosRecebidos || 0 %></div></div>
-                <div class="card metric"><div class="icon"><i class="fas fa-check-circle"></i></div><h3>Serviços Concluídos</h3><div class="value"><%= servicosConcluidos || 0 %></div></div>
-                <div class="card metric"><div class="icon"><i class="fas fa-money-bill-wave"></i></div><h3>Faturamento (Mês)</h3><div class="value">R$ <%= faturamentoMes || '0,00' %></div></div>
-                <div class="card metric"><div class="icon"><i class="fas fa-star"></i></div><h3>Avaliação Média</h3><div class="value"><%= avaliacaoMedia || '0' %> ⭐</div></div>
+                <div class="card metric"><div class="icon"><i class="fas fa-phone"></i></div><h3>Contatos Recebidos</h3><div class="value"><%= contatosRecebidos %></div></div>
+                <div class="card metric"><div class="icon"><i class="fas fa-check-circle"></i></div><h3>Serviços Concluídos</h3><div class="value"><%= servicosConcluidos %></div></div>
+                <div class="card metric"><div class="icon"><i class="fas fa-money-bill-wave"></i></div><h3>Faturamento (Mês)</h3><div class="value">R$ <%= faturamentoMes %></div></div>
+                <div class="card metric"><div class="icon"><i class="fas fa-star"></i></div><h3>Avaliação Média</h3><div class="value"><%= avaliacaoMedia %></div></div>
+            </div>
+            <div class="summary-grid" style="margin-top:18px;">
+                <div class="panel">
+                    <h2>Andamento do perfil</h2>
+                    <div class="detail-grid" style="margin-top:14px;">
+                        <div class="detail"><strong>Dados básicos</strong><%= basicProfileComplete ? 'Concluídos' : 'Pendentes' %></div>
+                        <div class="detail"><strong>Plano atual</strong><%= currentPlanName %></div>
+                        <div class="detail"><strong>Profissões escolhidas</strong><%= selectedCount %></div>
+                        <div class="detail"><strong>Portfólio</strong><%= (portfolio || []).length %> imagem(ns)</div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>Próximo passo</h2>
+                    <p class="small" style="margin-top:8px;">Use o onboarding separado para evoluir seu perfil sem cair em formulários confusos dentro da dashboard.</p>
+                    <div class="top-actions"><a href="/profissional/onboarding?step=1" class="btn btn-primary">Abrir onboarding</a></div>
+                </div>
             </div>
         </section>
 
         <section id="perfil" class="tab-content">
-            <div class="summary-grid" style="margin-bottom:18px;">
-                <div class="panel">
-                    <h2>Meu Perfil Profissional</h2>
-                    <p class="small">Seu nome real fica protegido na conta. Aqui você monta o perfil que os clientes vão enxergar e prepara tudo para análise.</p>
-                    <div class="preview-grid" style="margin-top:14px;">
-                        <div class="preview-item"><strong>Nome</strong><div class="small" style="margin-top:4px;"><%= (profissional && profissional.users && profissional.users.full_name) || fullName %></div></div>
-                        <div class="preview-item"><strong>Telefone</strong><div class="small" style="margin-top:4px;"><%= profissional.phone_number || 'Não informado' %></div></div>
-                        <div class="preview-item"><strong>Cidade / Estado</strong><div class="small" style="margin-top:4px;"><%= profissional.city || 'Não informado' %><%= profissional.state ? ' - ' + profissional.state : '' %></div></div>
-                        <div class="preview-item"><strong>CEP</strong><div class="small" style="margin-top:4px;"><%= profissional.cep || 'Não informado' %></div></div>
-                    </div>
-                    <div class="summary-strip" style="margin-top:14px;">
-                        Quer mais visibilidade? Profissionais com 2 ou 3 categorias costumam aparecer para mais buscas. <a href="#" class="btn btn-secondary" style="margin-left:10px; padding:7px 12px;">Atualizar plano</a>
-                    </div>
+            <div class="panel">
+                <h2>Meu Perfil Profissional</h2>
+                <p class="small">Aqui fica a visão geral do perfil já salvo. Para editar, use o onboarding separado.</p>
+                <div class="detail-grid" style="margin-top:14px;">
+                    <div class="detail"><strong>Nome</strong><%= profissional?.users?.full_name || fullName || 'Não informado' %></div>
+                    <div class="detail"><strong>Telefone</strong><%= profissional.phone_number || 'Não informado' %></div>
+                    <div class="detail"><strong>Cidade / Estado</strong><%= profissional.city ? `${profissional.city} - ${profissional.state || ''}` : 'Não informado' %></div>
+                    <div class="detail"><strong>CEP</strong><%= profissional.cep || 'Não informado' %></div>
                 </div>
-                <div class="panel">
-                    <h2>Como seu plano funciona</h2>
-                    <p class="small">Você escolhe quantas profissões quer liberar e por quantos meses deseja manter o perfil em destaque.</p>
-                    <div class="summary-box" style="margin-top:14px;">
-                        <strong>Que mais visibilidade?</strong>
-                        <p class="small" style="margin-top:6px;">Profissionais com mais categorias tendem a receber mais contatos.</p>
-                    </div>
-                    <div class="top-actions" style="margin-top:14px;">
-                        <a href="#planSection" class="btn btn-primary" onclick="openWizardAt(2)">Ver planos</a>
-                        <% if (profileReadyForApproval && !profissional.approval_requested) { %>
-                            <form action="/profissional/solicitar-aprovacao" method="POST">
-                                <button class="btn btn-secondary" type="submit">Solicitar aprovação</button>
-                            </form>
-                        <% } %>
-                    </div>
+                <div class="detail" style="margin-top:12px;"><strong>Descrição</strong><%= profissional.description || 'Ainda não adicionada.' %></div>
+                <div class="detail" style="margin-top:12px;"><strong>Profissão principal</strong><%= currentPrimaryCategory?.name || 'Ainda não definida' %></div>
+                <div class="chip-wrap">
+                    <% if ((selectedAdditionalCategories || []).length) { %>
+                        <% selectedAdditionalCategories.forEach(cat => { %><span class="chip"><%= cat.name %></span><% }) %>
+                    <% } else { %>
+                        <span class="chip">Sem profissões adicionais</span>
+                    <% } %>
                 </div>
+                <div class="detail" style="margin-top:12px;"><strong>Especialidades</strong><%= profissional.specialties || 'Não informadas' %></div>
+                <div class="detail" style="margin-top:12px;"><strong>Disponibilidade</strong><%= profissional.availability || 'Não informada' %></div>
+                <div class="detail" style="margin-top:12px;"><strong>Preço</strong><%= profissional.price_info || 'Não informado' %></div>
+                <div class="top-actions"><a href="/profissional/onboarding?step=1" class="btn btn-primary">Editar perfil</a></div>
             </div>
-
-            <form method="POST" action="/profissional/atualizar-perfil" enctype="multipart/form-data" class="form-shell" id="professionalProfileForm">
-                <div class="wizard-shell panel">
-                    <div class="wizard-progress">
-                        <div class="step-pill active" data-step-pill="1">1. Dados básicos</div>
-                        <div class="step-pill" data-step-pill="2">2. Plano</div>
-                        <div class="step-pill" data-step-pill="3">3. Profissões</div>
-                        <div class="step-pill" data-step-pill="4">4. Imagens e revisão</div>
-                    </div>
-
-                    <div class="wizard-step active" data-step="1">
-                        <div class="grid-2">
-                            <div class="field">
-                                <label>Nome completo</label>
-                                <input type="text" name="full_name" value="<%= (profissional && profissional.users && profissional.users.full_name) || fullName %>" required>
-                                <small>Seu nome do Google pode ser ajustado aqui.</small>
-                            </div>
-                            <div class="field">
-                                <label>Foto de perfil</label>
-                                <input type="file" name="avatar" accept="image/*">
-                                <small>Você pode trocar depois. A foto ajuda a gerar confiança.</small>
-                            </div>
-                        </div>
-                        <div class="grid-2">
-                            <div class="field"><label>Telefone / WhatsApp</label><input type="text" name="phone_number" value="<%= profissional.phone_number || '' %>" required></div>
-                            <div class="field"><label>CEP</label><input type="text" id="cepField" name="cep" value="<%= profissional.cep || '' %>" required><small>Digite o CEP para preencher cidade e estado automaticamente.</small></div>
-                        </div>
-                        <div class="grid-2">
-                            <div class="field"><label>Cidade</label><input type="text" id="cityField" name="city" value="<%= profissional.city || '' %>" required></div>
-                            <div class="field"><label>Estado</label><input type="text" id="stateField" name="state" maxlength="2" value="<%= profissional.state || '' %>" required></div>
-                        </div>
-                        <div class="field"><label>Descrição inicial</label><textarea name="description" placeholder="Conte rapidamente o que você faz e em que cidade atende."><%= profissional.description || '' %></textarea></div>
-                        <div class="wizard-nav"><button type="button" class="btn btn-secondary" disabled>Voltar</button><button type="button" class="btn btn-primary" onclick="nextStep()">Continuar</button></div>
-                    </div>
-
-                    <div class="wizard-step" data-step="2" id="planSection">
-                        <div class="field"><label>Etapa 1 · Escolha seu plano</label><small>Primeiro defina quantas profissões você quer liberar. Depois o formulário abre exatamente a quantidade certa.</small></div>
-                        <div class="plan-cards">
-                            <label class="plan-card active" data-plan-card="1">
-                                <input type="radio" name="plan_tier" value="basic" checked>
-                                <div class="title">Plano Básico</div>
-                                <div class="count">1 profissão</div>
-                                <div class="price">Ideal para quem quer começar focado.</div>
-                            </label>
-                            <label class="plan-card" data-plan-card="2">
-                                <input type="radio" name="plan_tier" value="professional">
-                                <div class="title">Plano Profissional</div>
-                                <div class="count">2 profissões</div>
-                                <div class="price">Mais alcance para captar contatos.</div>
-                            </label>
-                            <label class="plan-card" data-plan-card="3">
-                                <input type="radio" name="plan_tier" value="premium">
-                                <div class="title">Plano Premium</div>
-                                <div class="count">3 profissões</div>
-                                <div class="price">Máxima visibilidade dentro da plataforma.</div>
-                            </label>
-                        </div>
-                        <div class="grid-2" style="margin-top:14px; align-items:end;">
-                            <div class="field">
-                                <label>Quantidade de meses</label>
-                                <select id="planMonths" name="plan_months">
-                                    <% for(let m=1;m<=12;m++){ %>
-                                        <option value="<%= m %>"><%= m %> <%= m > 1 ? 'meses' : 'mês' %></option>
-                                    <% } %>
-                                </select>
-                            </div>
-                            <div class="summary-box">
-                                <strong>Resumo estimado</strong>
-                                <div class="small" id="planSummary" style="margin-top:8px;"></div>
-                                <div style="margin-top:8px; color:#ffb020; font-size:28px; font-weight:800;" id="planTotal">R$ 30,00</div>
-                            </div>
-                        </div>
-                        <div class="summary-strip" style="margin-top:14px;">Para adicionar mais profissões, é necessário plano maior. Profissionais com mais categorias recebem mais contatos.</div>
-                        <div class="wizard-nav"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-primary" onclick="nextStep()">Continuar</button></div>
-                    </div>
-
-                    <div class="wizard-step" data-step="3">
-                        <div class="field"><label>Etapa 2 · Profissões</label><small>Selecione a profissão principal e as adicionais conforme o seu plano.</small></div>
-                        <datalist id="categoriesList">
-                            <% (categorias || []).forEach(cat => { %>
-                                <option value="<%= cat.name %>"><%= cat.name %></option>
-                            <% }); %>
-                        </datalist>
-                        <div class="grid-2">
-                            <div class="field">
-                                <label>Profissão principal</label>
-                                <input list="categoriesList" name="primary_category_name" id="primaryCategory" value="<%= currentPrimaryCategory ? currentPrimaryCategory.name : '' %>" placeholder="Ex: Eletricista" required>
-                            </div>
-                            <div class="field">
-                                <label>Não encontrou sua profissão?</label>
-                                <input type="text" name="new_profession_request" placeholder="Descreva a nova profissão para análise do admin">
-                            </div>
-                        </div>
-                        <div class="grid-2" id="additionalCategoryWrap">
-                            <div class="field additional-category additional-slot-2 hide">
-                                <label>Profissão adicional 1</label>
-                                <input list="categoriesList" name="additional_category_1" value="<%= selectedAdditionalNames[0] || '' %>" placeholder="Ex: Pintor">
-                            </div>
-                            <div class="field additional-category additional-slot-3 hide">
-                                <label>Profissão adicional 2</label>
-                                <input list="categoriesList" name="additional_category_2" value="<%= selectedAdditionalNames[1] || '' %>" placeholder="Ex: Encanador">
-                            </div>
-                        </div>
-                        <div class="grid-2">
-                            <div class="field"><label>Especialidades</label><input type="text" name="specialties" value="<%= profissional.specialties || '' %>" placeholder="Ex: instalação, manutenção, residencial"></div>
-                            <div class="field"><label>Informações de preço</label><input type="text" name="price_info" value="<%= profissional.price_info || '' %>" placeholder="Ex: Taxa de visita R$ 50"></div>
-                        </div>
-                        <div class="choice-grid">
-                            <div class="field">
-                                <label>Taxa de serviço</label>
-                                <div class="checkbox-group">
-                                    <label class="chip"><input type="checkbox" name="service_fee_enabled" id="serviceFeeToggle"> Cobro taxa de visita</label>
-                                </div>
-                                <input type="text" id="serviceFeeAmount" name="service_fee_amount" class="hide" placeholder="Ex: 50,00" style="margin-top:8px;">
-                            </div>
-                            <div class="field">
-                                <label>Disponibilidade</label>
-                                <div class="checkbox-group">
-                                    <label class="chip"><input type="checkbox" name="working_days" value="Seg"> Seg</label>
-                                    <label class="chip"><input type="checkbox" name="working_days" value="Ter"> Ter</label>
-                                    <label class="chip"><input type="checkbox" name="working_days" value="Qua"> Qua</label>
-                                    <label class="chip"><input type="checkbox" name="working_days" value="Qui"> Qui</label>
-                                    <label class="chip"><input type="checkbox" name="working_days" value="Sex"> Sex</label>
-                                    <label class="chip"><input type="checkbox" name="working_days" value="Sáb"> Sáb</label>
-                                    <label class="chip"><input type="checkbox" name="working_days" value="Dom"> Dom</label>
-                                    <label class="chip"><input type="checkbox" name="available_24h" id="available24h"> 24h</label>
-                                </div>
-                                <div class="grid-2" style="margin-top:8px;">
-                                    <input type="time" name="availability_start">
-                                    <input type="time" name="availability_end">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="wizard-nav"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-primary" onclick="nextStep()">Continuar</button></div>
-                    </div>
-
-                    <div class="wizard-step" data-step="4">
-                        <div class="field"><label>Etapa 3 · Imagens e finalização</label><small>Suba as fotos agora para o perfil já nascer forte. Depois você poderá editar tudo em “Meu Portfólio”.</small></div>
-                        <div class="grid-2">
-                            <div class="portfolio-upload-box">
-                                <strong>Fotos do portfólio</strong>
-                                <p class="small" style="margin:8px 0 12px;">Envie até 10 imagens. Em celular, escolha suas melhores fotos primeiro.</p>
-                                <input type="file" name="portfolio_images" id="portfolioImagesInput" accept="image/*" multiple>
-                                <p class="small" style="margin-top:10px;">Dica: use TinyJPG ou Squoosh se a imagem estiver pesada.</p>
-                            </div>
-                            <div class="panel">
-                                <h2 style="margin-bottom:8px;">Pronto para ativar</h2>
-                                <p class="small">Ao salvar, seu perfil fica preparado. Depois você revisa com calma e solicita aprovação quando achar que está tudo certo.</p>
-                                <div class="summary-strip" style="margin-top:14px;">Seu perfil não aparece no site automaticamente. Primeiro você salva, revisa e depois solicita aprovação.</div>
-                            </div>
-                        </div>
-                        <div class="portfolio-grid" id="portfolioPreviewGrid">
-                            <% if ((portfolio || []).length) { %>
-                                <% portfolio.forEach(item => { %>
-                                    <div class="portfolio-thumb"><img src="<%= item.image_url %>" alt="Portfólio"></div>
-                                <% }); %>
-                            <% } %>
-                        </div>
-                        <div class="wizard-nav">
-                            <button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button>
-                            <div class="top-actions">
-                                <a href="/auth/logout" class="btn btn-secondary">Salvar e sair depois</a>
-                                <button type="submit" class="btn btn-primary">Salvar perfil</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
         </section>
 
         <section id="portfolio" class="tab-content">
             <div class="panel">
                 <h2>Meu Portfólio</h2>
-                <p class="small" style="margin-bottom:14px;">Adicione fotos dos seus melhores trabalhos. Aqui é o lugar de revisar, excluir e complementar o que você subiu no onboarding.</p>
-                <form action="/profissional/portfolio/adicionar" method="POST" enctype="multipart/form-data" class="top-actions" style="margin-bottom:14px;">
+                <p class="small" style="margin-bottom:14px;">Adicione mais fotos dos seus melhores trabalhos. Aqui é o lugar de revisar, excluir e complementar seu material.</p>
+                <form action="/profissional/portfolio/adicionar" method="POST" enctype="multipart/form-data" class="form-inline">
                     <input type="file" name="portfolio_images" accept="image/*" multiple required>
                     <button type="submit" class="btn btn-primary">Adicionar ao portfólio</button>
                 </form>
@@ -381,12 +153,12 @@
                         <% portfolio.forEach(item => { %>
                             <div class="portfolio-thumb">
                                 <img src="<%= item.image_url %>" alt="Portfólio">
-                                <form action="/profissional/portfolio/remover" method="POST" style="position:absolute; top:10px; right:10px;">
+                                <form action="/profissional/portfolio/remover" method="POST" style="position:absolute;top:10px;right:10px;">
                                     <input type="hidden" name="id" value="<%= item.id %>">
                                     <button class="btn btn-danger" type="submit" style="padding:7px 10px;">Remover</button>
                                 </form>
                             </div>
-                        <% }); %>
+                        <% }) %>
                     <% } else { %>
                         <p class="small">Nenhuma foto no portfólio ainda.</p>
                     <% } %>
@@ -395,17 +167,18 @@
         </section>
 
         <section id="planos" class="tab-content">
-            <div class="panel stack">
-                <div>
-                    <h2>Meu Plano</h2>
-                    <p class="small">Hoje o plano é escolhido dentro do onboarding. Nesta área você acompanha e pode evoluir depois.</p>
+            <div class="panel">
+                <h2>Meu Plano</h2>
+                <p class="small">Seu plano atual é definido no onboarding. Hoje você está no <strong><%= currentPlanName %></strong>.</p>
+                <div class="top-actions">
+                    <a href="/profissional/onboarding?step=1" class="btn btn-primary">Mudar plano</a>
                 </div>
-                <div class="plan-cards">
-                    <div class="plan-card active"><div class="title">Básico</div><div class="count">1 profissão</div><div class="price">Mensalidade base: R$ 30</div></div>
-                    <div class="plan-card"><div class="title">Profissional</div><div class="count">2 profissões</div><div class="price">Mais visibilidade e maior cobertura.</div></div>
-                    <div class="plan-card"><div class="title">Premium</div><div class="count">3 profissões</div><div class="price">Perfil com alcance máximo na plataforma.</div></div>
+                <div class="detail-grid" style="margin-top:14px;">
+                    <div class="detail"><strong>Profissões liberadas</strong><%= selectedCount || 1 %></div>
+                    <div class="detail"><strong>Status do perfil</strong><%= profileReadyForApproval ? 'Pronto para análise' : 'Em montagem' %></div>
+                    <div class="detail"><strong>Pagamento</strong>Definido na próxima etapa</div>
+                    <div class="detail"><strong>Dica</strong>Mais categorias tendem a gerar mais contatos</div>
                 </div>
-                <a href="/profissional/dashboard?tab=perfil&wizard=1#perfil" class="btn btn-primary" style="width:max-content;">Atualizar plano dentro do perfil</a>
             </div>
         </section>
 
@@ -424,7 +197,7 @@
                                         <td>R$ <%= pag.amount %></td>
                                         <td><span class="badge <%= pag.status %>"><%= pag.status === 'completed' ? 'Concluído' : 'Pendente' %></span></td>
                                     </tr>
-                                <% }); %>
+                                <% }) %>
                             <% } else { %>
                                 <tr><td colspan="4" class="small">Nenhum pagamento registrado ainda.</td></tr>
                             <% } %>
@@ -434,100 +207,23 @@
             </div>
         </section>
 
-        <section id="servicos" class="tab-content"><div class="panel"><h2>Meus Serviços</h2><p class="small">Essa área continua disponível para a próxima etapa do produto.</p></div></section>
-        <section id="avaliacoes" class="tab-content"><div class="panel"><h2>Avaliações</h2><p class="small">Essa área continua disponível para a próxima etapa do produto.</p></div></section>
+        <section id="servicos" class="tab-content"><div class="panel"><h2>Meus Serviços</h2><p class="small">Essa área entra na próxima fase do produto, depois que o onboarding estiver 100% redondo.</p></div></section>
+        <section id="avaliacoes" class="tab-content"><div class="panel"><h2>Avaliações</h2><p class="small">Essa área entra na próxima fase do produto, com histórico, notas e evolução do perfil.</p></div></section>
     </main>
 </div>
-
 <script>
-    const activeTab = '<%= activeTab || "resumo" %>';
-    let currentStep = 1;
-    const PLAN_CONFIG = {
-        basic: { slots: 1, monthly: 30, label: 'Plano Básico' },
-        professional: { slots: 2, monthly: 50, label: 'Plano Profissional' },
-        premium: { slots: 3, monthly: 70, label: 'Plano Premium' }
-    };
-    function monthDiscount(months){ if(months >= 12) return 20; if(months >= 6) return 12; if(months >= 3) return 6; return 0; }
-    function openTab(tab){
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-link[data-tab]').forEach(el => el.classList.remove('active'));
-        const panel = document.getElementById(tab);
-        if(panel) panel.classList.add('active');
-        const link = document.querySelector(`.nav-link[data-tab="${tab}"]`);
-        if(link) link.classList.add('active');
-        if(tab) history.replaceState({}, '', `/profissional/dashboard?tab=${tab}${window.location.hash || ''}`);
-    }
-    function updateStepUI(){
-        document.querySelectorAll('.wizard-step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) === currentStep));
-        document.querySelectorAll('[data-step-pill]').forEach(el => el.classList.toggle('active', Number(el.dataset.stepPill) === currentStep));
-    }
-    function nextStep(){ if(currentStep < 4){ currentStep++; updateStepUI(); } }
-    function prevStep(){ if(currentStep > 1){ currentStep--; updateStepUI(); } }
-    function openWizardAt(step){ openTab('perfil'); currentStep = step; updateStepUI(); }
-    function updatePlanUI(){
-        const checked = document.querySelector('input[name="plan_tier"]:checked');
-        const tier = checked ? checked.value : 'basic';
-        const cfg = PLAN_CONFIG[tier];
-        document.querySelectorAll('.plan-card').forEach(card => card.classList.remove('active'));
-        const activeCard = checked ? checked.closest('.plan-card') : null;
-        if(activeCard) activeCard.classList.add('active');
-        const months = Number(document.getElementById('planMonths').value || 1);
-        const discount = monthDiscount(months);
-        const total = cfg.monthly * months * (1 - discount / 100);
-        document.getElementById('planSummary').innerHTML = `Plano: ${cfg.label}<br>Mensalidade base: R$ ${cfg.monthly.toFixed(2).replace('.', ',')}<br>Desconto: ${discount}%`;
-        document.getElementById('planTotal').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        document.querySelector('.additional-slot-2')?.classList.toggle('hide', cfg.slots < 2);
-        document.querySelector('.additional-slot-3')?.classList.toggle('hide', cfg.slots < 3);
-    }
-    function setupCepAutoFill(){
-        const cepInput = document.getElementById('cepField');
-        if(!cepInput) return;
-        cepInput.addEventListener('blur', async () => {
-            const raw = cepInput.value.replace(/\D/g, '');
-            if(raw.length !== 8) return;
-            try {
-                const res = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
-                const data = await res.json();
-                if(!data.erro){
-                    const city = document.getElementById('cityField');
-                    const state = document.getElementById('stateField');
-                    if(city && !city.value) city.value = data.localidade || '';
-                    if(state && !state.value) state.value = data.uf || '';
-                }
-            } catch(e){ console.log('CEP sem preenchimento automático.'); }
-        });
-    }
-    function setupPortfolioPreview(){
-        const input = document.getElementById('portfolioImagesInput');
-        const grid = document.getElementById('portfolioPreviewGrid');
-        if(!input || !grid) return;
-        input.addEventListener('change', () => {
-            const files = Array.from(input.files || []);
-            const previewOnly = grid.querySelectorAll('.preview-generated');
-            previewOnly.forEach(el => el.remove());
-            files.slice(0, 10).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const div = document.createElement('div');
-                    div.className = 'portfolio-thumb preview-generated';
-                    div.innerHTML = `<img src="${e.target.result}" alt="Prévia">`;
-                    grid.appendChild(div);
-                };
-                reader.readAsDataURL(file);
-            });
-        });
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.nav-link[data-tab]').forEach(link => {
-            link.addEventListener('click', ev => { ev.preventDefault(); openTab(link.dataset.tab); });
-        });
-        openTab(activeTab || 'resumo');
-        if((new URLSearchParams(location.search)).get('wizard') === '1'){ openTab('perfil'); }
-        document.querySelectorAll('input[name="plan_tier"]').forEach(input => input.addEventListener('change', updatePlanUI));
-        document.getElementById('planMonths')?.addEventListener('change', updatePlanUI);
-        document.getElementById('serviceFeeToggle')?.addEventListener('change', e => document.getElementById('serviceFeeAmount').classList.toggle('hide', !e.target.checked));
-        updatePlanUI(); updateStepUI(); setupCepAutoFill(); setupPortfolioPreview();
-    });
+const activeTab = '<%= activeTab || "resumo" %>';
+function openTab(tab){
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-link[data-tab]').forEach(el => el.classList.remove('active'));
+    const panel = document.getElementById(tab); if(panel) panel.classList.add('active');
+    const link = document.querySelector(`.nav-link[data-tab="${tab}"]`); if(link) link.classList.add('active');
+    history.replaceState({}, '', `/profissional/dashboard?tab=${tab}`);
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+    document.querySelectorAll('.nav-link[data-tab]').forEach(link => link.addEventListener('click', ev => { ev.preventDefault(); openTab(link.dataset.tab); }));
+    openTab(activeTab || 'resumo');
+});
 </script>
 </body>
 </html>

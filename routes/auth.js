@@ -175,7 +175,10 @@ router.post('/login', async (req, res) => {
             if (!basicProfessionalProfileComplete(prof)) {
                 return res.redirect('/auth/completar-perfil');
             }
-            return res.redirect('/profissional/dashboard?tab=perfil&wizard=1');
+            if (!prof?.profile_completed) {
+                return res.redirect('/profissional/onboarding?step=1');
+            }
+            return res.redirect('/profissional/dashboard');
         }
         return res.redirect('/cliente/dashboard');
     } catch (err) {
@@ -235,7 +238,10 @@ router.get('/google/callback', passport.authenticate('google', {
             if (user._wasNew || !basicProfessionalProfileComplete(prof)) {
                 return res.redirect('/auth/completar-perfil');
             }
-            return res.redirect('/profissional/dashboard?tab=perfil&wizard=1');
+            if (!prof?.profile_completed) {
+                return res.redirect('/profissional/onboarding?step=1');
+            }
+            return res.redirect('/profissional/dashboard');
         }
 
         return res.redirect('/cliente/dashboard');

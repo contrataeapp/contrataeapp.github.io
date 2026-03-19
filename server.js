@@ -469,8 +469,11 @@ app.get("/auth/completar-perfil", async (req, res) => {
         const { data: user } = await supabase.from('users').select('*').eq('id', req.session.userId).single();
         const { data: profissional } = await supabase.from('professionals').select('*').eq('user_id', req.session.userId).maybeSingle();
         const basicProfileComplete = Boolean(profissional && profissional.phone_number && profissional.cep && profissional.city && profissional.state);
+        if (basicProfileComplete && profissional?.profile_completed) {
+            return res.redirect('/profissional/dashboard');
+        }
         if (basicProfileComplete) {
-            return res.redirect('/profissional/dashboard?tab=perfil');
+            return res.redirect('/profissional/onboarding?step=1');
         }
         res.render("auth/completar-perfil", {
             user: user || {},
@@ -566,8 +569,8 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
             throw error;
         }
 
-        console.log("Dados básicos salvos com sucesso! Redirecionando para dashboard...");
-        return res.redirect(303, '/profissional/dashboard?tab=perfil&wizard=1&basic=1');
+        console.log("Dados básicos salvos com sucesso! Redirecionando para onboarding...");
+        return res.redirect(303, '/profissional/onboarding?step=1&basic=1');
     } catch (err) {
         console.error("ERRO CRÍTICO no POST /auth/completar-perfil:", err);
         return res.redirect('/auth/completar-perfil');
