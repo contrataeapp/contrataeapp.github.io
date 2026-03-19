@@ -8,6 +8,23 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 
+const FALLBACK_CATEGORIES = [
+    { id: 'fallback-eletricista', name: 'Eletricista', slug: 'eletricistas' },
+    { id: 'fallback-encanador', name: 'Encanador', slug: 'encanadores' },
+    { id: 'fallback-pedreiro', name: 'Pedreiro', slug: 'pedreiros' },
+    { id: 'fallback-pintor', name: 'Pintor', slug: 'pintores' },
+    { id: 'fallback-montador', name: 'Montador de Móveis', slug: 'montador-moveis' },
+    { id: 'fallback-ar', name: 'Técnico em Ar Condicionado', slug: 'ar-condicionado' },
+    { id: 'fallback-geladeira', name: 'Técnico em Geladeira', slug: 'geladeira' },
+    { id: 'fallback-cameras', name: 'Instalador de Câmeras', slug: 'cameras' },
+    { id: 'fallback-marido', name: 'Marido de Aluguel', slug: 'marido-aluguel' },
+    { id: 'fallback-outros', name: 'Outros', slug: 'outros' }
+];
+
+function getCategoriesWithFallback(rows) {
+    return Array.isArray(rows) && rows.length ? rows : FALLBACK_CATEGORIES;
+}
+
 // Dashboard do Profissional (SaaS - Protegido)
 router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req, res) => {
     console.log("--- INÍCIO GET /profissional/dashboard ---");
@@ -42,7 +59,8 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
         };
     }
 
-    const { data: categorias } = await supabase.from('categories').select('*').order('name', { ascending: true });
+    const { data: categoriasDb } = await supabase.from('categories').select('*').order('name', { ascending: true });
+    const categorias = getCategoriesWithFallback(categoriasDb);
     const { data: categoriasExtras } = await supabase
         .from('professional_categories')
         .select('category_id, categories(id, name, slug)')
@@ -118,12 +136,38 @@ router.get('/cliente/dashboard', requireAuth, catchAsync(async (req, res) => {
 
 // Atualizar perfil do profissional
 router.post('/profissional/atualizar-perfil', requireProfessional, catchAsync(async (req, res) => {
-    const { category_id, description, phone_number, cep, city, state, specialties, price_info, availability, categories } = req.body;
+    const {
+        category_id,
+        category_primary,
+        category_extra_1,
+        category_extra_2,
+        selected_plan,
+        plan_months,
+        description,
+        phone_number,
+        cep,
+        city,
+        state,
+        specialties,
+        price_info,
+        availability,
+        categories
+    } = req.body;
 
-    const selectedCategories = Array.isArray(categories) ? categories : (categories ? [categories] : []);
-    const uniqueSelected = Array.from(new Set(selectedCategories.filter(Boolean)));
-    const finalSelected = Array.from(new Set([category_id, ...uniqueSelected].filter(Boolean))).slice(0, 3);
-    const finalCategoryId = category_id || finalSelected[0] || null;
+    const selectedPlan = selected_plan || 'basic';
+    const planLimit = selectedPlan === 'premium' ? 3 : selectedPlan === 'professional' ? 2 : 1;
+
+    const legacyCategories = Array.isArray(categories) ? categories : (categories ? [categories] : []);
+    const combined = [
+        category_id,
+        category_primary,
+        category_extra_1,
+        category_extra_2,
+        ...legacyCategories
+    ].filter(Boolean);
+
+    const finalSelected = Array.from(new Set(combined)).slice(0, planLimit);
+    const finalCategoryId = finalSelected[0] || null;
     const profileReadyForApproval = Boolean(phone_number && cep && city && state && description && finalCategoryId);
 
     const payload = {
@@ -152,7 +196,11 @@ router.post('/profissional/atualizar-perfil', requireProfessional, catchAsync(as
         await supabase.from('professional_categories').insert(rows);
     }
 
-    res.redirect('/profissional/dashboard#perfil');
+    const params = new URLSearchParams();
+    params.set('tab', 'perfil');
+    if (selectedPlan) params.set('plan', selectedPlan);
+    if (plan_months) params.set('months', String(plan_months));
+    res.redirect(`/profissional/dashboard?${params.toString()}#perfil`);
 }));
 
 // Solicitar aprovação do perfil

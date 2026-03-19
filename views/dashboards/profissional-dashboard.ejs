@@ -7,501 +7,746 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #111; color: #f5f5f5; }
-        
+        :root {
+            --bg: #0f0f10;
+            --card: #171718;
+            --card-2: #1f1f21;
+            --line: rgba(255,255,255,0.08);
+            --text: #f5f5f5;
+            --muted: #b9b9c0;
+            --primary: #ffa500;
+            --primary-dark: #d88b00;
+            --success: #4caf50;
+        }
+        body { font-family: Inter, Arial, sans-serif; background: var(--bg); color: var(--text); }
+        a { color: inherit; }
         .dashboard-container { display: flex; min-height: 100vh; }
-        
-        /* SIDEBAR */
-        .sidebar { width: 260px; background: #111; color: white; padding: 25px 15px; overflow-y: auto; position: fixed; height: 100vh; }
-        .sidebar .logo { font-size: 24px; font-weight: 800; margin-bottom: 40px; text-align: center; color: #ffa500; }
-        .sidebar nav ul { list-style: none; padding: 0; }
-        .sidebar nav ul li { margin-bottom: 8px; }
-        .sidebar nav ul li a { display: flex; align-items: center; gap: 15px; padding: 12px 15px; border-radius: 8px; color: #a0aec0; text-decoration: none; transition: 0.3s; cursor: pointer; }
-        .sidebar nav ul li a:hover, .sidebar nav ul li a.active { background: rgba(255,165,0,0.1); color: #ffa500; }
-        
-        /* MAIN CONTENT */
-        .main-content { margin-left: 260px; padding: 30px 40px; width: calc(100% - 260px); }
-        
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        header h1 { font-size: 28px; color: #ffa500; }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .avatar { width: 45px; height: 45px; background: #ffa500; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
-        
-        /* CARDS */
-        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .card { background: #1c1c1c; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .card h3 { color: #ccc; font-size: 14px; margin-bottom: 10px; }
-        .card .value { font-size: 32px; font-weight: 700; color: #ffa500; }
-        .card .icon { font-size: 40px; color: #ffa500; margin-bottom: 15px; }
-        
-        /* TABS */
-        .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; }
-        .tab-btn { padding: 15px 20px; background: none; border: none; color: #6c757d; font-weight: 600; cursor: pointer; transition: 0.3s; border-bottom: 3px solid transparent; }
-        .tab-btn.active { color: #ffa500; border-bottom-color: #ffa500; }
-        
+        .sidebar {
+            width: 250px; background: #111; padding: 24px 14px; position: fixed; inset: 0 auto 0 0; overflow-y: auto;
+            border-right: 1px solid var(--line);
+        }
+        .logo { font-size: 22px; font-weight: 800; margin-bottom: 28px; text-align: center; }
+        .logo a { text-decoration: none; color: var(--primary); }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin-bottom: 8px; }
+        .sidebar a.nav-link {
+            display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px;
+            text-decoration: none; color: #d0d0d7; transition: .2s ease;
+        }
+        .sidebar a.nav-link:hover, .sidebar a.nav-link.active {
+            background: rgba(255,165,0,.12); color: var(--primary);
+        }
+        .main-content { margin-left: 250px; width: calc(100% - 250px); padding: 28px 30px 50px; }
+        header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 26px; gap: 16px; }
+        header h1 { color: var(--primary); font-size: 28px; }
+        .user-info { display:flex; align-items:center; gap: 12px; font-weight: 600; }
+        .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--primary); color: #fff; display:grid; place-items:center; }
+        .hero-box, .card {
+            background: linear-gradient(180deg, var(--card), var(--card-2)); border: 1px solid var(--line); border-radius: 16px;
+            box-shadow: 0 10px 24px rgba(0,0,0,.16);
+        }
+        .hero-box { padding: 22px; margin-bottom: 22px; }
+        .hero-box h3 { color: var(--primary); margin-bottom: 8px; font-size: 18px; }
+        .hero-box p { color: #ddd; line-height: 1.45; }
+        .hero-actions { display:flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+        .card { padding: 22px; }
+        .cards-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 20px; }
+        .metric-card .icon { font-size: 34px; color: var(--primary); margin-bottom: 10px; }
+        .metric-card h3 { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+        .metric-card .value { font-size: 22px; color: var(--primary); font-weight: 800; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        
-        /* TABELA */
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px; background: #f8f9fa; color: #6c757d; font-weight: 600; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 15px; border-bottom: 1px solid #e2e8f0; }
-        tr:hover { background: #f8f9fa; }
-        
-        /* BOTÕES */
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
-        .btn-primary { background: #ffa500; color: white; }
-        .btn-primary:hover { background: #ff9500; }
-        .btn-secondary { background: #e2e8f0; color: #f5f5f5; }
-        .btn-secondary:hover { background: #cbd5e0; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-danger:hover { background: #c82333; }
-        
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-        .badge.pending { background: rgba(255,193,7,0.1); color: #ffc107; }
-        .badge.completed { background: rgba(40,167,69,0.1); color: #28a745; }
-        
-        /* MODAL */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .close { float: right; font-size: 24px; font-weight: bold; color: #a0aec0; cursor: pointer; }
-        
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #f5f5f5; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; }
-        
+        .btn {
+            border: 0; border-radius: 12px; padding: 12px 18px; font-weight: 700; cursor: pointer; text-decoration: none;
+            transition: .2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: #111; }
+        .btn-primary:hover { background: #ffb733; }
+        .btn-secondary { background: #2c2c30; color: #fff; }
+        .btn-secondary:hover { background: #3b3b40; }
+        .btn-danger { background: #bf3232; color: #fff; }
+        .btn-danger:hover { background: #d33f3f; }
+        .section-head { margin-bottom: 16px; }
+        .section-head h2 { font-size: 20px; margin-bottom: 6px; }
+        .section-head p { color: var(--muted); }
+        .profile-layout { display:grid; grid-template-columns: 1.2fr .8fr; gap: 18px; }
+        .preview-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; margin-top: 14px; }
+        .preview-item { background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+        .preview-item strong { display:block; margin-bottom: 4px; color: var(--primary); }
+        form.profile-form { display:grid; gap: 14px; }
+        .grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+        .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+        .form-group label { display:block; font-weight: 700; margin-bottom: 6px; color: #fff; }
+        .form-help { color: var(--muted); font-size: 13px; margin-top: 5px; line-height: 1.4; }
+        .input, .select, textarea {
+            width:100%; background: #101012; color:#fff; border:1px solid rgba(255,255,255,.12); border-radius: 12px;
+            padding: 12px 14px; font-size: 15px; min-height: 48px;
+        }
+        textarea { min-height: 110px; resize: vertical; }
+        .compact-box { padding: 16px; border-radius: 14px; background: rgba(255,255,255,.03); border: 1px solid var(--line); }
+        .plan-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+        .plan-card {
+            border: 1px solid var(--line); background: #111214; border-radius: 14px; padding: 16px; cursor: pointer;
+            transition: .2s ease; position: relative;
+        }
+        .plan-card.active { border-color: var(--primary); box-shadow: 0 0 0 1px rgba(255,165,0,.3) inset; }
+        .plan-card h4 { margin-bottom: 8px; color: var(--primary); }
+        .plan-card small { color: var(--muted); display:block; margin-top: 6px; }
+        .plan-card .price { font-size: 24px; font-weight: 800; margin: 8px 0 4px; }
+        .profession-rows { display:grid; gap: 12px; margin-top: 12px; }
+        .profession-row { display:none; }
+        .profession-row.active { display:block; }
+        .selected-chips { display:flex; flex-wrap:wrap; gap: 8px; margin-top: 10px; }
+        .chip { background: rgba(255,165,0,.12); color: #ffd58a; border:1px solid rgba(255,165,0,.25); border-radius: 999px; padding: 7px 11px; font-size: 13px; }
+        .upgrade-note {
+            margin-top: 12px; background: rgba(255,165,0,.08); border: 1px solid rgba(255,165,0,.2); color: #ffd58a;
+            padding: 12px 14px; border-radius: 12px; display:none;
+        }
+        .portfolio-upload { display:grid; grid-template-columns: 1.2fr .8fr; gap: 16px; align-items: start; }
+        .file-box { border:1px dashed rgba(255,255,255,.18); border-radius: 16px; padding: 18px; background: rgba(255,255,255,.03); }
+        .file-preview { display:flex; flex-wrap:wrap; gap: 10px; margin-top: 14px; }
+        .file-preview img { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); }
+        .portfolio-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap: 14px; }
+        .portfolio-card { position: relative; overflow:hidden; border-radius: 14px; border: 1px solid var(--line); background: #111; }
+        .portfolio-card img { width:100%; height:180px; object-fit:cover; display:block; }
+        .portfolio-card form { position:absolute; top:10px; right:10px; }
+        .table-responsive { overflow-x:auto; }
+        table { width:100%; border-collapse: collapse; }
+        th, td { padding: 14px 12px; border-bottom:1px solid var(--line); }
+        th { text-align:left; color: var(--muted); font-size: 13px; text-transform: uppercase; }
+        .badge { display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+        .badge.pending { background: rgba(255,193,7,.12); color: #ffd04f; }
+        .badge.completed { background: rgba(76,175,80,.12); color: #7ddf82; }
+        .alert-bar { margin-bottom: 18px; padding: 14px 16px; border-radius: 14px; font-weight: 600; }
+        .alert-warning { background: rgba(255,165,0,.08); color: #ffd58a; border:1px solid rgba(255,165,0,.18); }
+        .alert-info { background: rgba(53,152,219,.12); color: #9ed5ff; border:1px solid rgba(53,152,219,.18); }
+        .subtle { color: var(--muted); }
+        .mobile-note { display:none; }
+        @media (max-width: 980px) {
+            .profile-layout, .portfolio-upload { grid-template-columns: 1fr; }
+            .plan-grid, .grid-3 { grid-template-columns: 1fr; }
+        }
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); position: fixed; z-index: 1000; }
-            .main-content { margin-left: 0; width: 100%; padding: 15px; }
-            header { flex-direction: column; align-items: flex-start; }
+            .sidebar { position: static; width: 100%; height: auto; border-right: 0; border-bottom:1px solid var(--line); }
+            .dashboard-container { display:block; }
+            .main-content { margin-left:0; width:100%; padding: 18px 14px 40px; }
+            header { flex-direction: column; align-items:flex-start; margin-bottom: 20px; }
+            .grid-2, .preview-grid { grid-template-columns: 1fr; }
             .cards-grid { grid-template-columns: 1fr; }
+            .mobile-note { display:block; }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <div class="logo"><a href="/" style="color:#ffa500;text-decoration:none;">Contrataê</a></div>
-            <nav>
-                <ul>
-                    <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
-                    <li><a href="#" class="tab-btn active" onclick="mudarAba('resumo')"><i class="fas fa-chart-line"></i> Resumo</a></li>
-                    <li><a href="#" class="tab-btn" onclick="mudarAba('servicos')"><i class="fas fa-briefcase"></i> Meus Serviços</a></li>
-                    <li><a href="#" class="tab-btn" onclick="mudarAba('avaliacoes')"><i class="fas fa-star"></i> Avaliações</a></li>
-                    <li><a href="#" class="tab-btn" onclick="mudarAba('perfil')"><i class="fas fa-user"></i> Meu Perfil</a></li>
-                    <li><a href="#" class="tab-btn" onclick="mudarAba('portfolio')"><i class="fas fa-images"></i> Meu Portfólio</a></li>
-                    <li><a href="#" class="tab-btn" onclick="mudarAba('planos')"><i class="fas fa-credit-card"></i> Meu Plano</a></li>
-                    <li><a href="#" class="tab-btn" onclick="mudarAba('pagamentos')"><i class="fas fa-history"></i> Pagamentos</a></li>
-                    <li><a href="/auth/logout"><i class="fas fa-power-off"></i> Sair</a></li>
-                </ul>
-            </nav>
-        </aside>
-        
-        <!-- MAIN CONTENT -->
-        <div class="main-content">
-            <header>
-                <h1>Dashboard do Profissional</h1>
-                <div class="user-info">
-                    <span><%= fullName %></span>
-                    <div class="avatar"><%= fullName.charAt(0).toUpperCase() %></div>
-                </div>
-            </header>
-                        <!-- ABA RESUMO -->
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <div class="logo"><a href="/">Contrataê</a></div>
+        <nav>
+            <ul>
+                <li><a href="/" class="nav-link"><i class="fas fa-home"></i> Início</a></li>
+                <li><a href="#" class="nav-link active" data-tab-link="resumo" onclick="mudarAba('resumo')"><i class="fas fa-chart-line"></i> Resumo</a></li>
+                <li><a href="#" class="nav-link" data-tab-link="servicos" onclick="mudarAba('servicos')"><i class="fas fa-briefcase"></i> Meus Serviços</a></li>
+                <li><a href="#" class="nav-link" data-tab-link="avaliacoes" onclick="mudarAba('avaliacoes')"><i class="fas fa-star"></i> Avaliações</a></li>
+                <li><a href="#" class="nav-link" data-tab-link="perfil" onclick="mudarAba('perfil')"><i class="fas fa-user"></i> Meu Perfil</a></li>
+                <li><a href="#" class="nav-link" data-tab-link="portfolio" onclick="mudarAba('portfolio')"><i class="fas fa-images"></i> Meu Portfólio</a></li>
+                <li><a href="#" class="nav-link" data-tab-link="planos" onclick="mudarAba('planos')"><i class="fas fa-credit-card"></i> Meu Plano</a></li>
+                <li><a href="#" class="nav-link" data-tab-link="pagamentos" onclick="mudarAba('pagamentos')"><i class="fas fa-history"></i> Pagamentos</a></li>
+                <li><a href="/auth/logout" class="nav-link"><i class="fas fa-power-off"></i> Sair</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Dashboard do Profissional</h1>
+            <div class="user-info">
+                <span><%= fullName %></span>
+                <div class="avatar"><%= (fullName || 'P').charAt(0).toUpperCase() %></div>
+            </div>
+        </header>
+
+        <div id="resumo" class="tab-content active">
             <% if (!basicProfileComplete) { %>
-                <div class="card" style="background:#2a2112;border:1px solid #6b4d14;margin-bottom:24px;">
-                    <h3 style="color:#ffa500;margin-bottom:8px;"><i class="fas fa-user-pen"></i> Complete seu perfil profissional</h3>
-                    <p style="color:#ddd; margin-bottom:14px;">Sua conta profissional já foi criada. Complete o cadastro inicial para liberar a configuração do seu perfil, profissões e portfólio.</p>
-                    <a href="/auth/completar-perfil" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Completar cadastro inicial</a>
+                <div class="hero-box">
+                    <h3><i class="fas fa-user-pen"></i> Cadastro iniciado com sucesso</h3>
+                    <p>Agora falta a parte importante: completar seu perfil para aparecer bem na plataforma. Em poucos minutos você define suas profissões, ajusta seu plano e monta seu portfólio.</p>
+                    <div class="hero-actions">
+                        <a href="/auth/completar-perfil" class="btn btn-primary"><i class="fas fa-arrow-right"></i> Completar cadastro inicial</a>
+                        <button type="button" class="btn btn-secondary" onclick="mudarAba('perfil')">Ir direto ao meu perfil</button>
+                    </div>
+                </div>
+            <% } else if (!profileReadyForApproval) { %>
+                <div class="hero-box">
+                    <h3><i class="fas fa-bolt"></i> Seu perfil já está quase pronto</h3>
+                    <p>Os dados básicos foram salvos. Agora escolha o plano, selecione suas profissões, adicione especialidades e deixe seu perfil mais forte para receber contatos.</p>
+                    <div class="hero-actions">
+                        <button type="button" class="btn btn-primary" onclick="mudarAba('perfil')">Abrir meu perfil</button>
+                        <button type="button" class="btn btn-secondary" onclick="mudarAba('portfolio')">Adicionar fotos</button>
+                    </div>
+                </div>
+            <% } else if (profissional && !profissional.approval_requested && profissional.status === 'pending') { %>
+                <div class="alert-bar alert-warning" style="display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap;">
+                    <div>
+                        <strong>Perfil pronto para análise.</strong><br>
+                        Seu cadastro já está estruturado. Agora você pode solicitar a aprovação da plataforma.
+                    </div>
+                    <form action="/profissional/solicitar-aprovacao" method="POST">
+                        <button type="submit" class="btn btn-primary">Solicitar aprovação</button>
+                    </form>
+                </div>
+            <% } else if (profissional && profissional.approval_requested && profissional.status === 'pending') { %>
+                <div class="alert-bar alert-info">
+                    <strong>Perfil em análise.</strong> Sua solicitação já foi enviada. Em breve a equipe do Contrataê analisa seu cadastro.
                 </div>
             <% } %>
 
-            <!-- ABA RESUMO -->
-            <div id="resumo" class="tab-content active">
-                <% if (profissional.data_vencimento) { %>
-                    <% 
-                        const hoje = new Date();
-                        const venc = new Date(profissional.data_vencimento);
-                        const diffDays = Math.ceil((venc - hoje) / (1000 * 60 * 60 * 24));
-                    %>
-                    <% if (diffDays <= 5 && diffDays > 0) { %>
-                        <div class="alert alert-warning" style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ffeeba;">
-                            <i class="fas fa-exclamation-triangle"></i> <strong>Atenção:</strong> Seu plano vence em <%= diffDays %> dias. <a href="#" onclick="mudarAba('planos')" style="color: #856404; font-weight: bold;">Renove agora</a> para não perder visibilidade!
-                        </div>
-                    <% } else if (diffDays <= 0) { %>
-                        <div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #f5c6cb;">
-                            <i class="fas fa-times-circle"></i> <strong>Plano Vencido:</strong> Seu perfil está oculto para clientes. <a href="#" onclick="mudarAba('planos')" style="color: #721c24; font-weight: bold;">Renove seu plano</a> para voltar a aparecer nas buscas.
-                        </div>
-                    <% } %>
-                <% } %>
-
-                <% if (profileReadyForApproval && profissional && !profissional.approval_requested && profissional.status === 'pending') { %>
-                    <div class="card" style="background: #fff8e1; border: 1px solid #ffe082; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h3 style="color: #856404; margin-bottom: 5px;"><i class="fas fa-exclamation-triangle"></i> Perfil Pronto para Análise</h3>
-                            <p style="color: #856404; font-size: 14px;">Seu perfil está completo! Clique no botão ao lado para solicitar a aprovação da plataforma.</p>
-                        </div>
-                        <form action="/profissional/solicitar-aprovacao" method="POST">
-                            <button type="submit" class="btn btn-primary">Solicitar Aprovação</button>
-                        </form>
-                    </div>
-                <% } else if (profissional && profissional.approval_requested && profissional.status === 'pending') { %>
-                    <div class="card" style="background: #e3f2fd; border: 1px solid #bbdefb; margin-bottom: 30px;">
-                        <h3 style="color: #0d47a1; margin-bottom: 5px;"><i class="fas fa-clock"></i> Perfil em Análise</h3>
-                        <p style="color: #0d47a1; font-size: 14px;">Seu perfil foi enviado para análise. Em breve nossa equipe entrará em contato.</p>
-                    </div>
-                <% } %>
-
-                <div class="cards-grid">
-                    <div class="card">
-                        <div class="icon"><i class="fas fa-phone"></i></div>
-                        <h3>Contatos Recebidos</h3>
-                        <div class="value"><%= contatosRecebidos || 0 %></div>
-                    </div>
-                    <div class="card">
-                        <div class="icon"><i class="fas fa-check-circle"></i></div>
-                        <h3>Serviços Concluídos</h3>
-                        <div class="value"><%= servicosConcluidos || 0 %></div>
-                    </div>
-                    <div class="card">
-                        <div class="icon"><i class="fas fa-money-bill"></i></div>
-                        <h3>Faturamento (Mês)</h3>
-                        <div class="value">R$ <%= faturamentoMes || '0,00' %></div>
-                    </div>
-                    <div class="card">
-                        <div class="icon"><i class="fas fa-star"></i></div>
-                        <h3>Avaliação Média</h3>
-                        <div class="value"><%= avaliacaoMedia || '0' %> ⭐</div>
-                    </div>
+            <div class="cards-grid">
+                <div class="card metric-card">
+                    <div class="icon"><i class="fas fa-phone"></i></div>
+                    <h3>Contatos Recebidos</h3>
+                    <div class="value"><%= contatosRecebidos || 0 %></div>
+                </div>
+                <div class="card metric-card">
+                    <div class="icon"><i class="fas fa-check-circle"></i></div>
+                    <h3>Serviços Concluídos</h3>
+                    <div class="value"><%= servicosConcluidos || 0 %></div>
+                </div>
+                <div class="card metric-card">
+                    <div class="icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <h3>Faturamento do mês</h3>
+                    <div class="value">R$ <%= faturamentoMes || '0,00' %></div>
+                </div>
+                <div class="card metric-card">
+                    <div class="icon"><i class="fas fa-star"></i></div>
+                    <h3>Avaliação média</h3>
+                    <div class="value"><%= avaliacaoMedia || '0' %> ⭐</div>
                 </div>
             </div>
-            
-            <!-- ABA SERVIÇOS -->
-            <div id="servicos" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                    <h2>Meus Serviços</h2>
-                    <button class="btn btn-primary" onclick="abrirModalServico()">+ Novo Serviço</button>
+        </div>
+
+        <div id="servicos" class="tab-content">
+            <div class="section-head">
+                <h2>Meus Serviços</h2>
+                <p>Use esta área para acompanhar atendimentos e organizar seu histórico.</p>
+            </div>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+                    <p class="subtle">Em breve você poderá registrar visitas, serviços fechados e ordens de serviço por aqui.</p>
+                    <button class="btn btn-primary" type="button">+ Novo Serviço</button>
                 </div>
-                
                 <div class="table-responsive">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
                         <tbody>
-                            <% if (servicos && servicos.length > 0) { %>
-                                <% servicos.forEach(servico => { %>
-                                    <tr>
-                                        <td><%= servico.client_name %></td>
-                                        <td><%= servico.service_description %></td>
-                                        <td>R$ <%= servico.value %></td>
-                                        <td><span class="badge <%= servico.status %>"><%= servico.status === 'pending' ? 'Pendente' : 'Concluído' %></span></td>
-                                        <td>
-                                            <% if (servico.status === 'pending') { %>
-                                                <button class="btn btn-secondary" onclick="marcarConcluido('<%= servico.id %>')">Marcar Concluído</button>
-                                            <% } %>
-                                            <button class="btn btn-primary" onclick="gerarComprovante('<%= servico.id %>')">Comprovante</button>
-                                        </td>
-                                    </tr>
-                                <% }); %>
-                            <% } else { %>
-                                <tr><td colspan="5" style="text-align: center; color: #6c757d;">Nenhum serviço registrado ainda</td></tr>
-                            <% } %>
+                        <% if (servicos && servicos.length > 0) { %>
+                            <% servicos.forEach(servico => { %>
+                                <tr>
+                                    <td><%= servico.client_name %></td>
+                                    <td><%= servico.service_description %></td>
+                                    <td>R$ <%= servico.value %></td>
+                                    <td><span class="badge <%= servico.status %>"><%= servico.status %></span></td>
+                                    <td>-</td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="5" class="subtle">Nenhum serviço registrado ainda.</td></tr>
+                        <% } %>
                         </tbody>
                     </table>
                 </div>
             </div>
-            
-            <!-- ABA AVALIAÇÕES -->
-            <div id="avaliacoes" class="tab-content">
-                <h2>Minhas Avaliações</h2>
-                <div style="margin-top: 25px;">
-                    <% if (avaliacoes && avaliacoes.length > 0) { %>
-                        <% avaliacoes.forEach(avaliacao => { %>
-                            <div class="card" style="margin-bottom: 15px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <div>
-                                        <h4><%= avaliacao.reviewer_name %></h4>
-                                        <p style="color: #6c757d; font-size: 14px;"><%= avaliacao.comment %></p>
-                                        <div style="color: #ffc107; font-size: 16px;">
-                                            <% for (let i = 0; i < avaliacao.rating; i++) { %>⭐<% } %>
-                                        </div>
-                                    </div>
-                                    <% if (avaliacao.status === 'pending') { %>
-                                        <button class="btn btn-secondary" onclick="aprovarAvaliacao('<%= avaliacao.id %>')">Aprovar</button>
-                                    <% } %>
-                                </div>
-                            </div>
-                        <% }); %>
-                    <% } else { %>
-                        <p style="color: #6c757d;">Nenhuma avaliação recebida ainda</p>
-                    <% } %>
-                </div>
-            </div>
-            
-            <!-- ABA PORTFÓLIO -->
-            <div id="portfolio" class="tab-content">
-                <h2>Meu Portfólio</h2>
-                <p style="color: #6c757d; margin-bottom: 25px;">Adicione fotos do seu portfólio para mostrar seus melhores trabalhos (máx. 10 imagens).</p>
-                
-                <form action="/profissional/portfolio/adicionar" method="POST" enctype="multipart/form-data" style="margin-bottom: 30px; display: flex; gap: 10px; align-items:center;">
-                    <input type="file" name="portfolio_image" accept="image/*" required style="flex: 1;">
-                    <button type="submit" class="btn btn-primary">Adicionar ao Portfólio</button>
-                </form>
-                <p style="color:#999; font-size:12px; margin-top:-15px; margin-bottom:20px;">Envie até 10 imagens. Se a foto estiver pesada, reduza o tamanho em ferramentas como TinyJPG ou Squoosh.</p>
+        </div>
 
-                <div class="cards-grid" id="galeria-portfolio">
-                    <% if (typeof portfolio !== 'undefined' && portfolio.length > 0) { %>
-                        <% portfolio.forEach(item => { %>
-                            <div class="card" style="padding: 10px; position: relative;">
-                                <img src="<%= item.image_url %>" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px;">
-                                <form action="/profissional/portfolio/remover" method="POST" style="position: absolute; top: 15px; right: 15px;">
-                                    <input type="hidden" name="id" value="<%= item.id %>">
-                                    <button type="submit" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;"><i class="fas fa-trash"></i></button>
-                                </form>
-                            </div>
-                        <% }); %>
-                    <% } else { %>
-                        <p style="grid-column: 1/-1; text-align: center; color: #999;">Nenhuma foto no portfólio ainda.</p>
-                    <% } %>
-                </div>
+        <div id="avaliacoes" class="tab-content">
+            <div class="section-head">
+                <h2>Avaliações</h2>
+                <p>Quando começar a atender clientes, suas avaliações aparecerão aqui.</p>
+            </div>
+            <div class="cards-grid">
+                <% if (avaliacoes && avaliacoes.length > 0) { %>
+                    <% avaliacoes.forEach(avaliacao => { %>
+                        <div class="card">
+                            <h3 style="margin-bottom:8px; color:#fff;"><%= avaliacao.reviewer_name || 'Cliente' %></h3>
+                            <p class="subtle" style="margin-bottom:10px;"><%= avaliacao.comment %></p>
+                            <div style="color:#ffd04f;"> <%= '⭐'.repeat(avaliacao.rating || 0) %> </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="card"><p class="subtle">Nenhuma avaliação recebida ainda.</p></div>
+                <% } %>
+            </div>
+        </div>
+
+        <div id="perfil" class="tab-content">
+            <div class="section-head">
+                <h2>Meu Perfil Profissional</h2>
+                <p>Seu nome completo fica protegido na conta. Aqui você monta o perfil que os clientes vão enxergar.</p>
             </div>
 
-            <!-- ABA PERFIL -->
-            <div id="perfil" class="tab-content">
-                <div class="card" style="margin-bottom:20px;">
-                    <h3 style="color:#ffa500;margin-bottom:8px;">Seu perfil profissional</h3>
-                    <p style="color:#ccc; margin-bottom:12px;">Gerencie suas informações, categorias e portfólio.</p>
-                    <a href="/profissional/dashboard?tab=perfil" class="btn btn-primary" style="display:inline-block;text-decoration:none;">Abrir Meu Perfil</a>
-                </div>
-                <h2 id="perfil">Meu Perfil Profissional</h2>
-                <p style="color:#bbb; margin-bottom:14px;">Seu nome completo fica preservado na conta. Aqui você completa os dados que vão aparecer para clientes e para análise da plataforma.</p>
-                <div class="card" style="margin:20px 0;">
-                    <h3 style="color:#ffa500; margin-bottom:12px;">Prévia do perfil</h3>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:15px;">
-                        <div><strong>Nome:</strong><br><span><%= profissional?.users?.full_name || fullName %></span></div>
-                        <div><strong>Telefone:</strong><br><span><%= profissional?.phone_number || 'Não informado' %></span></div>
-                        <div><strong>Cidade/Estado:</strong><br><span><%= (profissional?.city || 'Não informado') %> <%= profissional?.state ? '- ' + profissional.state : '' %></span></div>
-                        <div><strong>CEP:</strong><br><span><%= profissional?.cep || 'Não informado' %></span></div>
+            <div class="profile-layout">
+                <section class="card">
+                    <h3 style="color:var(--primary); margin-bottom:12px;">Prévia rápida do perfil</h3>
+                    <div class="preview-grid">
+                        <div class="preview-item"><strong>Nome</strong><span><%= profissional?.users?.full_name || fullName %></span></div>
+                        <div class="preview-item"><strong>Telefone</strong><span><%= profissional?.phone_number || 'Não informado' %></span></div>
+                        <div class="preview-item"><strong>Cidade / Estado</strong><span><%= profissional?.city || 'Não informado' %><%= profissional?.state ? ' - ' + profissional.state : '' %></span></div>
+                        <div class="preview-item"><strong>CEP</strong><span><%= profissional?.cep || 'Não informado' %></span></div>
                     </div>
-                    <div style="margin-top:12px;"><strong>Descrição:</strong><br><span><%= profissional?.description || 'Ainda não adicionada.' %></span></div>
-                </div>
-                <form method="POST" action="/profissional/atualizar-perfil" style="margin-top: 25px;">
+                    <div class="preview-item" style="margin-top:14px;">
+                        <strong>Descrição inicial</strong>
+                        <span><%= profissional?.description || 'Ainda não adicionada.' %></span>
+                    </div>
+                    <div class="upgrade-note" id="upgradeNoteBox"></div>
+                </section>
+
+                <section class="card">
+                    <h3 style="color:var(--primary); margin-bottom:10px;">Como seu plano funciona</h3>
+                    <p class="subtle" style="margin-bottom:12px;">Você escolhe quantas profissões quer ativar e por quantos meses deseja manter o perfil em destaque.</p>
+                    <div class="compact-box">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                            <div>
+                                <strong style="display:block; margin-bottom:6px;">Quer mais visibilidade?</strong>
+                                <span class="subtle">Profissionais com mais categorias tendem a receber mais contatos.</span>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="mudarAba('planos')">Ver planos</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <form method="POST" action="/profissional/atualizar-perfil" class="profile-form card" style="margin-top:18px;">
+                <div class="grid-2">
                     <div class="form-group">
                         <label>Telefone / WhatsApp</label>
-                        <input type="text" name="phone_number" value="<%= profissional && profissional.phone_number ? profissional.phone_number : '' %>" required>
+                        <input class="input" type="text" name="phone_number" id="profilePhone" value="<%= profissional?.phone_number || '' %>" required>
                     </div>
                     <div class="form-group">
                         <label>CEP</label>
-                        <input type="text" name="cep" value="<%= profissional && profissional.cep ? profissional.cep : '' %>" required>
+                        <input class="input" type="text" name="cep" id="profileCep" value="<%= profissional?.cep || '' %>" required>
+                        <div class="form-help">Digite o CEP para preencher cidade e estado automaticamente.</div>
                     </div>
+                </div>
+
+                <div class="grid-2">
                     <div class="form-group">
                         <label>Cidade</label>
-                        <input type="text" name="city" value="<%= profissional && profissional.city ? profissional.city : '' %>" required>
+                        <input class="input" type="text" name="city" id="profileCity" value="<%= profissional?.city || '' %>" required>
                     </div>
                     <div class="form-group">
                         <label>Estado</label>
-                        <input type="text" name="state" maxlength="2" value="<%= profissional && profissional.state ? profissional.state : '' %>" required>
+                        <input class="input" type="text" maxlength="2" name="state" id="profileState" value="<%= profissional?.state || '' %>" required>
                     </div>
-                    <div class="form-group">
-                        <label>Profissão principal</label><small style="display:block; color:#999; margin-bottom:6px;">Escolha a principal. Ela será a categoria usada como destaque do seu perfil.</small>
-                        <select name="category_id" required>
-                            <option value="">Selecione uma categoria</option>
-                            <% if (categorias) { %>
-                                <% categorias.forEach(cat => { %>
-                                    <option value="<%= cat.id %>" <%= profissional && profissional.category_id === cat.id ? 'selected' : '' %>><%= cat.name %></option>
-                                <% }); %>
-                            <% } %>
-                        </select>
+                </div>
+
+                <div class="compact-box">
+                    <div class="section-head" style="margin-bottom:12px;">
+                        <h2 style="font-size:18px;">Etapa 1 · Escolha seu plano</h2>
+                        <p>Primeiro defina quantas profissões você quer liberar. Depois o formulário abre exatamente a quantidade certa.</p>
                     </div>
-                    <div class="form-group">
-                        <label>Profissões adicionais (até 2 além da principal)</label>
-                        <select name="categories" multiple size="6" style="min-height: 140px;">
-                            <% if (categorias) { %>
-                                <% categorias.forEach(cat => { %>
-                                    <% if (!profissional || profissional.category_id !== cat.id) { %>
-                                        <option value="<%= cat.id %>" <%= categoriasSelecionadas && categoriasSelecionadas.includes(cat.id) ? 'selected' : '' %>><%= cat.name %></option>
-                                    <% } %>
-                                <% }); %>
-                            <% } %>
-                        </select>
-                        <small style="color:#999; display:block; margin-top:8px;">Use Ctrl/Cmd para escolher mais de uma. Você poderá manter até 3 profissões no total.</small>
+                    <input type="hidden" name="selected_plan" id="selectedPlanInput" value="basic">
+                    <div class="plan-grid">
+                        <div class="plan-card active" data-plan="basic" data-limit="1" data-price="30">
+                            <h4>Plano Básico</h4>
+                            <div class="price">1 profissão</div>
+                            <small>Ideal para quem quer começar focado.</small>
+                        </div>
+                        <div class="plan-card" data-plan="professional" data-limit="2" data-price="49">
+                            <h4>Plano Profissional</h4>
+                            <div class="price">2 profissões</div>
+                            <small>Mais alcance para captar contatos em frentes próximas.</small>
+                        </div>
+                        <div class="plan-card" data-plan="premium" data-limit="3" data-price="69">
+                            <h4>Plano Premium</h4>
+                            <div class="price">3 profissões</div>
+                            <small>Máxima visibilidade dentro da plataforma.</small>
+                        </div>
                     </div>
+                    <div class="grid-2" style="margin-top:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Quantidade de meses</label>
+                            <select class="select" name="plan_months" id="profilePlanMonths">
+                                <% for(let m=1;m<=12;m++){ %>
+                                    <option value="<%= m %>"><%= m %> <%= m > 1 ? 'meses' : 'mês' %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="compact-box" style="align-self:end;">
+                            <strong style="display:block; color:var(--primary); margin-bottom:6px;">Resumo estimado</strong>
+                            <div class="subtle">Plano: <span id="planLabel">Plano Básico</span></div>
+                            <div class="subtle">Mensalidade base: R$ <span id="planPriceLabel">30</span>,00</div>
+                            <div class="subtle">Desconto: <span id="profileDiscountLabel">0%</span></div>
+                            <div style="margin-top:8px; font-size:22px; font-weight:800; color:var(--primary);">Total: <span id="profileTotalLabel">R$ 30,00</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="compact-box">
+                    <div class="section-head" style="margin-bottom:12px;">
+                        <h2 style="font-size:18px;">Etapa 2 · Profissões</h2>
+                        <p>Selecione a profissão principal e as adicionais conforme o seu plano.</p>
+                    </div>
+                    <datalist id="categorySuggestions">
+                        <% (categorias || []).forEach(cat => { %>
+                            <option value="<%= cat.name %>" data-id="<%= cat.id %>"></option>
+                        <% }) %>
+                    </datalist>
+                    <div class="profession-rows">
+                        <div class="profession-row active" data-row="1">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Profissão principal</label>
+                                <input class="input profession-display" type="text" list="categorySuggestions" placeholder="🔍 Digite para buscar ou selecionar" data-hidden-target="categoryPrimaryId" value="<%= (categorias || []).find(c => c.id === profissional?.category_id)?.name || '' %>">
+                                <input type="hidden" id="categoryPrimaryId" name="category_primary" value="<%= profissional?.category_id || '' %>">
+                            </div>
+                        </div>
+                        <div class="profession-row" data-row="2">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Profissão adicional 1</label>
+                                <input class="input profession-display" type="text" list="categorySuggestions" placeholder="🔍 Buscar profissão adicional" data-hidden-target="categoryExtra1Id">
+                                <input type="hidden" id="categoryExtra1Id" name="category_extra_1" value="">
+                            </div>
+                        </div>
+                        <div class="profession-row" data-row="3">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Profissão adicional 2</label>
+                                <input class="input profession-display" type="text" list="categorySuggestions" placeholder="🔍 Buscar segunda profissão adicional" data-hidden-target="categoryExtra2Id">
+                                <input type="hidden" id="categoryExtra2Id" name="category_extra_2" value="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="selected-chips" id="selectedCategoryChips"></div>
+                    <div class="upgrade-note" id="upgradeInlineNote"></div>
+                </div>
+
+                <div class="grid-2">
                     <div class="form-group">
                         <label>Especialidades</label>
-                        <input type="text" name="specialties" placeholder="Ex: Instalação, manutenção, residencial" value="<%= profissional && profissional.specialties ? profissional.specialties : '' %>">
+                        <input class="input" type="text" name="specialties" placeholder="Ex: instalação, manutenção, residencial" value="<%= profissional?.specialties || '' %>">
+                        <div class="form-help">Separe por vírgula os serviços que você quer destacar.</div>
                     </div>
                     <div class="form-group">
-                        <label>Descrição Profissional</label>
-                        <textarea name="description" placeholder="Descreva seus serviços e experiência" rows="5"><%= profissional && profissional.description ? profissional.description : '' %></textarea>
+                        <label>Informações de preço</label>
+                        <input class="input" type="text" name="price_info" placeholder="Ex: Taxa de visita R$ 50" value="<%= profissional?.price_info || '' %>">
                     </div>
-                    <div class="form-group">
-                        <label>Informações de Preço</label>
-                        <input type="text" name="price_info" placeholder="Ex: Taxa de visita: R$ 50" value="<%= profissional && profissional.price_info ? profissional.price_info : '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>Disponibilidade</label>
-                        <input type="text" name="availability" placeholder="Ex: Seg-Sex, 8h-18h" value="<%= profissional && profissional.availability ? profissional.availability : '' %>">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                </form>
-            </div>
+                </div>
 
-            <!-- ABA PLANOS -->
-            <div id="planos" class="tab-content">
-                <h2>Ativar Perfil na Plataforma</h2>
-                <p style="color: #6c757d; margin-bottom: 30px;">Escolha por quantos meses deseja manter seu perfil em destaque. Quanto maior o período, maior o desconto.</p>
-                <div class="card" style="max-width:700px;">
+                <div class="form-group">
+                    <label>Descrição profissional</label>
+                    <textarea name="description" placeholder="Explique rapidamente o que você faz, para quem atende e seu diferencial."><%= profissional?.description || '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Disponibilidade</label>
+                    <input class="input" type="text" name="availability" placeholder="Ex: Seg a sex, 8h às 18h | sábado sob consulta" value="<%= profissional?.availability || '' %>">
+                </div>
+
+                <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; align-items:center;">
+                    <div class="subtle">Depois de salvar, você poderá adicionar e gerenciar imagens no portfólio.</div>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-secondary" onclick="window.location='/auth/logout'">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar perfil profissional</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div id="portfolio" class="tab-content">
+            <div class="section-head">
+                <h2>Meu Portfólio</h2>
+                <p>Adicione até 10 imagens dos seus melhores trabalhos. O ideal é usar fotos claras, bem enquadradas e leves para carregar rápido.</p>
+            </div>
+            <div class="portfolio-upload">
+                <div class="card file-box">
+                    <form action="/profissional/portfolio/adicionar" method="POST" enctype="multipart/form-data">
+                        <label style="display:block; font-weight:700; margin-bottom:10px;">Nova imagem do portfólio</label>
+                        <input type="file" name="portfolio_image" id="portfolioInput" accept="image/*" class="input" style="padding:10px;" required>
+                        <div class="form-help">Depois de escolher a foto, você verá a miniatura antes de enviar.</div>
+                        <div class="file-preview" id="portfolioPreviewBox"></div>
+                        <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+                            <button type="submit" class="btn btn-primary">Adicionar ao portfólio</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card">
+                    <strong style="display:block; color:var(--primary); margin-bottom:10px;">Dica de conversão</strong>
+                    <p class="subtle">Uma boa capa e imagens organizadas passam mais confiança. Você pode mostrar antes e depois, acabamento e detalhes do serviço.</p>
+                </div>
+            </div>
+            <div class="portfolio-grid" style="margin-top:18px;">
+                <% if (typeof portfolio !== 'undefined' && portfolio.length > 0) { %>
+                    <% portfolio.forEach(item => { %>
+                        <div class="portfolio-card">
+                            <img src="<%= item.image_url %>" alt="Portfólio">
+                            <form action="/profissional/portfolio/remover" method="POST">
+                                <input type="hidden" name="id" value="<%= item.id %>">
+                                <button type="submit" class="btn btn-danger" style="padding:8px 10px;"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="card"><p class="subtle">Nenhuma foto adicionada ainda.</p></div>
+                <% } %>
+            </div>
+        </div>
+
+        <div id="planos" class="tab-content">
+            <div class="section-head">
+                <h2>Meu Plano</h2>
+                <p>Escolha a duração do seu destaque. Quanto maior o período, melhor o valor final.</p>
+            </div>
+            <div class="card" style="max-width:760px;">
+                <div class="grid-2">
                     <div class="form-group">
                         <label>Quantidade de meses</label>
-                        <select id="planMonths" onchange="atualizarPlanoMeses()">
+                        <select id="planMonths" class="select" onchange="atualizarPlanoMeses()">
                             <% for(let m=1;m<=12;m++){ %>
                                 <option value="<%= m %>"><%= m %> <%= m > 1 ? 'meses' : 'mês' %></option>
                             <% } %>
                         </select>
                     </div>
-                    <p style="color:#ccc; margin:10px 0;">Valor base por mês: <strong style="color:#ffa500;">R$ 30,00</strong></p>
-                    <p style="color:#ccc; margin:10px 0;">Desconto aplicado: <strong id="planDiscount" style="color:#ffa500;">0%</strong></p>
-                    <p style="font-size:30px; color:#ffa500; font-weight:700; margin:15px 0;">Total: <span id="planTotal">R$ 30,00</span></p>
-                    <button class="btn btn-primary" type="button" onclick="pagarPlanoFlexivel()">Pagar via PIX</button>
+                    <div class="form-group">
+                        <label>Plano escolhido</label>
+                        <select id="planTier" class="select" onchange="atualizarPlanoMeses()">
+                            <option value="basic">Plano Básico · 1 profissão</option>
+                            <option value="professional">Plano Profissional · 2 profissões</option>
+                            <option value="premium">Plano Premium · 3 profissões</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="compact-box" style="margin-top:10px;">
+                    <p class="subtle">Valor base mensal: <strong style="color:var(--primary);">R$ <span id="planBaseValue">30</span>,00</strong></p>
+                    <p class="subtle">Desconto: <strong style="color:var(--primary);" id="planDiscount">0%</strong></p>
+                    <p style="font-size:30px; color:var(--primary); font-weight:800; margin:12px 0;">Total: <span id="planTotal">R$ 30,00</span></p>
+                    <button type="button" class="btn btn-primary">Continuar para pagamento</button>
                 </div>
             </div>
+        </div>
 
-            <!-- ABA PAGAMENTOS -->
-            <div id="pagamentos" class="tab-content">
-                <h2>Histórico de Pagamentos</h2>
-                <div class="table-responsive" style="margin-top: 25px;">
-                    <table>
-                        <thead>
+        <div id="pagamentos" class="tab-content">
+            <div class="section-head">
+                <h2>Pagamentos</h2>
+                <p>Histórico dos pagamentos vinculados ao seu perfil.</p>
+            </div>
+            <div class="card table-responsive">
+                <table>
+                    <thead><tr><th>Data</th><th>Plano</th><th>Valor</th><th>Status</th></tr></thead>
+                    <tbody>
+                    <% if (pagamentos && pagamentos.length > 0) { %>
+                        <% pagamentos.forEach(pag => { %>
                             <tr>
-                                <th>Data</th>
-                                <th>Plano</th>
-                                <th>Valor</th>
-                                <th>Status</th>
+                                <td><%= new Date(pag.payment_date).toLocaleDateString('pt-BR') %></td>
+                                <td><%= pag.plans?.name || 'Plano' %></td>
+                                <td>R$ <%= pag.amount %></td>
+                                <td><span class="badge <%= pag.status === 'completed' ? 'completed' : 'pending' %>"><%= pag.status %></span></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% if (typeof pagamentos !== 'undefined' && pagamentos.length > 0) { %>
-                                <% pagamentos.forEach(pag => { %>
-                                    <tr>
-                                        <td><%= new Date(pag.payment_date).toLocaleDateString('pt-BR') %></td>
-                                        <td><%= pag.plans?.name %></td>
-                                        <td>R$ <%= pag.amount %></td>
-                                        <td><span class="badge <%= pag.status %>"><%= pag.status === 'completed' ? 'Concluído' : 'Pendente' %></span></td>
-                                    </tr>
-                                <% }); %>
-                            <% } else { %>
-                                <tr><td colspan="4" style="text-align: center; color: #6c757d;">Nenhum pagamento registrado</td></tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="4" class="subtle">Nenhum pagamento registrado.</td></tr>
+                    <% } %>
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
+    </main>
+</div>
 
-    <script>
-        const BASE_PLAN_VALUE = 30;
-        function calcularDescontoPlano(meses){
-            if (meses >= 9) return 15;
-            if (meses >= 6) return 10;
-            if (meses >= 3) return 5;
-            return 0;
-        }
-        function atualizarPlanoMeses(){
-            const meses = Number(document.getElementById('planMonths')?.value || 1);
-            const desconto = calcularDescontoPlano(meses);
-            const subtotal = BASE_PLAN_VALUE * meses;
-            const total = subtotal * (1 - desconto/100);
-            const discountEl = document.getElementById('planDiscount');
-            const totalEl = document.getElementById('planTotal');
-            if (discountEl) discountEl.textContent = `${desconto}%`;
-            if (totalEl) totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        }
-        function pagarPlanoFlexivel() {
-            const meses = Number(document.getElementById('planMonths')?.value || 1);
-            const desconto = calcularDescontoPlano(meses);
-            const subtotal = BASE_PLAN_VALUE * meses;
-            const total = subtotal * (1 - desconto/100);
-            const nome = "<%= fullName %>";
-            const categoria = "<%= profissional.categories?.name || 'Não definida' %>";
-            const mensagem = `Olá, sou PROFISSIONAL da plataforma Contrataê.\n\nNome: ${nome}\nCategoria: ${categoria}\nPlano escolhido: ${meses} ${meses > 1 ? 'meses' : 'mês'}\nDesconto: ${desconto}%\nValor total: R$ ${total.toFixed(2).replace('.', ',')}\n\nEstou enviando o comprovante de pagamento.`;
-            const whatsappUrl = `https://wa.me/5516999999999?text=${encodeURIComponent(mensagem)}`;
-            window.open(whatsappUrl, '_blank');
-        }
-    </script>
-    
-    <!-- MODAL NOVO SERVIÇO -->
-    <div id="modalServico" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="fecharModal('modalServico')">&times;</span>
-            <h2>Registrar Novo Serviço</h2>
-            <form method="POST" action="/profissional/novo-servico" style="margin-top: 20px;">
-                <div class="form-group">
-                    <label>Nome do Cliente</label>
-                    <input type="text" name="client_name" required>
-                </div>
-                <div class="form-group">
-                    <label>Descrição do Serviço</label>
-                    <textarea name="service_description" required rows="4"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Valor (R$)</label>
-                    <input type="number" name="value" step="0.01" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Registrar Serviço</button>
-            </form>
-        </div>
-    </div>
-    
-    <script>
-        function mudarAba(aba) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            const tab = document.getElementById(aba);
-            if (tab) tab.classList.add('active');
-            const btn = Array.from(document.querySelectorAll('.tab-btn')).find(el => (el.getAttribute('onclick') || '').includes(`'${aba}'`));
-            if (btn) btn.classList.add('active');
-            window.location.hash = aba;
-        }
-        
-        function abrirModalServico() {
-            document.getElementById('modalServico').classList.add('active');
-        }
-        
-        function fecharModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-        
-        document.addEventListener('DOMContentLoaded', function(){ atualizarPlanoMeses(); const params = new URLSearchParams(window.location.search); const requestedTab = params.get('tab'); const hash = window.location.hash.replace('#',''); const target = requestedTab || hash; if(target && document.getElementById(target)) mudarAba(target); });
+<script>
+    const CATEGORY_DATA = <%- JSON.stringify(categorias || []) %>;
+    const CATEGORY_BY_ID = Object.fromEntries(CATEGORY_DATA.map(c => [c.id, c]));
+    const CATEGORY_BY_NAME = Object.fromEntries(CATEGORY_DATA.map(c => [String(c.name).toLowerCase(), c]));
+    const PLAN_CONFIG = {
+        basic: { label: 'Plano Básico', limit: 1, monthly: 30 },
+        professional: { label: 'Plano Profissional', limit: 2, monthly: 49 },
+        premium: { label: 'Plano Premium', limit: 3, monthly: 69 }
+    };
 
-        function marcarConcluido(servicoId) {
-            if (confirm('Marcar este serviço como concluído?')) {
-                fetch(`/profissional/servico/${servicoId}/concluir`, { method: 'POST' })
-                    .then(() => location.reload())
-                    .catch(err => alert('Erro ao atualizar serviço'));
-            }
+    function mudarAba(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('[data-tab-link]').forEach(btn => btn.classList.remove('active'));
+        const target = document.getElementById(tabId);
+        if (target) target.classList.add('active');
+        const link = document.querySelector(`[data-tab-link="${tabId}"]`);
+        if (link) link.classList.add('active');
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tabId);
+        history.replaceState({}, '', url.toString().replace(/#.*$/, '') + '#' + tabId);
+    }
+
+    function calculatePlanDiscount(months) {
+        if (months >= 12) return 18;
+        if (months >= 6) return 12;
+        if (months >= 3) return 6;
+        return 0;
+    }
+
+    function formatCurrency(value) {
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function getProfessionInputs() {
+        return Array.from(document.querySelectorAll('.profession-display'));
+    }
+
+    function applyPlan(planKey, syncMonthsBox = true) {
+        const plan = PLAN_CONFIG[planKey] || PLAN_CONFIG.basic;
+        document.getElementById('selectedPlanInput').value = planKey;
+        document.querySelectorAll('.plan-card').forEach(card => card.classList.toggle('active', card.dataset.plan === planKey));
+        document.querySelectorAll('.profession-row').forEach((row, idx) => row.classList.toggle('active', idx < plan.limit));
+        document.getElementById('planLabel').textContent = plan.label;
+        document.getElementById('planPriceLabel').textContent = plan.monthly;
+        if (syncMonthsBox) {
+            const tier = document.getElementById('planTier');
+            if (tier) tier.value = planKey;
         }
-        
-        function gerarComprovante(servicoId) {
-            window.open(`/profissional/comprovante/${servicoId}`, '_blank');
+        refreshProfilePrice();
+        updateSelectedChips();
+    }
+
+    function refreshProfilePrice() {
+        const planKey = document.getElementById('selectedPlanInput').value || 'basic';
+        const plan = PLAN_CONFIG[planKey] || PLAN_CONFIG.basic;
+        const months = Number(document.getElementById('profilePlanMonths')?.value || 1);
+        const discount = calculatePlanDiscount(months);
+        const total = plan.monthly * months * (1 - discount / 100);
+        document.getElementById('profileDiscountLabel').textContent = `${discount}%`;
+        document.getElementById('profileTotalLabel').textContent = formatCurrency(total);
+        const box = document.getElementById('upgradeNoteBox');
+        if (plan.limit === 1) {
+            box.style.display = 'block';
+            box.innerHTML = 'Quer mais visibilidade? Profissionais com 2 ou 3 categorias costumam aparecer para mais buscas.<br><strong>[Atualizar plano]</strong>';
+        } else {
+            box.style.display = 'none';
+            box.innerHTML = '';
         }
-        
-        function aprovarAvaliacao(avaliacaoId) {
-            if (confirm('Aprovar esta avaliação?')) {
-                fetch(`/profissional/avaliacao/${avaliacaoId}/aprovar`, { method: 'POST' })
-                    .then(() => location.reload())
-                    .catch(err => alert('Erro ao aprovar avaliação'));
-            }
+    }
+
+    function updateSelectedChips() {
+        const wrap = document.getElementById('selectedCategoryChips');
+        if (!wrap) return;
+        const items = [];
+        getProfessionInputs().forEach(input => {
+            const hidden = document.getElementById(input.dataset.hiddenTarget);
+            const row = input.closest('.profession-row');
+            if (row && !row.classList.contains('active')) return;
+            if (hidden?.value && input.value.trim()) items.push(input.value.trim());
+        });
+        wrap.innerHTML = items.map(name => `<span class="chip">${name}</span>`).join('');
+    }
+
+    function bindProfessionInputs() {
+        getProfessionInputs().forEach(input => {
+            input.addEventListener('change', () => handleProfessionInput(input));
+            input.addEventListener('blur', () => handleProfessionInput(input));
+        });
+    }
+
+    function handleProfessionInput(input) {
+        const hidden = document.getElementById(input.dataset.hiddenTarget);
+        const value = input.value.trim();
+        if (!value) {
+            hidden.value = '';
+            updateSelectedChips();
+            return;
         }
-    </script>
+        const match = CATEGORY_BY_NAME[value.toLowerCase()];
+        if (!match) {
+            hidden.value = '';
+            updateSelectedChips();
+            return;
+        }
+        const activeIds = getProfessionInputs().map(el => document.getElementById(el.dataset.hiddenTarget)?.value).filter(Boolean);
+        const alreadyExists = activeIds.filter(id => id === match.id).length > (hidden.value === match.id ? 1 : 0);
+        if (alreadyExists) {
+            hidden.value = '';
+            input.value = '';
+            const note = document.getElementById('upgradeInlineNote');
+            note.style.display = 'block';
+            note.textContent = 'Você já selecionou essa profissão. Escolha uma categoria diferente.';
+            updateSelectedChips();
+            return;
+        }
+        hidden.value = match.id;
+        const note = document.getElementById('upgradeInlineNote');
+        note.style.display = 'none';
+        note.textContent = '';
+        updateSelectedChips();
+    }
+
+    function validateProfileForm(event) {
+        const activeRows = Array.from(document.querySelectorAll('.profession-row.active'));
+        const chosen = activeRows
+            .map(row => row.querySelector('input[type="hidden"]')?.value)
+            .filter(Boolean);
+        if (chosen.length < 1) {
+            event.preventDefault();
+            const note = document.getElementById('upgradeInlineNote');
+            note.style.display = 'block';
+            note.textContent = 'Escolha pelo menos 1 profissão para salvar o perfil.';
+            mudarAba('perfil');
+            return false;
+        }
+        return true;
+    }
+
+    function previewPortfolioFile() {
+        const input = document.getElementById('portfolioInput');
+        const box = document.getElementById('portfolioPreviewBox');
+        if (!input || !box) return;
+        box.innerHTML = '';
+        const file = input.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => { box.innerHTML = `<img src="${e.target.result}" alt="Prévia">`; };
+        reader.readAsDataURL(file);
+    }
+
+    async function autoFillCep(cepValue) {
+        const cleaned = String(cepValue || '').replace(/\D/g, '');
+        if (cleaned.length !== 8) return;
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cleaned}/json/`);
+            const data = await response.json();
+            if (data.erro) return;
+            const city = document.getElementById('profileCity');
+            const state = document.getElementById('profileState');
+            if (city && !city.value) city.value = data.localidade || '';
+            if (state && !state.value) state.value = data.uf || '';
+        } catch (e) {
+            console.warn('Não foi possível consultar o CEP.', e);
+        }
+    }
+
+    function atualizarPlanoMeses() {
+        const months = Number(document.getElementById('planMonths')?.value || 1);
+        const planTier = document.getElementById('planTier')?.value || 'basic';
+        const config = PLAN_CONFIG[planTier];
+        const discount = calculatePlanDiscount(months);
+        const total = config.monthly * months * (1 - discount / 100);
+        document.getElementById('planBaseValue').textContent = config.monthly;
+        document.getElementById('planDiscount').textContent = `${discount}%`;
+        document.getElementById('planTotal').textContent = formatCurrency(total);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const initialTab = new URL(window.location.href).searchParams.get('tab') || (window.location.hash || '').replace('#', '') || 'resumo';
+        mudarAba(initialTab);
+
+        document.querySelectorAll('.plan-card').forEach(card => {
+            card.addEventListener('click', () => applyPlan(card.dataset.plan));
+        });
+
+        bindProfessionInputs();
+        applyPlan(new URL(window.location.href).searchParams.get('plan') || 'basic', true);
+        const monthsFromUrl = new URL(window.location.href).searchParams.get('months');
+        if (monthsFromUrl && document.getElementById('profilePlanMonths')) document.getElementById('profilePlanMonths').value = monthsFromUrl;
+        refreshProfilePrice();
+        atualizarPlanoMeses();
+
+        document.getElementById('profilePlanMonths')?.addEventListener('change', refreshProfilePrice);
+        document.getElementById('planTier')?.addEventListener('change', e => atualizarPlanoMeses());
+        document.getElementById('portfolioInput')?.addEventListener('change', previewPortfolioFile);
+        document.getElementById('profileCep')?.addEventListener('blur', e => autoFillCep(e.target.value));
+        document.querySelector('form.profile-form')?.addEventListener('submit', validateProfileForm);
+    });
+</script>
 </body>
 </html>
