@@ -567,7 +567,7 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
         }
 
         console.log("Dados básicos salvos com sucesso! Redirecionando para dashboard...");
-        return res.redirect(303, '/profissional/dashboard?tab=perfil&basic=1');
+        return res.redirect(303, '/profissional/dashboard?tab=perfil&wizard=1&basic=1');
     } catch (err) {
         console.error("ERRO CRÍTICO no POST /auth/completar-perfil:", err);
         return res.redirect('/auth/completar-perfil');
