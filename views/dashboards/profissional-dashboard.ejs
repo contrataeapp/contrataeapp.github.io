@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contrataê - Dashboard do Profissional</title>
+    <title>Contrataê · Área do Profissional</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#101114">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
@@ -24,7 +26,7 @@
         .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;text-decoration:none}
         .btn-primary{background:#ffb020;color:#111}.btn-secondary{background:#24262b;color:#fff;border:1px solid #393c44}.btn-danger{background:#ad3030;color:#fff}
         .top-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-        .small{color:#a9b0ba;font-size:13px}.flash{padding:14px 16px;border-radius:12px;margin-bottom:18px;border:1px solid #444}.flash.success{background:#142513;border-color:#285c27;color:#b9efb7}.flash.error{background:#291717;border-color:#6e2d2d;color:#ffb5b5}
+        .small{color:#a9b0ba;font-size:13px}.flash{padding:14px 16px;border-radius:12px;margin-bottom:18px;border:1px solid #444}.flash.success{background:#142513;border-color:#285c27;color:#b9efb7}.flash.error{background:#291717;border-color:#6e2d2d;color:#ffb5b5}.flash.info{background:rgba(60,98,255,.12);border-color:rgba(60,98,255,.35);color:#dbe5ff}.btn-muted{background:#2e3138;color:#bfc7d3;cursor:not-allowed}.modal-overlay-local{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:3000}.modal-overlay-local.active{display:flex}.modal-card-local{width:min(460px,100%);background:#17181c;border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:24px;box-shadow:0 30px 60px rgba(0,0,0,.45)}.modal-card-local h3{font-size:24px;color:#ffb020;margin-bottom:12px}.modal-card-local p{color:#d0d0d7;line-height:1.6}.modal-actions-local{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
         .summary-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}.detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.detail{padding:14px;border-radius:14px;border:1px solid #2a2d33;background:rgba(255,255,255,.02)}.detail strong{display:block;color:#ffb020;font-size:12px;margin-bottom:6px}
         .chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.chip{padding:8px 12px;border-radius:999px;background:#181a1f;border:1px solid #2c3037;color:#dde3ea;font-size:13px}
         .portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}.portfolio-thumb{position:relative;border:1px solid #2c3037;border-radius:14px;overflow:hidden;background:#121316;min-height:140px;display:flex;align-items:center;justify-content:center}.portfolio-thumb img{width:100%;height:140px;object-fit:cover}
@@ -55,7 +57,7 @@
     <main class="main">
         <header>
             <div>
-                <h1>Dashboard do Profissional</h1>
+                <h1>Área do Profissional</h1>
                 <div class="small">Gerencie seu perfil, portfólio e ativação da sua presença na plataforma.</div>
             </div>
             <div class="user-chip">
@@ -68,13 +70,14 @@
 
         <% if (flashError) { %><div class="flash error"><%= flashError %></div><% } %>
         <% if (flashSuccess) { %><div class="flash success"><%= flashSuccess %></div><% } %>
+        <% if (approvalPending) { %><div class="flash info">Seu perfil está em análise. Agora é só aguardar a resposta da administração.</div><% } %>
 
         <% if (!profileReadyForApproval) { %>
             <div class="banner">
                 <h3>Seu perfil ainda não está pronto para aparecer no site</h3>
-                <p>Finalize o onboarding para definir plano, profissões, descrição e imagens. Depois disso, você poderá revisar tudo com calma e só então solicitar aprovação.</p>
+                <p>Finalize as etapas do cadastro para definir plano, profissões, descrição e imagens. Depois disso, você poderá revisar tudo com calma e só então solicitar aprovação.</p>
                 <div class="top-actions">
-                    <a href="/profissional/onboarding?step=1" class="btn btn-primary">Continuar onboarding</a>
+                    <a href="/profissional/onboarding?step=1" class="btn btn-primary">Continuar cadastro</a>
                     <form action="/auth/cancelar-profissional" method="POST"><button class="btn btn-secondary" type="submit">Cancelar cadastro</button></form>
                 </div>
             </div>
@@ -83,8 +86,14 @@
                 <h3>Seu perfil está pronto para a próxima etapa</h3>
                 <p>Revise as informações abaixo. Quando estiver satisfeito, envie seu perfil para análise da plataforma.</p>
                 <div class="top-actions">
-                    <a href="/profissional/onboarding?step=1" class="btn btn-secondary">Editar onboarding</a>
-                    <form action="/profissional/solicitar-aprovacao" method="POST"><button class="btn btn-primary" type="submit">Solicitar aprovação</button></form>
+                    <a href="/profissional/onboarding?step=1" class="btn btn-secondary">Editar cadastro</a>
+                    <% if (isApproved) { %>
+                        <button class="btn btn-primary" type="button" disabled>Perfil aprovado</button>
+                    <% } else if (approvalPending) { %>
+                        <button class="btn btn-muted" type="button" disabled>Em análise</button>
+                    <% } else { %>
+                        <button class="btn btn-primary" type="button" id="openApprovalModal">Solicitar aprovação</button>
+                    <% } %>
                 </div>
             </div>
         <% } %>
@@ -108,8 +117,8 @@
                 </div>
                 <div class="panel">
                     <h2>Próximo passo</h2>
-                    <p class="small" style="margin-top:8px;">Use o onboarding separado para evoluir seu perfil sem cair em formulários confusos dentro da dashboard.</p>
-                    <div class="top-actions"><a href="/profissional/onboarding?step=1" class="btn btn-primary">Abrir onboarding</a></div>
+                    <p class="small" style="margin-top:8px;">Use as etapas guiadas para revisar ou ajustar seu cadastro com calma.</p>
+                    <div class="top-actions"><a href="/profissional/onboarding?step=1" class="btn btn-primary">Abrir etapas do cadastro</a></div>
                 </div>
             </div>
         </section>
@@ -117,7 +126,7 @@
         <section id="perfil" class="tab-content">
             <div class="panel">
                 <h2>Meu Perfil Profissional</h2>
-                <p class="small">Aqui fica a visão geral do perfil já salvo. Para editar, use o onboarding separado.</p>
+                <p class="small">Aqui fica a visão geral do perfil já salvo. Para editar, use as etapas do cadastro.</p>
                 <div class="detail-grid" style="margin-top:14px;">
                     <div class="detail"><strong>Nome</strong><%= profissional?.users?.full_name || fullName || 'Não informado' %></div>
                     <div class="detail"><strong>Telefone</strong><%= profissional.phone_number || 'Não informado' %></div>
@@ -169,7 +178,7 @@
         <section id="planos" class="tab-content">
             <div class="panel">
                 <h2>Meu Plano</h2>
-                <p class="small">Seu plano atual é definido no onboarding. Hoje você está no <strong><%= currentPlanName %></strong>.</p>
+                <p class="small">Seu plano atual foi definido nas etapas do cadastro. Hoje você está no <strong><%= currentPlanName %></strong>.</p>
                 <div class="top-actions">
                     <a href="/profissional/onboarding?step=1" class="btn btn-primary">Mudar plano</a>
                 </div>
@@ -207,9 +216,32 @@
             </div>
         </section>
 
-        <section id="servicos" class="tab-content"><div class="panel"><h2>Meus Serviços</h2><p class="small">Essa área entra na próxima fase do produto, depois que o onboarding estiver 100% redondo.</p></div></section>
+        <section id="servicos" class="tab-content"><div class="panel"><h2>Meus Serviços</h2><p class="small">Essa área entra na próxima fase do produto, depois que o cadastro do profissional estiver 100% redondo.</p></div></section>
         <section id="avaliacoes" class="tab-content"><div class="panel"><h2>Avaliações</h2><p class="small">Essa área entra na próxima fase do produto, com histórico, notas e evolução do perfil.</p></div></section>
     </main>
+</div>
+
+<div class="modal-overlay-local" id="approvalConfirmModal">
+  <div class="modal-card-local">
+    <h3>Enviar perfil para análise?</h3>
+    <p>Depois do envio, seu cadastro ficará em análise até a equipe revisar. Se você mudar plano, profissões ou imagens depois, o pedido atual volta para rascunho.</p>
+    <div class="modal-actions-local">
+      <button type="button" class="btn btn-secondary" id="closeApprovalModal">Cancelar</button>
+      <form action="/profissional/solicitar-aprovacao" method="POST">
+        <button class="btn btn-primary" type="submit">Enviar para análise</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay-local" id="approvalSentModal">
+  <div class="modal-card-local">
+    <h3>Perfil enviado</h3>
+    <p>Seu pedido foi enviado com sucesso. Agora é só aguardar a resposta da administração.</p>
+    <div class="modal-actions-local">
+      <button type="button" class="btn btn-primary" id="closeApprovalSentModal">Entendi</button>
+    </div>
+  </div>
 </div>
 <script>
 const activeTab = '<%= activeTab || "resumo" %>';
@@ -223,6 +255,19 @@ function openTab(tab){
 document.addEventListener('DOMContentLoaded', ()=>{
     document.querySelectorAll('.nav-link[data-tab]').forEach(link => link.addEventListener('click', ev => { ev.preventDefault(); openTab(link.dataset.tab); }));
     openTab(activeTab || 'resumo');
+    
+const approvalConfirmModal = document.getElementById('approvalConfirmModal');
+const approvalSentModal = document.getElementById('approvalSentModal');
+const openApprovalModalBtn = document.getElementById('openApprovalModal');
+const closeApprovalModalBtn = document.getElementById('closeApprovalModal');
+const closeApprovalSentModalBtn = document.getElementById('closeApprovalSentModal');
+if(openApprovalModalBtn){openApprovalModalBtn.addEventListener('click', ()=> approvalConfirmModal?.classList.add('active'));}
+if(closeApprovalModalBtn){closeApprovalModalBtn.addEventListener('click', ()=> approvalConfirmModal?.classList.remove('active'));}
+if(closeApprovalSentModalBtn){closeApprovalSentModalBtn.addEventListener('click', ()=> approvalSentModal?.classList.remove('active'));}
+window.addEventListener('click', (ev)=>{ if(ev.target === approvalConfirmModal) approvalConfirmModal.classList.remove('active'); if(ev.target === approvalSentModal) approvalSentModal.classList.remove('active'); });
+if((new URLSearchParams(window.location.search)).get('success') === 'Solicitação enviada para análise'){ approvalSentModal?.classList.add('active'); }
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+
 });
 </script>
 </body>

@@ -83,6 +83,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+app.get('/manifest.webmanifest', (req, res) => res.sendFile(path.join(__dirname, 'public', 'manifest.webmanifest')));
+app.get('/sw.js', (req, res) => {
+    res.set('Service-Worker-Allowed', '/');
+    res.sendFile(path.join(__dirname, 'public', 'sw.js'));
+});
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
@@ -259,6 +264,7 @@ app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
         // Padronizado para usar user_id
         const updateData = { 
             status: "active", 
+            approval_requested: false,
             data_vencimento: dataVencimento.toISOString(), 
             valor_pago: parseFloat(valor)
         };

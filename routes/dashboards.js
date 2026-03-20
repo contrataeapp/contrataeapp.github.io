@@ -6,7 +6,7 @@ const { catchAsync } = require('../middlewares/errorHandler');
 const multer = require('multer');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage(), limits: { files: 10, fileSize: 8 * 1024 * 1024 } });
 
 function compactText(value) {
     return String(value || '').trim();
@@ -172,6 +172,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
 ]), catchAsync(async (req, res) => {
     const body = req.body || {};
     const saveMode = body.save_mode === 'draft' ? 'draft' : 'final';
+    const currentStepLabel = Number(body.current_step || 1);
     const currentStep = Number(body.current_step || 1);
     const allCategories = await getAllCategories();
 
@@ -199,13 +200,14 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
         ? `Taxa de visita: R$ ${(parseCurrencyLike(body.service_fee_amount) || 0).toFixed(2).replace('.', ',')}`
         : compactText(body.price_info) || null;
 
+    const isCompleteForSave = Boolean(primaryCategory && basicData.phone_number && basicData.cep && basicData.city && basicData.state);
     const profilePayload = {
         user_id: req.session.userId,
         ...basicData,
         price_info: priceInfo,
-        status: 'pending',
+        status: saveMode === 'final' ? 'pending' : 'pending',
         approval_requested: false,
-        profile_completed: saveMode === 'final' ? Boolean(primaryCategory && basicData.phone_number && basicData.cep && basicData.city && basicData.state) : false
+        profile_completed: saveMode === 'final' ? isCompleteForSave : false
     };
 
     if (primaryCategory) {
@@ -240,12 +242,16 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
     }
 
     const portfolioFiles = [...(req.files?.portfolio_images || [])];
+    if (currentStepLabel === 4 && portfolioFiles.length > 3) {
+        return res.redirect('/profissional/onboarding?step=4&error=No onboarding inicial você pode enviar até 3 imagens');
+    }
     if (portfolioFiles.length) {
         const { data: existingPortfolio } = await supabase
             .from('professional_portfolio')
             .select('id')
             .eq('professional_id', req.session.userId);
-        const slotsLeft = Math.max(0, 10 - (existingPortfolio || []).length);
+        const maxAllowedNow = currentStepLabel === 4 ? 3 : 10;
+        const slotsLeft = Math.max(0, Math.min(maxAllowedNow, 10) - (existingPortfolio || []).length);
         for (const file of portfolioFiles.slice(0, slotsLeft)) {
             const ext = (file.originalname.split('.').pop() || 'jpg').toLowerCase();
             const path = `portfolio/portfolio_${req.session.userId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.${ext}`;
@@ -275,6 +281,8 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     const profissional = bundle.profissional;
     const basicProfileComplete = Boolean(profissional.phone_number && profissional.cep && profissional.city && profissional.state);
     const profileReadyForApproval = Boolean(basicProfileComplete && profissional.description && profissional.category_id && bundle.portfolio.length > 0);
+    const approvalPending = Boolean(profissional.approval_requested);
+    const isApproved = String(profissional.status || '').toLowerCase() === 'active';
 
     const selectedCount = [profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length;
     const currentPlanName = selectedCount >= 3 ? 'Plano Premium' : selectedCount === 2 ? 'Plano Profissional' : 'Plano Básico';
@@ -301,7 +309,9 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
         faturamentoMes: profissional?.payment_value || '0,00',
         avaliacaoMedia,
         currentPlanName,
-        selectedCount
+        selectedCount,
+        approvalPending,
+        isApproved
     });
 }));
 
@@ -324,12 +334,38 @@ router.get('/cliente/dashboard', requireAuth, catchAsync(async (req, res) => {
 }));
 
 router.post('/profissional/solicitar-aprovacao', requireProfessional, catchAsync(async (req, res) => {
+    const bundle = await getProfessionalBundle(req.session.userId);
+    const profissional = bundle.profissional || {};
+    const basicProfileComplete = Boolean(profissional.phone_number && profissional.cep && profissional.city && profissional.state);
+    const profileReadyForApproval = Boolean(basicProfileComplete && profissional.description && profissional.category_id && bundle.portfolio.length > 0);
+
+    if (profissional.approval_requested) {
+        return res.redirect('/profissional/dashboard?success=Seu perfil já está em análise');
+    }
+
+    if (!profileReadyForApproval) {
+        return res.redirect('/profissional/dashboard?error=Complete seu perfil antes de enviar para análise');
+    }
+
     const { error } = await supabase
         .from('professionals')
-        .update({ approval_requested: true, status: 'pending' })
+        .update({ approval_requested: true, status: 'pending', updated_at: new Date().toISOString() })
         .eq('user_id', req.session.userId);
 
     if (error) throw error;
+
+    await supabase.from('admin_logs').insert({
+        professional_id: req.session.userId,
+        action_type: 'approval_request',
+        new_values: {
+            profile: 'sent_to_review',
+            category_id: profissional.category_id || null,
+            price_info: profissional.price_info || null,
+            description: profissional.description || null
+        },
+        performed_by: 'professional-dashboard'
+    });
+
     res.redirect('/profissional/dashboard?success=Solicitação enviada para análise');
 }));
 
@@ -351,6 +387,8 @@ router.post('/profissional/portfolio/adicionar', requireProfessional, upload.fie
 
     const slotsLeft = Math.max(0, 10 - (existingPortfolio || []).length);
     const allowedFiles = files.slice(0, slotsLeft);
+
+    if (!allowedFiles.length) return res.redirect('/profissional/dashboard?tab=portfolio&error=Seu portfólio já atingiu o limite de 10 imagens');
 
     for (const file of allowedFiles) {
         const ext = (file.originalname.split('.').pop() || 'jpg').toLowerCase();

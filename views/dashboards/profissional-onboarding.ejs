@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contrataê · Onboarding Profissional</title>
+    <title>Contrataê · Cadastro do profissional</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#101114">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
@@ -67,9 +69,9 @@
     <div class="shell">
         <aside class="lead">
             <div>
-                <span class="badge">Onboarding profissional Contrataê</span>
-                <h1>Monte seu perfil em etapas claras, sem cair em dashboard confusa.</h1>
-                <p>Agora o cadastro profissional segue um caminho direto: plano, profissões, perfil e imagens. Só depois disso você entra na dashboard para gerenciar com calma.</p>
+                <span class="badge">Cadastro profissional Contrataê</span>
+                <h1>Monte seu perfil em etapas claras, sem cair em telas confusas.</h1>
+                <p>Agora o cadastro profissional segue um caminho direto: plano, profissões, perfil e imagens. Só depois disso você entra na sua área para gerenciar com calma.</p>
                 <div class="steps-info">
                     <div class="box"><strong>1. Escolha seu plano</strong>Defina quantas profissões quer ativar e por quantos meses quer manter seu perfil em destaque.</div>
                     <div class="box"><strong>2. Escolha suas profissões</strong>Selecione a principal, adicione extras conforme o plano e sugira uma nova profissão se não encontrar.</div>
@@ -81,8 +83,8 @@
 
         <section class="panel">
             <span class="badge">Fluxo profissional</span>
-            <h2>Concluir perfil profissional</h2>
-            <p style="margin-bottom:16px">Use as etapas abaixo. Você pode voltar, salvar um rascunho depois e só solicitar aprovação quando estiver satisfeito.</p>
+            <h2>Concluir cadastro profissional</h2>
+            <p style="margin-bottom:16px">Siga as etapas abaixo. Você pode voltar, salvar para terminar depois e só pedir análise quando estiver satisfeito.</p>
 
             <% if (flashError) { %><div class="flash error"><%= flashError %></div><% } %>
             <% if (flashSuccess) { %><div class="flash success"><%= flashSuccess %></div><% } %>
@@ -274,6 +276,7 @@
                     <div class="upload-box" style="margin-top:16px">
                         <strong style="color:#ffb020">Portfólio inicial</strong>
                         <p class="help" style="margin:10px 0 12px">Envie até 3 fotos iniciais agora. Depois você poderá editar e completar em “Meu Portfólio”.</p>
+                        <div class="help">Escolha até 3 imagens nesta etapa.</div>
                         <input type="file" name="portfolio_images" id="portfolioInput" accept="image/*" multiple>
                     </div>
                     <div class="preview-grid" id="portfolioPreviewGrid">
@@ -282,8 +285,8 @@
                         <% }) %>
                     </div>
                     <div class="subpanel">
-                        <strong style="color:#ffb020">Revisão final</strong>
-                        <p class="help" style="margin-top:8px">Ao salvar, seu perfil fica montado e você entra na dashboard para revisar, ajustar e depois solicitar aprovação.</p>
+                        <strong style="color:#ffb020">Antes de terminar</strong>
+                        <p class="help" style="margin-top:8px">Ao salvar, seu perfil fica montado e você entra na sua área para revisar, ajustar e depois pedir análise.</p>
                     </div>
                     <div class="actions">
                         <button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button>
@@ -374,7 +377,13 @@ function setupPortfolioPreview(){
     if(!input || !grid) return;
     input.addEventListener('change', ()=>{
         grid.querySelectorAll('.generated').forEach(el => el.remove());
-        Array.from(input.files || []).slice(0,3).forEach(file => {
+        const files = Array.from(input.files || []);
+        if(files.length > 3){
+            alert('No cadastro inicial você pode selecionar até 3 imagens.');
+            input.value = '';
+            return;
+        }
+        files.slice(0,3).forEach(file => {
             const reader = new FileReader();
             reader.onload = e => {
                 const div = document.createElement('div');
@@ -388,6 +397,7 @@ function setupPortfolioPreview(){
 }
 document.addEventListener('DOMContentLoaded', ()=>{
     updateStepUI(); updatePlanUI(); setupAvatarPreview(); setupPortfolioPreview();
+    if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
     document.querySelectorAll('input[name="plan_tier"]').forEach(el => el.addEventListener('change', updatePlanUI));
     document.getElementById('planMonths').addEventListener('change', updatePlanUI);
     document.getElementById('categorySearch').addEventListener('input', filterCategories);
