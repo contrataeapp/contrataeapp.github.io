@@ -83,6 +83,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/manifest.webmanifest', (req, res) => res.sendFile(path.join(__dirname, 'public', 'manifest.webmanifest')));
 app.get('/sw.js', (req, res) => {
     res.set('Service-Worker-Allowed', '/');
@@ -171,7 +172,11 @@ app.post('/login-adm', (req, res) => res.redirect(307, '/admin/login'));
 
 app.get('/admin/logout', (req, res) => {
     if (req.session) {
-        req.session.destroy(); 
+        req.session.destroy(() => {
+            res.clearCookie('connect.sid');
+            res.redirect('/admin/login');
+        });
+        return;
     }
     res.redirect('/admin/login');
 });
@@ -439,8 +444,8 @@ app.get("/api/admin/reports", checkAdminAPI, async (req, res) => {
 const dashboardRoutes = require("./routes/dashboards");
 app.use("/", dashboardRoutes);
 
-app.get("/auth/login", (req, res) => res.render("auth/login", { erro: null }));
-app.get("/auth/cadastro", (req, res) => res.render("auth/selecionar-tipo", { actionUrl: "/auth/cadastro-form" }));
+app.get("/auth/login", (req, res) => res.render("auth/login", { erro: null, next: req.query.next || '' }));
+app.get("/auth/cadastro", (req, res) => res.render("auth/selecionar-tipo", { actionUrl: "/auth/cadastro-form", next: req.query.next || '' }));
 app.get("/auth/cadastro-form", (req, res) => {
     const type = req.query.type || 'client';
     res.render("auth/cadastro", { erro: null, userType: type });
@@ -495,22 +500,23 @@ app.post("/auth/cancelar-profissional", async (req, res) => {
     console.log("--- INÍCIO POST /auth/cancelar-profissional ---");
     if (!req.session.userId) return res.redirect('/');
     try {
+        const { data: profissional } = await supabase.from('professionals').select('profile_completed, approval_requested').eq('user_id', req.session.userId).maybeSingle();
+        if (profissional?.profile_completed) {
+            return res.redirect(303, '/profissional/dashboard?error=Seu perfil já foi criado. Para ajustar dados, use as áreas da sua conta.');
+        }
         console.log("Cancelando cadastro profissional para UserID:", req.session.userId);
-        await supabase.from('users').update({ user_type: 'client' }).eq('id', req.session.userId);
         await supabase.from('professional_categories').delete().eq('professional_id', req.session.userId);
         await supabase.from('professional_specialties').delete().eq('professional_id', req.session.userId);
+        await supabase.from('professional_portfolio').delete().eq('professional_id', req.session.userId);
         await supabase.from('professionals').delete().eq('user_id', req.session.userId);
+        await supabase.from('users').delete().eq('id', req.session.userId);
         req.session.destroy(() => {
-            console.log("Cadastro cancelado com sucesso. Logout realizado. Redirecionando para home...");
+            res.clearCookie('connect.sid');
             return res.redirect(303, '/');
         });
     } catch (err) {
         console.error("Erro ao cancelar cadastro profissional:", err);
-        if (req.session) {
-            req.session.destroy(() => res.redirect(303, '/'));
-        } else {
-            res.redirect(303, '/');
-        }
+        return res.redirect(303, '/profissional/dashboard?error=Não foi possível cancelar agora.');
     }
 });
 

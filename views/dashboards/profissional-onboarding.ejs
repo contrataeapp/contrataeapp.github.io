@@ -82,7 +82,7 @@
         </aside>
 
         <section class="panel">
-            <span class="badge">Fluxo profissional</span>
+            <span class="badge">Cadastro guiado</span>
             <h2>Concluir cadastro profissional</h2>
             <p style="margin-bottom:16px">Siga as etapas abaixo. Você pode voltar, salvar para terminar depois e só pedir análise quando estiver satisfeito.</p>
 
@@ -142,7 +142,7 @@
                     </div>
                     <div class="summary-strip" style="margin-top:14px">Quer mais visibilidade? Profissionais com 2 ou 3 categorias costumam aparecer para mais buscas.</div>
                     <div class="actions">
-                        <button type="button" class="btn btn-secondary" onclick="cancelRegistration()">Cancelar cadastro</button>
+                        <% if (!profissional.profile_completed) { %><button type="button" class="btn btn-secondary" onclick="cancelRegistration()">Cancelar cadastro</button><% } else { %><a href="/profissional/dashboard" class="btn btn-secondary">Voltar para minha área</a><% } %>
                         <div style="display:flex;gap:10px;flex-wrap:wrap">
                             <button type="button" class="btn btn-ghost" onclick="saveDraft()">Salvar e sair depois</button>
                             <button type="button" class="btn btn-primary" onclick="nextStep()">Continuar</button>
@@ -158,7 +158,7 @@
                     <div class="grid-2" style="margin-top:14px">
                         <div class="field">
                             <label>Profissão principal</label>
-                            <select name="primary_category_id" id="primaryCategory" required>
+                            <select name="primary_category_id" data-category-select="1" id="primaryCategory" required>
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
                                     <option value="<%= cat.id %>" <%= currentPrimaryCategory && currentPrimaryCategory.id === cat.id ? 'selected' : '' %>><%= cat.name %></option>
@@ -173,7 +173,7 @@
                     <div class="grid-2" style="margin-top:12px">
                         <div class="field additional-slot additional-slot-2 hide">
                             <label>Profissão adicional 1</label>
-                            <select name="additional_category_1" class="extraCategorySelect">
+                            <select name="additional_category_1" data-category-select="1" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
                                     <option value="<%= cat.id %>" <%= selectedAdditionalIds && selectedAdditionalIds[0] === cat.id ? 'selected' : '' %>><%= cat.name %></option>
@@ -182,7 +182,7 @@
                         </div>
                         <div class="field additional-slot additional-slot-3 hide">
                             <label>Profissão adicional 2</label>
-                            <select name="additional_category_2" class="extraCategorySelect">
+                            <select name="additional_category_2" data-category-select="1" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
                                     <option value="<%= cat.id %>" <%= selectedAdditionalIds && selectedAdditionalIds[1] === cat.id ? 'selected' : '' %>><%= cat.name %></option>
@@ -190,9 +190,10 @@
                             </select>
                         </div>
                     </div>
-                    <div class="field" style="margin-top:12px">
+                    <div class="field hide" style="margin-top:12px" id="customProfessionWrap">
                         <label>Não encontrou sua profissão?</label>
-                        <input type="text" name="new_profession_request" value="<%= savedSuggestion || '' %>" placeholder="Escreva a profissão e o admin poderá analisar depois">
+                        <input type="text" name="new_profession_request" value="<%= savedSuggestion || '' %>" placeholder="Digite o nome da profissão. Nós vamos analisar essa nova categoria antes do perfil ficar no ar.">
+                        <div class="help">Use esse campo apenas quando escolher “Outros” ou quando realmente não encontrar algo parecido na lista.</div>
                     </div>
                     <div class="actions">
                         <button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button>
@@ -227,14 +228,14 @@
                         <div class="field"><label>Informações de preço</label><input type="text" name="price_info" value="<%= profissional.price_info || '' %>" placeholder="Ex: Taxa de visita R$ 50"></div>
                         <div class="field"><label>Taxa de serviço</label>
                             <div class="chips">
-                                <label class="chip"><input type="checkbox" id="serviceFeeToggle" name="service_fee_enabled"> Cobro taxa de visita</label>
+                                <label class="chip small"><input type="checkbox" id="serviceFeeToggle" name="service_fee_enabled"> Cobro taxa de visita</label>
                             </div>
                             <input type="text" id="serviceFeeAmount" name="service_fee_amount" class="hide" placeholder="Ex: 50,00" style="margin-top:8px">
                         </div>
                     </div>
                     <div class="field">
                         <label>Descrição profissional</label>
-                        <textarea name="description" placeholder="Explique em poucas linhas por que o cliente deve confiar no seu trabalho."><%= profissional.description || '' %></textarea>
+                        <textarea name="description" placeholder="Explique em poucas linhas o que você faz e por que o cliente pode confiar no seu trabalho."><%= profissional.description || '' %></textarea>
                     </div>
                     <div class="field">
                         <label>Disponibilidade</label>
@@ -245,9 +246,12 @@
                             <label class="chip"><input type="checkbox" name="available_24h" id="available24h"> 24h</label>
                         </div>
                         <div class="grid-2" style="margin-top:10px">
-                            <input type="time" name="availability_start">
-                            <input type="time" name="availability_end">
+                            <input type="time" name="availability_start" list="hourOptions">
+                            <input type="time" name="availability_end" list="hourOptions">
                         </div>
+                        <datalist id="hourOptions">
+                            <option value="07:00"></option><option value="08:00"></option><option value="09:00"></option><option value="10:00"></option><option value="12:00"></option><option value="13:00"></option><option value="18:00"></option>
+                        </datalist>
                     </div>
                     <div class="actions">
                         <button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button>
@@ -270,23 +274,24 @@
                         <div class="field">
                             <label>Foto de perfil</label>
                             <input type="file" name="avatar" id="avatarInput" accept="image/*">
-                            <div class="help">A foto de perfil ajuda a gerar mais confiança. Você pode trocar depois.</div>
+                            <div class="help">A foto de perfil ajuda a passar mais confiança. Você pode trocar depois.</div>
                         </div>
                     </div>
                     <div class="upload-box" style="margin-top:16px">
                         <strong style="color:#ffb020">Portfólio inicial</strong>
                         <p class="help" style="margin:10px 0 12px">Envie até 3 fotos iniciais agora. Depois você poderá editar e completar em “Meu Portfólio”.</p>
-                        <div class="help">Escolha até 3 imagens nesta etapa.</div>
+                        <div class="help">Cada espaço abaixo representa uma imagem.</div>
                         <input type="file" name="portfolio_images" id="portfolioInput" accept="image/*" multiple>
                     </div>
                     <div class="preview-grid" id="portfolioPreviewGrid">
-                        <% (portfolio || []).slice(0,3).forEach(item => { %>
-                            <div class="preview-card"><img src="<%= item.image_url %>" alt="Portfólio"></div>
-                        <% }) %>
+                        <% const initialPreview = (portfolio || []).slice(0,3); %>
+                        <% for (let i = 0; i < 3; i++) { const item = initialPreview[i]; %>
+                            <div class="preview-card <%= item ? '' : 'empty-slot' %>"><% if (item) { %><img src="<%= item.image_url %>" alt="Portfólio"><% } else { %><span>+ adicionar imagem</span><% } %></div>
+                        <% } %>
                     </div>
                     <div class="subpanel">
                         <strong style="color:#ffb020">Antes de terminar</strong>
-                        <p class="help" style="margin-top:8px">Ao salvar, seu perfil fica montado e você entra na sua área para revisar, ajustar e depois pedir análise.</p>
+                        <p class="help" style="margin-top:8px">Ao salvar, seu perfil fica pronto para revisão dentro da sua área. Depois você ajusta o que quiser e só então pede análise.</p>
                     </div>
                     <div class="actions">
                         <button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button>
@@ -354,11 +359,20 @@ async function buscarCep(cep){
     } catch(e){}
 }
 function filterCategories(){
-    const q = (document.getElementById('categorySearch').value || '').toLowerCase();
-    document.querySelectorAll('select option').forEach(opt => {
-        if(!opt.value) return;
-        opt.hidden = q && !opt.textContent.toLowerCase().includes(q);
+    const q = (document.getElementById('categorySearch').value || '').toLowerCase().trim();
+    if(!q) return;
+    document.querySelectorAll('select[data-category-select]').forEach(select => {
+        const match = Array.from(select.options).find(opt => opt.value && opt.textContent.toLowerCase().includes(q));
+        if(match) select.value = match.value;
     });
+}
+function toggleCustomProfession(){
+    const selectedOthers = Array.from(document.querySelectorAll('select[data-category-select]')).some(select => {
+        const opt = select.options[select.selectedIndex];
+        return opt && opt.textContent.trim().toLowerCase() === 'outros';
+    });
+    const wrap = document.getElementById('customProfessionWrap');
+    if(wrap) wrap.classList.toggle('hide', !selectedOthers);
 }
 function setupAvatarPreview(){
     const input = document.getElementById('avatarInput');
@@ -383,15 +397,17 @@ function setupPortfolioPreview(){
             input.value = '';
             return;
         }
-        files.slice(0,3).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const div = document.createElement('div');
-                div.className = 'preview-card generated';
-                div.innerHTML = `<img src="${e.target.result}" alt="Prévia">`;
-                grid.appendChild(div);
-            };
-            reader.readAsDataURL(file);
+        const allCards = Array.from(grid.querySelectorAll('.preview-card'));
+        allCards.forEach((card, index) => {
+            if(index < files.length){
+                const file = files[index];
+                const reader = new FileReader();
+                reader.onload = e => { card.classList.remove('empty-slot'); card.innerHTML = `<img src="${e.target.result}" alt="Prévia">`; };
+                reader.readAsDataURL(file);
+            } else if(!card.querySelector('img')) {
+                card.classList.add('empty-slot');
+                card.innerHTML = '<span>+ adicionar imagem</span>';
+            }
         });
     });
 }
@@ -401,6 +417,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.querySelectorAll('input[name="plan_tier"]').forEach(el => el.addEventListener('change', updatePlanUI));
     document.getElementById('planMonths').addEventListener('change', updatePlanUI);
     document.getElementById('categorySearch').addEventListener('input', filterCategories);
+    document.querySelectorAll('select[data-category-select]').forEach(el => el.addEventListener('change', toggleCustomProfession));
+    toggleCustomProfession();
     document.getElementById('onboardingCep').addEventListener('blur', e => buscarCep(e.target.value));
     document.getElementById('serviceFeeToggle').addEventListener('change', e => document.getElementById('serviceFeeAmount').classList.toggle('hide', !e.target.checked));
 });

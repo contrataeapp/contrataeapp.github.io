@@ -12,6 +12,27 @@ function compactText(value) {
     return String(value || '').trim();
 }
 
+function parsePlanConfig(body) {
+    const tier = compactText(body.plan_tier) || 'basic';
+    const months = Math.min(12, Math.max(1, Number(body.plan_months || 1) || 1));
+    const plans = {
+        basic: { slots: 1, monthly: 30, label: 'Plano Básico' },
+        professional: { slots: 2, monthly: 50, label: 'Plano Profissional' },
+        premium: { slots: 3, monthly: 70, label: 'Plano Premium' }
+    };
+    const plan = plans[tier] || plans.basic;
+    let discount = 0;
+    if (months >= 12) discount = 20;
+    else if (months >= 6) discount = 12;
+    else if (months >= 3) discount = 6;
+    const total = Number((plan.monthly * months * (1 - discount / 100)).toFixed(2));
+    return { tier, months, plan, discount, total };
+}
+
+function normalizeProfileStatus(profissional) {
+    return String(profissional?.profile_status || '').toLowerCase();
+}
+
 function parseCurrencyLike(value) {
     if (!value) return null;
     const cleaned = String(value).replace(/[^\d,.-]/g, '').replace(',', '.');
@@ -175,6 +196,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
     const currentStepLabel = Number(body.current_step || 1);
     const currentStep = Number(body.current_step || 1);
     const allCategories = await getAllCategories();
+    const planConfig = parsePlanConfig(body);
 
     const primaryCategory = resolveCategoryFromInput(body.primary_category_id || body.primary_category_name, allCategories);
     const additionalCategories = [body.additional_category_1, body.additional_category_2]
@@ -183,7 +205,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
 
     const selectedCategories = [primaryCategory, ...additionalCategories]
         .filter((cat, index, arr) => cat && arr.findIndex(other => other.id === cat.id) === index)
-        .slice(0, 3);
+        .slice(0, planConfig.plan.slots);
 
     const basicData = {
         phone_number: compactText(body.phone_number) || null,
@@ -196,8 +218,9 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
     };
 
     const serviceFeeEnabled = Boolean(body.service_fee_enabled);
-    const priceInfo = serviceFeeEnabled
-        ? `Taxa de visita: R$ ${(parseCurrencyLike(body.service_fee_amount) || 0).toFixed(2).replace('.', ',')}`
+    const serviceFeeAmount = parseCurrencyLike(body.service_fee_amount);
+    const priceInfo = serviceFeeEnabled && serviceFeeAmount !== null
+        ? `Taxa de visita: R$ ${serviceFeeAmount.toFixed(2).replace('.', ',')}`
         : compactText(body.price_info) || null;
 
     const isCompleteForSave = Boolean(primaryCategory && basicData.phone_number && basicData.cep && basicData.city && basicData.state);
@@ -205,8 +228,10 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
         user_id: req.session.userId,
         ...basicData,
         price_info: priceInfo,
-        status: saveMode === 'final' ? 'pending' : 'pending',
+        status: 'pending',
         approval_requested: false,
+        submitted_at: null,
+        profile_status: saveMode === 'final' && isCompleteForSave ? 'completed' : 'draft',
         profile_completed: saveMode === 'final' ? isCompleteForSave : false
     };
 
@@ -260,7 +285,9 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
         }
     }
 
-    await registerCategorySuggestion(req.session.userId, body.new_profession_request);
+    if (compactText(body.new_profession_request)) {
+        await registerCategorySuggestion(req.session.userId, body.new_profession_request);
+    }
 
     if (saveMode === 'draft') {
         return res.redirect(`/profissional/onboarding?step=${currentStep}&success=Rascunho salvo com sucesso`);
@@ -273,6 +300,58 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
     return res.redirect('/profissional/dashboard?success=Perfil concluído com sucesso');
 }));
 
+router.post('/profissional/perfil/atualizar', requireProfessional, catchAsync(async (req, res) => {
+    const body = req.body || {};
+    const displayName = compactText(body.display_name);
+    const availability = buildAvailability(body);
+    const serviceFeeEnabled = Boolean(body.service_fee_enabled);
+    const fee = parseCurrencyLike(body.service_fee_amount);
+    const priceInfo = serviceFeeEnabled && fee !== null
+        ? `Taxa de visita: R$ ${fee.toFixed(2).replace('.', ',')}`
+        : compactText(body.price_info) || null;
+
+    await supabase.from('professionals').update({
+        phone_number: compactText(body.phone_number) || null,
+        cep: compactText(body.cep) || null,
+        city: compactText(body.city) || null,
+        state: compactText(body.state).toUpperCase() || null,
+        specialties: compactText(body.specialties) || null,
+        description: compactText(body.description) || null,
+        availability,
+        price_info: priceInfo,
+        approval_requested: false,
+        submitted_at: null,
+        profile_status: 'completed'
+    }).eq('user_id', req.session.userId);
+
+    if (displayName) {
+        await supabase.from('users').update({ full_name: displayName }).eq('id', req.session.userId);
+        req.session.fullName = displayName;
+    }
+    res.redirect('/profissional/dashboard?tab=perfil&success=Perfil atualizado com sucesso');
+}));
+
+router.post('/profissional/plano/atualizar', requireProfessional, catchAsync(async (req, res) => {
+    const allCategories = await getAllCategories();
+    const planConfig = parsePlanConfig(req.body || {});
+    const bundle = await getProfessionalBundle(req.session.userId);
+    const primary = resolveCategoryFromInput(req.body.primary_category_id || bundle.profissional.category_id, allCategories) || bundle.currentPrimaryCategory;
+    const additions = [req.body.additional_category_1, req.body.additional_category_2]
+        .map(v => resolveCategoryFromInput(v, allCategories))
+        .filter(Boolean);
+    const selected = [primary, ...additions].filter((cat, i, arr) => cat && arr.findIndex(o => o.id === cat.id) === i).slice(0, planConfig.plan.slots);
+    if (!selected.length) return res.redirect('/profissional/dashboard?tab=planos&error=Escolha pelo menos uma profissão antes de mudar o plano');
+    await supabase.from('professionals').update({
+        category_id: selected[0].id,
+        approval_requested: false,
+        submitted_at: null,
+        profile_status: 'completed'
+    }).eq('user_id', req.session.userId);
+    await supabase.from('professional_categories').delete().eq('professional_id', req.session.userId);
+    await supabase.from('professional_categories').insert(selected.map(cat => ({ professional_id: req.session.userId, category_id: cat.id })));
+    res.redirect('/profissional/dashboard?tab=planos&success=Plano e profissões atualizados');
+}));
+
 router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req, res) => {
     console.log('--- INÍCIO GET /profissional/dashboard ---');
     console.log('UserID na Sessão:', req.session.userId);
@@ -283,6 +362,7 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     const profileReadyForApproval = Boolean(basicProfileComplete && profissional.description && profissional.category_id && bundle.portfolio.length > 0);
     const approvalPending = Boolean(profissional.approval_requested);
     const isApproved = String(profissional.status || '').toLowerCase() === 'active';
+    const profileStatus = normalizeProfileStatus(profissional) || (profileReadyForApproval ? 'completed' : 'draft');
 
     const selectedCount = [profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length;
     const currentPlanName = selectedCount >= 3 ? 'Plano Premium' : selectedCount === 2 ? 'Plano Profissional' : 'Plano Básico';
@@ -311,7 +391,8 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
         currentPlanName,
         selectedCount,
         approvalPending,
-        isApproved
+        isApproved,
+        profileStatus
     });
 }));
 
@@ -349,7 +430,7 @@ router.post('/profissional/solicitar-aprovacao', requireProfessional, catchAsync
 
     const { error } = await supabase
         .from('professionals')
-        .update({ approval_requested: true, status: 'pending', updated_at: new Date().toISOString() })
+        .update({ approval_requested: true, status: 'pending', profile_status: 'under_review', submitted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
         .eq('user_id', req.session.userId);
 
     if (error) throw error;
@@ -397,6 +478,7 @@ router.post('/profissional/portfolio/adicionar', requireProfessional, upload.fie
         await supabase.from('professional_portfolio').insert({ professional_id: req.session.userId, image_url: imageUrl });
     }
 
+    await supabase.from('professionals').update({ approval_requested: false, submitted_at: null, profile_status: 'completed' }).eq('user_id', req.session.userId);
     res.redirect('/profissional/dashboard?tab=portfolio&success=Imagens adicionadas ao portfólio');
 }));
 
@@ -409,6 +491,7 @@ router.post('/profissional/portfolio/remover', requireProfessional, catchAsync(a
         .eq('professional_id', req.session.userId);
 
     if (error) throw error;
+    await supabase.from('professionals').update({ approval_requested: false, submitted_at: null, profile_status: 'completed' }).eq('user_id', req.session.userId);
     res.redirect('/profissional/dashboard?tab=portfolio&success=Imagem removida');
 }));
 

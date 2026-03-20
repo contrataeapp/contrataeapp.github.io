@@ -43,7 +43,7 @@
                 </div>
                 <div class="mini-box">
                     <strong>Para profissionais</strong>
-                    Criar conta, completar o onboarding, selecionar profissões, montar portfólio e solicitar aprovação.
+                    Criar conta, completar as etapas do cadastro, escolher profissões, montar portfólio e pedir análise.
                 </div>
                 <div class="mini-box">
                     <strong>Objetivo da plataforma</strong>
@@ -54,14 +54,14 @@
         <section class="panel">
             <span class="badge">Primeiro passo</span>
             <h2>Como você deseja usar a plataforma?</h2>
-            <p>Escolha seu perfil abaixo. Se for profissional, o próximo passo será o cadastro inicial para liberar sua dashboard.</p>
+            <p>Escolha seu perfil abaixo. Se for profissional, o próximo passo será o cadastro inicial para liberar sua área.</p>
             <div class="options">
-                <a href="<%= actionUrl %>?type=client" class="option-card">
+                <a href="<%= actionUrl %>?type=client<%= next ? `&next=${encodeURIComponent(next)}` : "" %>" class="option-card">
                     <i class="fas fa-user"></i>
                     <h3>Cliente</h3>
                     <span>Quero encontrar profissionais, comparar opções e contratar com mais praticidade.</span>
                 </a>
-                <a href="<%= actionUrl %>?type=professional" class="option-card">
+                <a href="<%= actionUrl %>?type=professional<%= next ? `&next=${encodeURIComponent(next)}` : "" %>" class="option-card">
                     <i class="fas fa-tools"></i>
                     <h3>Profissional</h3>
                     <span>Quero oferecer meus serviços, montar meu perfil e ganhar visibilidade na plataforma.</span>

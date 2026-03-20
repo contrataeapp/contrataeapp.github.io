@@ -136,6 +136,7 @@ router.post('/cadastro', async (req, res) => {
         req.session.userId = userData.id;
         req.session.userType = userData.user_type;
         req.session.fullName = userData.full_name;
+        req.session.afterLoginRedirect = null;
 
         if (user_type === 'professional') {
             return res.redirect('/auth/completar-perfil');
@@ -149,7 +150,7 @@ router.post('/cadastro', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, next } = req.body;
 
         const { data: user, error } = await supabase
             .from('users')
@@ -169,18 +170,15 @@ router.post('/login', async (req, res) => {
         req.session.userId = user.id;
         req.session.userType = user.user_type;
         req.session.fullName = user.full_name;
+        const nextUrl = next && String(next).startsWith('/') ? next : null;
 
         if (user.user_type === 'professional') {
             const { data: prof } = await supabase.from('professionals').select('*').eq('user_id', user.id).maybeSingle();
-            if (!basicProfessionalProfileComplete(prof)) {
-                return res.redirect('/auth/completar-perfil');
-            }
-            if (!prof?.profile_completed) {
-                return res.redirect('/profissional/onboarding?step=1');
-            }
-            return res.redirect('/profissional/dashboard');
+            if (!basicProfessionalProfileComplete(prof)) return res.redirect('/auth/completar-perfil');
+            if (!prof?.profile_completed) return res.redirect('/profissional/onboarding?step=1');
+            return res.redirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
         }
-        return res.redirect('/cliente/dashboard');
+        return res.redirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
     } catch (err) {
         console.error(err);
         res.render('auth/login', { erro: 'Erro ao fazer login' });
@@ -192,9 +190,11 @@ router.post('/login', async (req, res) => {
 // ============================================
 router.get('/google', (req, res, next) => {
     const userType = req.query.type;
+    const nextUrl = req.query.next && String(req.query.next).startsWith('/') ? req.query.next : '';
     if (!userType) {
-        return res.render('auth/selecionar-tipo', { actionUrl: '/auth/google' });
+        return res.render('auth/selecionar-tipo', { actionUrl: '/auth/google', next: nextUrl });
     }
+    if (nextUrl) req.session.afterLoginRedirect = nextUrl;
     passport.authenticate('google', {
         scope: ['profile', 'email'],
         state: userType,
@@ -210,6 +210,7 @@ router.get('/google/callback', passport.authenticate('google', {
         req.session.userId = user.id;
         req.session.userType = user.user_type;
         req.session.fullName = user.full_name;
+        const nextUrl = next && String(next).startsWith('/') ? next : null;
 
         if (user.user_type === 'professional') {
             console.log('Usuário Google é profissional. Verificando perfil...');
@@ -235,16 +236,12 @@ router.get('/google/callback', passport.authenticate('google', {
                 prof = createdProf;
             }
 
-            if (user._wasNew || !basicProfessionalProfileComplete(prof)) {
-                return res.redirect('/auth/completar-perfil');
-            }
-            if (!prof?.profile_completed) {
-                return res.redirect('/profissional/onboarding?step=1');
-            }
-            return res.redirect('/profissional/dashboard');
+            if (user._wasNew || !basicProfessionalProfileComplete(prof)) return res.redirect('/auth/completar-perfil');
+            if (!prof?.profile_completed) return res.redirect('/profissional/onboarding?step=1');
+            return res.redirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
         }
 
-        return res.redirect('/cliente/dashboard');
+        return res.redirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
     } catch (err) {
         console.error('Erro no callback do Google:', err);
         res.redirect('/auth/login');
@@ -255,7 +252,11 @@ router.get('/google/callback', passport.authenticate('google', {
 // LOGOUT GERAL
 // ============================================
 router.get('/logout', (req, res) => {
+    if (req.logout) { try { req.logout(() => {}); } catch (e) {} }
+    const sidName = process.env.SESSION_NAME || 'connect.sid';
     req.session.destroy(() => {
+        res.clearCookie(sidName);
+        res.clearCookie('connect.sid');
         res.redirect('/');
     });
 });

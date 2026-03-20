@@ -176,6 +176,7 @@
             <% } %>
             
             <form method="POST" action="/auth/login">
+                <input type="hidden" name="next" value="<%= typeof next !== 'undefined' ? next : '' %>">
                 <div class="form-group">
                     <label>E-mail</label>
                     <input type="email" name="email" required placeholder="seu@email.com">
@@ -198,7 +199,7 @@
                 <span></span>
             </div>
             
-            <a href="/auth/google" class="btn btn-google">
+            <a href="/auth/google<%= (typeof next !== 'undefined' && next) ? `?next=${encodeURIComponent(next)}` : '' %>" class="btn btn-google">
                 <i class="fab fa-google"></i> Continuar com Google
             </a>
             
