@@ -1,0 +1,19 @@
+Use este projeto já editado e faça o deploy sem alterar o código.
+
+Tarefas:
+1. Abrir a pasta do projeto.
+2. Confirmar que o arquivo principal é server.js.
+3. Garantir que as variáveis de ambiente do Render continuem configuradas.
+4. Fazer commit com a mensagem:
+   fix: estabiliza autenticação e sessão v11.1
+5. Fazer push para a branch principal do repositório.
+6. Não reescrever layout, não simplificar onboarding e não trocar rotas.
+7. Após o push, conferir no Render se o deploy iniciou.
+
+Checklist rápido:
+- login normal funcionando
+- login Google funcionando
+- logout limpando sessão
+- header consistente em todas as páginas públicas
+- admin mostrando faixa/topo de forma consistente
+- sem regressão visual do onboarding

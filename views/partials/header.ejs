@@ -60,7 +60,14 @@
                 <li><a href="/categoria/encanadores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'encanadores') ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
                 <li><a href="/categoria/outros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'outros') ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
                 <li><a href="/contato" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'contato') ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
-                <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                <% if (adminLogado) { %>
+                    <li class="mobile-only"><a href="/admin"><i class="fas fa-user-shield"></i> Painel ADM</a></li>
+                <% } else if (userId) { %>
+                    <li class="mobile-only"><a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>"><i class="fas fa-gauge-high"></i> Dashboard</a></li>
+                    <li class="mobile-only"><a href="/auth/logout"><i class="fas fa-right-from-bracket"></i> Sair</a></li>
+                <% } else { %>
+                    <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                <% } %>
             </ul>
         </div>
     </nav>

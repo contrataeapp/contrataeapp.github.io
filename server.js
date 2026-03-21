@@ -7,6 +7,8 @@ const passport = require("passport");
 const cors = require("cors");
 const helmet = require("helmet");
 const multer = require('multer');
+const InMemorySessionStore = require('./stores/InMemorySessionStore');
+const { applyAdminSession, clearAdminSession } = require('./lib/sessionState');
 
 // Importar Middlewares e Controllers (Arquitetura SaaS)
 const { injectUserVars, requireAuth, requireProfessional, requireAdmin } = require('./middlewares/authMiddleware');
@@ -96,14 +98,20 @@ app.set("views", path.join(__dirname, "views"));
 // No Render, trust proxy deve estar ativo para cookies seguros funcionarem
 app.set("trust proxy", 1);
 
+const sessionCookieName = process.env.SESSION_NAME || 'contratae.sid';
+const sessionStore = new InMemorySessionStore({ ttlMs: 1000 * 60 * 60 * 24 * 7 });
+
 app.use(session({
+    name: sessionCookieName,
     secret: process.env.SESSION_SECRET || "contratae_secret_key_2026",
-    resave: true,
+    store: sessionStore,
+    resave: false,
     saveUninitialized: false,
+    rolling: true,
     proxy: true,
     cookie: { 
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24 * 7,
         httpOnly: true
     }
@@ -159,8 +167,14 @@ app.post('/admin/login', (req, res) => {
     const adminPass = process.env.ADMIN_PASS || '#Relaxsempre153143';
 
     if (usuario === adminUser && senha === adminPass) {
-        req.session.adminLogado = true;
-        res.redirect('/admin');
+        req.session.regenerate((err) => {
+            if (err) {
+                console.error('Erro ao regenerar sessão do admin:', err);
+                return res.render('admin/login_admin', { erro: 'Erro ao iniciar sessão de administrador.' });
+            }
+            applyAdminSession(req.session);
+            req.session.save(() => res.redirect('/admin'));
+        });
     } else {
         res.render('admin/login_admin', { erro: 'Usuário ou senha inválidos!' });
     }
@@ -173,6 +187,7 @@ app.post('/login-adm', (req, res) => res.redirect(307, '/admin/login'));
 app.get('/admin/logout', (req, res) => {
     if (req.session) {
         req.session.destroy(() => {
+            res.clearCookie(sessionCookieName);
             res.clearCookie('connect.sid');
             res.redirect('/admin/login');
         });

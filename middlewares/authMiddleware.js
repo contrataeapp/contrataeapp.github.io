@@ -1,3 +1,5 @@
+const { getPublicSessionUser } = require('../lib/sessionState');
+
 /**
  * Middlewares de Autenticação e Autorização
  */
@@ -27,10 +29,11 @@ const requireAdmin = (req, res, next) => {
 
 // Middleware para injetar variáveis globais em todas as views
 const injectUserVars = (req, res, next) => {
-    res.locals.userId = req.session.userId || null;
-    res.locals.userType = req.session.userType || null;
-    res.locals.fullName = req.session.fullName || null;
-    res.locals.adminLogado = req.session.adminLogado || false;
+    const state = getPublicSessionUser(req.session);
+    res.locals.userId = state.userId;
+    res.locals.userType = state.userType;
+    res.locals.fullName = state.fullName;
+    res.locals.adminLogado = state.adminLogado;
     next();
 };
 

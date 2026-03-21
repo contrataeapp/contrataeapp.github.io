@@ -4,6 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const { applyUserSession, clearAdminSession, clearUserSession } = require('../lib/sessionState');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
@@ -18,7 +19,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "https://contrataeapp.onrender.com/auth/google/callback",
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || 'https://contrataeapp.onrender.com/auth/google/callback',
         proxy: true,
         passReqToCallback: true
     }, async (req, accessToken, refreshToken, profile, done) => {
@@ -27,7 +28,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             const fullName = profile.displayName;
             const googleId = profile.id;
             const avatarUrl = profile.photos[0]?.value || null;
-            const requestedType = req.query.state === 'professional' ? 'professional' : 'client';
+            let stateData = {};
+            try {
+                stateData = JSON.parse(Buffer.from(String(req.query.state || ''), 'base64url').toString('utf8'));
+            } catch (_) {}
+            const requestedType = stateData.userType === 'professional' ? 'professional' : 'client';
 
             const { data: existingUser, error: selectError } = await supabase
                 .from('users')
@@ -39,11 +44,13 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
             let user;
             if (existingUser) {
+                const stableUserType = existingUser.user_type || requestedType;
                 const { data: updatedUser, error: updateError } = await supabase
                     .from('users')
                     .update({
                         google_id: googleId,
-                        avatar_url: existingUser.avatar_url || avatarUrl
+                        avatar_url: existingUser.avatar_url || avatarUrl,
+                        user_type: stableUserType
                     })
                     .eq('email', email)
                     .select()
@@ -133,15 +140,21 @@ router.post('/cadastro', async (req, res) => {
             }], { onConflict: 'user_id' });
         }
 
-        req.session.userId = userData.id;
-        req.session.userType = userData.user_type;
-        req.session.fullName = userData.full_name;
-        req.session.afterLoginRedirect = null;
-
-        if (user_type === 'professional') {
-            return res.redirect('/auth/completar-perfil');
-        }
-        return res.redirect('/cliente/dashboard');
+        req.session.regenerate((sessionErr) => {
+            if (sessionErr) {
+                console.error('Erro ao regenerar sessão no cadastro:', sessionErr);
+                return res.render('auth/cadastro', { erro: 'Erro ao iniciar sessão', userType: req.body.user_type || 'client' });
+            }
+            applyUserSession(req.session, userData);
+            req.session.afterLoginRedirect = null;
+            req.session.save(() => {
+                if (user_type === 'professional') {
+                    return res.redirect('/auth/completar-perfil');
+                }
+                return res.redirect('/cliente/dashboard');
+            });
+        });
+        return;
     } catch (err) {
         console.error(err);
         res.render('auth/cadastro', { erro: 'Erro ao criar conta', userType: req.body.user_type || 'client' });
@@ -159,18 +172,23 @@ router.post('/login', async (req, res) => {
             .maybeSingle();
 
         if (error || !user || !user.password) {
-            return res.render('auth/login', { erro: 'E-mail ou senha inválidos' });
+            return res.render('auth/login', { erro: 'E-mail ou senha inválidos', next: next || '' });
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.render('auth/login', { erro: 'E-mail ou senha inválidos' });
+            return res.render('auth/login', { erro: 'E-mail ou senha inválidos', next: next || '' });
         }
 
-        req.session.userId = user.id;
-        req.session.userType = user.user_type;
-        req.session.fullName = user.full_name;
         const nextUrl = next && String(next).startsWith('/') ? next : null;
+
+        req.session.regenerate(async (sessionErr) => {
+            if (sessionErr) {
+                console.error('Erro ao regenerar sessão no login:', sessionErr);
+                return res.render('auth/login', { erro: 'Erro ao iniciar sessão', next: next || '' });
+            }
+            applyUserSession(req.session, user);
+            req.session.afterLoginRedirect = nextUrl || null;
 
         if (user.user_type === 'professional') {
             const { data: prof } = await supabase.from('professionals').select('*').eq('user_id', user.id).maybeSingle();
@@ -179,9 +197,10 @@ router.post('/login', async (req, res) => {
             return res.redirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
         }
         return res.redirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
+        });
     } catch (err) {
         console.error(err);
-        res.render('auth/login', { erro: 'Erro ao fazer login' });
+        res.render('auth/login', { erro: 'Erro ao fazer login', next: req.body.next || '' });
     }
 });
 
@@ -194,10 +213,11 @@ router.get('/google', (req, res, next) => {
     if (!userType) {
         return res.render('auth/selecionar-tipo', { actionUrl: '/auth/google', next: nextUrl });
     }
+    const statePayload = Buffer.from(JSON.stringify({ userType, nextUrl })).toString('base64url');
     if (nextUrl) req.session.afterLoginRedirect = nextUrl;
     passport.authenticate('google', {
         scope: ['profile', 'email'],
-        state: userType,
+        state: statePayload,
         prompt: 'select_account'
     })(req, res, next);
 });
@@ -207,41 +227,50 @@ router.get('/google/callback', passport.authenticate('google', {
 }), async (req, res) => {
     try {
         const user = req.user;
-        req.session.userId = user.id;
-        req.session.userType = user.user_type;
-        req.session.fullName = user.full_name;
-        const nextUrl = next && String(next).startsWith('/') ? next : null;
+        const nextUrl = req.session.afterLoginRedirect && String(req.session.afterLoginRedirect).startsWith('/')
+            ? req.session.afterLoginRedirect
+            : null;
 
-        if (user.user_type === 'professional') {
-            console.log('Usuário Google é profissional. Verificando perfil...');
-            let { data: prof, error: profError } = await supabase
-                .from('professionals')
-                .select('*')
-                .eq('user_id', user.id)
-                .maybeSingle();
-            if (profError) throw profError;
-
-            if (!prof) {
-                const { data: createdProf, error: createProfError } = await supabase
-                    .from('professionals')
-                    .upsert({
-                        user_id: user.id,
-                        status: 'pending',
-                        profile_completed: false,
-                        approval_requested: false
-                    }, { onConflict: 'user_id' })
-                    .select()
-                    .single();
-                if (createProfError) throw createProfError;
-                prof = createdProf;
+        req.session.regenerate(async (sessionErr) => {
+            if (sessionErr) {
+                console.error('Erro ao regenerar sessão no callback Google:', sessionErr);
+                return res.redirect('/auth/login');
             }
 
-            if (user._wasNew || !basicProfessionalProfileComplete(prof)) return res.redirect('/auth/completar-perfil');
-            if (!prof?.profile_completed) return res.redirect('/profissional/onboarding?step=1');
-            return res.redirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
-        }
+            applyUserSession(req.session, user);
+            req.session.afterLoginRedirect = nextUrl || null;
 
-        return res.redirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
+            if (user.user_type === 'professional') {
+                console.log('Usuário Google é profissional. Verificando perfil...');
+                let { data: prof, error: profError } = await supabase
+                    .from('professionals')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+                if (profError) throw profError;
+
+                if (!prof) {
+                    const { data: createdProf, error: createProfError } = await supabase
+                        .from('professionals')
+                        .upsert({
+                            user_id: user.id,
+                            status: 'pending',
+                            profile_completed: false,
+                            approval_requested: false
+                        }, { onConflict: 'user_id' })
+                        .select()
+                        .single();
+                    if (createProfError) throw createProfError;
+                    prof = createdProf;
+                }
+
+                if (user._wasNew || !basicProfessionalProfileComplete(prof)) return res.redirect('/auth/completar-perfil');
+                if (!prof?.profile_completed) return res.redirect('/profissional/onboarding?step=1');
+                return res.redirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
+            }
+
+            return res.redirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
+        });
     } catch (err) {
         console.error('Erro no callback do Google:', err);
         res.redirect('/auth/login');
@@ -252,13 +281,25 @@ router.get('/google/callback', passport.authenticate('google', {
 // LOGOUT GERAL
 // ============================================
 router.get('/logout', (req, res) => {
-    if (req.logout) { try { req.logout(() => {}); } catch (e) {} }
-    const sidName = process.env.SESSION_NAME || 'connect.sid';
-    req.session.destroy(() => {
+    const sidName = process.env.SESSION_NAME || 'contratae.sid';
+    const finalize = () => {
         res.clearCookie(sidName);
         res.clearCookie('connect.sid');
         res.redirect('/');
-    });
+    };
+
+    if (!req.session) {
+        return finalize();
+    }
+
+    clearUserSession(req.session);
+    clearAdminSession(req.session);
+
+    const destroySession = () => req.session.destroy(() => finalize());
+    if (req.logout) {
+        return req.logout(() => destroySession());
+    }
+    return destroySession();
 });
 
 module.exports = router;
