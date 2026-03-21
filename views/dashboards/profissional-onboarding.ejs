@@ -158,7 +158,7 @@
                     <div class="grid-2" style="margin-top:14px">
                         <div class="field">
                             <label>Profissão principal</label>
-                            <select name="primary_category_id" data-category-select="1" id="primaryCategory" required>
+                            <select name="primary_category_id" data-category-select="1" id="primaryCategorySelect" required>
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
                                     <option value="<%= cat.id %>" <%= currentPrimaryCategory && currentPrimaryCategory.id === cat.id ? 'selected' : '' %>><%= cat.name %></option>
@@ -166,14 +166,16 @@
                             </select>
                         </div>
                         <div class="field">
-                            <label>Busca rápida</label>
-                            <input type="text" id="categorySearch" placeholder="Digite para filtrar as profissões disponíveis">
+                            <label>Busca rápida da profissão principal</label>
+                            <input type="text" id="primaryCategorySearch" placeholder="Digite para filtrar a profissão principal">
                         </div>
                     </div>
                     <div class="grid-2" style="margin-top:12px">
                         <div class="field additional-slot additional-slot-2 hide">
+                            <label>Busca rápida da profissão adicional</label>
+                            <input type="text" id="additionalCategorySearch" placeholder="Digite para filtrar a profissão adicional" style="margin-bottom:10px">
                             <label>Profissão adicional 1</label>
-                            <select name="additional_category_1" data-category-select="1" class="extraCategorySelect">
+                            <select name="additional_category_1" data-category-select="1" id="additionalCategorySelect1" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
                                     <option value="<%= cat.id %>" <%= selectedAdditionalIds && selectedAdditionalIds[0] === cat.id ? 'selected' : '' %>><%= cat.name %></option>
@@ -182,7 +184,7 @@
                         </div>
                         <div class="field additional-slot additional-slot-3 hide">
                             <label>Profissão adicional 2</label>
-                            <select name="additional_category_2" data-category-select="1" class="extraCategorySelect">
+                            <select name="additional_category_2" data-category-select="1" id="additionalCategorySelect2" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
                                     <option value="<%= cat.id %>" <%= selectedAdditionalIds && selectedAdditionalIds[1] === cat.id ? 'selected' : '' %>><%= cat.name %></option>
@@ -281,12 +283,13 @@
                         <strong style="color:#ffb020">Portfólio inicial</strong>
                         <p class="help" style="margin:10px 0 12px">Envie até 3 fotos iniciais agora. Depois você poderá editar e completar em “Meu Portfólio”.</p>
                         <div class="help">Cada espaço abaixo representa uma imagem.</div>
-                        <input type="file" name="portfolio_images" id="portfolioInput" accept="image/*" multiple>
+                        <input type="file" name="portfolio_images" id="portfolioInput" accept="image/*" multiple style="display:none">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('portfolioInput').click()">Selecionar imagens</button>
                     </div>
                     <div class="preview-grid" id="portfolioPreviewGrid">
                         <% const initialPreview = (portfolio || []).slice(0,3); %>
                         <% for (let i = 0; i < 3; i++) { const item = initialPreview[i]; %>
-                            <div class="preview-card <%= item ? '' : 'empty-slot' %>"><% if (item) { %><img src="<%= item.image_url %>" alt="Portfólio"><% } else { %><span>+ adicionar imagem</span><% } %></div>
+                            <button type="button" class="preview-card <%= item ? '' : 'empty-slot' %>" <% if (!item) { %>onclick="document.getElementById('portfolioInput').click()"<% } %>><% if (item) { %><img src="<%= item.image_url %>" alt="Portfólio"><% } else { %><span>+ adicionar imagem</span><% } %></button>
                         <% } %>
                     </div>
                     <div class="subpanel">
@@ -297,7 +300,7 @@
                         <button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button>
                         <div style="display:flex;gap:10px;flex-wrap:wrap">
                             <button type="button" class="btn btn-ghost" onclick="saveDraft()">Salvar e sair depois</button>
-                            <button type="submit" class="btn btn-primary">Finalizar perfil</button>
+                            <button type="submit" class="btn btn-primary" id="finishProfileBtn">Finalizar perfil</button>
                         </div>
                     </div>
                 </div>
@@ -358,12 +361,13 @@ async function buscarCep(cep){
         }
     } catch(e){}
 }
-function filterCategories(){
-    const q = (document.getElementById('categorySearch').value || '').toLowerCase().trim();
-    if(!q) return;
-    document.querySelectorAll('select[data-category-select]').forEach(select => {
-        const match = Array.from(select.options).find(opt => opt.value && opt.textContent.toLowerCase().includes(q));
-        if(match) select.value = match.value;
+function filterSelectBySearch(selectId, searchId){
+    const select = document.getElementById(selectId);
+    const search = document.getElementById(searchId);
+    if(!select || !search) return;
+    const q = (search.value || '').toLowerCase().trim();
+    Array.from(select.options).forEach(opt => {
+        opt.hidden = Boolean(q && opt.value && !opt.textContent.toLowerCase().includes(q));
     });
 }
 function toggleCustomProfession(){
@@ -416,7 +420,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
     document.querySelectorAll('input[name="plan_tier"]').forEach(el => el.addEventListener('change', updatePlanUI));
     document.getElementById('planMonths').addEventListener('change', updatePlanUI);
-    document.getElementById('categorySearch').addEventListener('input', filterCategories);
+    document.getElementById('primaryCategorySearch')?.addEventListener('input', () => filterSelectBySearch('primaryCategorySelect', 'primaryCategorySearch'));
+    document.getElementById('additionalCategorySearch')?.addEventListener('input', () => filterSelectBySearch('additionalCategorySelect1', 'additionalCategorySearch'));
+    document.getElementById('onboardingForm')?.addEventListener('submit', () => {
+        const submitter = document.activeElement;
+        const finishBtn = document.getElementById('finishProfileBtn');
+        if (finishBtn && submitter === finishBtn) {
+            finishBtn.disabled = true;
+            finishBtn.textContent = 'Salvando...';
+        }
+    });
     document.querySelectorAll('select[data-category-select]').forEach(el => el.addEventListener('change', toggleCustomProfession));
     toggleCustomProfession();
     document.getElementById('onboardingCep').addEventListener('blur', e => buscarCep(e.target.value));

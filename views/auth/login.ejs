@@ -199,12 +199,12 @@
                 <span></span>
             </div>
             
-            <a href="/auth/google<%= (typeof next !== 'undefined' && next) ? `?next=${encodeURIComponent(next)}` : '' %>" class="btn btn-google">
+            <a href="/auth/google/login<%= (typeof next !== 'undefined' && next) ? `?next=${encodeURIComponent(next)}` : '' %>" class="btn btn-google">
                 <i class="fab fa-google"></i> Continuar com Google
             </a>
             
             <div class="auth-footer">
-                <p>Não tem uma conta? <a href="/auth/cadastro">Cadastre-se</a></p>
+                <p>Não tem uma conta? <a href="/auth/cadastro">Clique em entrar e escolha como deseja continuar</a></p>
                 <p style="margin-top: 15px;"><a href="/esqueci-senha">Esqueceu a senha?</a></p>
             </div>
         </div>

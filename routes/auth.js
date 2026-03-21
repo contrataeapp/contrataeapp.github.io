@@ -32,7 +32,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             try {
                 stateData = JSON.parse(Buffer.from(String(req.query.state || ''), 'base64url').toString('utf8'));
             } catch (_) {}
-            const requestedType = stateData.userType === 'professional' ? 'professional' : 'client';
+            const requestedType = stateData.userType === 'professional'
+                ? 'professional'
+                : stateData.userType === 'client'
+                    ? 'client'
+                    : null;
 
             const { data: existingUser, error: selectError } = await supabase
                 .from('users')
@@ -44,7 +48,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
             let user;
             if (existingUser) {
-                const stableUserType = existingUser.user_type || requestedType;
+                const stableUserType = existingUser.user_type || requestedType || 'client';
                 const { data: updatedUser, error: updateError } = await supabase
                     .from('users')
                     .update({
@@ -66,7 +70,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                         full_name: fullName,
                         google_id: googleId,
                         avatar_url: avatarUrl,
-                        user_type: requestedType
+                        user_type: requestedType || 'client'
                     })
                     .select()
                     .single();
@@ -190,13 +194,18 @@ router.post('/login', async (req, res) => {
             applyUserSession(req.session, user);
             req.session.afterLoginRedirect = nextUrl || null;
 
-        if (user.user_type === 'professional') {
-            const { data: prof } = await supabase.from('professionals').select('*').eq('user_id', user.id).maybeSingle();
-            if (!basicProfessionalProfileComplete(prof)) return res.redirect('/auth/completar-perfil');
-            if (!prof?.profile_completed) return res.redirect('/profissional/onboarding?step=1');
-            return res.redirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
-        }
-        return res.redirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
+            const finishRedirect = (target) => req.session.save((saveErr) => {
+                if (saveErr) console.error('Erro ao salvar sessão no login:', saveErr);
+                return res.redirect(target);
+            });
+
+            if (user.user_type === 'professional') {
+                const { data: prof } = await supabase.from('professionals').select('*').eq('user_id', user.id).maybeSingle();
+                if (!basicProfessionalProfileComplete(prof)) return finishRedirect('/auth/completar-perfil');
+                if (!prof?.profile_completed) return finishRedirect('/profissional/onboarding?step=1');
+                return finishRedirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
+            }
+            return finishRedirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
         });
     } catch (err) {
         console.error(err);
@@ -207,29 +216,41 @@ router.post('/login', async (req, res) => {
 // ============================================
 // ROTAS DO GOOGLE OAUTH2
 // ============================================
-router.get('/google', (req, res, next) => {
-    const userType = req.query.type;
+function startGoogleAuth(req, res, next, mode = 'signup') {
     const nextUrl = req.query.next && String(req.query.next).startsWith('/') ? req.query.next : '';
-    if (!userType) {
+    let userType = req.query.type;
+
+    if (!userType && nextUrl.startsWith('/profissional')) userType = 'professional';
+    if (!userType && nextUrl.startsWith('/cliente')) userType = 'client';
+
+    if (!userType && mode !== 'login') {
         return res.render('auth/selecionar-tipo', { actionUrl: '/auth/google', next: nextUrl });
     }
-    const statePayload = Buffer.from(JSON.stringify({ userType, nextUrl })).toString('base64url');
+
+    const statePayload = Buffer.from(JSON.stringify({ userType, nextUrl, mode })).toString('base64url');
     if (nextUrl) req.session.afterLoginRedirect = nextUrl;
     passport.authenticate('google', {
         scope: ['profile', 'email'],
         state: statePayload,
         prompt: 'select_account'
     })(req, res, next);
-});
+}
+
+router.get('/google', (req, res, next) => startGoogleAuth(req, res, next, 'signup'));
+router.get('/google/login', (req, res, next) => startGoogleAuth(req, res, next, 'login'));
 
 router.get('/google/callback', passport.authenticate('google', {
     failureRedirect: '/auth/login'
 }), async (req, res) => {
     try {
         const user = req.user;
+        let stateData = {};
+        try {
+            stateData = JSON.parse(Buffer.from(String(req.query.state || ''), 'base64url').toString('utf8'));
+        } catch (_) {}
         const nextUrl = req.session.afterLoginRedirect && String(req.session.afterLoginRedirect).startsWith('/')
             ? req.session.afterLoginRedirect
-            : null;
+            : (stateData.nextUrl && String(stateData.nextUrl).startsWith('/') ? stateData.nextUrl : null);
 
         req.session.regenerate(async (sessionErr) => {
             if (sessionErr) {
@@ -239,9 +260,12 @@ router.get('/google/callback', passport.authenticate('google', {
 
             applyUserSession(req.session, user);
             req.session.afterLoginRedirect = nextUrl || null;
+            const finishRedirect = (target) => req.session.save((saveErr) => {
+                if (saveErr) console.error('Erro ao salvar sessão no callback Google:', saveErr);
+                return res.redirect(target);
+            });
 
             if (user.user_type === 'professional') {
-                console.log('Usuário Google é profissional. Verificando perfil...');
                 let { data: prof, error: profError } = await supabase
                     .from('professionals')
                     .select('*')
@@ -264,12 +288,12 @@ router.get('/google/callback', passport.authenticate('google', {
                     prof = createdProf;
                 }
 
-                if (user._wasNew || !basicProfessionalProfileComplete(prof)) return res.redirect('/auth/completar-perfil');
-                if (!prof?.profile_completed) return res.redirect('/profissional/onboarding?step=1');
-                return res.redirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
+                if (user._wasNew || !basicProfessionalProfileComplete(prof)) return finishRedirect('/auth/completar-perfil');
+                if (!prof?.profile_completed) return finishRedirect('/profissional/onboarding?step=1');
+                return finishRedirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
             }
 
-            return res.redirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
+            return finishRedirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
         });
     } catch (err) {
         console.error('Erro no callback do Google:', err);
@@ -280,12 +304,13 @@ router.get('/google/callback', passport.authenticate('google', {
 // ============================================
 // LOGOUT GERAL
 // ============================================
-router.get('/logout', (req, res) => {
+function logoutHandler(req, res) {
     const sidName = process.env.SESSION_NAME || 'contratae.sid';
     const finalize = () => {
-        res.clearCookie(sidName);
-        res.clearCookie('connect.sid');
-        res.redirect('/');
+        res.clearCookie(sidName, { path: '/' });
+        res.clearCookie('connect.sid', { path: '/' });
+        res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
+        return res.redirect('/');
     };
 
     if (!req.session) {
@@ -295,11 +320,24 @@ router.get('/logout', (req, res) => {
     clearUserSession(req.session);
     clearAdminSession(req.session);
 
-    const destroySession = () => req.session.destroy(() => finalize());
-    if (req.logout) {
+    const destroySession = () => {
+        const sessionId = req.sessionID;
+        req.session.destroy(() => {
+            if (req.sessionStore && sessionId) {
+                req.sessionStore.destroy(sessionId, () => finalize());
+                return;
+            }
+            finalize();
+        });
+    };
+
+    if (typeof req.logout === 'function') {
         return req.logout(() => destroySession());
     }
     return destroySession();
-});
+}
+
+router.get('/logout', logoutHandler);
+router.post('/logout', logoutHandler);
 
 module.exports = router;

@@ -14,8 +14,9 @@
         .sidebar{width:230px;background:#111;padding:24px 12px;position:fixed;inset:0 auto 0 0;border-right:1px solid #232323}
         .logo{font-size:22px;font-weight:800;margin-bottom:28px;text-align:center}.logo a{color:#ffb020;text-decoration:none}
         .sidebar ul{list-style:none}.sidebar li{margin-bottom:8px}
-        .sidebar a{display:flex;align-items:center;gap:12px;color:#b8c0cc;text-decoration:none;padding:12px 14px;border-radius:12px;transition:.2s}
-        .sidebar a:hover,.sidebar a.active{background:rgba(255,176,32,.12);color:#ffb020}
+        .sidebar a,.sidebar-logout-btn{display:flex;align-items:center;gap:12px;color:#b8c0cc;text-decoration:none;padding:12px 14px;border-radius:12px;transition:.2s;width:100%;background:none;border:0;font:inherit;cursor:pointer;text-align:left}
+.sidebar-logout-form{margin:0}
+        .sidebar a:hover,.sidebar a.active,.sidebar-logout-btn:hover{background:rgba(255,176,32,.12);color:#ffb020}
         .main{margin-left:230px;width:calc(100% - 230px);padding:28px}
         header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px} h1{color:#ffb020;font-size:24px}
         .user-chip{display:flex;align-items:center;gap:12px}.avatar{width:42px;height:42px;border-radius:50%;background:#ffb020;color:#111;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}
@@ -50,7 +51,7 @@
             <li><a href="#" class="nav-link" data-tab="portfolio"><i class="fas fa-image"></i> Meu Portfólio</a></li>
             <li><a href="#" class="nav-link" data-tab="planos"><i class="fas fa-credit-card"></i> Meu Plano</a></li>
             <li><a href="#" class="nav-link" data-tab="pagamentos"><i class="fas fa-money-check"></i> Pagamentos</a></li>
-            <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+            <li><form method="POST" action="/auth/logout" class="sidebar-logout-form"><button type="submit" class="sidebar-logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</button></form></li>
         </ul>
     </aside>
 
@@ -86,7 +87,7 @@
                 <h3>Seu perfil está pronto para a próxima etapa</h3>
                 <p>Revise as informações abaixo. Quando estiver satisfeito, envie seu perfil para análise da plataforma.</p>
                 <div class="top-actions">
-                    <a href="/profissional/onboarding?step=1" class="btn btn-secondary">Editar etapas do cadastro</a>
+                    <a href="/profissional/dashboard?tab=perfil" class="btn btn-secondary">Editar perfil</a>
                     <% if (isApproved) { %>
                         <button class="btn btn-primary" type="button" disabled>Perfil aprovado</button>
                     <% } else if (approvalPending) { %>
@@ -158,7 +159,7 @@
                         <div class="field"><label>Disponibilidade</label><input type="text" name="availability_start" placeholder="08:00"><input type="text" name="availability_end" placeholder="18:00" style="margin-top:8px"></div>
                     </div>
                     <div class="field" style="margin-top:12px"><label>Descrição</label><textarea name="description"><%= profissional.description || '' %></textarea></div>
-                    <div class="top-actions"><button type="submit" class="btn btn-primary">Salvar ajustes do perfil</button></div>
+                    <div class="top-actions"><button type="button" class="btn btn-secondary" onclick="cancelProfileEdit()">Cancelar edição</button><button type="submit" class="btn btn-primary">Salvar ajustes do perfil</button><form method="POST" action="/auth/cancelar-profissional" onsubmit="return confirm('Deseja excluir seu perfil profissional? Esta ação apaga o cadastro em andamento.')"><button type="submit" class="btn btn-danger">Excluir perfil</button></form></div>
                 </form>
             </div>
         </section>
@@ -167,8 +168,8 @@
             <div class="panel">
                 <h2>Meu Portfólio</h2>
                 <p class="small" style="margin-bottom:14px;">Aqui você completa até 10 imagens. Cada espaço vazio representa uma foto que ainda pode ser adicionada.</p>
-                <form action="/profissional/portfolio/adicionar" method="POST" enctype="multipart/form-data" class="form-inline">
-                    <input type="file" name="portfolio_images" accept="image/*" multiple required>
+                <form action="/profissional/portfolio/adicionar" method="POST" enctype="multipart/form-data" class="form-inline" id="dashboardPortfolioForm">
+                    <input type="file" name="portfolio_images" id="dashboardPortfolioInput" accept="image/*" multiple required>
                     <button type="submit" class="btn btn-primary">Adicionar ao portfólio</button>
                 </form>
                 <div class="portfolio-slots">
@@ -183,7 +184,7 @@
                                 </form>
                             </div>
                         <% } else { %>
-                            <div class="slot empty">+ espaço livre<br>para nova imagem</div>
+                            <button type="button" class="slot empty slot-trigger" onclick="openPortfolioPicker()">+ espaço livre<br>para nova imagem</button>
                         <% } %>
                     <% } %>
                 </div>
@@ -195,7 +196,7 @@
                 <h2>Meu Plano</h2>
                 <p class="small">Seu plano atual foi definido nas etapas do cadastro. Hoje você está no <strong><%= currentPlanName %></strong>.</p>
                 <div class="top-actions">
-                    <a href="/profissional/onboarding?step=1" class="btn btn-primary">Ajustar plano e profissões</a>
+                    <a href="/profissional/dashboard?tab=planos" class="btn btn-primary">Ajustar plano e profissões</a>
                 </div>
                 <div class="detail-grid" style="margin-top:14px;">
                     <div class="detail"><strong>Profissões liberadas</strong><%= selectedCount || 1 %></div>
@@ -282,6 +283,22 @@ if(closeApprovalSentModalBtn){closeApprovalSentModalBtn.addEventListener('click'
 window.addEventListener('click', (ev)=>{ if(ev.target === approvalConfirmModal) approvalConfirmModal.classList.remove('active'); if(ev.target === approvalSentModal) approvalSentModal.classList.remove('active'); });
 if((new URLSearchParams(window.location.search)).get('success') === 'Solicitação enviada para análise'){ approvalSentModal?.classList.add('active'); }
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+
+window.cancelProfileEdit = function(){
+  const url = new URL(window.location.href);
+  url.searchParams.set('tab', 'perfil');
+  url.searchParams.delete('success');
+  url.searchParams.delete('error');
+  window.location.href = url.toString();
+};
+window.openPortfolioPicker = function(){
+  document.getElementById('dashboardPortfolioInput')?.click();
+};
+document.getElementById('dashboardPortfolioInput')?.addEventListener('change', function(){
+  if(this.files && this.files.length){
+    document.getElementById('dashboardPortfolioForm')?.requestSubmit();
+  }
+});
 
 });
 </script>

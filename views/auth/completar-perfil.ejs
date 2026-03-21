@@ -144,7 +144,7 @@
 
                 <div class="actions">
                     <button type="submit" formaction="/auth/cancelar-profissional" class="btn btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Criar conta profissional</button>
+                    <button type="submit" class="btn btn-primary" id="completeProfileSubmit">Continuar</button>
                 </div>
             </form>
         </section>
@@ -165,6 +165,16 @@
             }
         }
         document.getElementById('cep')?.addEventListener('blur', e => buscarCep(e.target.value));
+    </script>
+    <script>
+        const completeProfileForm = document.querySelector('form[action="/auth/completar-perfil"]');
+        const completeProfileSubmit = document.getElementById('completeProfileSubmit');
+        if (completeProfileForm && completeProfileSubmit) {
+            completeProfileForm.addEventListener('submit', () => {
+                completeProfileSubmit.disabled = true;
+                completeProfileSubmit.innerHTML = '⏳ Continuando...';
+            });
+        }
     </script>
 </body>
 </html>

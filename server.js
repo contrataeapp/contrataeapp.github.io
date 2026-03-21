@@ -84,11 +84,29 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use((req, res, next) => {
+    const accept = String(req.headers.accept || '');
+    if (req.method === 'GET' && accept.includes('text/html')) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.setHeader('Vary', 'Cookie');
+    }
+    next();
+});
+app.use(express.static(path.join(__dirname, "public"), {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('sw.js')) {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            res.setHeader('Service-Worker-Allowed', '/');
+        }
+    }
+}));
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/manifest.webmanifest', (req, res) => res.sendFile(path.join(__dirname, 'public', 'manifest.webmanifest')));
 app.get('/sw.js', (req, res) => {
     res.set('Service-Worker-Allowed', '/');
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(path.join(__dirname, 'public', 'sw.js'));
 });
 app.set("view engine", "ejs");
@@ -187,8 +205,8 @@ app.post('/login-adm', (req, res) => res.redirect(307, '/admin/login'));
 app.get('/admin/logout', (req, res) => {
     if (req.session) {
         req.session.destroy(() => {
-            res.clearCookie(sessionCookieName);
-            res.clearCookie('connect.sid');
+            res.clearCookie(sessionCookieName, { path: '/' });
+            res.clearCookie('connect.sid', { path: '/' });
             res.redirect('/admin/login');
         });
         return;
@@ -276,34 +294,49 @@ app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
         const { valor, tipo_prazo, prazo, motivo } = req.body;
         const id = req.params.id;
         let dataVencimento = new Date();
+        const prazoNumero = Number.parseInt(prazo, 10);
 
-        if (tipo_prazo === 'dias') dataVencimento.setDate(dataVencimento.getDate() + parseInt(prazo));
-        else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
-        else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
+        if (tipo_prazo === 'dias' && Number.isFinite(prazoNumero)) dataVencimento.setDate(dataVencimento.getDate() + prazoNumero);
+        else if (tipo_prazo === 'meses' && Number.isFinite(prazoNumero)) dataVencimento.setMonth(dataVencimento.getMonth() + prazoNumero);
+        else if (tipo_prazo === 'data' && prazo) dataVencimento = new Date(prazo);
 
-        // Padronizado para usar user_id
-        const updateData = { 
-            status: "active", 
+        const valorPago = Number.parseFloat(valor);
+        const updateData = {
+            status: "active",
             approval_requested: false,
-            data_vencimento: dataVencimento.toISOString(), 
-            valor_pago: parseFloat(valor)
+            submitted_at: null,
+            profile_status: 'approved',
+            data_vencimento: dataVencimento.toISOString(),
+            valor_pago: Number.isFinite(valorPago) ? valorPago : 0
         };
         const { error: errorAtualizar } = await supabase.from("professionals")
             .update(updateData)
             .eq("user_id", id);
-        
+
         if (errorAtualizar) throw errorAtualizar;
 
-        // Registrar Log
-        await supabase.from('admin_logs').insert([{
-            admin_id: req.session.userId,
-            action: 'aprovação',
-            target_id: id,
-            details: `Profissional aprovado com valor R$ ${valor} e vencimento em ${dataVencimento.toLocaleDateString('pt-BR')}`
-        }]);
+        try {
+            await supabase.from('admin_logs').insert({
+                professional_id: id,
+                action_type: 'approval_granted',
+                new_values: {
+                    valor_pago: updateData.valor_pago,
+                    tipo_prazo,
+                    prazo,
+                    motivo: motivo || null,
+                    data_vencimento: updateData.data_vencimento
+                },
+                performed_by: 'admin-panel'
+            });
+        } catch (logErr) {
+            console.error('Falha ao registrar log de aprovação:', logErr);
+        }
 
         res.json({ sucesso: true });
-    } catch (err) { res.status(500).json({ erro: err.message }); }
+    } catch (err) {
+        console.error('Erro ao aprovar profissional:', err);
+        res.status(500).json({ erro: err.message });
+    }
 });
 
 // APIs DE BANNERS (SaaS - Com Upload para Supabase Storage)
@@ -526,7 +559,9 @@ app.post("/auth/cancelar-profissional", async (req, res) => {
         await supabase.from('professionals').delete().eq('user_id', req.session.userId);
         await supabase.from('users').delete().eq('id', req.session.userId);
         req.session.destroy(() => {
-            res.clearCookie('connect.sid');
+            const sidName = process.env.SESSION_NAME || 'contratae.sid';
+            res.clearCookie(sidName, { path: '/' });
+            res.clearCookie('connect.sid', { path: '/' });
             return res.redirect(303, '/');
         });
     } catch (err) {
