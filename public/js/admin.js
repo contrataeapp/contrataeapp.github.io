@@ -40,11 +40,24 @@ async function carregarSolicitacoes() {
         if (!tbody) return;
         
         if (solicitacoes.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 20px;">Nenhuma solicitação pendente</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999; padding: 20px;">Nenhuma solicitação pendente</td></tr>';
             return;
         }
         
-        tbody.innerHTML = solicitacoes.map(s => `
+        tbody.innerHTML = solicitacoes.map(s => {
+            const reqData = s.latest_request_log?.new_values || {};
+            const paymentText = reqData.payment_sent_whatsapp ? 'WhatsApp' : (reqData.payment_proof_url ? 'Comprovante anexado' : 'Pendente');
+            const payload = encodeURIComponent(JSON.stringify({
+                plan_months: reqData.plan_duration_months || s.plan_duration_months || 1,
+                plan_price: reqData.plan_price || s.plan_price || s.payment_value || 0,
+                payment_proof_url: reqData.payment_proof_url || '',
+                payment_sent_whatsapp: Boolean(reqData.payment_sent_whatsapp),
+                avatar_url: s.users?.avatar_url || '',
+                price_info: reqData.price_info || s.price_info || '',
+                phone_number: s.phone_number || '',
+                description: reqData.description || s.description || ''
+            }));
+            return `
             <tr>
                 <td>
                     <div class="profissional-info">
@@ -57,13 +70,14 @@ async function carregarSolicitacoes() {
                 </td>
                 <td>${s.categories?.name || 'Não definida'}</td>
                 <td>${new Date(s.updated_at).toLocaleDateString('pt-BR')}</td>
+                <td>${paymentText}</td>
                 <td>
-                    <button class="btn btn-primary btn-sm" onclick="abrirModalAprovar('${s.user_id}', '${s.users?.full_name}')">
+                    <button class="btn btn-primary btn-sm" onclick="abrirModalAprovar('${s.user_id}', '${s.users?.full_name}', '${payload}')">
                         <i class="fas fa-check"></i> Analisar
                     </button>
                 </td>
             </tr>
-        `).join('');
+        `}).join('');
     } catch (err) {
         console.error("Erro ao carregar solicitações:", err);
     }
@@ -240,10 +254,24 @@ function fecharModal(idModal) {
 // ============================================
 // GESTÃO DE PROFISSIONAIS E REATIVAÇÃO
 // ============================================
-function abrirModalAprovar(id, nome) {
+function abrirModalAprovar(id, nome, encodedData = '') {
     document.getElementById('id-prof-aprovar').value = id;
     document.getElementById('nome-prof-aprovar').textContent = nome;
     document.getElementById('form-aprovar').reset();
+    const details = encodedData ? JSON.parse(decodeURIComponent(encodedData)) : {};
+    const resumo = document.getElementById('aprovar-resumo');
+    if (resumo) {
+        resumo.innerHTML = `
+            <div><strong>Plano solicitado:</strong> ${details.plan_months || 1} mês(es) · R$ ${Number(details.plan_price || 0).toFixed(2).replace('.', ',')}</div>
+            <div><strong>Preço/taxa informada:</strong> ${details.price_info || 'Não informado'}</div>
+            <div><strong>Telefone:</strong> ${details.phone_number || 'Não informado'}</div>
+            <div style="margin-top:8px"><strong>Descrição:</strong> ${details.description || 'Sem descrição'}</div>
+            ${details.avatar_url ? `<div style="margin-top:8px"><img src="${details.avatar_url}" style="width:62px;height:62px;border-radius:50%;object-fit:cover;border:2px solid #ffa500"></div>` : ''}
+            ${details.payment_proof_url ? `<div style="margin-top:8px"><a href="${details.payment_proof_url}" target="_blank">Abrir comprovante enviado</a></div>` : ''}
+            <div style="margin-top:8px"><strong>Pagamento por WhatsApp:</strong> ${details.payment_sent_whatsapp ? 'Sim' : 'Não'}</div>`;
+        const check = document.getElementById('payment-checked-whatsapp');
+        if (check) check.checked = Boolean(details.payment_sent_whatsapp);
+    }
     atualizarCampoPrazo('aprovar'); 
     abrirModal('modal-aprovar');
 }
@@ -343,6 +371,7 @@ async function submeterAprovar(event) {
     const tipoPrazo = document.getElementById('tipo-prazo-aprovar').value;
     const prazo = document.getElementById('prazo-aprovar').value;
     const motivo = document.getElementById('motivo-aprovar') ? document.getElementById('motivo-aprovar').value : '';
+    const paymentCheckedWhatsapp = document.getElementById('payment-checked-whatsapp')?.checked;
     
     try {
         const response = await fetch(`/api/profissionais/${id}/aprovar`, {
@@ -660,7 +689,7 @@ async function carregarCategorias() {
                 <tr>
                     <td>${c.name}</td>
                     <td>${c.slug}</td>
-                    <td><i class="${c.icon_class || 'fas fa-tag'}"></i> ${c.icon_class || '---'}</td>
+                    <td><i class="${c.icon_class || c.icon_url || 'fas fa-tag'}"></i> ${c.icon_class || c.icon_url || '---'}</td>
                     <td class="acoes-cell">
                         <button class="btn-action edit" onclick='abrirModalCategoria(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
                         <button class="btn-action suspend" onclick="deletarCategoria('${c.id}')"><i class="fas fa-trash"></i></button>
@@ -678,7 +707,7 @@ function abrirModalCategoria(cat = null) {
         document.getElementById('id-categoria').value = cat.id;
         document.getElementById('nome-categoria').value = cat.name;
         document.getElementById('slug-categoria').value = cat.slug;
-        document.getElementById('icon-categoria').value = cat.icon_class || '';
+        document.getElementById('icon-categoria').value = cat.icon_class || cat.icon_url || ''; 
         document.getElementById('titulo-modal-categoria').textContent = 'Editar Categoria';
     } else {
         document.getElementById('id-categoria').value = '';
@@ -691,10 +720,11 @@ async function submeterCategoria(e) {
     e.preventDefault();
     const id = document.getElementById('id-categoria').value;
     const data = {
-        name: document.getElementById('nome-categoria').value,
-        slug: document.getElementById('slug-categoria').value,
-        icon_class: document.getElementById('icon-categoria').value
+        name: document.getElementById('nome-categoria').value.trim(),
+        slug: document.getElementById('slug-categoria').value.trim(),
+        icon_class: document.getElementById('icon-categoria').value.trim()
     };
+    if(!data.name){ alert('Informe o nome da categoria'); return; }
 
     try {
         const method = id ? 'PUT' : 'POST';
@@ -705,11 +735,13 @@ async function submeterCategoria(e) {
             body: JSON.stringify(data)
         });
         const res = await response.json();
+        if(!response.ok){ throw new Error(res.erro || 'Erro ao salvar categoria'); }
         if(res.sucesso) {
             fecharModal('modal-categoria');
-            carregarCategorias();
+            await carregarCategorias();
+            alert(id ? 'Categoria atualizada com sucesso' : 'Categoria criada com sucesso');
         }
-    } catch(e) { alert('Erro ao salvar categoria'); }
+    } catch(e) { alert(e.message || 'Erro ao salvar categoria'); }
 }
 
 async function deletarCategoria(id) {

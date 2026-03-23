@@ -38,7 +38,7 @@
         .divider:before,.divider:after{content:'';flex:1;height:1px;background:rgba(255,255,255,.09)}
         .footer{text-align:center;color:#9f9fa8;font-size:14px;margin-top:8px}
         .footer a,.link{color:#ffb21e;text-decoration:none;font-weight:700}
-        @media (max-width: 900px){.shell{grid-template-columns:1fr}.lead{order:2}}
+        @media (max-width: 900px){.shell{grid-template-columns:1fr}}
         @media (max-width: 640px){.grid-2{grid-template-columns:1fr}body{padding:12px}.form-card,.lead{padding:20px}.title{font-size:28px}.lead h1{font-size:30px}}
     </style>
 </head>
@@ -78,18 +78,18 @@
                     <div class="grid-2">
                         <div>
                             <label>Nome completo</label>
-                            <input type="text" name="full_name" required placeholder="Seu nome completo">
+                            <input type="text" name="full_name" required placeholder="Seu nome completo" autocomplete="name">
                         </div>
                         <div>
                             <label>E-mail</label>
-                            <input type="email" name="email" required placeholder="seu@email.com">
+                            <input type="email" name="email" required placeholder="seu@email.com" autocomplete="email">
                         </div>
                     </div>
 
                     <div class="grid-2">
                         <div>
                             <label>Telefone</label>
-                            <input type="tel" name="phone_number" class="mask-phone" inputmode="numeric" pattern="[0-9]*" placeholder="(00) 00000-0000">
+                            <input type="tel" name="phone_number" class="mask-phone" inputmode="numeric" pattern="[0-9]*" placeholder="(00) 00000-0000" maxlength="15">
                         </div>
                         <div>
                             <label>Tipo de conta</label>
@@ -126,7 +126,7 @@
                 <a href="/auth/google?type=<%= userType %>" class="btn btn-google"><i class="fab fa-google"></i> Cadastrar com Google</a>
             </div>
 
-            <div class="footer" style="margin-top:18px;">Já tem uma conta? <a href="/auth/login">Entrar</a></div>
+            <div class="footer" style="margin-top:18px;font-size:15px;line-height:1.6">Já tem uma conta? <a href="/auth/login">Entrar</a><br>Ou volte e escolha outro tipo de acesso.</div>
         </section>
     </div>
 
@@ -145,5 +145,6 @@
             }
         }
     </script>
+<script>document.querySelectorAll('form input').forEach((field)=>field.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); }}));</script>
 </body>
 </html>

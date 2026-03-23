@@ -256,8 +256,11 @@ app.get("/admin", checkAdmin, async (req, res) => {
             profissao: p.categories?.name || 'Sem Categoria',
             status: p.status.toUpperCase(),
             data_cadastro: p.created_at,
-            valor_pago: p.valor_pago || 0,
-            data_vencimento: p.data_vencimento
+            valor_pago: p.payment_value || p.plan_price || 0,
+            data_vencimento: p.data_vencimento,
+            foto: p.users?.avatar_url || null,
+            whatsapp: p.phone_number || '',
+            cidade: p.city || ''
         }));
         
         if (busca) {
@@ -291,7 +294,7 @@ app.get("/admin", checkAdmin, async (req, res) => {
 // APIs DO PAINEL ADM
 app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
     try {
-        const { valor, tipo_prazo, prazo, motivo } = req.body;
+        const { valor, tipo_prazo, prazo, motivo, payment_verified_whatsapp } = req.body;
         const id = req.params.id;
         let dataVencimento = new Date();
         const prazoNumero = Number.parseInt(prazo, 10);
@@ -307,7 +310,8 @@ app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
             submitted_at: null,
             profile_status: 'approved',
             data_vencimento: dataVencimento.toISOString(),
-            valor_pago: Number.isFinite(valorPago) ? valorPago : 0
+            payment_value: Number.isFinite(valorPago) ? valorPago : 0,
+            approved_at: new Date().toISOString()
         };
         const { error: errorAtualizar } = await supabase.from("professionals")
             .update(updateData)
@@ -320,7 +324,8 @@ app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
                 professional_id: id,
                 action_type: 'approval_granted',
                 new_values: {
-                    valor_pago: updateData.valor_pago,
+                    valor_pago: updateData.payment_value,
+                    payment_verified_whatsapp: payment_verified_whatsapp === true || payment_verified_whatsapp === 'true' || payment_verified_whatsapp === 'on',
                     tipo_prazo,
                     prazo,
                     motivo: motivo || null,
@@ -433,14 +438,19 @@ app.get("/api/categories", async (req, res) => {
     try {
         const { data, error } = await supabase.from("categories").select("*").order("name");
         if (error) throw error;
-        res.json(data || []);
+        res.json((data || []).map(cat => ({ ...cat, icon_class: cat.icon_class || cat.icon_url || null })));
     } catch (err) { res.status(500).json({ erro: err.message }); }
 });
 
 app.post("/api/categories", checkAdminAPI, async (req, res) => {
     try {
-        const { name, slug, icon_class } = req.body;
-        const { data, error } = await supabase.from("categories").insert([{ name, slug, icon_class }]).select().single();
+        const rawName = String(req.body.name || '').trim();
+        const rawIcon = String(req.body.icon_class || req.body.icon_url || '').trim();
+        let rawSlug = String(req.body.slug || '').trim().toLowerCase();
+        if (!rawName) return res.status(400).json({ erro: 'Nome é obrigatório' });
+        if (!rawSlug) rawSlug = rawName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+        const payload = { name: rawName, slug: rawSlug, icon_url: rawIcon || null };
+        const { data, error } = await supabase.from("categories").insert([payload]).select().single();
         if (error) throw error;
         res.json({ sucesso: true, data });
     } catch (err) { res.status(500).json({ erro: err.message }); }
@@ -448,8 +458,12 @@ app.post("/api/categories", checkAdminAPI, async (req, res) => {
 
 app.put("/api/categories/:id", checkAdminAPI, async (req, res) => {
     try {
-        const { name, slug, icon_class } = req.body;
-        const { error } = await supabase.from("categories").update({ name, slug, icon_class }).eq("id", req.params.id);
+        const rawName = String(req.body.name || '').trim();
+        const rawIcon = String(req.body.icon_class || req.body.icon_url || '').trim();
+        let rawSlug = String(req.body.slug || '').trim().toLowerCase();
+        if (!rawName) return res.status(400).json({ erro: 'Nome é obrigatório' });
+        if (!rawSlug) rawSlug = rawName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+        const { error } = await supabase.from("categories").update({ name: rawName, slug: rawSlug, icon_url: rawIcon || null }).eq("id", req.params.id);
         if (error) throw error;
         res.json({ sucesso: true });
     } catch (err) { res.status(500).json({ erro: err.message }); }
@@ -513,7 +527,27 @@ app.get("/admin/api/solicitacoes", async (req, res) => {
             .order('updated_at', { ascending: false });
         
         if (error) throw error;
-        res.json(data);
+
+        const ids = (data || []).map(item => item.user_id);
+        let logsByProfessional = {};
+        if (ids.length) {
+            const { data: logs } = await supabase
+                .from('admin_logs')
+                .select('*')
+                .in('professional_id', ids)
+                .eq('action_type', 'approval_request')
+                .order('action_at', { ascending: false });
+            logsByProfessional = (logs || []).reduce((acc, log) => {
+                if (!acc[log.professional_id]) acc[log.professional_id] = log;
+                return acc;
+            }, {});
+        }
+
+        const enriched = (data || []).map(item => ({
+            ...item,
+            latest_request_log: logsByProfessional[item.user_id] || null
+        }));
+        res.json(enriched);
     } catch (err) {
         res.status(500).json({ erro: err.message });
     }
@@ -584,7 +618,11 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
         const body = req.body || {};
         console.log("Dados recebidos (body):", body);
 
-        const { phone_number, city, state, cep, description } = body;
+        const phone_number = String(body.phone_number || '').replace(/\D/g, '').slice(0, 11);
+        const city = String(body.city || '').replace(/[^A-Za-zÀ-ÿ\s]/g, '').trim();
+        const state = String(body.state || '').replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0, 2);
+        const cep = String(body.cep || '').replace(/\D/g, '').slice(0, 8);
+        const description = body.description;
         let avatar_url = body.avatar_url;
 
         const avatarFile = req.files ? req.files.find(f => f.fieldname === 'avatar') : null;

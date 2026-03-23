@@ -57,7 +57,7 @@
         .btn-primary { background:#ffb21e; color:#111; }
         .btn-secondary:hover { background:#45464d; }
         .btn-primary:hover { background:#ffc04b; }
-        @media (max-width: 900px) { .shell { grid-template-columns: 1fr; } .lead { order: 2; } }
+        @media (max-width: 900px) { .shell { grid-template-columns: 1fr; } }
         @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } body { padding: 12px; } .form-card, .lead { padding: 20px; } .title { font-size: 28px; } .lead h1 { font-size: 30px; } }
     </style>
 </head>
@@ -116,11 +116,11 @@
                 <div class="grid-2">
                     <div>
                         <label>Telefone / WhatsApp</label>
-                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" required>
+                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15" required>
                     </div>
                     <div>
                         <label>CEP</label>
-                        <input type="text" name="cep" id="cep" value="<%= profissional?.cep || '' %>" placeholder="00000-000" required>
+                        <input type="text" name="cep" id="cep" value="<%= profissional?.cep || '' %>" placeholder="00000-000" inputmode="numeric" maxlength="9" required>
                         <div class="help">Ao digitar o CEP, vamos sugerir cidade e estado automaticamente.</div>
                     </div>
                 </div>
@@ -128,11 +128,11 @@
                 <div class="grid-2">
                     <div>
                         <label>Cidade</label>
-                        <input type="text" name="city" id="city" value="<%= profissional?.city || '' %>" placeholder="Sua cidade" required>
+                        <input type="text" name="city" id="city" value="<%= profissional?.city || '' %>" placeholder="Sua cidade" pattern="[A-Za-zÀ-ÿ\s]+" required>
                     </div>
                     <div>
                         <label>Estado</label>
-                        <input type="text" name="state" id="state" value="<%= profissional?.state || '' %>" placeholder="UF" maxlength="2" required>
+                        <input type="text" name="state" id="state" value="<%= profissional?.state || '' %>" placeholder="UF" maxlength="2" pattern="[A-Za-zÀ-ÿ\s]+" required>
                     </div>
                 </div>
 
@@ -143,7 +143,7 @@
                 </div>
 
                 <div class="actions">
-                    <button type="submit" formaction="/auth/cancelar-profissional" class="btn btn-secondary">Cancelar</button>
+                    <a href="/auth/cadastro-form?type=professional" class="btn btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Voltar</a>
                     <button type="submit" class="btn btn-primary" id="completeProfileSubmit">Continuar</button>
                 </div>
             </form>
@@ -164,7 +164,16 @@
                 console.warn('Erro ao buscar CEP', e);
             }
         }
+        const phoneInput = document.getElementById('phone_number');
+        const cepInput = document.getElementById('cep');
+        const cityInput = document.getElementById('city');
+        const stateInput = document.getElementById('state');
+        phoneInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0,11); });
+        cepInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0,8); });
+        cityInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''); });
+        stateInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0,2); });
         document.getElementById('cep')?.addEventListener('blur', e => buscarCep(e.target.value));
+        document.querySelectorAll('form input').forEach(field => field.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); }));
     </script>
     <script>
         const completeProfileForm = document.querySelector('form[action="/auth/completar-perfil"]');
