@@ -39,8 +39,53 @@
         </div>
     </div>
     <% } %>
-    <%- include('partials/top-status-bar') %>
-    <%- include('partials/header', { currentPage: 'pintores' }) %>
+
+    <header class="airbnb-header">
+        <div class="container header-grid">
+            <div class="header-left">
+                <a href="/" class="site-logo">
+                    <img src="/imagens/logo/logo_contratae.png" alt="Logo Contrataê">
+                </a>
+            </div>
+
+            <div class="header-center desktop-only">
+                <div class="search-pill">
+                    <input type="text" class="search-input-pill" placeholder="Busque por pintor...">
+                    <button class="search-btn-round"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div id="google_translate_element" class="desktop-only"></div>
+                <button id="theme-toggle" class="icon-btn" title="Alternar Tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="/auth/login" class="login-pill desktop-only">
+                    <span class="login-text">Entrar / Cadastrar</span>
+                    <span class="login-icon"><i class="fas fa-user-circle"></i></span>
+                </a>
+            </div>
+        </div>
+        
+        <nav class="categories-nav" id="main-nav">
+            <div class="container">
+                <div class="nav-header mobile-only">
+                    <h3>Menu</h3>
+                    <button id="close-menu-btn"><i class="fas fa-times"></i></button>
+                </div>
+                <ul>
+                    <li><a href="/"><i class="fas fa-home"></i> Início</a></li>
+                    <li><a href="/categoria/pintores" class="active"><i class="fas fa-paint-roller"></i> Pintores</a></li>
+                    <li><a href="/categoria/pedreiros"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
+                    <li><a href="/categoria/eletricistas"><i class="fas fa-bolt"></i> Eletricistas</a></li>
+                    <li><a href="/categoria/encanadores"><i class="fas fa-wrench"></i> Encanadores</a></li>
+                    <li><a href="/categoria/outros"><i class="fas fa-th"></i> Outros</a></li>
+                    <li><a href="/contato"><i class="fas fa-envelope"></i> Contato</a></li>
+                    <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
 
     <main>
         <div class="container" style="margin-top: 10px; margin-bottom: 40px;">

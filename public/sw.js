@@ -1,48 +1,18 @@
-const CACHE_NAME = 'contratae-static-v11-3-2';
-const STATIC_ASSETS = ['/manifest.webmanifest'];
+const CACHE_NAME = 'contratae-v11-3-3-safe';
+
 self.addEventListener('install', event => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(key => caches.delete(key)));
-    const cache = await caches.open(CACHE_NAME);
-    await cache.addAll(STATIC_ASSETS).catch(() => null);
-    await self.skipWaiting();
-  })());
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key)))));
+  self.skipWaiting();
 });
+
 self.addEventListener('activate', event => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
-    await self.clients.claim();
-  })());
+  event.waitUntil(self.clients.claim());
 });
-function shouldBypass(request) {
-  if (!request || !request.url) return true;
-  if (request.method !== 'GET') return true;
-  let url;
-  try { url = new URL(request.url); } catch { return true; }
-  if (url.origin !== self.location.origin) return true;
-  if (!url.pathname || url.pathname === '') return true;
-  if (request.mode === 'navigate') return true;
-  if (request.headers.get('accept')?.includes('text/html')) return true;
-  if (url.pathname.startsWith('/auth') || url.pathname.startsWith('/admin') || url.pathname.startsWith('/api')) return true;
-  return false;
-}
+
+// FIX v11.3.3: service worker conservador para não quebrar formulários do onboarding
 self.addEventListener('fetch', event => {
-  if (shouldBypass(event.request)) {
-    event.respondWith(fetch(event.request).catch(() => caches.match('/manifest.webmanifest')));
-    return;
-  }
-  event.respondWith((async () => {
-    try {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(event.request);
-      if (cached) return cached;
-      const response = await fetch(event.request);
-      if (response && response.ok) cache.put(event.request, response.clone()).catch(() => null);
-      return response;
-    } catch {
-      return fetch(event.request);
-    }
-  })());
+  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
 });

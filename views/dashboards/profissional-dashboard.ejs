@@ -14,9 +14,8 @@
         .sidebar{width:230px;background:#111;padding:24px 12px;position:fixed;inset:0 auto 0 0;border-right:1px solid #232323}
         .logo{font-size:22px;font-weight:800;margin-bottom:28px;text-align:center}.logo a{color:#ffb020;text-decoration:none}
         .sidebar ul{list-style:none}.sidebar li{margin-bottom:8px}
-        .sidebar a,.sidebar-logout-btn{display:flex;align-items:center;gap:12px;color:#b8c0cc;text-decoration:none;padding:12px 14px;border-radius:12px;transition:.2s;width:100%;background:none;border:0;font:inherit;cursor:pointer;text-align:left}
-.sidebar-logout-form{margin:0}
-        .sidebar a:hover,.sidebar a.active,.sidebar-logout-btn:hover{background:rgba(255,176,32,.12);color:#ffb020}
+        .sidebar a{display:flex;align-items:center;gap:12px;color:#b8c0cc;text-decoration:none;padding:12px 14px;border-radius:12px;transition:.2s}
+        .sidebar a:hover,.sidebar a.active{background:rgba(255,176,32,.12);color:#ffb020}
         .main{margin-left:230px;width:calc(100% - 230px);padding:28px}
         header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px} h1{color:#ffb020;font-size:24px}
         .user-chip{display:flex;align-items:center;gap:12px}.avatar{width:42px;height:42px;border-radius:50%;background:#ffb020;color:#111;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}
@@ -33,7 +32,7 @@
         .portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}.portfolio-thumb{position:relative;border:1px solid #2c3037;border-radius:14px;overflow:hidden;background:#121316;min-height:140px;display:flex;align-items:center;justify-content:center}.portfolio-thumb img{width:100%;height:140px;object-fit:cover}
         .table-wrap{overflow:auto} table{width:100%;border-collapse:collapse} th,td{padding:12px;border-bottom:1px solid #282b31;text-align:left} th{color:#a8b0ba;font-size:12px;text-transform:uppercase}
         .badge{padding:6px 10px;border-radius:999px;font-size:12px;display:inline-block}.badge.pending{background:#463514;color:#ffd27d}.badge.completed{background:#15331a;color:#a2f0b1}
-        .form-inline{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:13px;color:#d6dbe3;font-weight:700}.field input,.field textarea,.field select{background:#101115;color:#fff;border:1px solid #2b2f36;border-radius:12px;padding:11px 12px}.field textarea{min-height:100px;resize:vertical}.days{display:flex;flex-wrap:wrap;gap:8px}.days label{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;border:1px solid #2b2f36;background:#14161a}.portfolio-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}.slot{border:1px dashed #3a3f48;border-radius:18px;aspect-ratio:1/1;background:#111318;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.slot img{width:100%;height:100%;object-fit:cover}.slot.empty{color:#9aa4b2;font-size:13px;text-align:center;padding:8px}.slot form{position:absolute;top:8px;right:8px}@media(max-width:980px){.summary-grid,.detail-grid,.field-grid,.portfolio-slots{grid-template-columns:1fr}}
+        .form-inline{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:13px;color:#d6dbe3;font-weight:700}.field input,.field textarea,.field select{background:#101115;color:#fff;border:1px solid #2b2f36;border-radius:12px;padding:11px 12px}.field textarea{min-height:100px;resize:vertical}.days{display:flex;flex-wrap:wrap;gap:8px}.days label{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;border:1px solid #2b2f36;background:#14161a}.portfolio-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}.slot{border:1px dashed #3a3f48;border-radius:14px;min-height:120px;background:#111318;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.slot img{width:100%;height:120px;object-fit:cover}.slot.empty{color:#9aa4b2;font-size:13px;text-align:center;padding:8px}.slot form{position:absolute;top:8px;right:8px}@media(max-width:980px){.summary-grid,.detail-grid,.field-grid,.portfolio-slots{grid-template-columns:1fr}}
         @media(max-width:980px){.summary-grid,.detail-grid{grid-template-columns:1fr}}
         @media(max-width:820px){.sidebar{position:static;width:100%;height:auto}.dashboard-container{display:block}.main{margin-left:0;width:100%;padding:16px}header{flex-direction:column;align-items:flex-start;gap:12px}}
     </style>
@@ -51,7 +50,7 @@
             <li><a href="#" class="nav-link" data-tab="portfolio"><i class="fas fa-image"></i> Meu Portfólio</a></li>
             <li><a href="#" class="nav-link" data-tab="planos"><i class="fas fa-credit-card"></i> Meu Plano</a></li>
             <li><a href="#" class="nav-link" data-tab="pagamentos"><i class="fas fa-money-check"></i> Pagamentos</a></li>
-            <li><form method="POST" action="/auth/logout" class="sidebar-logout-form"><button type="submit" class="sidebar-logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</button></form></li>
+            <li><a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
         </ul>
     </aside>
 
@@ -87,7 +86,7 @@
                 <h3>Seu perfil está pronto para a próxima etapa</h3>
                 <p>Revise as informações abaixo. Quando estiver satisfeito, envie seu perfil para análise da plataforma.</p>
                 <div class="top-actions">
-                    <a href="/profissional/dashboard?tab=perfil" class="btn btn-secondary">Editar perfil</a>
+                    <a href="/profissional/onboarding?step=1" class="btn btn-secondary">Editar etapas do cadastro</a>
                     <% if (isApproved) { %>
                         <button class="btn btn-primary" type="button" disabled>Perfil aprovado</button>
                     <% } else if (approvalPending) { %>
@@ -119,7 +118,7 @@
                 <div class="panel">
                     <h2>Próximo passo</h2>
                     <p class="small" style="margin-top:8px;">Use a área do perfil para pequenos ajustes e as etapas guiadas apenas quando quiser mexer em plano, profissões ou fotos iniciais.</p>
-                    <div class="top-actions"><a href="/profissional/onboarding?step=1" class="btn btn-primary">Voltar às etapas do cadastro</a></div>
+                    <div class="top-actions"><span class="small">Cadastro inicial concluído. Ajustes futuros serão feitos aqui na dashboard.</span></div>
                 </div>
             </div>
         </section>
@@ -150,16 +149,16 @@
                     <h3>Ajustes rápidos do perfil</h3>
                     <div class="field-grid">
                         <div class="field"><label>Nome que aparece</label><input type="text" name="display_name" value="<%= profissional?.users?.full_name || fullName || '' %>"></div>
-                        <div class="field"><label>Telefone / WhatsApp</label><input type="text" inputmode="numeric" pattern="[0-9]*" name="phone_number" value="<%= profissional.phone_number || '' %>"></div>
-                        <div class="field"><label>CEP</label><input type="text" inputmode="numeric" pattern="[0-9]*" name="cep" value="<%= profissional.cep || '' %>"></div>
-                        <div class="field"><label>Cidade</label><input type="text" name="city" pattern="[A-Za-zÀ-ÿ\s]+" value="<%= profissional.city || '' %>"></div>
-                        <div class="field"><label>Estado</label><input type="text" maxlength="2" name="state" pattern="[A-Za-zÀ-ÿ\s]+" value="<%= profissional.state || '' %>"></div>
+                        <div class="field"><label>Telefone / WhatsApp</label><input type="text" name="phone_number" value="<%= profissional.phone_number || '' %>"></div>
+                        <div class="field"><label>CEP</label><input type="text" name="cep" value="<%= profissional.cep || '' %>"></div>
+                        <div class="field"><label>Cidade</label><input type="text" name="city" value="<%= profissional.city || '' %>"></div>
+                        <div class="field"><label>Estado</label><input type="text" maxlength="2" name="state" value="<%= profissional.state || '' %>"></div>
                         <div class="field"><label>Especialidades</label><input type="text" name="specialties" value="<%= profissional.specialties || '' %>" placeholder="Ex: instalação, manutenção, residencial"></div>
-                        <div class="field"><label>Preço ou taxa</label><input type="text" inputmode="decimal" name="service_fee_amount" inputmode="decimal" value="<%= profissional.price_value || '' %>" placeholder="Ex: 50,00"></div>
-                        <div class="field"><label>Disponibilidade</label><input type="time" name="availability_start" placeholder="08:00"><input type="time" name="availability_end" placeholder="18:00" style="margin-top:8px"></div>
+                        <div class="field"><label>Preço ou taxa</label><input type="text" name="price_info" value="<%= profissional.price_info || '' %>" placeholder="Ex: Taxa de visita R$ 50"></div>
+                        <div class="field"><label>Disponibilidade</label><input type="text" name="availability_start" placeholder="08:00"><input type="text" name="availability_end" placeholder="18:00" style="margin-top:8px"></div>
                     </div>
                     <div class="field" style="margin-top:12px"><label>Descrição</label><textarea name="description"><%= profissional.description || '' %></textarea></div>
-                    <div class="top-actions"><button type="button" class="btn btn-secondary" onclick="cancelProfileEdit()">Cancelar edição</button><button type="submit" class="btn btn-primary">Salvar ajustes do perfil</button><form method="POST" action="/auth/cancelar-profissional" onsubmit="return confirm('Deseja excluir seu perfil profissional? Esta ação apaga o cadastro em andamento.')"><button type="submit" class="btn btn-danger">Excluir perfil</button></form></div>
+                    <div class="top-actions"><button type="submit" class="btn btn-primary">Salvar ajustes do perfil</button></div>
                 </form>
             </div>
         </section>
@@ -167,9 +166,9 @@
         <section id="portfolio" class="tab-content">
             <div class="panel">
                 <h2>Meu Portfólio</h2>
-                <p class="small" style="margin-bottom:14px;">Aqui você completa até 10 imagens. Cada espaço vazio representa uma foto que ainda pode ser adicionada. Revise seu portfólio antes de solicitar aprovação para aumentar sua confiança com os clientes.</p>
-                <form action="/profissional/portfolio/adicionar" method="POST" enctype="multipart/form-data" class="form-inline" id="dashboardPortfolioForm">
-                    <input type="file" name="portfolio_images" id="dashboardPortfolioInput" accept="image/*" multiple required>
+                <p class="small" style="margin-bottom:14px;">Aqui você completa até 10 imagens. Cada espaço vazio representa uma foto que ainda pode ser adicionada.</p>
+                <form action="/profissional/portfolio/adicionar" method="POST" enctype="multipart/form-data" class="form-inline">
+                    <input type="file" name="portfolio_images" accept="image/*" multiple required>
                     <button type="submit" class="btn btn-primary">Adicionar ao portfólio</button>
                 </form>
                 <div class="portfolio-slots">
@@ -184,7 +183,7 @@
                                 </form>
                             </div>
                         <% } else { %>
-                            <button type="button" class="slot empty slot-trigger" onclick="openPortfolioPicker()">+ espaço livre<br>para nova imagem</button>
+                            <div class="slot empty">+ espaço livre<br>para nova imagem</div>
                         <% } %>
                     <% } %>
                 </div>
@@ -196,12 +195,12 @@
                 <h2>Meu Plano</h2>
                 <p class="small">Seu plano atual foi definido nas etapas do cadastro. Hoje você está no <strong><%= currentPlanName %></strong>.</p>
                 <div class="top-actions">
-                    <a href="/profissional/dashboard?tab=planos" class="btn btn-primary">Ajustar plano e profissões (em breve)</a>
+                    <a href="/profissional/onboarding?step=1" class="btn btn-primary">Ajustar plano e profissões</a>
                 </div>
                 <div class="detail-grid" style="margin-top:14px;">
                     <div class="detail"><strong>Profissões liberadas</strong><%= selectedCount || 1 %></div>
-                    <div class="detail"><strong>Status do perfil</strong><%= profileReadyForApproval ? 'Pronto para análise' : 'Em montagem' %></div>
-                    <div class="detail"><strong>Pagamento informado</strong>R$ <%= Number(profissional.plan_price || profissional.payment_value || 0).toFixed(2).replace('.', ',') %> / <%= profissional.plan_duration_months || 1 %> mês(es)</div>
+                    <div class="detail"><strong>Status do perfil</strong><%= profileReadyForApproval ? 'Pronto para análise' : 'Em montagem' %></div><div class="detail"><strong>Duração contratada</strong><%= currentPlanMonths || 1 %> mês(es)</div>
+                    <div class="detail"><strong>Mensalidade do plano</strong>R$ <%= Number(currentPlanMonthlyPrice || 30).toFixed(2).replace('.', ',') %></div>
                     <div class="detail"><strong>Dica</strong>Mais categorias tendem a gerar mais contatos</div>
                 </div>
             </div>
@@ -240,20 +239,11 @@
 <div class="modal-overlay-local" id="approvalConfirmModal">
   <div class="modal-card-local">
     <h3>Enviar perfil para análise?</h3>
-    <p>Depois do envio, seu cadastro ficará em análise até a equipe revisar. Você pode continuar ajustando descrição, disponibilidade, foto e portfólio. Mudanças de plano ou profissões podem exigir nova conferência da equipe.</p>
+    <p>Depois do envio, seu cadastro ficará em análise até a equipe revisar. Se você mudar plano, profissões ou imagens depois, o pedido atual volta para rascunho.</p>
     <div class="modal-actions-local">
       <button type="button" class="btn btn-secondary" id="closeApprovalModal">Cancelar</button>
-      <form action="/profissional/solicitar-aprovacao" method="POST" enctype="multipart/form-data" id="approvalRequestForm">
-        <div class="field" style="margin-top:14px;text-align:left">
-            <label>Comprovante de pagamento</label>
-            <input type="file" name="payment_proof" id="paymentProofInput" accept="image/*,application/pdf">
-            <div class="help">Você pode anexar o comprovante aqui ou marcar abaixo que enviou pelo WhatsApp.</div>
-        </div>
-        <label style="display:flex;align-items:center;gap:8px;margin-top:12px;color:#fff"><input type="checkbox" name="payment_sent_whatsapp" id="paymentWhatsappCheck"> Enviei o comprovante pelo WhatsApp</label>
-        <div class="modal-actions-local">
-            <button type="button" class="btn btn-secondary" id="closeApprovalModal">Cancelar</button>
-            <button class="btn btn-primary" type="submit" id="approvalSubmitBtn" disabled>Enviar para análise</button>
-        </div>
+      <form action="/profissional/solicitar-aprovacao" method="POST">
+        <button class="btn btn-primary" type="submit">Enviar para análise</button>
       </form>
     </div>
   </div>
@@ -292,41 +282,6 @@ if(closeApprovalSentModalBtn){closeApprovalSentModalBtn.addEventListener('click'
 window.addEventListener('click', (ev)=>{ if(ev.target === approvalConfirmModal) approvalConfirmModal.classList.remove('active'); if(ev.target === approvalSentModal) approvalSentModal.classList.remove('active'); });
 if((new URLSearchParams(window.location.search)).get('success') === 'Solicitação enviada para análise'){ approvalSentModal?.classList.add('active'); }
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
-
-window.cancelProfileEdit = function(){
-  const url = new URL(window.location.href);
-  url.searchParams.set('tab', 'perfil');
-  url.searchParams.delete('success');
-  url.searchParams.delete('error');
-  window.location.href = url.toString();
-};
-window.openPortfolioPicker = function(){
-  document.getElementById('dashboardPortfolioInput')?.click();
-};
-document.getElementById('dashboardPortfolioInput')?.addEventListener('change', function(){
-  if(this.files && this.files.length){
-    document.getElementById('dashboardPortfolioForm')?.requestSubmit();
-  }
-});
-const paymentProofInput = document.getElementById('paymentProofInput');
-const paymentWhatsappCheck = document.getElementById('paymentWhatsappCheck');
-const approvalSubmitBtn = document.getElementById('approvalSubmitBtn');
-function syncApprovalSubmit(){
-  if(!approvalSubmitBtn) return;
-  const enabled = Boolean(paymentProofInput?.files?.length || paymentWhatsappCheck?.checked);
-  approvalSubmitBtn.disabled = !enabled;
-}
-paymentProofInput?.addEventListener('change', syncApprovalSubmit);
-paymentWhatsappCheck?.addEventListener('change', syncApprovalSubmit);
-document.querySelectorAll('input[name="phone_number"], input[name="cep"], input[name="service_fee_amount"]').forEach((field)=>field.addEventListener('input', ()=>{
-  if(field.name === 'service_fee_amount') field.value = field.value.replace(/[^\d,]/g, '');
-  else field.value = field.value.replace(/\D/g, '').slice(0, field.name === 'cep' ? 8 : 11);
-}));
-document.querySelectorAll('input[name="city"], input[name="state"]').forEach((field)=>field.addEventListener('input', ()=>{
-  field.value = field.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '');
-  if(field.name === 'state') field.value = field.value.toUpperCase().slice(0,2);
-}));
-document.querySelectorAll('form').forEach(form => form.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }));
 
 });
 </script>

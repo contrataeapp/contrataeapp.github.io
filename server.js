@@ -7,8 +7,6 @@ const passport = require("passport");
 const cors = require("cors");
 const helmet = require("helmet");
 const multer = require('multer');
-const InMemorySessionStore = require('./stores/InMemorySessionStore');
-const { applyAdminSession, clearAdminSession } = require('./lib/sessionState');
 
 // Importar Middlewares e Controllers (Arquitetura SaaS)
 const { injectUserVars, requireAuth, requireProfessional, requireAdmin } = require('./middlewares/authMiddleware');
@@ -84,29 +82,11 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-    const accept = String(req.headers.accept || '');
-    if (req.method === 'GET' && accept.includes('text/html')) {
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        res.setHeader('Vary', 'Cookie');
-    }
-    next();
-});
-app.use(express.static(path.join(__dirname, "public"), {
-    setHeaders: (res, filePath) => {
-        if (filePath.endsWith('sw.js')) {
-            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-            res.setHeader('Service-Worker-Allowed', '/');
-        }
-    }
-}));
+app.use(express.static(path.join(__dirname, "public")));
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/manifest.webmanifest', (req, res) => res.sendFile(path.join(__dirname, 'public', 'manifest.webmanifest')));
 app.get('/sw.js', (req, res) => {
     res.set('Service-Worker-Allowed', '/');
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(path.join(__dirname, 'public', 'sw.js'));
 });
 app.set("view engine", "ejs");
@@ -116,20 +96,14 @@ app.set("views", path.join(__dirname, "views"));
 // No Render, trust proxy deve estar ativo para cookies seguros funcionarem
 app.set("trust proxy", 1);
 
-const sessionCookieName = process.env.SESSION_NAME || 'contratae.sid';
-const sessionStore = new InMemorySessionStore({ ttlMs: 1000 * 60 * 60 * 24 * 7 });
-
 app.use(session({
-    name: sessionCookieName,
     secret: process.env.SESSION_SECRET || "contratae_secret_key_2026",
-    store: sessionStore,
     resave: false,
     saveUninitialized: false,
-    rolling: true,
     proxy: true,
     cookie: { 
         secure: process.env.NODE_ENV === "production",
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 1000 * 60 * 60 * 24 * 7,
         httpOnly: true
     }
@@ -185,14 +159,8 @@ app.post('/admin/login', (req, res) => {
     const adminPass = process.env.ADMIN_PASS || '#Relaxsempre153143';
 
     if (usuario === adminUser && senha === adminPass) {
-        req.session.regenerate((err) => {
-            if (err) {
-                console.error('Erro ao regenerar sessão do admin:', err);
-                return res.render('admin/login_admin', { erro: 'Erro ao iniciar sessão de administrador.' });
-            }
-            applyAdminSession(req.session);
-            req.session.save(() => res.redirect('/admin'));
-        });
+        req.session.adminLogado = true;
+        res.redirect('/admin');
     } else {
         res.render('admin/login_admin', { erro: 'Usuário ou senha inválidos!' });
     }
@@ -205,8 +173,7 @@ app.post('/login-adm', (req, res) => res.redirect(307, '/admin/login'));
 app.get('/admin/logout', (req, res) => {
     if (req.session) {
         req.session.destroy(() => {
-            res.clearCookie(sessionCookieName, { path: '/' });
-            res.clearCookie('connect.sid', { path: '/' });
+            res.clearCookie('connect.sid');
             res.redirect('/admin/login');
         });
         return;
@@ -256,11 +223,8 @@ app.get("/admin", checkAdmin, async (req, res) => {
             profissao: p.categories?.name || 'Sem Categoria',
             status: p.status.toUpperCase(),
             data_cadastro: p.created_at,
-            valor_pago: p.payment_value || p.plan_price || 0,
-            data_vencimento: p.data_vencimento,
-            foto: p.users?.avatar_url || null,
-            whatsapp: p.phone_number || '',
-            cidade: p.city || ''
+            valor_pago: p.valor_pago || 0,
+            data_vencimento: p.data_vencimento
         }));
         
         if (busca) {
@@ -294,54 +258,37 @@ app.get("/admin", checkAdmin, async (req, res) => {
 // APIs DO PAINEL ADM
 app.post("/api/profissionais/:id/aprovar", checkAdminAPI, async (req, res) => {
     try {
-        const { valor, tipo_prazo, prazo, motivo, payment_verified_whatsapp } = req.body;
+        const { valor, tipo_prazo, prazo, motivo } = req.body;
         const id = req.params.id;
         let dataVencimento = new Date();
-        const prazoNumero = Number.parseInt(prazo, 10);
 
-        if (tipo_prazo === 'dias' && Number.isFinite(prazoNumero)) dataVencimento.setDate(dataVencimento.getDate() + prazoNumero);
-        else if (tipo_prazo === 'meses' && Number.isFinite(prazoNumero)) dataVencimento.setMonth(dataVencimento.getMonth() + prazoNumero);
-        else if (tipo_prazo === 'data' && prazo) dataVencimento = new Date(prazo);
+        if (tipo_prazo === 'dias') dataVencimento.setDate(dataVencimento.getDate() + parseInt(prazo));
+        else if (tipo_prazo === 'meses') dataVencimento.setDate(dataVencimento.getDate() + (parseInt(prazo) * 30));
+        else if (tipo_prazo === 'data') dataVencimento = new Date(prazo);
 
-        const valorPago = Number.parseFloat(valor);
-        const updateData = {
-            status: "active",
+        // Padronizado para usar user_id
+        const updateData = { 
+            status: "active", 
             approval_requested: false,
-            submitted_at: null,
-            profile_status: 'approved',
-            data_vencimento: dataVencimento.toISOString(),
-            payment_value: Number.isFinite(valorPago) ? valorPago : 0,
-            approved_at: new Date().toISOString()
+            data_vencimento: dataVencimento.toISOString(), 
+            valor_pago: parseFloat(valor)
         };
         const { error: errorAtualizar } = await supabase.from("professionals")
             .update(updateData)
             .eq("user_id", id);
-
+        
         if (errorAtualizar) throw errorAtualizar;
 
-        try {
-            await supabase.from('admin_logs').insert({
-                professional_id: id,
-                action_type: 'approval_granted',
-                new_values: {
-                    valor_pago: updateData.payment_value,
-                    payment_verified_whatsapp: payment_verified_whatsapp === true || payment_verified_whatsapp === 'true' || payment_verified_whatsapp === 'on',
-                    tipo_prazo,
-                    prazo,
-                    motivo: motivo || null,
-                    data_vencimento: updateData.data_vencimento
-                },
-                performed_by: 'admin-panel'
-            });
-        } catch (logErr) {
-            console.error('Falha ao registrar log de aprovação:', logErr);
-        }
+        // Registrar Log
+        await supabase.from('admin_logs').insert([{
+            admin_id: req.session.userId,
+            action: 'aprovação',
+            target_id: id,
+            details: `Profissional aprovado com valor R$ ${valor} e vencimento em ${dataVencimento.toLocaleDateString('pt-BR')}`
+        }]);
 
         res.json({ sucesso: true });
-    } catch (err) {
-        console.error('Erro ao aprovar profissional:', err);
-        res.status(500).json({ erro: err.message });
-    }
+    } catch (err) { res.status(500).json({ erro: err.message }); }
 });
 
 // APIs DE BANNERS (SaaS - Com Upload para Supabase Storage)
@@ -438,18 +385,16 @@ app.get("/api/categories", async (req, res) => {
     try {
         const { data, error } = await supabase.from("categories").select("*").order("name");
         if (error) throw error;
-        res.json((data || []).map(cat => ({ ...cat, icon_class: cat.icon_class || cat.icon_url || null })));
+        res.json(data || []);
     } catch (err) { res.status(500).json({ erro: err.message }); }
 });
 
 app.post("/api/categories", checkAdminAPI, async (req, res) => {
     try {
-        const rawName = String(req.body.name || '').trim();
-        const rawIcon = String(req.body.icon_class || req.body.icon_url || '').trim();
-        let rawSlug = String(req.body.slug || '').trim().toLowerCase();
-        if (!rawName) return res.status(400).json({ erro: 'Nome é obrigatório' });
-        if (!rawSlug) rawSlug = rawName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
-        const payload = { name: rawName, slug: rawSlug, icon_url: rawIcon || null };
+        const { name, slug, icon_class } = req.body;
+        const payload = { name, slug };
+        // FUTURO: se o schema voltar a usar icon_class, mapear aqui. Hoje o banco usa icon_url.
+        if (icon_class) payload.icon_url = icon_class;
         const { data, error } = await supabase.from("categories").insert([payload]).select().single();
         if (error) throw error;
         res.json({ sucesso: true, data });
@@ -458,12 +403,8 @@ app.post("/api/categories", checkAdminAPI, async (req, res) => {
 
 app.put("/api/categories/:id", checkAdminAPI, async (req, res) => {
     try {
-        const rawName = String(req.body.name || '').trim();
-        const rawIcon = String(req.body.icon_class || req.body.icon_url || '').trim();
-        let rawSlug = String(req.body.slug || '').trim().toLowerCase();
-        if (!rawName) return res.status(400).json({ erro: 'Nome é obrigatório' });
-        if (!rawSlug) rawSlug = rawName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
-        const { error } = await supabase.from("categories").update({ name: rawName, slug: rawSlug, icon_url: rawIcon || null }).eq("id", req.params.id);
+        const { name, slug, icon_class } = req.body;
+        const { error } = await supabase.from("categories").update({ name, slug, icon_class }).eq("id", req.params.id);
         if (error) throw error;
         res.json({ sucesso: true });
     } catch (err) { res.status(500).json({ erro: err.message }); }
@@ -527,27 +468,7 @@ app.get("/admin/api/solicitacoes", async (req, res) => {
             .order('updated_at', { ascending: false });
         
         if (error) throw error;
-
-        const ids = (data || []).map(item => item.user_id);
-        let logsByProfessional = {};
-        if (ids.length) {
-            const { data: logs } = await supabase
-                .from('admin_logs')
-                .select('*')
-                .in('professional_id', ids)
-                .eq('action_type', 'approval_request')
-                .order('action_at', { ascending: false });
-            logsByProfessional = (logs || []).reduce((acc, log) => {
-                if (!acc[log.professional_id]) acc[log.professional_id] = log;
-                return acc;
-            }, {});
-        }
-
-        const enriched = (data || []).map(item => ({
-            ...item,
-            latest_request_log: logsByProfessional[item.user_id] || null
-        }));
-        res.json(enriched);
+        res.json(data);
     } catch (err) {
         res.status(500).json({ erro: err.message });
     }
@@ -593,9 +514,7 @@ app.post("/auth/cancelar-profissional", async (req, res) => {
         await supabase.from('professionals').delete().eq('user_id', req.session.userId);
         await supabase.from('users').delete().eq('id', req.session.userId);
         req.session.destroy(() => {
-            const sidName = process.env.SESSION_NAME || 'contratae.sid';
-            res.clearCookie(sidName, { path: '/' });
-            res.clearCookie('connect.sid', { path: '/' });
+            res.clearCookie('connect.sid');
             return res.redirect(303, '/');
         });
     } catch (err) {
@@ -604,6 +523,7 @@ app.post("/auth/cancelar-profissional", async (req, res) => {
     }
 });
 
+// FIX v11.3.3: etapa básica do cadastro profissional com saneamento de dados
 app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
     console.log("--- INÍCIO POST /auth/completar-perfil ---");
     console.log("UserID na Sessão:", req.session.userId);
@@ -618,12 +538,16 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
         const body = req.body || {};
         console.log("Dados recebidos (body):", body);
 
-        const phone_number = String(body.phone_number || '').replace(/\D/g, '').slice(0, 11);
-        const city = String(body.city || '').replace(/[^A-Za-zÀ-ÿ\s]/g, '').trim();
-        const state = String(body.state || '').replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0, 2);
-        const cep = String(body.cep || '').replace(/\D/g, '').slice(0, 8);
+        const phone_number = String(body.phone_number || '').replace(/\D/g, '');
+        const city = String(body.city || '').replace(/[^A-Za-zÀ-ÿ\s'-]/g, '').trim();
+        const state = String(body.state || '').replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase();
+        const cep = String(body.cep || '').replace(/\D/g, '');
         const description = body.description;
         let avatar_url = body.avatar_url;
+
+        if (phone_number.length < 10 || cep.length !== 8 || !city || !state) {
+            return res.redirect('/auth/completar-perfil');
+        }
 
         const avatarFile = req.files ? req.files.find(f => f.fieldname === 'avatar') : null;
         if (avatarFile) {

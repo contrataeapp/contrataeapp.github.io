@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#1f1f22 0%,#0b0b0c 65%);color:#fff;min-height:100vh;display:grid;place-items:center;padding:20px 20px 90px}
+        body{font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#1f1f22 0%,#0b0b0c 65%);color:#fff;min-height:100vh;display:grid;place-items:center;padding:20px}
         .wrap{width:100%;max-width:980px;display:grid;grid-template-columns:.95fr 1.05fr;gap:22px}
         .lead,.panel{background:linear-gradient(180deg,rgba(28,28,30,.96),rgba(20,20,22,.98));border:1px solid rgba(255,255,255,.08);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
         .lead{padding:34px 28px}
@@ -26,17 +26,11 @@
         .option-card i{font-size:34px;color:#ffb21e}
         .option-card h3{font-size:21px}
         .option-card span{color:#c9c9d1;line-height:1.45}
-        .foot{margin-top:26px;font-size:14px;color:#a7a7af;display:flex;gap:12px;flex-wrap:wrap;align-items:center} .foot a.back-link{padding:10px 14px;border-radius:12px;background:#2d2f36;color:#fff}
-        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1e1e1e;border-top:1px solid #333;display:none;justify-content:space-around;align-items:center;height:70px;z-index:1000}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:#999;text-decoration:none;font-size:12px;gap:5px}.nav-item i{font-size:22px}.nav-item.active,.nav-item:hover{color:#ffa500}@media (max-width: 840px){.wrap{grid-template-columns:1fr}.options{grid-template-columns:1fr}} @media (max-width: 768px){.bottom-nav{display:flex}}
+        .foot{margin-top:26px;font-size:14px;color:#a7a7af}
+        @media (max-width: 840px){.wrap{grid-template-columns:1fr}.options{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
-    <nav class="bottom-nav">
-        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
-        <a href="/" class="nav-item"><i class="fas fa-search"></i><span>Busca</span></a>
-        <a href="/categoria/outros" class="nav-item"><i class="fas fa-bars"></i><span>Menu</span></a>
-        <a href="/auth/cadastro" class="nav-item active"><i class="fas fa-user-plus"></i><span>Cadastro</span></a>
-    </nav>
     <div class="wrap">
         <section class="lead">
             <span class="badge">Contrataê · cadastro simples</span>
@@ -73,11 +67,8 @@
                     <span>Quero oferecer meus serviços, montar meu perfil e ganhar visibilidade na plataforma.</span>
                 </a>
             </div>
-            <div class="foot"><a class="back-link" href="/auth/login">Voltar</a><a href="/auth/login" style="color:#bdbdc5;text-decoration:none;">Já tem uma conta? Faça login</a></div>
+            <div class="foot"><a href="/auth/login" style="color:#bdbdc5;text-decoration:none;">Já tem uma conta? Faça login</a></div>
         </section>
     </div>
-
-<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-<script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
 </body>
 </html>
