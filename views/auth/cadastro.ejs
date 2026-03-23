@@ -38,11 +38,17 @@
         .divider:before,.divider:after{content:'';flex:1;height:1px;background:rgba(255,255,255,.09)}
         .footer{text-align:center;color:#9f9fa8;font-size:14px;margin-top:8px}
         .footer a,.link{color:#ffb21e;text-decoration:none;font-weight:700}
-        @media (max-width: 900px){.shell{grid-template-columns:1fr}}
-        @media (max-width: 640px){.grid-2{grid-template-columns:1fr}body{padding:12px}.form-card,.lead{padding:20px}.title{font-size:28px}.lead h1{font-size:30px}}
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1e1e1e;border-top:1px solid #333;display:none;justify-content:space-around;align-items:center;height:70px;z-index:1000}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:#999;text-decoration:none;font-size:12px;gap:5px}.nav-item i{font-size:22px}.nav-item.active,.nav-item:hover{color:#ffa500} @media (max-width: 900px){.shell{grid-template-columns:1fr}.lead{order:1}.form-card{order:2}}
+        @media (max-width: 640px){.grid-2{grid-template-columns:1fr}body{padding:12px 12px 90px}.form-card,.lead{padding:20px}.title{font-size:28px}.lead h1{font-size:30px}} @media (max-width: 768px){.bottom-nav{display:flex}}
     </style>
 </head>
 <body>
+    <nav class="bottom-nav">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="/" class="nav-item"><i class="fas fa-search"></i><span>Busca</span></a>
+        <a href="/categoria/outros" class="nav-item"><i class="fas fa-bars"></i><span>Menu</span></a>
+        <a href="/auth/cadastro" class="nav-item active"><i class="fas fa-user-plus"></i><span>Cadastro</span></a>
+    </nav>
     <div class="shell">
         <aside class="lead">
             <div>
@@ -146,5 +152,8 @@
         }
     </script>
 <script>document.querySelectorAll('form input').forEach((field)=>field.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); }}));</script>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
 </body>
 </html>

@@ -14,10 +14,10 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            padding-bottom: 80px; 
+            padding: 90px 0 80px; 
         }
         
-        .auth-container { width: 100%; max-width: 450px; padding: 20px; }
+        .page-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;z-index:1000;padding:14px}.page-top-inner{width:min(980px,calc(100% - 24px));display:flex;justify-content:space-between;align-items:center;background:rgba(17,17,20,.9);border:1px solid #2f3137;border-radius:16px;padding:10px 14px;backdrop-filter:blur(8px)}.page-top a{color:#fff;text-decoration:none;font-weight:700}.page-top .highlight{color:#ffa500}.auth-container { width: 100%; max-width: 450px; padding: 20px; }
         .auth-card { 
             background: #1e1e1e; 
             border-radius: 12px; 
@@ -147,6 +147,7 @@
     </style>
 </head>
 <body>
+    <div class="page-top"><div class="page-top-inner"><a href="/"><i class="fas fa-arrow-left"></i> Início</a><a class="highlight" href="/auth/cadastro">Criar conta</a></div></div>
     <nav class="bottom-nav">
         <a href="/" class="nav-item" title="Inicio">
             <i class="fas fa-home"></i>
@@ -228,5 +229,8 @@
             }
         }
     </script>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
 </body>
 </html>

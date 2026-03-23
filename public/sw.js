@@ -1,8 +1,5 @@
-const CACHE_NAME = 'contratae-static-v11-2';
-const STATIC_ASSETS = [
-  '/manifest.webmanifest'
-];
-
+const CACHE_NAME = 'contratae-static-v11-3-2';
+const STATIC_ASSETS = ['/manifest.webmanifest'];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
@@ -12,7 +9,6 @@ self.addEventListener('install', event => {
     await self.skipWaiting();
   })());
 });
-
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
@@ -20,31 +16,33 @@ self.addEventListener('activate', event => {
     await self.clients.claim();
   })());
 });
-
 function shouldBypass(request) {
+  if (!request || !request.url) return true;
   if (request.method !== 'GET') return true;
-  const url = new URL(request.url);
+  let url;
+  try { url = new URL(request.url); } catch { return true; }
   if (url.origin !== self.location.origin) return true;
+  if (!url.pathname || url.pathname === '') return true;
   if (request.mode === 'navigate') return true;
   if (request.headers.get('accept')?.includes('text/html')) return true;
   if (url.pathname.startsWith('/auth') || url.pathname.startsWith('/admin') || url.pathname.startsWith('/api')) return true;
   return false;
 }
-
 self.addEventListener('fetch', event => {
   if (shouldBypass(event.request)) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(fetch(event.request).catch(() => caches.match('/manifest.webmanifest')));
     return;
   }
-
   event.respondWith((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    const cached = await cache.match(event.request);
-    if (cached) return cached;
-    const response = await fetch(event.request);
-    if (response && response.ok) {
-      cache.put(event.request, response.clone()).catch(() => null);
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(event.request);
+      if (cached) return cached;
+      const response = await fetch(event.request);
+      if (response && response.ok) cache.put(event.request, response.clone()).catch(() => null);
+      return response;
+    } catch {
+      return fetch(event.request);
     }
-    return response;
   })());
 });

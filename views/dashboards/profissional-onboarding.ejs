@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#1d1d20 0%,#0b0b0c 70%);color:#fff;min-height:100vh;padding:24px}
+        body{font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#1d1d20 0%,#0b0b0c 70%);color:#fff;min-height:100vh;padding:24px 24px 96px}
         .shell{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:.85fr 1.15fr;gap:22px}
         .lead,.panel{background:linear-gradient(180deg,rgba(28,28,30,.96),rgba(20,20,22,.98));border:1px solid rgba(255,255,255,.08);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
         .lead{padding:30px;display:flex;flex-direction:column;justify-content:space-between}
@@ -47,7 +47,7 @@
         .avatar-preview{width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid #ffb21e;background:#6a1bb2;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800}
         .avatar-preview img{width:100%;height:100%;object-fit:cover}
         .chips{display:flex;flex-wrap:wrap;gap:8px}
-        .chip{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;background:#181a1f;border:1px solid #2c3037}
+        .chip{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;background:#181a1f;border:1px solid #2c3037}.chip.small{padding:8px 10px;font-size:13px}.toggle-row{display:flex;align-items:center;gap:10px}.toggle-row input[type=checkbox]{width:18px;height:18px;accent-color:#ffb020}.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1e1e1e;border-top:1px solid #333;display:none;justify-content:space-around;align-items:center;height:70px;z-index:1000}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:#999;text-decoration:none;font-size:12px;gap:5px}.nav-item i{font-size:22px}.nav-item.active,.nav-item:hover{color:#ffa500}
         .upload-box{padding:18px;border-radius:18px;border:1px dashed #50545c;background:#111215;text-align:center}
         .preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}
         .preview-card{border:1px solid #2c3037;border-radius:14px;overflow:hidden;background:#141517;min-height:140px;display:flex;align-items:center;justify-content:center}
@@ -62,7 +62,7 @@
         .flash.error{background:#291717;border:1px solid #6e2d2d;color:#ffb5b5}
         .flash.success{background:#142513;border:1px solid #285c27;color:#b9efb7}
         @media(max-width:980px){.shell{grid-template-columns:1fr}.plan-cards,.grid-3{grid-template-columns:1fr}}
-        @media(max-width:720px){body{padding:12px}.panel,.lead{padding:20px}.progress,.grid-2,.avatar-row{grid-template-columns:1fr}h1{font-size:31px}h2{font-size:25px}}
+        @media(max-width:720px){body{padding:12px 12px 96px}.panel,.lead{padding:20px}.progress,.grid-2,.avatar-row{grid-template-columns:1fr}h1{font-size:31px}h2{font-size:25px}} @media(max-width:768px){.bottom-nav{display:flex}}
     
         .profession-grid .field-search{order:1}
         .profession-grid .field-select{order:2}
@@ -74,6 +74,12 @@
 </style>
 </head>
 <body>
+    <nav class="bottom-nav">
+        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="/profissional/dashboard" class="nav-item"><i class="fas fa-chart-line"></i><span>Painel</span></a>
+        <a href="/categoria/outros" class="nav-item"><i class="fas fa-bars"></i><span>Menu</span></a>
+        <a href="/profissional/onboarding" class="nav-item active"><i class="fas fa-user-edit"></i><span>Cadastro</span></a>
+    </nav>
     <div class="shell">
         <aside class="lead">
             <div>
@@ -163,8 +169,12 @@
                         <strong style="color:#ffb020">Escolha suas profissões</strong>
                         <p class="help" style="margin-top:6px">Escolha a principal e, conforme o plano, mais 1 ou 2 profissões adicionais.</p>
                     </div>
-                    <div class="grid-2" style="margin-top:14px">
-                        <div class="field">
+                    <div class="grid-2 profession-grid" style="margin-top:14px">
+                        <div class="field field-search">
+                            <label>Busca rápida da profissão principal</label>
+                            <input type="text" id="primaryCategorySearch" placeholder="Digite para filtrar a profissão principal" style="margin-bottom:10px">
+                        </div>
+                        <div class="field field-select">
                             <label>Profissão principal</label>
                             <select name="primary_category_id" data-category-select="1" id="primaryCategorySelect" required>
                                 <option value="">Selecione uma profissão</option>
@@ -173,12 +183,13 @@
                                 <% }); %>
                             </select>
                         </div>
-                        
                     </div>
-                    <div class="grid-2" style="margin-top:12px">
-                        <div class="field additional-slot additional-slot-2 hide">
+                    <div class="grid-2 profession-grid" style="margin-top:12px">
+                        <div class="field additional-slot additional-slot-2 hide field-search">
                             <label>Busca rápida da profissão adicional</label>
                             <input type="text" id="additionalCategorySearch" placeholder="Digite para filtrar a profissão adicional" style="margin-bottom:10px">
+                        </div>
+                        <div class="field additional-slot additional-slot-2 hide field-select">
                             <label>Profissão adicional 1</label>
                             <select name="additional_category_1" data-category-select="1" id="additionalCategorySelect1" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
@@ -188,6 +199,8 @@
                             </select>
                         </div>
                         <div class="field additional-slot additional-slot-3 hide">
+                            <label>Busca rápida da profissão adicional 2</label>
+                            <input type="text" id="additionalCategorySearch2" placeholder="Digite para filtrar a segunda profissão adicional" style="margin-bottom:10px">
                             <label>Profissão adicional 2</label>
                             <select name="additional_category_2" data-category-select="1" id="additionalCategorySelect2" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
@@ -233,20 +246,24 @@
                             <div class="help">Escreva de forma simples. Use um telefone válido para receber contatos e respostas da análise.</div></div>
                     </div>
                     <div class="grid-2">
-                        <div class="field"><label>Informações de preço</label><input type="text" name="price_info" value="<%= profissional.price_info || '' %>" placeholder="Ex: Taxa de visita R$ 50"></div>
-                        <div class="field"><label>Taxa de serviço</label>
-                            <div class="chips">
-                                <label class="chip small"><input type="checkbox" id="serviceFeeToggle" name="service_fee_enabled"> Cobro taxa de visita</label>
+                        <div class="field">
+                            <label>Taxa de visita</label>
+                            <div class="toggle-row">
+                                <input type="checkbox" id="serviceFeeToggle" name="service_fee_enabled">
+                                <label for="serviceFeeToggle" style="margin:0;font-size:14px">Cobro taxa de visita</label>
                             </div>
                             <input type="text" inputmode="decimal" id="serviceFeeAmount" name="service_fee_amount" class="hide" placeholder="Ex: 50,00" style="margin-top:8px">
+                            <div class="help">O campo só aparece quando você informar que cobra taxa de visita.</div>
                         </div>
+                        <div class="field"><label>Especialidades</label><input type="text" name="specialties" value="<%= profissional.specialties || '' %>" placeholder="Ex: instalação, manutenção, residencial">
+                            <div class="help">Escreva de forma simples. Use um telefone válido para receber contatos e respostas da análise.</div></div>
                     </div>
                     <div class="field">
                         <label>Descrição profissional</label>
                         <textarea name="description" placeholder="Explique em poucas linhas o que você faz e por que o cliente pode confiar no seu trabalho."><%= profissional.description || '' %></textarea>
                     </div>
                     <div class="field">
-                        <label>Disponibilidade</label>
+                        <label>Horário de funcionamento</label>
                         <div class="chips">
                             <% ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(day => { %>
                                 <label class="chip"><input type="checkbox" name="working_days" value="<%= day %>"> <%= day %></label>
@@ -254,12 +271,10 @@
                             <label class="chip"><input type="checkbox" name="available_24h" id="available24h"> 24h</label>
                         </div>
                         <div class="grid-2" style="margin-top:10px">
-                            <input type="time" name="availability_start">
-                            <input type="time" name="availability_end">
+                            <select name="availability_start" id="availabilityStartSelect"></select>
+                            <select name="availability_end" id="availabilityEndSelect"></select>
                         </div>
-                        <datalist id="hourOptions">
-                            <option value="07:00"></option><option value="08:00"></option><option value="09:00"></option><option value="10:00"></option><option value="12:00"></option><option value="13:00"></option><option value="18:00"></option>
-                        </datalist>
+                        <div class="help">Informe os dias em que você atende e o horário em que normalmente trabalha.</div>
                     </div>
                     <div class="actions">
                         <button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button>
@@ -490,12 +505,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('planMonths').addEventListener('change', updatePlanUI);
     document.getElementById('primaryCategorySearch')?.addEventListener('input', () => filterSelectBySearch('primaryCategorySelect', 'primaryCategorySearch'));
     document.getElementById('additionalCategorySearch')?.addEventListener('input', () => filterSelectBySearch('additionalCategorySelect1', 'additionalCategorySearch'));
+    document.getElementById('additionalCategorySearch2')?.addEventListener('input', () => filterSelectBySearch('additionalCategorySelect2', 'additionalCategorySearch2'));
     document.getElementById('serviceFeeAmount')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^\d,]/g, ''); });
     document.querySelector('input[name="phone_number"]')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0,11); });
     document.getElementById('onboardingCep')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0,8); });
     document.getElementById('onboardingCity')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''); });
     document.getElementById('onboardingState')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0,2); });
     document.querySelectorAll('input, textarea, select').forEach(field => field.addEventListener('keydown', (e) => { if (e.key === 'Enter' && field.tagName !== 'TEXTAREA') e.preventDefault(); }));
+    const fillTimeSelect = (id) => { const el = document.getElementById(id); if(!el) return; const opts=['']; for(let h=0; h<24; h++){ for(let m=0; m<60; m+=30){ const v=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; opts.push(v); }} el.innerHTML = opts.map(v => `<option value="${v}">${v || 'Selecione um horário'}</option>`).join(''); };
+    fillTimeSelect('availabilityStartSelect');
+    fillTimeSelect('availabilityEndSelect');
     document.getElementById('onboardingForm')?.addEventListener('submit', () => {
         const submitter = document.activeElement;
         const finishBtn = document.getElementById('finishProfileBtn');
@@ -507,8 +526,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.querySelectorAll('select[data-category-select]').forEach(el => el.addEventListener('change', toggleCustomProfession));
     toggleCustomProfession();
     document.getElementById('onboardingCep').addEventListener('blur', e => buscarCep(e.target.value));
-    document.getElementById('serviceFeeToggle').addEventListener('change', e => document.getElementById('serviceFeeAmount').classList.toggle('hide', !e.target.checked));
+    const serviceToggle = document.getElementById('serviceFeeToggle');
+    const serviceAmount = document.getElementById('serviceFeeAmount');
+    if(serviceAmount && `<%= profissional.price_value || '' %>`){ serviceAmount.value = `<%= profissional.price_value || '' %>`.replace('.', ','); }
+    if(serviceToggle && serviceAmount && serviceAmount.value){ serviceToggle.checked = true; serviceAmount.classList.remove('hide'); }
+    serviceToggle?.addEventListener('change', e => { serviceAmount.classList.toggle('hide', !e.target.checked); if(!e.target.checked) serviceAmount.value=''; });
+    filterSelectBySearch('primaryCategorySelect', 'primaryCategorySearch');
+    filterSelectBySearch('additionalCategorySelect1', 'additionalCategorySearch');
+    filterSelectBySearch('additionalCategorySelect2', 'additionalCategorySearch2');
 });
 </script>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
 </body>
 </html>

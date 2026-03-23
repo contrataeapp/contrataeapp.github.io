@@ -47,7 +47,7 @@ function buildAvailability(body) {
         : body.working_days ? [body.working_days] : [];
 
     if (body.available_24h) {
-        return days.length ? `${days.join(', ')} • 24h` : 'Disponível 24h';
+        return days.length ? `${days.join(', ')} • 24h` : 'Funcionamento 24h';
     }
 
     const start = compactText(body.availability_start);
@@ -228,7 +228,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
     const serviceFeeEnabled = Boolean(body.service_fee_enabled) || serviceFeeAmount !== null;
     const priceInfo = serviceFeeEnabled && serviceFeeAmount !== null
         ? `Taxa de visita: R$ ${serviceFeeAmount.toFixed(2).replace('.', ',')}`
-        : compactText(body.price_info) || null;
+        : null;
 
     const isCompleteForSave = Boolean(primaryCategory && basicData.phone_number && basicData.cep && basicData.city && basicData.state);
     const profilePayload = {
@@ -302,7 +302,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
     }
 
     if (saveMode === 'draft') {
-        return req.session.destroy(() => res.redirect('/?success=Cadastro salvo para continuar depois'));
+        return res.redirect('/profissional/dashboard?success=Rascunho salvo para continuar depois');
     }
 
     if (!primaryCategory) {
@@ -321,7 +321,7 @@ router.post('/profissional/perfil/atualizar', requireProfessional, catchAsync(as
     const serviceFeeEnabled = Boolean(body.service_fee_enabled) || fee !== null;
     const priceInfo = serviceFeeEnabled && fee !== null
         ? `Taxa de visita: R$ ${fee.toFixed(2).replace('.', ',')}`
-        : compactText(body.price_info) || null;
+        : null;
 
     await supabase.from('professionals').update({
         phone_number: String(body.phone_number || '').replace(/\D/g, '').slice(0,11) || null,
