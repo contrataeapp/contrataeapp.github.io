@@ -564,9 +564,11 @@ app.get("/auth/completar-perfil", async (req, res) => {
         const { data: profissional } = await supabase.from('professionals').select('*').eq('user_id', req.session.userId).maybeSingle();
         const basicProfileComplete = Boolean(profissional && profissional.phone_number && profissional.cep && profissional.city && profissional.state);
         if (basicProfileComplete && profissional?.profile_completed) {
+            req.session.professionalReady = true;
             return res.redirect('/profissional/dashboard');
         }
         if (basicProfileComplete) {
+            req.session.professionalReady = false;
             return res.redirect('/profissional/onboarding?step=1');
         }
         res.render("auth/completar-perfil", {

@@ -1,0 +1,42 @@
+Use EXATAMENTE o repositório já existente. NÃO crie novo repositório.
+
+REPOSITÓRIO:
+https://github.com/contrataeapp/contrataeapp.github.io
+
+OBJETIVO:
+Subir a versão "contrataeapp_v11_3_4_1_cadastro_refino.zip" substituindo os arquivos do projeto ATUAL sem alterar a estrutura Git.
+
+REGRAS CRÍTICAS
+- NÃO rodar git init
+- NÃO alterar origin
+- NÃO criar branch nova
+- NÃO mexer no Render
+- NÃO instalar dependências novas
+- NÃO editar fora do que veio no ZIP
+
+PROCESSO
+1. Abrir o repositório existente
+2. Garantir que a pasta .git já existe
+3. Extrair o ZIP localmente
+4. Copiar os arquivos do ZIP e substituir no projeto atual, SEM apagar a pasta .git
+5. Validar:
+   - node --check server.js
+   - node --check routes/auth.js
+   - node --check routes/dashboards.js
+6. Commitar:
+   git add .
+   git commit -m "fix: v11.3.4.1 refino do cadastro guiado profissional"
+7. Push:
+   git push origin main
+
+FOCO DESTA VERSÃO
+- remover confusão do topo no onboarding
+- padronizar voltar para voltar só uma etapa
+- adicionar cancelar cadastro com confirmação
+- manter tab bar mobile consistente
+- impedir modo profissional ativo antes da conclusão
+- corrigir volta do topo para usar a mesma lógica do botão inferior
+- manter dashboard bloqueada até concluir onboarding
+- manter valores/plano/meses e profissões funcionando
+- corrigir nome do campo WhatsApp no cadastro inicial
+- manter sidebar/dashboard para próxima etapa, sem refatorar agora

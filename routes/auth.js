@@ -150,6 +150,7 @@ router.post('/cadastro', async (req, res) => {
                 return res.render('auth/cadastro', { erro: 'Erro ao iniciar sessão', userType: req.body.user_type || 'client' });
             }
             applyUserSession(req.session, userData);
+            req.session.professionalReady = false;
             req.session.afterLoginRedirect = null;
             req.session.save(() => {
                 if (user_type === 'professional') {
@@ -201,8 +202,9 @@ router.post('/login', async (req, res) => {
 
             if (user.user_type === 'professional') {
                 const { data: prof } = await supabase.from('professionals').select('*').eq('user_id', user.id).maybeSingle();
-                if (!basicProfessionalProfileComplete(prof)) return finishRedirect('/auth/completar-perfil');
-                if (!prof?.profile_completed) return finishRedirect('/profissional/onboarding?step=1');
+                if (!basicProfessionalProfileComplete(prof)) { req.session.professionalReady = false; return finishRedirect('/auth/completar-perfil'); }
+                if (!prof?.profile_completed) { req.session.professionalReady = false; return finishRedirect('/profissional/onboarding?step=1'); }
+                req.session.professionalReady = true;
                 return finishRedirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
             }
             return finishRedirect(nextUrl && nextUrl.startsWith('/cliente') ? nextUrl : '/cliente/dashboard');
@@ -288,8 +290,9 @@ router.get('/google/callback', passport.authenticate('google', {
                     prof = createdProf;
                 }
 
-                if (user._wasNew || !basicProfessionalProfileComplete(prof)) return finishRedirect('/auth/completar-perfil');
-                if (!prof?.profile_completed) return finishRedirect('/profissional/onboarding?step=1');
+                if (user._wasNew || !basicProfessionalProfileComplete(prof)) { req.session.professionalReady = false; return finishRedirect('/auth/completar-perfil'); }
+                if (!prof?.profile_completed) { req.session.professionalReady = false; return finishRedirect('/profissional/onboarding?step=1'); }
+                req.session.professionalReady = true;
                 return finishRedirect(nextUrl && nextUrl.startsWith('/profissional') ? nextUrl : '/profissional/dashboard');
             }
 

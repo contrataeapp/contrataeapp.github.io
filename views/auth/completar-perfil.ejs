@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contrataê · Cadastro profissional</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .page-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;z-index:1000;padding:14px}.page-top-inner{width:min(980px,calc(100% - 24px));display:flex;justify-content:space-between;align-items:center;background:rgba(17,17,20,.9);border:1px solid #2f3137;border-radius:16px;padding:10px 14px;backdrop-filter:blur(8px)}.page-top a{color:#fff;text-decoration:none;font-weight:700}.page-top .highlight{color:#ffa500}
@@ -59,11 +60,11 @@
         .btn-secondary:hover { background:#45464d; }
         .btn-primary:hover { background:#ffc04b; }
         .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1e1e1e;border-top:1px solid #333;display:none;justify-content:space-around;align-items:center;height:70px;z-index:1000}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:#999;text-decoration:none;font-size:12px;gap:5px}.nav-item i{font-size:22px}.nav-item.active,.nav-item:hover{color:#ffa500} @media (max-width: 900px) { .shell { grid-template-columns: 1fr; } .lead{order:1}.form-card{order:2} }
-        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } body { padding: 86px 12px 90px; } .form-card, .lead { padding: 20px; } .title { font-size: 28px; } .lead h1 { font-size: 30px; } } @media (max-width: 768px){.bottom-nav{display:flex}}
+        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } body { padding: 86px 12px 90px; } .form-card, .lead { padding: 20px; } .title { font-size: 28px; } .lead h1 { font-size: 30px; } .page-top{display:none;} } @media (max-width: 768px){.bottom-nav{display:flex}}
     </style>
 </head>
 <body>
-    <div class="page-top"><div class="page-top-inner"><a href="/auth/cadastro"><i class="fas fa-arrow-left"></i> Voltar</a><a class="highlight" href="/">Voltar para a plataforma</a></div></div>
+    <div class="page-top"><div class="page-top-inner"><a href="/auth/cadastro-form?type=professional"><i class="fas fa-arrow-left"></i> Voltar</a></div></div>
     <nav class="bottom-nav safe-auth-nav">
         <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
         <a href="javascript:history.back()" class="nav-item"><i class="fas fa-arrow-left"></i><span>Voltar</span></a>
@@ -123,8 +124,8 @@
 
                 <div class="grid-2">
                     <div>
-                        <label>Telefone / WhatsApp</label>
-                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15" required>
+                        <label>WhatsApp</label>
+                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" inputmode="numeric" pattern="[0-9]*" maxlength="15" required>
                     </div>
                     <div>
                         <label>CEP</label>
@@ -194,6 +195,7 @@
         }
     </script>
 
+<script>document.getElementById('phone_number')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,11)});document.getElementById('cep')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,8)});document.getElementById('city')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g,'')});document.getElementById('state')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ]/g,'').toUpperCase().slice(0,2)});</script>
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
 </body>

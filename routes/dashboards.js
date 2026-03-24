@@ -312,7 +312,8 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
         return res.redirect('/profissional/onboarding?step=2&error=Selecione pelo menos uma profissão para finalizar');
     }
 
-    return res.redirect('/profissional/dashboard?success=Perfil concluído com sucesso');
+    req.session.professionalReady = true;
+    return req.session.save(() => res.redirect('/profissional/dashboard?success=Perfil concluído com sucesso'));
 }));
 
 router.post('/profissional/perfil/atualizar', requireProfessional, catchAsync(async (req, res) => {

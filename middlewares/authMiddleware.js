@@ -33,6 +33,7 @@ const injectUserVars = (req, res, next) => {
     res.locals.userId = state.userId;
     res.locals.userType = state.userType;
     res.locals.fullName = state.fullName;
+    res.locals.professionalReady = state.professionalReady;
     res.locals.adminLogado = state.adminLogado;
     next();
 };
