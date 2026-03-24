@@ -1,3 +1,4 @@
+// FIX v11.3.4 cadastro estável: bloqueia dashboard antes da conclusão e preserva plano/meses no onboarding
 const express = require('express');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
@@ -10,32 +11,6 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { files: 10, fi
 
 function compactText(value) {
     return String(value || '').trim();
-}
-
-
-// FIX v11.3.3: helpers de validação do cadastro para reduzir erros de entrada
-function digitsOnly(value) {
-    return String(value || '').replace(/\D/g, '');
-}
-
-function normalizeCity(value) {
-    return compactText(value).replace(/[^A-Za-zÀ-ÿ\s'-]/g, '');
-}
-
-function normalizeState(value) {
-    return compactText(value).replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase();
-}
-
-function getSavedPlanMeta(profissional, selectedCount) {
-    const months = Math.max(1, Number(profissional?.plan_duration_months || 1));
-    const price = Number(profissional?.plan_price || 0);
-    const inferredTier = selectedCount >= 3 ? 'premium' : selectedCount === 2 ? 'professional' : 'basic';
-    const tier = price >= 70 ? 'premium' : price >= 50 ? 'professional' : inferredTier;
-    return { months, price, tier };
-}
-
-function isOnboardingComplete(profissional) {
-    return Boolean(profissional?.profile_completed);
 }
 
 function parsePlanConfig(body) {
@@ -60,8 +35,9 @@ function normalizeProfileStatus(profissional) {
 }
 
 function parseCurrencyLike(value) {
-    if (!value) return null;
-    const cleaned = String(value).replace(/[^\d,.-]/g, '').replace(',', '.');
+    if (value === undefined || value === null || value === '') return null;
+    const cleaned = String(value).replace(/[^\d,]/g, '').replace(',', '.');
+    if (!cleaned) return null;
     const num = Number(cleaned);
     return Number.isFinite(num) ? num : null;
 }
@@ -72,7 +48,7 @@ function buildAvailability(body) {
         : body.working_days ? [body.working_days] : [];
 
     if (body.available_24h) {
-        return days.length ? `${days.join(', ')} • 24h` : 'Disponível 24h';
+        return days.length ? `${days.join(', ')} • 24h` : 'Funcionamento 24h';
     }
 
     const start = compactText(body.availability_start);
@@ -174,6 +150,13 @@ async function getProfessionalBundle(userId) {
         .eq('professional_id', userId)
         .order('payment_date', { ascending: false });
 
+    const { data: approvalLogs } = await supabase
+        .from('admin_logs')
+        .select('*')
+        .eq('professional_id', userId)
+        .in('action_type', ['approval_request', 'approval_granted'])
+        .order('action_at', { ascending: false });
+
     return {
         profissional: profissional || {},
         categorias,
@@ -181,7 +164,8 @@ async function getProfessionalBundle(userId) {
         selectedAdditionalIds,
         portfolio: portfolio || [],
         reviews: reviews || [],
-        pagamentos: pagamentos || []
+        pagamentos: pagamentos || [],
+        approvalLogs: approvalLogs || []
     };
 }
 
@@ -194,8 +178,9 @@ router.get('/profissional/onboarding', requireProfessional, catchAsync(async (re
     }
 
     const selectedCount = [bundle.profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length;
-    const savedPlan = getSavedPlanMeta(bundle.profissional, selectedCount);
-    const savedPlanTier = savedPlan.tier;
+    const queryTier = compactText(req.query.tier);
+    const savedPlanTier = queryTier || (selectedCount >= 3 ? 'premium' : selectedCount === 2 ? 'professional' : 'basic');
+    const savedPlanMonths = Number(req.query.months || bundle.profissional.plan_duration_months || 1);
 
     res.render('dashboards/profissional-onboarding', {
         user: bundle.profissional.users || {},
@@ -208,17 +193,15 @@ router.get('/profissional/onboarding', requireProfessional, catchAsync(async (re
         flashSuccess: req.query.success || '',
         startStep: Number(req.query.step || 1),
         savedPlanTier,
-        savedPlanMonths: Number(req.query.months || savedPlan.months || 1),
+        savedPlanMonths,
         displayName: bundle.profissional.users?.full_name || req.session.fullName,
         savedSuggestion: ''
     });
 }));
 
-router.post('/profissional/onboarding/salvar', requireProfessional, upload.fields([
-    { name: 'avatar', maxCount: 1 },
-    { name: 'portfolio_images', maxCount: 10 }
-]), catchAsync(async (req, res) => {
+router.post('/profissional/onboarding/salvar', requireProfessional, upload.any(), catchAsync(async (req, res) => {
     const body = req.body || {};
+    const uploadedFiles = Array.isArray(req.files) ? req.files : [];
     const saveMode = body.save_mode === 'draft' ? 'draft' : 'final';
     const currentStepLabel = Number(body.current_step || 1);
     const currentStep = Number(body.current_step || 1);
@@ -235,30 +218,30 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
         .slice(0, planConfig.plan.slots);
 
     const basicData = {
-        phone_number: digitsOnly(body.phone_number) || null,
-        cep: digitsOnly(body.cep) || null,
-        city: normalizeCity(body.city) || null,
-        state: normalizeState(body.state) || null,
+        phone_number: String(body.phone_number || '').replace(/\D/g, '').slice(0,11) || null,
+        cep: String(body.cep || '').replace(/\D/g, '').slice(0,8) || null,
+        city: compactText(body.city).replace(/[^A-Za-zÀ-ÿ\s]/g, '') || null,
+        state: compactText(body.state).replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0,2) || null,
         description: compactText(body.description) || null,
         specialties: compactText(body.specialties) || null,
         availability: buildAvailability(body)
     };
 
-    const serviceFeeEnabled = Boolean(body.service_fee_enabled);
     const serviceFeeAmount = parseCurrencyLike(body.service_fee_amount);
+    const serviceFeeEnabled = Boolean(body.service_fee_enabled) || serviceFeeAmount !== null;
     const priceInfo = serviceFeeEnabled && serviceFeeAmount !== null
         ? `Taxa de visita: R$ ${serviceFeeAmount.toFixed(2).replace('.', ',')}`
-        : compactText(body.price_info) || null;
+        : null;
 
     const isCompleteForSave = Boolean(primaryCategory && basicData.phone_number && basicData.cep && basicData.city && basicData.state);
     const profilePayload = {
         user_id: req.session.userId,
         ...basicData,
         price_info: priceInfo,
-        price_value: serviceFeeEnabled && serviceFeeAmount !== null ? serviceFeeAmount : null,
-        payment_value: 0,
+        price_value: serviceFeeAmount,
+        payment_value: planConfig.total,
         plan_duration_months: planConfig.months,
-        plan_price: planConfig.plan.monthly,
+        plan_price: planConfig.total,
         status: 'pending',
         approval_requested: false,
         submitted_at: null,
@@ -279,7 +262,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
     const userUpdates = {};
     if (displayName) userUpdates.full_name = displayName;
 
-    const avatarFile = req.files?.avatar?.[0] || null;
+    const avatarFile = uploadedFiles.find(file => file.fieldname === 'avatar') || null;
     if (avatarFile) {
         const ext = (avatarFile.originalname.split('.').pop() || 'jpg').toLowerCase();
         const avatarPath = `public/avatar_${req.session.userId}_${Date.now()}.${ext}`;
@@ -297,7 +280,8 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
         );
     }
 
-    const portfolioFiles = [...(req.files?.portfolio_images || [])];
+    const portfolioFiles = uploadedFiles
+        .filter(file => file.fieldname === 'portfolio_images' || file.fieldname.startsWith('portfolio_image_slot_'));
     if (currentStepLabel === 4 && portfolioFiles.length > 3) {
         return res.redirect('/profissional/onboarding?step=4&error=No onboarding inicial você pode enviar até 3 imagens');
     }
@@ -321,7 +305,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
     }
 
     if (saveMode === 'draft') {
-        return res.redirect(`/profissional/onboarding?step=${currentStep}&success=Rascunho salvo com sucesso`);
+        return res.redirect(`/profissional/onboarding?step=${currentStep || 1}&tier=${planConfig.tier}&months=${planConfig.months}&success=Rascunho salvo. Você pode continuar depois`);
     }
 
     if (!primaryCategory) {
@@ -333,23 +317,25 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.field
 
 router.post('/profissional/perfil/atualizar', requireProfessional, catchAsync(async (req, res) => {
     const body = req.body || {};
+    const uploadedFiles = Array.isArray(req.files) ? req.files : [];
     const displayName = compactText(body.display_name);
     const availability = buildAvailability(body);
-    const serviceFeeEnabled = Boolean(body.service_fee_enabled);
     const fee = parseCurrencyLike(body.service_fee_amount);
+    const serviceFeeEnabled = Boolean(body.service_fee_enabled) || fee !== null;
     const priceInfo = serviceFeeEnabled && fee !== null
         ? `Taxa de visita: R$ ${fee.toFixed(2).replace('.', ',')}`
-        : compactText(body.price_info) || null;
+        : null;
 
     await supabase.from('professionals').update({
-        phone_number: digitsOnly(body.phone_number) || null,
-        cep: digitsOnly(body.cep) || null,
-        city: normalizeCity(body.city) || null,
-        state: normalizeState(body.state) || null,
+        phone_number: String(body.phone_number || '').replace(/\D/g, '').slice(0,11) || null,
+        cep: String(body.cep || '').replace(/\D/g, '').slice(0,8) || null,
+        city: compactText(body.city).replace(/[^A-Za-zÀ-ÿ\s]/g, '') || null,
+        state: compactText(body.state).replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0,2) || null,
         specialties: compactText(body.specialties) || null,
         description: compactText(body.description) || null,
         availability,
         price_info: priceInfo,
+        price_value: fee,
         approval_requested: false,
         submitted_at: null,
         profile_status: 'completed'
@@ -374,8 +360,9 @@ router.post('/profissional/plano/atualizar', requireProfessional, catchAsync(asy
     if (!selected.length) return res.redirect('/profissional/dashboard?tab=planos&error=Escolha pelo menos uma profissão antes de mudar o plano');
     await supabase.from('professionals').update({
         category_id: selected[0].id,
+        payment_value: planConfig.total,
         plan_duration_months: planConfig.months,
-        plan_price: planConfig.plan.monthly,
+        plan_price: planConfig.total,
         approval_requested: false,
         submitted_at: null,
         profile_status: 'completed'
@@ -392,20 +379,16 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     const bundle = await getProfessionalBundle(req.session.userId);
     const profissional = bundle.profissional;
     const basicProfileComplete = Boolean(profissional.phone_number && profissional.cep && profissional.city && profissional.state);
-    if (!basicProfileComplete) {
-        return res.redirect('/auth/completar-perfil');
-    }
-    if (!isOnboardingComplete(profissional)) {
-        return res.redirect('/profissional/onboarding?step=1&resume=1');
-    }
+    if (!basicProfileComplete) return res.redirect('/auth/completar-perfil');
+    if (!profissional.profile_completed) return res.redirect('/profissional/onboarding?step=1&error=Conclua as 4 etapas do cadastro antes de acessar sua dashboard');
     const profileReadyForApproval = Boolean(basicProfileComplete && profissional.description && profissional.category_id && bundle.portfolio.length > 0);
     const approvalPending = Boolean(profissional.approval_requested);
     const isApproved = String(profissional.status || '').toLowerCase() === 'active';
     const profileStatus = normalizeProfileStatus(profissional) || (profileReadyForApproval ? 'completed' : 'draft');
+    const latestApprovalRequest = (bundle.approvalLogs || []).find(log => log.action_type === 'approval_request') || null;
 
     const selectedCount = [profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length;
-    const savedPlan = getSavedPlanMeta(profissional, selectedCount);
-    const currentPlanName = savedPlan.tier === 'premium' ? 'Plano Premium' : savedPlan.tier === 'professional' ? 'Plano Profissional' : 'Plano Básico';
+    const currentPlanName = selectedCount >= 3 ? 'Plano Premium' : selectedCount === 2 ? 'Plano Profissional' : 'Plano Básico';
 
     const avaliacaoMedia = bundle.reviews.length > 0
         ? (bundle.reviews.reduce((acc, r) => acc + r.rating, 0) / bundle.reviews.length).toFixed(1)
@@ -426,15 +409,14 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
         flashSuccess: req.query.success || '',
         contatosRecebidos: 0,
         servicosConcluidos: 0,
-        faturamentoMes: '0,00',
+        faturamentoMes: Number(0).toFixed(2).replace('.', ','),
         avaliacaoMedia,
         currentPlanName,
         selectedCount,
-        currentPlanMonths: savedPlan.months,
-        currentPlanMonthlyPrice: savedPlan.price || 30,
         approvalPending,
         isApproved,
-        profileStatus
+        profileStatus,
+        latestApprovalRequest
     });
 }));
 
@@ -456,7 +438,8 @@ router.get('/cliente/dashboard', requireAuth, catchAsync(async (req, res) => {
     });
 }));
 
-router.post('/profissional/solicitar-aprovacao', requireProfessional, catchAsync(async (req, res) => {
+router.post('/profissional/solicitar-aprovacao', requireProfessional, upload.single('payment_proof'), catchAsync(async (req, res) => {
+    const body = req.body || {};
     const bundle = await getProfessionalBundle(req.session.userId);
     const profissional = bundle.profissional || {};
     const basicProfileComplete = Boolean(profissional.phone_number && profissional.cep && profissional.city && profissional.state);
@@ -468,6 +451,17 @@ router.post('/profissional/solicitar-aprovacao', requireProfessional, catchAsync
 
     if (!profileReadyForApproval) {
         return res.redirect('/profissional/dashboard?error=Complete seu perfil antes de enviar para análise');
+    }
+
+    const sentByWhatsapp = body.payment_sent_whatsapp === 'on';
+    let paymentProofUrl = null;
+    if (!sentByWhatsapp && !req.file) {
+        return res.redirect('/profissional/dashboard?tab=resumo&error=Envie o comprovante de pagamento ou marque que enviou pelo WhatsApp');
+    }
+    if (req.file) {
+        const ext = (req.file.originalname.split('.').pop() || 'jpg').toLowerCase();
+        const path = `payments/payment_${req.session.userId}_${Date.now()}.${ext}`;
+        paymentProofUrl = await uploadToBucket('avatars', path, req.file);
     }
 
     const { error } = await supabase
@@ -484,9 +478,13 @@ router.post('/profissional/solicitar-aprovacao', requireProfessional, catchAsync
             profile: 'sent_to_review',
             category_id: profissional.category_id || null,
             price_info: profissional.price_info || null,
+            price_value: profissional.price_value || null,
             description: profissional.description || null,
-            plan_duration_months: profissional.plan_duration_months || 1,
-            plan_price: profissional.plan_price || 30
+            plan_duration_months: profissional.plan_duration_months || null,
+            plan_price: profissional.plan_price || profissional.payment_value || null,
+            payment_proof_url: paymentProofUrl,
+            payment_sent_whatsapp: sentByWhatsapp,
+            user_avatar_url: profissional.users?.avatar_url || null
         },
         performed_by: 'professional-dashboard'
     });

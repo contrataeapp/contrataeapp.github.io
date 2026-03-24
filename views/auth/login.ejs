@@ -14,10 +14,10 @@
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            padding-bottom: 80px; 
+            padding: 90px 0 80px; 
         }
         
-        .auth-container { width: 100%; max-width: 450px; padding: 20px; }
+        .page-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;z-index:1000;padding:14px}.page-top-inner{width:min(980px,calc(100% - 24px));display:flex;justify-content:space-between;align-items:center;background:rgba(17,17,20,.9);border:1px solid #2f3137;border-radius:16px;padding:10px 14px;backdrop-filter:blur(8px)}.page-top a{color:#fff;text-decoration:none;font-weight:700}.page-top .highlight{color:#ffa500}.auth-container { width: 100%; max-width: 450px; padding: 20px; }
         .auth-card { 
             background: #1e1e1e; 
             border-radius: 12px; 
@@ -31,7 +31,7 @@
         .auth-header p { color: #ccc; font-size: 14px; }
         
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 800; color: #fff; font-size: 14px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #fff; font-size: 14px; }
         .form-group input { 
             width: 100%; 
             padding: 12px 15px; 
@@ -80,8 +80,10 @@
         }
         .btn-google:hover { background: #f0f0f0; transform: translateY(-2px); }
         
-        .auth-footer { text-align: center; margin-top: 25px; font-size: 14px; color: #999; }
-        .auth-footer a { color: #ffa500; text-decoration: none; font-weight: 600; }
+        .auth-footer { text-align: center; margin-top: 25px; font-size: 15px; color: #b8b8bf; line-height: 1.6; }
+        .auth-footer a { color: #ffa500; text-decoration: none; font-weight: 800; font-size: 15px; }
+        .signup-cta { margin-top: 6px; font-size: 16px; }
+        .signup-cta a { font-size: 18px; text-transform: uppercase; letter-spacing: 0.4px; }
         .auth-footer a:hover { text-decoration: underline; }
         
         .error-message { 
@@ -145,18 +147,19 @@
     </style>
 </head>
 <body>
+    <div class="page-top"><div class="page-top-inner"><a href="/"><i class="fas fa-arrow-left"></i> Voltar para a plataforma</a><a class="highlight" href="/auth/cadastro">Criar conta</a></div></div>
     <nav class="bottom-nav">
         <a href="/" class="nav-item" title="Inicio">
             <i class="fas fa-home"></i>
             <span>Inicio</span>
         </a>
-        <a href="javascript:void(0)" class="nav-item" title="Busca">
-            <i class="fas fa-search"></i>
-            <span>Busca</span>
+        <a href="javascript:history.back()" class="nav-item" title="Voltar">
+            <i class="fas fa-arrow-left"></i>
+            <span>Voltar</span>
         </a>
-        <a href="javascript:void(0)" class="nav-item" title="Menu">
-            <i class="fas fa-bars"></i>
-            <span>Menu</span>
+        <a href="/contato" class="nav-item" title="Ajuda">
+            <i class="fas fa-circle-question"></i>
+            <span>Ajuda</span>
         </a>
         <a href="/auth/login" class="nav-item active" title="Entrar">
             <i class="fas fa-user"></i>
@@ -199,12 +202,13 @@
                 <span></span>
             </div>
             
-            <a href="/auth/google<%= (typeof next !== 'undefined' && next) ? `?next=${encodeURIComponent(next)}` : '' %>" class="btn btn-google">
+            <a href="/auth/google/login<%= (typeof next !== 'undefined' && next) ? `?next=${encodeURIComponent(next)}` : '' %>" class="btn btn-google">
                 <i class="fab fa-google"></i> Continuar com Google
             </a>
             
             <div class="auth-footer">
-                <p>Não tem uma conta? <a href="/auth/cadastro">Cadastre-se</a></p>
+                <p class="signup-cta">Não tem conta? <a href="/auth/cadastro">Cadastre-se</a></p>
+                <p>Você pode criar conta com e-mail e senha ou seguir com Google.</p>
                 <p style="margin-top: 15px;"><a href="/esqueci-senha">Esqueceu a senha?</a></p>
             </div>
         </div>
@@ -225,5 +229,8 @@
             }
         }
     </script>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
 </body>
 </html>

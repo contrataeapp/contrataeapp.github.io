@@ -121,6 +121,7 @@
                                 <th>Profissional</th>
                                 <th>Categoria</th>
                                 <th>Data Solicitação</th>
+                                <th>Pagamento</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -443,6 +444,7 @@
         <div class="modal-content">
             <span class="close" onclick="fecharModal('modal-aprovar')">&times;</span>
             <h2>Aprovar: <span id="nome-prof-aprovar"></span></h2>
+            <div id="aprovar-resumo" style="margin-bottom:15px;padding:12px;background:#f8f8f8;border-radius:10px;font-size:13px;color:#444;"></div>
             <form id="form-aprovar">
                 <input type="hidden" id="id-prof-aprovar">
                 
@@ -468,6 +470,10 @@
                 <div class="form-group">
                     <label>Motivo (Opcional)</label>
                     <textarea id="motivo-aprovar" rows="2" placeholder="Ex: Cadastro novo via Pix"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="payment-checked-whatsapp"> Conferi o pagamento enviado pelo WhatsApp</label>
                 </div>
 
                 <div class="modal-buttons">

@@ -34,7 +34,7 @@
                     <div class="user-dropdown" id="userDropdown">
                         <a href="<%= userType === 'professional' ? '/profissional/dashboard?tab=perfil' : '/cliente/dashboard?tab=perfil' %>"><i class="fas fa-id-card"></i> Perfil</a>
                         <a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>"><i class="fas fa-gauge-high"></i> Dashboard</a>
-                        <a href="/auth/logout"><i class="fas fa-right-from-bracket"></i> Sair</a>
+                        <form method="POST" action="/auth/logout" class="logout-inline-form"><button type="submit" class="logout-inline-btn"><i class="fas fa-right-from-bracket"></i> Sair</button></form>
                     </div>
                 </div>
             <% } else { %>
@@ -60,10 +60,23 @@
                 <li><a href="/categoria/encanadores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'encanadores') ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
                 <li><a href="/categoria/outros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'outros') ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
                 <li><a href="/contato" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'contato') ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
-                <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                <% if (adminLogado) { %>
+                    <li class="mobile-only"><a href="/admin"><i class="fas fa-user-shield"></i> Painel ADM</a></li>
+                <% } else if (userId) { %>
+                    <li class="mobile-only"><a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>"><i class="fas fa-gauge-high"></i> Dashboard</a></li>
+                    <li class="mobile-only"><form method="POST" action="/auth/logout" class="logout-inline-form"><button type="submit" class="logout-inline-btn"><i class="fas fa-right-from-bracket"></i> Sair</button></form></li>
+                <% } else { %>
+                    <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                <% } %>
             </ul>
         </div>
     </nav>
+        <style>
+        .logout-inline-form{margin:0}
+        .logout-inline-btn{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0;display:flex;align-items:center;gap:8px;width:100%;text-align:left}
+        .user-dropdown .logout-inline-btn{padding:0}
+        .mobile-logout-form .logout-inline-btn{padding:0;color:inherit}
+    </style>
     <script>
         (function(){
             const toggle = document.getElementById('userMenuToggle');
@@ -79,6 +92,7 @@
                     menu.classList.remove('open');
                 }
             });
+            if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistration) { navigator.serviceWorker.getRegistration('/').then(reg=>reg&&reg.unregister()).catch(()=>{}); }
         })();
     </script>
 </header>
