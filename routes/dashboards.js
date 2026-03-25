@@ -70,7 +70,8 @@ function buildAvailability(body) {
         : body.working_days ? [body.working_days] : [];
 
     if (body.available_24h) {
-        return days.length ? `${days.join(', ')} • 24h` : 'Funcionamento 24h';
+        if (!days.length) return 'Funcionamento 24h';
+        return `24h nos dias: ${days.join(', ')}`;
     }
 
     const start = compactText(body.availability_start);
@@ -109,13 +110,22 @@ function resolveCategoryFromInput(input, categories) {
     ) || null;
 }
 
-async function registerCategorySuggestion(professionalId, suggestion) {
+async function registerCategorySuggestion(professionalId, email, suggestion, slotIndex) {
     const text = compactText(suggestion);
     if (!text) return;
+    await supabase.from('profession_requests').insert({
+        user_id: professionalId,
+        email: email || null,
+        requested_name: text,
+        requested_slug: text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+        related_slot: slotIndex,
+        source: 'professional_onboarding',
+        status: 'pending'
+    });
     await supabase.from('admin_logs').insert({
         professional_id: professionalId,
         action_type: 'category_suggestion',
-        new_values: { suggestion: text },
+        new_values: { suggestion: text, slot: slotIndex },
         performed_by: 'professional-onboarding'
     });
 }
@@ -179,6 +189,12 @@ async function getProfessionalBundle(userId) {
         .in('action_type', ['approval_request', 'approval_granted'])
         .order('action_at', { ascending: false });
 
+    const { data: professionRequests } = await supabase
+        .from('profession_requests')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true });
+
     return {
         profissional: profissional || {},
         categorias,
@@ -187,7 +203,9 @@ async function getProfessionalBundle(userId) {
         portfolio: portfolio || [],
         reviews: reviews || [],
         pagamentos: pagamentos || [],
-        approvalLogs: approvalLogs || []
+        approvalLogs: approvalLogs || [],
+        professionRequests: professionRequests || [],
+        selectedSlotsCount: 1 + Math.min((categoriasExtras || []).length, 2)
     };
 }
 
@@ -218,7 +236,8 @@ router.get('/profissional/onboarding', requireProfessional, catchAsync(async (re
         savedPlanTier,
         savedPlanMonths,
         displayName: bundle.profissional.users?.full_name || req.session.fullName,
-        savedSuggestion: ''
+        savedSuggestion: '',
+        professionRequests: bundle.professionRequests || []
     });
 }));
 
@@ -231,14 +250,26 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
     const allCategories = await getAllCategories();
     const planConfig = parsePlanConfig(body);
 
-    const primaryCategory = resolveCategoryFromInput(body.primary_category_id || body.primary_category_name, allCategories);
-    const additionalCategories = [body.additional_category_1, body.additional_category_2]
-        .map(input => resolveCategoryFromInput(input, allCategories))
-        .filter(Boolean);
+    const categorySlots = [
+        resolveCategoryFromInput(body.primary_category_id || body.primary_category_name, allCategories),
+        resolveCategoryFromInput(body.additional_category_1, allCategories),
+        resolveCategoryFromInput(body.additional_category_2, allCategories)
+    ].slice(0, planConfig.plan.slots);
 
-    const selectedCategories = [primaryCategory, ...additionalCategories]
-        .filter((cat, index, arr) => cat && arr.findIndex(other => other.id === cat.id) === index)
-        .slice(0, planConfig.plan.slots);
+    const customSuggestions = [
+        compactText(body.new_profession_request_1),
+        compactText(body.new_profession_request_2),
+        compactText(body.new_profession_request_3)
+    ];
+
+    const selectedCategories = categorySlots.filter(Boolean);
+    const primaryCategory = categorySlots[0] || null;
+    const selectedSlotsCount = categorySlots.reduce((acc, cat, idx) => {
+        if (!cat) return acc;
+        const isOther = ['outros', 'outro'].includes(String(cat.slug || '').toLowerCase()) || ['outros', 'outro'].includes(String(cat.name || '').toLowerCase());
+        if (isOther && !customSuggestions[idx]) return acc;
+        return acc + 1;
+    }, 0);
 
     const basicData = {
         phone_number: String(body.phone_number || '').replace(/\D/g, '').slice(0,11) || null,
@@ -323,12 +354,20 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
         }
     }
 
-    if (compactText(body.new_profession_request)) {
-        await registerCategorySuggestion(req.session.userId, body.new_profession_request);
+    await supabase.from('profession_requests').delete().eq('user_id', req.session.userId).eq('source', 'professional_onboarding');
+    for (const [index, cat] of categorySlots.entries()) {
+        if (!cat) continue;
+        const isOther = ['outros', 'outro'].includes(String(cat.slug || '').toLowerCase()) || ['outros', 'outro'].includes(String(cat.name || '').toLowerCase());
+        if (isOther && customSuggestions[index]) {
+            await registerCategorySuggestion(req.session.userId, req.session.email || profissional?.users?.email || null, customSuggestions[index], index + 1);
+        }
     }
 
     if (!primaryCategory) {
         return res.redirect('/profissional/onboarding?step=2&error=Selecione pelo menos uma profissão para finalizar');
+    }
+    if (selectedSlotsCount < planConfig.plan.slots) {
+        return res.redirect(`/profissional/onboarding?step=2&error=Complete as ${planConfig.plan.slots} profissões do plano escolhido antes de continuar`);
     }
 
     req.session.professionalReady = true;
@@ -407,7 +446,7 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     const profileStatus = normalizeProfileStatus(profissional) || (profileReadyForApproval ? 'completed' : 'draft');
     const latestApprovalRequest = (bundle.approvalLogs || []).find(log => log.action_type === 'approval_request') || null;
 
-    const actualSelectedCount = [profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length;
+    const actualSelectedCount = Number(bundle.selectedSlotsCount || [profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length || 1);
     const inferredPlan = inferPlanTierFromProfessional(profissional);
     const selectedCount = Math.max(actualSelectedCount, inferredPlan.slots || 1);
     const currentPlanName = inferredPlan.label || 'Plano Básico';

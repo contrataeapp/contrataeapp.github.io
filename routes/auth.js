@@ -109,6 +109,11 @@ passport.deserializeUser(async (id, done) => {
 router.post('/cadastro', async (req, res) => {
     try {
         const { full_name, email, password, password_confirm, user_type } = req.body;
+        const cleanName = String(full_name || '').trim();
+
+        if (cleanName.length < 2) {
+            return res.render('auth/cadastro', { erro: 'Informe um nome válido para criar a conta', userType: user_type || 'client' });
+        }
 
         if (password !== password_confirm) {
             return res.render('auth/cadastro', { erro: 'As senhas não coincidem', userType: user_type || 'client' });
@@ -119,7 +124,7 @@ router.post('/cadastro', async (req, res) => {
         const { data: userData, error: userError } = await supabase
             .from('users')
             .insert([{ 
-                full_name, 
+                full_name: cleanName, 
                 email, 
                 password: hashedPassword, 
                 user_type: user_type || 'client' 

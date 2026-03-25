@@ -1,0 +1,28 @@
+Use este ZIP como fonte única e faça push NO REPOSITÓRIO CORRETO, sem criar repositório novo:
+
+REPO CORRETO:
+https://github.com/contrataeapp/contrataeapp.github.io
+
+REGRAS OBRIGATÓRIAS:
+1. NÃO criar novo repositório.
+2. NÃO trocar remote.
+3. NÃO alterar nome do projeto.
+4. Trabalhar em cima do repo existente contrataeapp.github.io.
+5. Substituir os arquivos locais pelo conteúdo do ZIP.
+6. Commitar e fazer push na branch principal usada hoje pelo projeto.
+
+PASSOS:
+- abrir o repositório local já conectado ao GitHub correto
+- apagar apenas os arquivos antigos do projeto e colocar os arquivos deste ZIP
+- manter .git do repositório existente
+- rodar npm install se necessário
+- conferir se package.json e server.js continuam presentes
+- git add .
+- git commit -m "fix: v11.3.6 estabiliza cadastro profissional e cancelamento real"
+- git push origin main
+
+VALIDAÇÕES ANTES DO PUSH:
+- o repositório continua sendo contrataeapp/contrataeapp.github.io
+- não existe repositório novo criado
+- a pasta .git do repo atual foi preservada
+- arquivos de onboarding, auth e cancelamento foram atualizados

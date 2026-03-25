@@ -79,7 +79,7 @@
         <a href="javascript:void(0)" class="nav-item" id="mobileHomeBtn"><i class="fas fa-home"></i><span>Início</span></a>
         <a href="javascript:void(0)" class="nav-item" id="mobileBackBtn"><i class="fas fa-arrow-left"></i><span>Voltar</span></a>
         <a href="javascript:void(0)" class="nav-item" id="mobileMenuBtn"><i class="fas fa-bars"></i><span>Menu</span></a>
-        <a href="/profissional/onboarding" class="nav-item active"><i class="fas fa-user-edit"></i><span>Cadastro</span></a>
+        <a href="javascript:void(0)" class="nav-item active" id="mobileCurrentBtn"><i class="fas fa-user-edit"></i><span>Cadastro</span></a>
     </nav>
     <div class="shell">
         <aside class="lead">
@@ -158,7 +158,7 @@
                     <div class="actions">
                         <div class="actions-left">
                             <button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button>
-                            <button type="button" class="btn btn-ghost" onclick="confirmCancel()">Cancelar cadastro</button>
+                            <button type="button" class="btn btn-danger" onclick="openCancelModal()">Cancelar cadastro</button>
                         </div>
                         <div class="actions-right">
                                                         <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
@@ -169,58 +169,73 @@
                 <div class="step" data-step="2">
                     <div class="subpanel">
                         <strong style="color:#ffb020">Escolha suas profissões</strong>
-                        <p class="help" style="margin-top:6px">Escolha a principal e, conforme o plano, mais 1 ou 2 profissões adicionais.</p>
+                        <p class="help" style="margin-top:6px">Organize suas profissões em sequência. Se escolher “Outros”, será aberto um campo próprio para descrever a nova categoria.</p>
                     </div>
+
                     <div class="grid-2 profession-grid" style="margin-top:14px">
                         <div class="field field-search">
                             <label>Busca rápida · Profissão 1</label>
-                            <input type="text" id="primaryCategorySearch" placeholder="Digite para filtrar a profissão principal" style="margin-bottom:10px">
+                            <input type="text" id="primaryCategorySearch" placeholder="Digite para filtrar a profissão 1">
                         </div>
                         <div class="field field-select">
-                            <label>Profissão 1 (principal)</label>
-                            <select name="primary_category_id" data-category-select="1" id="primaryCategorySelect" required>
+                            <label>Profissão 1</label>
+                            <select name="primary_category_id" data-category-select="1" data-slot="1" id="primaryCategorySelect" required>
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
                                     <option value="<%= cat.id %>" <%= currentPrimaryCategory && currentPrimaryCategory.id === cat.id ? 'selected' : '' %>><%= cat.name %></option>
                                 <% }); %>
                             </select>
+                            <div class="field hide custom-profession-field" id="customProfessionWrap1" style="margin-top:10px">
+                                <label>Nova profissão para a posição 1</label>
+                                <input type="text" name="new_profession_request_1" value="<%= (professionRequests || []).find(item => item.related_slot === 1)?.requested_name || '' %>" placeholder="Digite a profissão da posição 1">
+                            </div>
                         </div>
                     </div>
-                    <div class="grid-2 profession-grid" style="margin-top:12px">
-                        <div class="field additional-slot additional-slot-2 hide field-search">
+
+                    <div class="grid-2 profession-grid additional-slot additional-slot-2 hide" style="margin-top:12px">
+                        <div class="field field-search">
                             <label>Busca rápida · Profissão 2</label>
-                            <input type="text" id="additionalCategorySearch" placeholder="Digite para filtrar a profissão adicional" style="margin-bottom:10px">
+                            <input type="text" id="additionalCategorySearch" placeholder="Digite para filtrar a profissão 2">
                         </div>
-                        <div class="field additional-slot additional-slot-2 hide field-select">
+                        <div class="field field-select">
                             <label>Profissão 2</label>
-                            <select name="additional_category_1" data-category-select="1" id="additionalCategorySelect1" class="extraCategorySelect">
+                            <select name="additional_category_1" data-category-select="1" data-slot="2" id="additionalCategorySelect1" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
                                     <option value="<%= cat.id %>" <%= selectedAdditionalIds && selectedAdditionalIds[0] === cat.id ? 'selected' : '' %>><%= cat.name %></option>
                                 <% }); %>
                             </select>
+                            <div class="field hide custom-profession-field" id="customProfessionWrap2" style="margin-top:10px">
+                                <label>Nova profissão para a posição 2</label>
+                                <input type="text" name="new_profession_request_2" value="<%= (professionRequests || []).find(item => item.related_slot === 2)?.requested_name || '' %>" placeholder="Digite a profissão da posição 2">
+                            </div>
                         </div>
-                        <div class="field additional-slot additional-slot-3 hide">
+                    </div>
+
+                    <div class="grid-2 profession-grid additional-slot additional-slot-3 hide" style="margin-top:12px">
+                        <div class="field field-search">
                             <label>Busca rápida · Profissão 3</label>
-                            <input type="text" id="additionalCategorySearch2" placeholder="Digite para filtrar a segunda profissão adicional" style="margin-bottom:10px">
+                            <input type="text" id="additionalCategorySearch2" placeholder="Digite para filtrar a profissão 3">
+                        </div>
+                        <div class="field field-select">
                             <label>Profissão 3</label>
-                            <select name="additional_category_2" data-category-select="1" id="additionalCategorySelect2" class="extraCategorySelect">
+                            <select name="additional_category_2" data-category-select="1" data-slot="3" id="additionalCategorySelect2" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
                                     <option value="<%= cat.id %>" <%= selectedAdditionalIds && selectedAdditionalIds[1] === cat.id ? 'selected' : '' %>><%= cat.name %></option>
                                 <% }); %>
                             </select>
+                            <div class="field hide custom-profession-field" id="customProfessionWrap3" style="margin-top:10px">
+                                <label>Nova profissão para a posição 3</label>
+                                <input type="text" name="new_profession_request_3" value="<%= (professionRequests || []).find(item => item.related_slot === 3)?.requested_name || '' %>" placeholder="Digite a profissão da posição 3">
+                            </div>
                         </div>
                     </div>
-                    <div class="field hide" style="margin-top:12px" id="customProfessionWrap">
-                        <label>Não encontrou sua profissão?</label>
-                        <input type="text" name="new_profession_request" value="<%= savedSuggestion || '' %>" placeholder="Digite o nome da profissão. Nós vamos analisar essa nova categoria antes do perfil ficar no ar.">
-                        <div class="help">Use esse campo apenas quando escolher “Outros” ou quando realmente não encontrar algo parecido na lista.</div>
-                    </div>
+
                     <div class="actions">
-                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="confirmCancel()">Cancelar cadastro</button></div>
+                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="openCancelModal()">Cancelar cadastro</button></div>
                         <div class="actions-right" style="display:flex;gap:10px;flex-wrap:wrap">
-                                                        <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
                         </div>
                     </div>
                 </div>
@@ -249,8 +264,8 @@
                     <div class="grid-2">
                         <div class="field">
                             <label>Informações de preço</label>
-                            <input type="text" inputmode="decimal" id="serviceFeeAmount" name="service_fee_amount" placeholder="Ex: 50">
-                            <div class="help">Preencha somente se você cobra taxa de visita.</div>
+                            <input type="text" inputmode="decimal" id="serviceFeeAmount" name="service_fee_amount" placeholder="Ex: 50" class="hide">
+                            <div class="help" id="serviceFeeHelp">Marque abaixo somente se você cobra taxa de visita.</div>
                         </div>
                         <div class="field">
                             <label>Taxa de serviço</label>
@@ -280,7 +295,7 @@
                         <div class="help">Informe os dias em que você atende e o horário em que normalmente trabalha.</div>
                     </div>
                     <div class="actions">
-                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="confirmCancel()">Cancelar cadastro</button></div>
+                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="openCancelModal()">Cancelar cadastro</button></div>
                         <div class="actions-right" style="display:flex;gap:10px;flex-wrap:wrap">
                                                         <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
                         </div>
@@ -323,7 +338,7 @@
                         <p class="help" style="margin-top:8px">Ao salvar, seu perfil fica pronto para revisão dentro da sua área. Depois você ajusta o que quiser e só então pede análise.</p>
                     </div>
                     <div class="actions">
-                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="confirmCancel()">Cancelar cadastro</button></div>
+                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="openCancelModal()">Cancelar cadastro</button></div>
                         <div class="actions-right" style="display:flex;gap:10px;flex-wrap:wrap">
                                                         <button type="submit" class="btn btn-primary" id="finishProfileBtn">Finalizar perfil</button>
                         </div>
@@ -340,14 +355,25 @@
             <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
                 <button type="button" class="btn btn-secondary" onclick="closeCancelModal()">Continuar cadastro</button>
                 <form method="POST" action="/auth/cancelar-profissional" style="margin:0">
-                    <button type="submit" class="btn btn-danger">Confirmar cancelamento</button>
+                    <input type="hidden" name="current_step" id="cancelCurrentStep" value="1">
+                    <button type="submit" class="btn btn-danger" style="background:#b12c3a">Confirmar cancelamento</button>
                 </form>
             </div>
         </div>
     </div>
 
+
+    <div id="otherProfessionModal" class="hide" style="position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1200;align-items:center;justify-content:center;padding:20px;">
+        <div style="width:min(520px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;">
+            <h3 style="color:#ffb21e;margin-bottom:10px">Nova profissão para análise</h3>
+            <p style="color:#d0d0d7;line-height:1.6;margin-bottom:14px">Se você não encontrou a profissão desejada, pode sugerir uma nova categoria. Antes da ativação, nossa equipe vai revisar se essa atividade está de acordo com as diretrizes éticas, legais e de segurança da plataforma.</p>
+            <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
+                <button type="button" class="btn btn-secondary" onclick="closeOtherProfessionModal()">Entendi</button>
+            </div>
+        </div>
+    </div>
 <script>
-// FIX v11.3.4 cadastro estável: navegação mobile segura, plano dinâmico e profissões sincronizadas
+// FIX v11.3.6 cadastro profissional: fluxo seguro, cancelamento real e profissões por slot
 let currentStep = Number('<%= startStep || 1 %>') || 1;
 const PLAN_CONFIG = {
     basic: { slots: 1, monthly: 30, label: 'Plano Básico' },
@@ -383,8 +409,10 @@ function validateCurrentStep(){
 }
 function nextStep(){ if(!validateCurrentStep()) return; if(currentStep < 4){ currentStep++; updateStepUI(); window.scrollTo({top:0, behavior:'smooth'});} }
 function prevStep(){ if(currentStep > 1){ currentStep--; updateStepUI(); window.scrollTo({top:0, behavior:'smooth'}); return; } openCancelModal(); }
-function openCancelModal(){ const modal=document.getElementById('cancelModal'); if(modal){ modal.classList.remove('hide'); modal.style.display='flex'; } }
+function openCancelModal(){ const modal=document.getElementById('cancelModal'); const stepField=document.getElementById('cancelCurrentStep'); if(stepField){ stepField.value = currentStep; } if(modal){ modal.classList.remove('hide'); modal.style.display='flex'; } }
 function closeCancelModal(){ const modal=document.getElementById('cancelModal'); if(modal){ modal.classList.add('hide'); modal.style.display='none'; } }
+function openOtherProfessionModal(){ const modal=document.getElementById('otherProfessionModal'); if(modal){ modal.classList.remove('hide'); modal.style.display='flex'; } }
+function closeOtherProfessionModal(){ const modal=document.getElementById('otherProfessionModal'); if(modal){ modal.classList.add('hide'); modal.style.display='none'; } }
 function getCurrentPlanConfig(){ const checked = document.querySelector('input[name="plan_tier"]:checked'); return PLAN_CONFIG[checked ? checked.value : 'basic']; }
 function updatePlanUI(){
     const checked = document.querySelector('input[name="plan_tier"]:checked');
@@ -435,12 +463,14 @@ function setupSearchableSelect(selectId, searchId){
     if (search.value.trim()) render();
 }
 function toggleCustomProfession(){
-    const selectedOthers = Array.from(document.querySelectorAll('select[data-category-select]')).some(select => {
+    document.querySelectorAll('select[data-slot]').forEach(select => {
+        const slot = select.dataset.slot;
+        const wrap = document.getElementById(`customProfessionWrap${slot}`);
         const opt = select.options[select.selectedIndex];
-        return opt && opt.textContent.trim().toLowerCase() === 'outros';
+        const isOther = opt && ['outros','outro'].includes(opt.textContent.trim().toLowerCase());
+        if (wrap) wrap.classList.toggle('hide', !isOther);
+        if (isOther) openOtherProfessionModal();
     });
-    const wrap = document.getElementById('customProfessionWrap');
-    if(wrap) wrap.classList.toggle('hide', !selectedOthers);
 }
 function setupAvatarPreview(){
     const input = document.getElementById('avatarInput');
@@ -514,9 +544,33 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('onboardingState')?.addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0,2); });
     document.querySelectorAll('input, textarea, select').forEach(field => field.addEventListener('keydown', (e) => { if (e.key === 'Enter' && field.tagName !== 'TEXTAREA') e.preventDefault(); }));
     fillTimeSelect('availabilityStartSelect'); fillTimeSelect('availabilityEndSelect');
+    const openingSelect = document.getElementById('availabilityStartSelect');
+    const closingSelect = document.getElementById('availabilityEndSelect');
+    const available24h = document.getElementById('available24h');
+    function syncClosingOptions(){
+        if(!openingSelect || !closingSelect) return;
+        const start = openingSelect.value;
+        const options = Array.from(openingSelect.options).map(o=>o.value).filter(Boolean);
+        const filtered = options.filter(v => !start || v > start);
+        closingSelect.innerHTML = ['<option value="">Selecione um horário</option>'].concat(filtered.map(v=>`<option value="${v}">${v}</option>`)).join('');
+    }
+    function sync24h(){
+        const is24 = !!available24h?.checked;
+        if(openingSelect) { openingSelect.disabled = is24; if(is24) openingSelect.value=''; }
+        if(closingSelect) { closingSelect.disabled = is24; if(is24) closingSelect.value=''; }
+    }
+    openingSelect?.addEventListener('change', syncClosingOptions);
+    available24h?.addEventListener('change', sync24h);
+    syncClosingOptions();
+    sync24h();
+
     document.getElementById('onboardingForm')?.addEventListener('submit', (e) => {
         const submitter = document.activeElement;
-        if (submitter && submitter.id === 'finishProfileBtn') { submitter.disabled = true; submitter.textContent = 'Salvando...'; }
+        if (submitter) {
+            submitter.disabled = true;
+            submitter.dataset.originalText = submitter.textContent;
+            submitter.textContent = submitter.id === 'finishProfileBtn' ? 'Salvando...' : 'Continuando...';
+        }
     });
     document.querySelectorAll('select[data-category-select]').forEach(el => el.addEventListener('change', toggleCustomProfession));
     toggleCustomProfession();
@@ -524,12 +578,21 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const serviceToggle = document.getElementById('serviceFeeToggle');
     const serviceAmount = document.getElementById('serviceFeeAmount');
     const savedPriceValue = `<%= profissional.price_value || '' %>`;
+    function syncServiceFee(){
+        const enabled = !!serviceToggle?.checked;
+        if(serviceAmount) {
+            serviceAmount.classList.toggle('hide', !enabled);
+            if(!enabled) serviceAmount.value='';
+        }
+    }
     if(serviceAmount && savedPriceValue){ serviceAmount.value = savedPriceValue.replace('.', ','); }
     if(serviceToggle && serviceAmount && serviceAmount.value){ serviceToggle.checked = true; }
-    serviceToggle?.addEventListener('change', e => { if(!e.target.checked) serviceAmount.value=''; });
+    serviceToggle?.addEventListener('change', syncServiceFee);
+    syncServiceFee();
     document.getElementById('mobileBackBtn')?.addEventListener('click', ()=>prevStep());
     document.getElementById('mobileHomeBtn')?.addEventListener('click', ()=>openCancelModal());
     document.getElementById('mobileMenuBtn')?.addEventListener('click', ()=>openCancelModal());
+    document.getElementById('mobileCurrentBtn')?.addEventListener('click', (e)=>e.preventDefault());
 });
 </script>
 

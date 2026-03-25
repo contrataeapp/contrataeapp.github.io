@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        .page-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;z-index:1000;padding:14px}.page-top-inner{width:min(980px,calc(100% - 24px));display:flex;justify-content:space-between;align-items:center;background:rgba(17,17,20,.9);border:1px solid #2f3137;border-radius:16px;padding:10px 14px;backdrop-filter:blur(8px)}.page-top a{color:#fff;text-decoration:none;font-weight:700}.page-top .highlight{color:#ffa500}
         body {
             font-family: Inter, Arial, sans-serif;
             min-height: 100vh;
@@ -15,7 +14,7 @@
             color: #fff;
             display: grid;
             place-items: center;
-            padding: 88px 24px 96px;
+            padding: 24px 24px 96px;
         }
         .shell { width: 100%; max-width: 1080px; display: grid; grid-template-columns: .9fr 1.1fr; gap: 22px; }
         .lead, .form-card {
@@ -60,16 +59,15 @@
         .btn-secondary:hover { background:#45464d; }
         .btn-primary:hover { background:#ffc04b; }
         .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1e1e1e;border-top:1px solid #333;display:none;justify-content:space-around;align-items:center;height:70px;z-index:1000}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:#999;text-decoration:none;font-size:12px;gap:5px}.nav-item i{font-size:22px}.nav-item.active,.nav-item:hover{color:#ffa500} @media (max-width: 900px) { .shell { grid-template-columns: 1fr; } .lead{order:1}.form-card{order:2} }
-        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } body { padding: 86px 12px 90px; } .form-card, .lead { padding: 20px; } .title { font-size: 28px; } .lead h1 { font-size: 30px; } .page-top{display:none;} } @media (max-width: 768px){.bottom-nav{display:flex}}
+        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } body { padding: 12px 12px 90px; } .form-card, .lead { padding: 20px; } .title { font-size: 28px; } .lead h1 { font-size: 30px; } } @media (max-width: 768px){.bottom-nav{display:flex}}
     </style>
 </head>
 <body>
-    <div class="page-top"><div class="page-top-inner"><a href="/auth/cadastro-form?type=professional"><i class="fas fa-arrow-left"></i> Voltar</a></div></div>
     <nav class="bottom-nav safe-auth-nav">
         <a href="javascript:void(0)" class="nav-item" id="mobileHomeBtn"><i class="fas fa-home"></i><span>Início</span></a>
         <a href="javascript:void(0)" class="nav-item" id="mobileBackBtn"><i class="fas fa-arrow-left"></i><span>Voltar</span></a>
-        <a href="javascript:void(0)" class="nav-item" id="mobileMenuBtn"><i class="fas fa-circle-question"></i><span>Menu</span></a>
-        <a href="/auth/completar-perfil" class="nav-item active"><i class="fas fa-user-edit"></i><span>Cadastro</span></a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileMenuBtn"><i class="fas fa-bars"></i><span>Menu</span></a>
+        <a href="javascript:void(0)" class="nav-item active" id="mobileCurrentBtn"><i class="fas fa-user-edit"></i><span>Cadastro</span></a>
     </nav>
     <div class="shell">
         <aside class="lead">
@@ -152,7 +150,8 @@
                 </div>
 
                 <div class="actions">
-                    <a href="/auth/cadastro-form?type=professional" class="btn btn-secondary" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Voltar</a>
+                    <button type="button" class="btn btn-secondary" onclick="history.back()">Voltar</button>
+                    <button type="button" class="btn" style="background:#8f2630;color:#fff" onclick="openAuthLeaveModal()">Cancelar cadastro</button>
                     <button type="submit" class="btn btn-primary" id="completeProfileSubmit">Continuar</button>
                 </div>
             </form>
@@ -215,6 +214,7 @@ function closeAuthLeaveModal(){ const m=document.getElementById('authLeaveModal'
 document.getElementById('mobileBackBtn')?.addEventListener('click', ()=>history.back());
 document.getElementById('mobileHomeBtn')?.addEventListener('click', openAuthLeaveModal);
 document.getElementById('mobileMenuBtn')?.addEventListener('click', openAuthLeaveModal);
+document.getElementById('mobileCurrentBtn')?.addEventListener('click', (e)=>e.preventDefault());
 </script>
 
 </body>

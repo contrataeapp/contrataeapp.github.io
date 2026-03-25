@@ -585,14 +585,30 @@ app.post("/auth/cancelar-profissional", async (req, res) => {
     console.log("--- INÍCIO POST /auth/cancelar-profissional ---");
     if (!req.session.userId) return res.redirect('/');
     try {
-        const { data: profissional } = await supabase.from('professionals').select('profile_completed').eq('user_id', req.session.userId).maybeSingle();
+        const stage = String(req.body.current_step || req.query.step || 'unknown');
+        const { data: user } = await supabase.from('users').select('*').eq('id', req.session.userId).maybeSingle();
+        const { data: profissional } = await supabase.from('professionals').select('*').eq('user_id', req.session.userId).maybeSingle();
         if (profissional?.profile_completed) {
             return res.redirect(303, '/profissional/dashboard?error=Seu perfil já foi criado. Para ajustar dados, use as áreas da sua conta.');
         }
+
+        await supabase.from('onboarding_abandonos').insert({
+            email: user?.email || null,
+            full_name: user?.full_name || null,
+            phone: profissional?.phone_number || null,
+            stage,
+            user_type: 'professional',
+            reason: 'cancelled_by_user',
+            metadata: { route: req.headers.referer || null }
+        });
+
         await supabase.from('professional_portfolio').delete().eq('professional_id', req.session.userId);
         await supabase.from('professional_categories').delete().eq('professional_id', req.session.userId);
+        await supabase.from('profession_requests').delete().eq('user_id', req.session.userId);
         await supabase.from('admin_logs').delete().eq('professional_id', req.session.userId).in('action_type', ['category_suggestion', 'approval_request']);
         await supabase.from('professionals').delete().eq('user_id', req.session.userId);
+        await supabase.from('users').delete().eq('id', req.session.userId);
+
         req.session.destroy(() => {
             const sidName = process.env.SESSION_NAME || 'contratae.sid';
             res.clearCookie(sidName, { path: '/' });
