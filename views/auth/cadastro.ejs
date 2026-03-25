@@ -45,9 +45,9 @@
 <body>
     <div class="page-top"><div class="page-top-inner"><a href="/auth/cadastro"><i class="fas fa-arrow-left"></i> Voltar</a></div></div>
     <nav class="bottom-nav safe-auth-nav">
-        <a href="/" class="nav-item"><i class="fas fa-home"></i><span>Início</span></a>
-        <a href="javascript:history.back()" class="nav-item"><i class="fas fa-arrow-left"></i><span>Voltar</span></a>
-        <a href="/contato" class="nav-item"><i class="fas fa-circle-question"></i><span>Ajuda</span></a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileHomeBtn"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileBackBtn"><i class="fas fa-arrow-left"></i><span>Voltar</span></a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileMenuBtn"><i class="fas fa-circle-question"></i><span>Menu</span></a>
         <a href="/auth/cadastro" class="nav-item active"><i class="fas fa-user-plus"></i><span>Cadastro</span></a>
     </nav>
     <div class="shell">
@@ -157,5 +157,24 @@
 
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
+
+<div id="authLeaveModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1200;align-items:center;justify-content:center;padding:20px;">
+  <div style="width:min(420px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;">
+    <h3 style="color:#ffb21e;margin-bottom:10px">Sair do cadastro?</h3>
+    <p style="color:#d0d0d7;margin-bottom:14px">Se você prosseguir, o fluxo atual será interrompido e você voltará para a plataforma.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+      <button type="button" onclick="closeAuthLeaveModal()" class="btn btn-secondary">Continuar cadastro</button>
+      <a href="/" class="btn" style="background:#8f2630;color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center">Sair agora</a>
+    </div>
+  </div>
+</div>
+<script>
+function openAuthLeaveModal(){ const m=document.getElementById('authLeaveModal'); if(m){m.style.display='flex';} }
+function closeAuthLeaveModal(){ const m=document.getElementById('authLeaveModal'); if(m){m.style.display='none';} }
+document.getElementById('mobileBackBtn')?.addEventListener('click', ()=>history.back());
+document.getElementById('mobileHomeBtn')?.addEventListener('click', openAuthLeaveModal);
+document.getElementById('mobileMenuBtn')?.addEventListener('click', openAuthLeaveModal);
+</script>
+
 </body>
 </html>

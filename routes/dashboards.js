@@ -30,6 +30,28 @@ function parsePlanConfig(body) {
     return { tier, months, plan, discount, total };
 }
 
+
+function inferPlanTierFromProfessional(profissional) {
+    const months = Math.min(12, Math.max(1, Number(profissional?.plan_duration_months || 1) || 1));
+    const total = Number(profissional?.plan_price || profissional?.payment_value || 0);
+    const plans = {
+        basic: { slots: 1, monthly: 30, label: 'Plano Básico' },
+        professional: { slots: 2, monthly: 50, label: 'Plano Profissional' },
+        premium: { slots: 3, monthly: 70, label: 'Plano Premium' }
+    };
+    let discount = 0;
+    if (months >= 12) discount = 20;
+    else if (months >= 6) discount = 12;
+    else if (months >= 3) discount = 6;
+    const entries = Object.entries(plans).map(([tier, plan]) => ({
+        tier,
+        slots: plan.slots,
+        label: plan.label,
+        distance: Math.abs(Number((plan.monthly * months * (1 - discount / 100)).toFixed(2)) - total)
+    })).sort((a, b) => a.distance - b.distance);
+    return entries[0] || { tier: 'basic', slots: 1, label: 'Plano Básico' };
+}
+
 function normalizeProfileStatus(profissional) {
     return String(profissional?.profile_status || '').toLowerCase();
 }
@@ -177,9 +199,10 @@ router.get('/profissional/onboarding', requireProfessional, catchAsync(async (re
         return res.redirect('/auth/completar-perfil');
     }
 
-    const selectedCount = [bundle.profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length;
+    const actualSelectedCount = [bundle.profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length;
+    const inferredPlan = inferPlanTierFromProfessional(bundle.profissional);
     const queryTier = compactText(req.query.tier);
-    const savedPlanTier = queryTier || (selectedCount >= 3 ? 'premium' : selectedCount === 2 ? 'professional' : 'basic');
+    const savedPlanTier = queryTier || inferredPlan.tier || (actualSelectedCount >= 3 ? 'premium' : actualSelectedCount === 2 ? 'professional' : 'basic');
     const savedPlanMonths = Number(req.query.months || bundle.profissional.plan_duration_months || 1);
 
     res.render('dashboards/profissional-onboarding', {
@@ -202,7 +225,7 @@ router.get('/profissional/onboarding', requireProfessional, catchAsync(async (re
 router.post('/profissional/onboarding/salvar', requireProfessional, upload.any(), catchAsync(async (req, res) => {
     const body = req.body || {};
     const uploadedFiles = Array.isArray(req.files) ? req.files : [];
-    const saveMode = body.save_mode === 'draft' ? 'draft' : 'final';
+    const saveMode = 'final';
     const currentStepLabel = Number(body.current_step || 1);
     const currentStep = Number(body.current_step || 1);
     const allCategories = await getAllCategories();
@@ -304,10 +327,6 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
         await registerCategorySuggestion(req.session.userId, body.new_profession_request);
     }
 
-    if (saveMode === 'draft') {
-        return res.redirect(`/profissional/onboarding?step=${currentStep || 1}&tier=${planConfig.tier}&months=${planConfig.months}&success=Rascunho salvo. Você pode continuar depois`);
-    }
-
     if (!primaryCategory) {
         return res.redirect('/profissional/onboarding?step=2&error=Selecione pelo menos uma profissão para finalizar');
     }
@@ -388,8 +407,10 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     const profileStatus = normalizeProfileStatus(profissional) || (profileReadyForApproval ? 'completed' : 'draft');
     const latestApprovalRequest = (bundle.approvalLogs || []).find(log => log.action_type === 'approval_request') || null;
 
-    const selectedCount = [profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length;
-    const currentPlanName = selectedCount >= 3 ? 'Plano Premium' : selectedCount === 2 ? 'Plano Profissional' : 'Plano Básico';
+    const actualSelectedCount = [profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length;
+    const inferredPlan = inferPlanTierFromProfessional(profissional);
+    const selectedCount = Math.max(actualSelectedCount, inferredPlan.slots || 1);
+    const currentPlanName = inferredPlan.label || 'Plano Básico';
 
     const avaliacaoMedia = bundle.reviews.length > 0
         ? (bundle.reviews.reduce((acc, r) => acc + r.rating, 0) / bundle.reviews.length).toFixed(1)

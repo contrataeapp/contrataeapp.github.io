@@ -589,6 +589,10 @@ app.post("/auth/cancelar-profissional", async (req, res) => {
         if (profissional?.profile_completed) {
             return res.redirect(303, '/profissional/dashboard?error=Seu perfil já foi criado. Para ajustar dados, use as áreas da sua conta.');
         }
+        await supabase.from('professional_portfolio').delete().eq('professional_id', req.session.userId);
+        await supabase.from('professional_categories').delete().eq('professional_id', req.session.userId);
+        await supabase.from('admin_logs').delete().eq('professional_id', req.session.userId).in('action_type', ['category_suggestion', 'approval_request']);
+        await supabase.from('professionals').delete().eq('user_id', req.session.userId);
         req.session.destroy(() => {
             const sidName = process.env.SESSION_NAME || 'contratae.sid';
             res.clearCookie(sidName, { path: '/' });

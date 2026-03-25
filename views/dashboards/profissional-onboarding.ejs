@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#1d1d20 0%,#0b0b0c 70%);color:#fff;min-height:100vh;padding:88px 24px 96px}.page-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;z-index:1000;padding:14px}.page-top-inner{width:min(1180px,calc(100% - 24px));display:flex;justify-content:flex-start;align-items:center;background:rgba(17,17,20,.92);border:1px solid #2f3137;border-radius:16px;padding:10px 14px;backdrop-filter:blur(8px)}.page-top button{background:none;border:none;color:#fff;font-weight:700;cursor:pointer;font-size:15px}
+        body{font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#1d1d20 0%,#0b0b0c 70%);color:#fff;min-height:100vh;padding:24px 24px 96px}
         .shell{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:.85fr 1.15fr;gap:22px}
         .lead,.panel{background:linear-gradient(180deg,rgba(28,28,30,.96),rgba(20,20,22,.98));border:1px solid rgba(255,255,255,.08);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
         .lead{padding:30px;display:flex;flex-direction:column;justify-content:space-between}
@@ -57,12 +57,13 @@
         .btn-secondary{background:#34343c;color:#fff}
         .btn-primary{background:#ffb21e;color:#111}
         .btn-ghost{background:#1a1b1f;border:1px solid #393c44;color:#fff}
+        .btn-danger{background:#8f2630;color:#fff}
         .hide{display:none!important}
         .flash{padding:12px 14px;border-radius:12px;margin-bottom:14px}
         .flash.error{background:#291717;border:1px solid #6e2d2d;color:#ffb5b5}
         .flash.success{background:#142513;border:1px solid #285c27;color:#b9efb7}
         @media(max-width:980px){.shell{grid-template-columns:1fr}.plan-cards,.grid-3{grid-template-columns:1fr}}
-        @media(max-width:720px){body{padding:12px 12px 96px}.panel,.lead{padding:20px}.progress,.grid-2,.avatar-row{grid-template-columns:1fr}h1{font-size:31px}h2{font-size:25px}.page-top{display:none}} @media(max-width:768px){.bottom-nav{display:flex}}
+        @media(max-width:720px){body{padding:12px 12px 96px}.panel,.lead{padding:20px}.progress,.grid-2,.avatar-row{grid-template-columns:1fr}h1{font-size:31px}h2{font-size:25px}} @media(max-width:768px){.bottom-nav{display:flex}}
     
         .profession-grid .field-search{order:1}
         .profession-grid .field-select{order:2}
@@ -74,11 +75,10 @@
 </style>
 </head>
 <body>
-    <div class="page-top"><div class="page-top-inner"><button type="button" onclick="prevStep()"><i class="fas fa-arrow-left"></i> Voltar</button></div></div>
     <nav class="bottom-nav safe-onboarding-nav">
         <a href="javascript:void(0)" class="nav-item" id="mobileHomeBtn"><i class="fas fa-home"></i><span>Início</span></a>
         <a href="javascript:void(0)" class="nav-item" id="mobileBackBtn"><i class="fas fa-arrow-left"></i><span>Voltar</span></a>
-        <a href="/contato" class="nav-item"><i class="fas fa-circle-question"></i><span>Ajuda</span></a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileMenuBtn"><i class="fas fa-bars"></i><span>Menu</span></a>
         <a href="/profissional/onboarding" class="nav-item active"><i class="fas fa-user-edit"></i><span>Cadastro</span></a>
     </nav>
     <div class="shell">
@@ -99,7 +99,7 @@
         <section class="panel">
             <span class="badge">Cadastro guiado</span>
             <h2>Concluir cadastro profissional</h2>
-            <p style="margin-bottom:16px">Siga as etapas abaixo. Você pode voltar, salvar para terminar depois e só pedir análise quando estiver satisfeito.</p>
+            <p style="margin-bottom:16px">Siga as etapas abaixo. Você pode voltar uma etapa por vez, cancelar o cadastro se quiser sair e continuar até finalizar com segurança.</p>
 
             <% if (flashError) { %><div class="flash error"><%= flashError %></div><% } %>
             <% if (flashSuccess) { %><div class="flash success"><%= flashSuccess %></div><% } %>
@@ -112,8 +112,7 @@
             </div>
 
             <form id="onboardingForm" action="/profissional/onboarding/salvar" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="save_mode" id="saveMode" value="final">
-                <input type="hidden" name="current_step" id="currentStepInput" value="<%= startStep || 1 %>">
+                                <input type="hidden" name="current_step" id="currentStepInput" value="<%= startStep || 1 %>">
 
                 <div class="step" data-step="1">
                     <div class="grid-2">
@@ -162,8 +161,7 @@
                             <button type="button" class="btn btn-ghost" onclick="confirmCancel()">Cancelar cadastro</button>
                         </div>
                         <div class="actions-right">
-                            <button type="button" class="btn btn-ghost" onclick="saveDraft()">Salvar rascunho</button>
-                            <button type="button" class="btn btn-primary" onclick="nextStep()">Continuar</button>
+                                                        <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
                         </div>
                     </div>
                 </div>
@@ -175,11 +173,11 @@
                     </div>
                     <div class="grid-2 profession-grid" style="margin-top:14px">
                         <div class="field field-search">
-                            <label>Busca rápida da profissão principal</label>
+                            <label>Busca rápida · Profissão 1</label>
                             <input type="text" id="primaryCategorySearch" placeholder="Digite para filtrar a profissão principal" style="margin-bottom:10px">
                         </div>
                         <div class="field field-select">
-                            <label>Profissão principal</label>
+                            <label>Profissão 1 (principal)</label>
                             <select name="primary_category_id" data-category-select="1" id="primaryCategorySelect" required>
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
@@ -190,11 +188,11 @@
                     </div>
                     <div class="grid-2 profession-grid" style="margin-top:12px">
                         <div class="field additional-slot additional-slot-2 hide field-search">
-                            <label>Busca rápida da profissão adicional</label>
+                            <label>Busca rápida · Profissão 2</label>
                             <input type="text" id="additionalCategorySearch" placeholder="Digite para filtrar a profissão adicional" style="margin-bottom:10px">
                         </div>
                         <div class="field additional-slot additional-slot-2 hide field-select">
-                            <label>Profissão adicional 1</label>
+                            <label>Profissão 2</label>
                             <select name="additional_category_1" data-category-select="1" id="additionalCategorySelect1" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
@@ -203,9 +201,9 @@
                             </select>
                         </div>
                         <div class="field additional-slot additional-slot-3 hide">
-                            <label>Busca rápida da profissão adicional 2</label>
+                            <label>Busca rápida · Profissão 3</label>
                             <input type="text" id="additionalCategorySearch2" placeholder="Digite para filtrar a segunda profissão adicional" style="margin-bottom:10px">
-                            <label>Profissão adicional 2</label>
+                            <label>Profissão 3</label>
                             <select name="additional_category_2" data-category-select="1" id="additionalCategorySelect2" class="extraCategorySelect">
                                 <option value="">Selecione uma profissão</option>
                                 <% (categorias || []).forEach(cat => { %>
@@ -220,10 +218,9 @@
                         <div class="help">Use esse campo apenas quando escolher “Outros” ou quando realmente não encontrar algo parecido na lista.</div>
                     </div>
                     <div class="actions">
-                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-ghost" onclick="confirmCancel()">Cancelar cadastro</button></div>
+                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="confirmCancel()">Cancelar cadastro</button></div>
                         <div class="actions-right" style="display:flex;gap:10px;flex-wrap:wrap">
-                            <button type="button" class="btn btn-ghost" onclick="saveDraft()">Salvar rascunho</button>
-                            <button type="button" class="btn btn-primary" onclick="nextStep()">Continuar</button>
+                                                        <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
                         </div>
                     </div>
                 </div>
@@ -231,8 +228,8 @@
                 <div class="step" data-step="3">
                     <div class="grid-2">
                         <div class="field">
-                            <label>Nome que será exibido aos clientes (apelido/nome profissional)</label>
-                            <input type="text" name="display_name" value="<%= displayName || user?.full_name || '' %>" placeholder="Ex: Japa Eletricista, Augusto Pinturas">
+                            <label>Nome que será exibido aos clientes <span style="color:#ffb020">(apelido / nome profissional)</span></label>
+                            <input type="text" name="display_name" value="<%= displayName || user?.full_name || '' %>" placeholder="Ex: Japa Eletricista, Augusto Pinturas" style="border-color:#5b4820"> 
                             <div class="help">Seu nome do Google pode ser ajustado aqui para aparecer melhor aos clientes.</div>
                         </div>
                         <div class="field">
@@ -283,10 +280,9 @@
                         <div class="help">Informe os dias em que você atende e o horário em que normalmente trabalha.</div>
                     </div>
                     <div class="actions">
-                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-ghost" onclick="confirmCancel()">Cancelar cadastro</button></div>
+                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="confirmCancel()">Cancelar cadastro</button></div>
                         <div class="actions-right" style="display:flex;gap:10px;flex-wrap:wrap">
-                            <button type="button" class="btn btn-ghost" onclick="saveDraft()">Salvar rascunho</button>
-                            <button type="button" class="btn btn-primary" onclick="nextStep()">Continuar</button>
+                                                        <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
                         </div>
                     </div>
                 </div>
@@ -327,10 +323,9 @@
                         <p class="help" style="margin-top:8px">Ao salvar, seu perfil fica pronto para revisão dentro da sua área. Depois você ajusta o que quiser e só então pede análise.</p>
                     </div>
                     <div class="actions">
-                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-ghost" onclick="confirmCancel()">Cancelar cadastro</button></div>
+                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="confirmCancel()">Cancelar cadastro</button></div>
                         <div class="actions-right" style="display:flex;gap:10px;flex-wrap:wrap">
-                            <button type="button" class="btn btn-ghost" onclick="saveDraft()">Salvar rascunho</button>
-                            <button type="submit" class="btn btn-primary" id="finishProfileBtn">Finalizar perfil</button>
+                                                        <button type="submit" class="btn btn-primary" id="finishProfileBtn">Finalizar perfil</button>
                         </div>
                     </div>
                 </div>
@@ -345,7 +340,7 @@
             <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
                 <button type="button" class="btn btn-secondary" onclick="closeCancelModal()">Continuar cadastro</button>
                 <form method="POST" action="/auth/cancelar-profissional" style="margin:0">
-                    <button type="submit" class="btn btn-primary">Confirmar cancelamento</button>
+                    <button type="submit" class="btn btn-danger">Confirmar cancelamento</button>
                 </form>
             </div>
         </div>
@@ -390,7 +385,6 @@ function nextStep(){ if(!validateCurrentStep()) return; if(currentStep < 4){ cur
 function prevStep(){ if(currentStep > 1){ currentStep--; updateStepUI(); window.scrollTo({top:0, behavior:'smooth'}); return; } openCancelModal(); }
 function openCancelModal(){ const modal=document.getElementById('cancelModal'); if(modal){ modal.classList.remove('hide'); modal.style.display='flex'; } }
 function closeCancelModal(){ const modal=document.getElementById('cancelModal'); if(modal){ modal.classList.add('hide'); modal.style.display='none'; } }
-function saveDraft(){ document.getElementById('saveMode').value = 'draft'; document.getElementById('onboardingForm').requestSubmit(); }
 function getCurrentPlanConfig(){ const checked = document.querySelector('input[name="plan_tier"]:checked'); return PLAN_CONFIG[checked ? checked.value : 'basic']; }
 function updatePlanUI(){
     const checked = document.querySelector('input[name="plan_tier"]:checked');
@@ -535,6 +529,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     serviceToggle?.addEventListener('change', e => { if(!e.target.checked) serviceAmount.value=''; });
     document.getElementById('mobileBackBtn')?.addEventListener('click', ()=>prevStep());
     document.getElementById('mobileHomeBtn')?.addEventListener('click', ()=>openCancelModal());
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', ()=>openCancelModal());
 });
 </script>
 
