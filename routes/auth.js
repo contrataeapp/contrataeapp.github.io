@@ -109,10 +109,10 @@ passport.deserializeUser(async (id, done) => {
 router.post('/cadastro', async (req, res) => {
     try {
         const { full_name, email, password, password_confirm, user_type } = req.body;
-        const cleanName = String(full_name || '').trim();
+        const cleanName = String(full_name || '').trim().replace(/\s+/g, ' ');
 
-        if (cleanName.length < 2) {
-            return res.render('auth/cadastro', { erro: 'Informe um nome válido para criar a conta', userType: user_type || 'client' });
+        if (cleanName.length < 5 || cleanName.split(' ').length < 2 || cleanName.split(' ').some(part => part.length < 2)) {
+            return res.render('auth/cadastro', { erro: 'Informe nome e sobrenome válidos para criar a conta', userType: user_type || 'client' });
         }
 
         if (password !== password_confirm) {

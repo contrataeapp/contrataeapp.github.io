@@ -164,6 +164,7 @@ async function getProfessionalBundle(userId) {
     const currentPrimaryCategory = categorias.find(cat => cat.id === profissional?.category_id) || null;
     const extraDetails = (categoriasExtras || []).map(item => item.categories).filter(Boolean);
     const selectedAdditionalIds = extraDetails.filter(cat => cat.id !== profissional?.category_id).slice(0, 2).map(cat => cat.id);
+    const selectedSlotIds = [profissional?.category_id, ...selectedAdditionalIds].filter(Boolean);
 
     const { data: portfolio } = await supabase
         .from('professional_portfolio')
@@ -205,7 +206,7 @@ async function getProfessionalBundle(userId) {
         pagamentos: pagamentos || [],
         approvalLogs: approvalLogs || [],
         professionRequests: professionRequests || [],
-        selectedSlotsCount: 1 + Math.min((categoriasExtras || []).length, 2)
+        selectedSlotsCount: selectedSlotIds.length || 0
     };
 }
 
@@ -243,6 +244,7 @@ router.get('/profissional/onboarding', requireProfessional, catchAsync(async (re
 
 router.post('/profissional/onboarding/salvar', requireProfessional, upload.any(), catchAsync(async (req, res) => {
     const body = req.body || {};
+    const currentBundle = await getProfessionalBundle(req.session.userId);
     const uploadedFiles = Array.isArray(req.files) ? req.files : [];
     const saveMode = 'final';
     const currentStepLabel = Number(body.current_step || 1);
@@ -262,7 +264,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
         compactText(body.new_profession_request_3)
     ];
 
-    const selectedCategories = categorySlots.filter(Boolean);
+    const selectedCategories = categorySlots.filter((cat, idx, arr) => cat && arr.findIndex(item => item.id === cat.id) === idx);
     const primaryCategory = categorySlots[0] || null;
     const selectedSlotsCount = categorySlots.reduce((acc, cat, idx) => {
         if (!cat) return acc;
@@ -278,8 +280,13 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
         state: compactText(body.state).replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0,2) || null,
         description: compactText(body.description) || null,
         specialties: compactText(body.specialties) || null,
-        availability: buildAvailability(body)
+        availability: buildAvailability(body),
+        availability_24h_note: compactText(body.availability_24h_note) || null
     };
+
+    if (currentStep >= 1 && (!basicData.phone_number || basicData.phone_number.length < 10 || !basicData.city || !basicData.state || (!basicData.cep && !basicData.city))) {
+        return res.redirect('/auth/completar-perfil?error=Preencha telefone, cidade, estado e CEP antes de continuar');
+    }
 
     const serviceFeeAmount = parseCurrencyLike(body.service_fee_amount);
     const serviceFeeEnabled = Boolean(body.service_fee_enabled) || serviceFeeAmount !== null;
@@ -359,7 +366,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
         if (!cat) continue;
         const isOther = ['outros', 'outro'].includes(String(cat.slug || '').toLowerCase()) || ['outros', 'outro'].includes(String(cat.name || '').toLowerCase());
         if (isOther && customSuggestions[index]) {
-            await registerCategorySuggestion(req.session.userId, req.session.email || profissional?.users?.email || null, customSuggestions[index], index + 1);
+            await registerCategorySuggestion(req.session.userId, req.session.email || currentBundle?.profissional?.users?.email || null, customSuggestions[index], index + 1);
         }
     }
 
@@ -369,6 +376,14 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
     if (selectedSlotsCount < planConfig.plan.slots) {
         return res.redirect(`/profissional/onboarding?step=2&error=Complete as ${planConfig.plan.slots} profissões do plano escolhido antes de continuar`);
     }
+    const hasAvatar = Boolean(userUpdates.avatar_url || currentBundle?.profissional?.users?.avatar_url || req.body.existing_avatar_url);
+    const { data: finalPortfolio } = await supabase.from('professional_portfolio').select('id').eq('professional_id', req.session.userId);
+    if (!hasAvatar) {
+        return res.redirect('/profissional/onboarding?step=4&error=Adicione uma foto de perfil antes de finalizar');
+    }
+    if ((finalPortfolio || []).length < 3) {
+        return res.redirect('/profissional/onboarding?step=4&error=Adicione 3 imagens iniciais ao portfólio antes de finalizar');
+    }
 
     req.session.professionalReady = true;
     return req.session.save(() => res.redirect('/profissional/dashboard?success=Perfil concluído com sucesso'));
@@ -376,6 +391,7 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
 
 router.post('/profissional/perfil/atualizar', requireProfessional, catchAsync(async (req, res) => {
     const body = req.body || {};
+    const currentBundle = await getProfessionalBundle(req.session.userId);
     const uploadedFiles = Array.isArray(req.files) ? req.files : [];
     const displayName = compactText(body.display_name);
     const availability = buildAvailability(body);
@@ -446,9 +462,9 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
     const profileStatus = normalizeProfileStatus(profissional) || (profileReadyForApproval ? 'completed' : 'draft');
     const latestApprovalRequest = (bundle.approvalLogs || []).find(log => log.action_type === 'approval_request') || null;
 
-    const actualSelectedCount = Number(bundle.selectedSlotsCount || [profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length || 1);
+    const actualSelectedCount = Number(bundle.selectedSlotsCount || [profissional.category_id, ...bundle.selectedAdditionalIds].filter(Boolean).length || 0);
     const inferredPlan = inferPlanTierFromProfessional(profissional);
-    const selectedCount = Math.max(actualSelectedCount, inferredPlan.slots || 1);
+    const selectedCount = actualSelectedCount || (inferredPlan.slots || 1);
     const currentPlanName = inferredPlan.label || 'Plano Básico';
 
     const avaliacaoMedia = bundle.reviews.length > 0

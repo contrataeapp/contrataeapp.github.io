@@ -97,6 +97,7 @@
             <span class="badge">Etapa inicial</span>
             <h2 class="title">Complete seu Perfil</h2>
             <p class="subtitle">Nesta etapa você cria sua conta profissional com os dados básicos. O restante será feito em um cadastro em etapas, sem te jogar em formulários confusos dentro da área.</p>
+            <% if (typeof error !== 'undefined' && error) { %><div class="panel" style="border-color:#6e2d2d;background:rgba(205,60,60,.12);color:#ffb3b3;margin-bottom:16px"><%= error %></div><% } %>
 
             <div class="avatar-box">
                 <% if (user && user.avatar_url) { %>
@@ -151,7 +152,7 @@
 
                 <div class="actions">
                     <button type="button" class="btn btn-secondary" onclick="history.back()">Voltar</button>
-                    <button type="button" class="btn" style="background:#8f2630;color:#fff" onclick="openAuthLeaveModal()">Cancelar cadastro</button>
+                    <button type="button" class="btn" style="background:#b12c3a;color:#fff" onclick="openAuthLeaveModal()">Cancelar cadastro</button>
                     <button type="submit" class="btn btn-primary" id="completeProfileSubmit">Continuar</button>
                 </div>
             </form>
@@ -204,7 +205,7 @@
     <p style="color:#d0d0d7;margin-bottom:14px">Se você prosseguir, o fluxo atual será interrompido e você voltará para a plataforma.</p>
     <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
       <button type="button" onclick="closeAuthLeaveModal()" class="btn btn-secondary">Continuar cadastro</button>
-      <a href="/" class="btn" style="background:#8f2630;color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center">Sair agora</a>
+      <form method="POST" action="/auth/cancelar-profissional" style="margin:0"><input type="hidden" name="current_step" value="basic"><button type="submit" class="btn" style="background:#b12c3a;color:#fff">Confirmar cancelamento</button></form>
     </div>
   </div>
 </div>

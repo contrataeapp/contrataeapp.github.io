@@ -573,11 +573,12 @@ app.get("/auth/completar-perfil", async (req, res) => {
         }
         res.render("auth/completar-perfil", {
             user: user || {},
-            profissional: profissional || {}
+            profissional: profissional || {},
+            error: req.query.error || ''
         });
     } catch (err) {
         console.error("Erro ao carregar completar perfil:", err);
-        res.redirect('/profissional/dashboard');
+        res.redirect('/');
     }
 });
 
@@ -609,10 +610,11 @@ app.post("/auth/cancelar-profissional", async (req, res) => {
         await supabase.from('professionals').delete().eq('user_id', req.session.userId);
         await supabase.from('users').delete().eq('id', req.session.userId);
 
+        const sidName = process.env.SESSION_NAME || 'contratae.sid';
         req.session.destroy(() => {
-            const sidName = process.env.SESSION_NAME || 'contratae.sid';
             res.clearCookie(sidName, { path: '/' });
             res.clearCookie('connect.sid', { path: '/' });
+            res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
             return res.redirect(303, '/');
         });
     } catch (err) {
@@ -640,6 +642,10 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
         const state = String(body.state || '').replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0, 2);
         const cep = String(body.cep || '').replace(/\D/g, '').slice(0, 8);
         const description = body.description;
+
+        if (phone_number.length < 10) return res.redirect(303, '/auth/completar-perfil?error=Informe um WhatsApp válido com DDD');
+        if (!city || city.length < 2) return res.redirect(303, '/auth/completar-perfil?error=Informe uma cidade válida');
+        if (!state || state.length < 2) return res.redirect(303, '/auth/completar-perfil?error=Informe um estado válido');
         let avatar_url = body.avatar_url;
 
         const avatarFile = req.files ? req.files.find(f => f.fieldname === 'avatar') : null;
