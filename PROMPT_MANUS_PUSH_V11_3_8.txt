@@ -1,0 +1,42 @@
+Use o ZIP local desta versão e faça push SOMENTE no repositório correto já conectado ao Render:
+
+REPO CORRETO:
+https://github.com/contrataeapp/contrataeapp.github.io
+
+REGRAS CRÍTICAS:
+- NÃO criar novo repositório
+- NÃO trocar remote
+- NÃO mudar nome do repo
+- NÃO reestruturar layout
+- NÃO quebrar telas existentes
+- apenas atualizar o conteúdo do projeto com os arquivos desta versão v11.3.8
+
+PASSOS:
+1. Abrir o projeto atual já clonado do repositório contrataeapp/contrataeapp.github.io
+2. Fazer backup local rápido da pasta atual
+3. Extrair e copiar por cima os arquivos do ZIP v11.3.8
+4. Conferir que os arquivos alterados principais incluem:
+   - routes/auth.js
+   - routes/dashboards.js
+   - server.js
+   - views/auth/login.ejs
+   - views/auth/completar-perfil.ejs
+   - views/dashboards/profissional-onboarding.ejs
+5. Rodar checagem básica de sintaxe Node se possível
+6. Commitar com a mensagem:
+   feat: v11.3.8 estabiliza finalizacao do cadastro profissional e cancela fluxo corretamente
+7. Fazer push para a branch principal do MESMO repositório
+
+OBJETIVO DESTA VERSÃO:
+- corrigir cancelamento real do cadastro profissional com logout completo
+- estabilizar finalização do onboarding profissional
+- evitar erro/404 em /profissional/onboarding/salvar
+- melhorar fluxo Google/nativo para profissional existente
+- pré-preencher telefone no fluxo nativo profissional
+- reforçar UX do login
+- melhorar lógica de atendimento 24h no onboarding
+
+NO FINAL ME INFORME:
+- quais arquivos foram alterados
+- hash do commit
+- confirmação de que o push foi feito no repositório correto

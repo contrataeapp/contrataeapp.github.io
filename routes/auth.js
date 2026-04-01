@@ -48,7 +48,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
             let user;
             if (existingUser) {
-                const stableUserType = existingUser.user_type || requestedType || 'client';
+                const stableUserType = requestedType || existingUser.user_type || 'client';
                 const { data: updatedUser, error: updateError } = await supabase
                     .from('users')
                     .update({
@@ -109,6 +109,7 @@ passport.deserializeUser(async (id, done) => {
 router.post('/cadastro', async (req, res) => {
     try {
         const { full_name, email, password, password_confirm, user_type } = req.body;
+        const signupPhone = String(req.body.phone_number || '').replace(/\D/g, '').slice(0,11);
         const cleanName = String(full_name || '').trim().replace(/\s+/g, ' ');
 
         if (cleanName.length < 5 || cleanName.split(' ').length < 2 || cleanName.split(' ').some(part => part.length < 2)) {
@@ -143,6 +144,7 @@ router.post('/cadastro', async (req, res) => {
         if (user_type === 'professional') {
             await supabase.from('professionals').upsert([{ 
                 user_id: userData.id, 
+                phone_number: signupPhone || null,
                 status: 'pending',
                 profile_completed: false,
                 approval_requested: false

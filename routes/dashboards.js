@@ -68,10 +68,16 @@ function buildAvailability(body) {
     const days = Array.isArray(body.working_days)
         ? body.working_days
         : body.working_days ? [body.working_days] : [];
+    const days24 = Array.isArray(body.working_days_24h)
+        ? body.working_days_24h
+        : body.working_days_24h ? [body.working_days_24h] : [];
 
     if (body.available_24h) {
-        if (!days.length) return 'Funcionamento 24h';
-        return `24h nos dias: ${days.join(', ')}`;
+        const customNote = compactText(body.availability_24h_note);
+        if (customNote) return customNote;
+        if (body.available_24h_all_days) return 'Atendimento 24h todos os dias';
+        if (days24.length) return `Atendimento 24h em: ${days24.join(', ')}`;
+        return 'Atendimento 24h';
     }
 
     const start = compactText(body.availability_start);
@@ -242,6 +248,10 @@ router.get('/profissional/onboarding', requireProfessional, catchAsync(async (re
     });
 }));
 
+router.get('/profissional/onboarding/salvar', requireProfessional, catchAsync(async (req, res) => {
+    return res.redirect('/profissional/onboarding?step=4&error=Não foi possível concluir por este caminho. Revise os dados e finalize novamente.');
+}));
+
 router.post('/profissional/onboarding/salvar', requireProfessional, upload.any(), catchAsync(async (req, res) => {
     const body = req.body || {};
     const currentBundle = await getProfessionalBundle(req.session.userId);
@@ -306,8 +316,9 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
         status: 'pending',
         approval_requested: false,
         submitted_at: null,
+        status: 'pending',
         profile_status: saveMode === 'final' && isCompleteForSave ? 'completed' : 'draft',
-        profile_completed: saveMode === 'final' ? isCompleteForSave : false
+        profile_completed: false
     };
 
     if (primaryCategory) {
@@ -384,6 +395,14 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
     if ((finalPortfolio || []).length < 3) {
         return res.redirect('/profissional/onboarding?step=4&error=Adicione 3 imagens iniciais ao portfólio antes de finalizar');
     }
+
+    await supabase.from('professionals').update({
+        profile_completed: true,
+        profile_status: 'completed',
+        status: 'pending',
+        approval_requested: false,
+        submitted_at: null
+    }).eq('user_id', req.session.userId);
 
     req.session.professionalReady = true;
     return req.session.save(() => res.redirect('/profissional/dashboard?success=Perfil concluído com sucesso'));

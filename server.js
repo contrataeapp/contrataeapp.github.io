@@ -611,12 +611,25 @@ app.post("/auth/cancelar-profissional", async (req, res) => {
         await supabase.from('users').delete().eq('id', req.session.userId);
 
         const sidName = process.env.SESSION_NAME || 'contratae.sid';
-        req.session.destroy(() => {
+        const sessionId = req.sessionID;
+        const finalize = () => {
             res.clearCookie(sidName, { path: '/' });
             res.clearCookie('connect.sid', { path: '/' });
             res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
             return res.redirect(303, '/');
-        });
+        };
+        const destroySession = () => {
+            req.session.destroy(() => {
+                if (req.sessionStore && sessionId) {
+                    return req.sessionStore.destroy(sessionId, () => finalize());
+                }
+                finalize();
+            });
+        };
+        if (typeof req.logout === 'function') {
+            return req.logout(() => destroySession());
+        }
+        return destroySession();
     } catch (err) {
         console.error("Erro ao cancelar cadastro profissional:", err);
         return res.redirect(303, '/');

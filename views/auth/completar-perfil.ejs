@@ -151,7 +151,7 @@
                 </div>
 
                 <div class="actions">
-                    <button type="button" class="btn btn-secondary" onclick="history.back()">Voltar</button>
+                    <button type="button" class="btn btn-secondary" onclick="openAuthLeaveModal()">Voltar</button>
                     <button type="button" class="btn" style="background:#b12c3a;color:#fff" onclick="openAuthLeaveModal()">Cancelar cadastro</button>
                     <button type="submit" class="btn btn-primary" id="completeProfileSubmit">Continuar</button>
                 </div>
@@ -201,8 +201,8 @@
 
 <div id="authLeaveModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1200;align-items:center;justify-content:center;padding:20px;">
   <div style="width:min(420px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;">
-    <h3 style="color:#ffb21e;margin-bottom:10px">Sair do cadastro?</h3>
-    <p style="color:#d0d0d7;margin-bottom:14px">Se você prosseguir, o fluxo atual será interrompido e você voltará para a plataforma.</p>
+    <h3 style="color:#ffb21e;margin-bottom:10px">Cancelar cadastro?</h3>
+    <p style="color:#d0d0d7;margin-bottom:14px">Se você confirmar, o cadastro profissional será cancelado agora e você voltará para a plataforma.</p>
     <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
       <button type="button" onclick="closeAuthLeaveModal()" class="btn btn-secondary">Continuar cadastro</button>
       <form method="POST" action="/auth/cancelar-profissional" style="margin:0"><input type="hidden" name="current_step" value="basic"><button type="submit" class="btn" style="background:#b12c3a;color:#fff">Confirmar cancelamento</button></form>
@@ -212,7 +212,7 @@
 <script>
 function openAuthLeaveModal(){ const m=document.getElementById('authLeaveModal'); if(m){m.style.display='flex';} }
 function closeAuthLeaveModal(){ const m=document.getElementById('authLeaveModal'); if(m){m.style.display='none';} }
-document.getElementById('mobileBackBtn')?.addEventListener('click', ()=>history.back());
+document.getElementById('mobileBackBtn')?.addEventListener('click', openAuthLeaveModal);
 document.getElementById('mobileHomeBtn')?.addEventListener('click', openAuthLeaveModal);
 document.getElementById('mobileMenuBtn')?.addEventListener('click', openAuthLeaveModal);
 document.getElementById('mobileCurrentBtn')?.addEventListener('click', (e)=>e.preventDefault());
