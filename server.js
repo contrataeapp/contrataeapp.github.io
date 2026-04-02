@@ -554,6 +554,25 @@ app.get("/admin/api/solicitacoes", async (req, res) => {
     }
 });
 
+
+app.get('/api/cep/:cep', async (req, res) => {
+    try {
+        const cep = String(req.params.cep || '').replace(/\D/g, '').slice(0, 8);
+        if (cep.length !== 8) return res.status(400).json({ error: 'CEP inválido' });
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await response.json();
+        if (data.erro) return res.status(404).json({ error: 'CEP não encontrado' });
+        return res.json({
+            cep: data.cep || cep,
+            city: data.localidade || '',
+            state: data.uf || ''
+        });
+    } catch (error) {
+        console.error('Erro ao consultar CEP:', error);
+        return res.status(500).json({ error: 'Erro ao consultar CEP' });
+    }
+});
+
 // ROTA PARA COMPLETAR PERFIL (OBRIGATÓRIA PARA PROFISSIONAIS)
 app.get("/auth/completar-perfil", async (req, res) => {
     if (!req.session.userId || req.session.userType !== 'professional') {
@@ -659,6 +678,7 @@ app.post("/auth/completar-perfil", upload.any(), async (req, res) => {
         if (phone_number.length < 10) return res.redirect(303, '/auth/completar-perfil?error=Informe um WhatsApp válido com DDD');
         if (!city || city.length < 2) return res.redirect(303, '/auth/completar-perfil?error=Informe uma cidade válida');
         if (!state || state.length < 2) return res.redirect(303, '/auth/completar-perfil?error=Informe um estado válido');
+        if (cep && cep.length !== 8) return res.redirect(303, '/auth/completar-perfil?error=Informe um CEP válido com 8 números ou deixe o campo vazio');
         let avatar_url = body.avatar_url;
 
         const avatarFile = req.files ? req.files.find(f => f.fieldname === 'avatar') : null;

@@ -32,6 +32,10 @@ function parsePlanConfig(body) {
 
 
 function inferPlanTierFromProfessional(profissional) {
+    const explicitPlanName = String(profissional?.plan_name || '').toLowerCase();
+    if (explicitPlanName.includes('premium')) return { tier: 'premium', slots: 3, label: 'Plano Premium' };
+    if (explicitPlanName.includes('profissional')) return { tier: 'professional', slots: 2, label: 'Plano Profissional' };
+    if (explicitPlanName.includes('básico') || explicitPlanName.includes('basico')) return { tier: 'basic', slots: 1, label: 'Plano Básico' };
     const months = Math.min(12, Math.max(1, Number(profissional?.plan_duration_months || 1) || 1));
     const total = Number(profissional?.plan_price || profissional?.payment_value || 0);
     const plans = {
@@ -64,6 +68,7 @@ function parseCurrencyLike(value) {
     return Number.isFinite(num) ? num : null;
 }
 
+
 function buildAvailability(body) {
     const days = Array.isArray(body.working_days)
         ? body.working_days
@@ -75,9 +80,17 @@ function buildAvailability(body) {
     if (body.available_24h) {
         const customNote = compactText(body.availability_24h_note);
         if (customNote) return customNote;
-        if (body.available_24h_all_days) return 'Atendimento 24h todos os dias';
-        if (days24.length) return `Atendimento 24h em: ${days24.join(', ')}`;
-        return 'Atendimento 24h';
+        const attendsAllDays = Boolean(body.available_24h_all_days);
+        const attendsHolidays = Boolean(body.available_24h_holidays);
+        const attendsSundays = Boolean(body.available_24h_sundays);
+        if (attendsAllDays) {
+            return `Atendimento 24h todos os dias${attendsHolidays ? ', incluindo feriados' : ''}`;
+        }
+        const pieces = [];
+        if (days24.length) pieces.push(`dias: ${days24.join(', ')}`);
+        if (attendsSundays) pieces.push('domingos');
+        if (attendsHolidays) pieces.push('feriados');
+        return pieces.length ? `Atendimento 24h em ${pieces.join(' • ')}` : 'Atendimento 24h';
     }
 
     const start = compactText(body.availability_start);
@@ -86,6 +99,7 @@ function buildAvailability(body) {
     const hourText = start && end ? `${start} às ${end}` : '';
     return [dayText, hourText].filter(Boolean).join(' • ') || null;
 }
+
 
 async function uploadToBucket(bucket, filePath, file) {
     const { error: uploadError } = await supabase.storage
@@ -252,7 +266,11 @@ router.get('/profissional/onboarding/salvar', requireProfessional, catchAsync(as
     return res.redirect('/profissional/onboarding?step=4&error=Não foi possível concluir por este caminho. Revise os dados e finalize novamente.');
 }));
 
-router.post('/profissional/onboarding/salvar', requireProfessional, upload.any(), catchAsync(async (req, res) => {
+router.get('/profissional/onboarding/finalizar', requireProfessional, catchAsync(async (req, res) => {
+    return res.redirect('/profissional/onboarding?step=4&error=Finalize o cadastro pelo botão da etapa 4.');
+}));
+
+async function handleProfessionalOnboardingSave(req, res) {
     const body = req.body || {};
     const currentBundle = await getProfessionalBundle(req.session.userId);
     const uploadedFiles = Array.isArray(req.files) ? req.files : [];
@@ -294,8 +312,11 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
         availability_24h_note: compactText(body.availability_24h_note) || null
     };
 
-    if (currentStep >= 1 && (!basicData.phone_number || basicData.phone_number.length < 10 || !basicData.city || !basicData.state || (!basicData.cep && !basicData.city))) {
-        return res.redirect('/auth/completar-perfil?error=Preencha telefone, cidade, estado e CEP antes de continuar');
+    if (currentStep >= 1 && (!basicData.phone_number || basicData.phone_number.length < 10 || !basicData.city || !basicData.state)) {
+        return res.redirect('/auth/completar-perfil?error=Preencha telefone, cidade e estado antes de continuar');
+    }
+    if (basicData.cep && basicData.cep.length !== 8) {
+        return res.redirect('/auth/completar-perfil?error=Informe um CEP válido com 8 números ou deixe o campo vazio');
     }
 
     const serviceFeeAmount = parseCurrencyLike(body.service_fee_amount);
@@ -313,6 +334,8 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
         payment_value: planConfig.total,
         plan_duration_months: planConfig.months,
         plan_price: planConfig.total,
+        plan_name: planConfig.plan.label,
+        plan_months: planConfig.months,
         status: 'pending',
         approval_requested: false,
         submitted_at: null,
@@ -406,7 +429,10 @@ router.post('/profissional/onboarding/salvar', requireProfessional, upload.any()
 
     req.session.professionalReady = true;
     return req.session.save(() => res.redirect('/profissional/dashboard?success=Perfil concluído com sucesso'));
-}));
+}
+
+router.post('/profissional/onboarding/salvar', requireProfessional, upload.any(), catchAsync(handleProfessionalOnboardingSave));
+router.post('/profissional/onboarding/finalizar', requireProfessional, upload.any(), catchAsync(handleProfessionalOnboardingSave));
 
 router.post('/profissional/perfil/atualizar', requireProfessional, catchAsync(async (req, res) => {
     const body = req.body || {};
@@ -457,6 +483,8 @@ router.post('/profissional/plano/atualizar', requireProfessional, catchAsync(asy
         payment_value: planConfig.total,
         plan_duration_months: planConfig.months,
         plan_price: planConfig.total,
+        plan_name: planConfig.plan.label,
+        plan_months: planConfig.months,
         approval_requested: false,
         submitted_at: null,
         profile_status: 'completed'

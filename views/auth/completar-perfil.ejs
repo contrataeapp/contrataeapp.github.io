@@ -160,15 +160,25 @@
     </div>
 
     <script>
+        function formatPhone(value) {
+            const digits = String(value || '').replace(/\D/g, '').slice(0,11);
+            if (digits.length <= 10) return digits.replace(/(\d{2})(\d{0,4})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c ? '-' + c : ''}`.trim());
+            return digits.replace(/(\d{2})(\d{0,5})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c ? '-' + c : ''}`.trim());
+        }
+        function formatCep(value) {
+            const digits = String(value || '').replace(/\D/g, '').slice(0,8);
+            return digits.replace(/(\d{5})(\d{0,3})/, (_,a,b)=> b ? `${a}-${b}` : a);
+        }
         async function buscarCep(cep) {
             const clean = String(cep || '').replace(/\D/g, '');
             if (clean.length !== 8) return;
             try {
-                const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
+                const res = await fetch(`/api/cep/${clean}`);
+                if (!res.ok) return;
                 const data = await res.json();
-                if (data.erro) return;
-                if (!document.getElementById('city').value) document.getElementById('city').value = data.localidade || '';
-                if (!document.getElementById('state').value) document.getElementById('state').value = data.uf || '';
+                document.getElementById('city').value = data.city || '';
+                document.getElementById('state').value = data.state || '';
+                document.getElementById('cep').value = formatCep(data.cep || clean);
             } catch (e) {
                 console.warn('Erro ao buscar CEP', e);
             }
@@ -177,8 +187,8 @@
         const cepInput = document.getElementById('cep');
         const cityInput = document.getElementById('city');
         const stateInput = document.getElementById('state');
-        phoneInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0,11); });
-        cepInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0,8); });
+        phoneInput?.addEventListener('input', e => { e.target.value = formatPhone(e.target.value); });
+        cepInput?.addEventListener('input', e => { e.target.value = formatCep(e.target.value); });
         cityInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''); });
         stateInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0,2); });
         document.getElementById('cep')?.addEventListener('blur', e => buscarCep(e.target.value));
@@ -195,7 +205,7 @@
         }
     </script>
 
-<script>document.getElementById('phone_number')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,11)});document.getElementById('cep')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,8)});document.getElementById('city')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g,'')});document.getElementById('state')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ]/g,'').toUpperCase().slice(0,2)});</script>
+<script>document.getElementById('phone_number')?.addEventListener('input',e=>{e.target.value=formatPhone(e.target.value)});document.getElementById('cep')?.addEventListener('input',e=>{e.target.value=formatCep(e.target.value)});document.getElementById('city')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g,'')});document.getElementById('state')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ]/g,'').toUpperCase().slice(0,2)});</script>
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
 

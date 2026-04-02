@@ -242,7 +242,6 @@
     <h3>Enviar perfil para análise?</h3>
     <p>Depois do envio, seu cadastro ficará em análise até a equipe revisar. Você pode continuar ajustando descrição, disponibilidade, foto e portfólio. Mudanças de plano ou profissões podem exigir nova conferência da equipe.</p>
     <div class="modal-actions-local">
-      <button type="button" class="btn btn-secondary" id="closeApprovalModal">Cancelar</button>
       <form action="/profissional/solicitar-aprovacao" method="POST" enctype="multipart/form-data" id="approvalRequestForm">
         <div class="field" style="margin-top:14px;text-align:left">
             <label>Comprovante de pagamento</label>
@@ -318,6 +317,7 @@ function syncApprovalSubmit(){
 }
 paymentProofInput?.addEventListener('change', syncApprovalSubmit);
 paymentWhatsappCheck?.addEventListener('change', syncApprovalSubmit);
+document.getElementById('approvalRequestForm')?.addEventListener('submit',()=>{ if(approvalSubmitBtn){ approvalSubmitBtn.disabled=true; approvalSubmitBtn.textContent='⏳ Enviando...'; } });
 document.querySelectorAll('input[name="phone_number"], input[name="cep"], input[name="service_fee_amount"]').forEach((field)=>field.addEventListener('input', ()=>{
   if(field.name === 'service_fee_amount') field.value = field.value.replace(/[^\d,]/g, '');
   else field.value = field.value.replace(/\D/g, '').slice(0, field.name === 'cep' ? 8 : 11);

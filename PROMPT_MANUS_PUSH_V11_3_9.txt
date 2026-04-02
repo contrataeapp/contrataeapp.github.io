@@ -1,0 +1,24 @@
+Use EXATAMENTE a pasta deste ZIP extraído e publique no repositório CORRETO abaixo, SEM criar novo repositório:
+
+Repo correto:
+https://github.com/contrataeapp/contrataeapp.github.io
+
+Tarefas:
+1. Extraia o ZIP localmente.
+2. Copie/substitua os arquivos no repo contrataeapp.github.io.
+3. Revise se routes, views, public e server.js foram atualizados.
+4. Commit com a mensagem:
+feat: v11.3.9 fluxo profissional seguro e estabilidade do cadastro
+5. Push direto para a branch main.
+6. NÃO criar outro repositório.
+7. NÃO alterar remote origin para outro repo.
+8. Depois do push, confirme quais arquivos principais foram enviados.
+
+Objetivo desta versão:
+- estabilizar o fluxo de cadastro profissional
+- corrigir finalização do onboarding
+- manter user_type estável no login Google
+- melhorar CEP/WhatsApp com máscara e CEP inteligente
+- fortalecer cancelamento real do cadastro
+- corrigir modal de envio para análise
+- consolidar plano salvo no profissional

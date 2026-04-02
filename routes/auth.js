@@ -48,7 +48,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
             let user;
             if (existingUser) {
-                const stableUserType = requestedType || existingUser.user_type || 'client';
+                const stableUserType = existingUser.user_type || requestedType || 'client';
                 const { data: updatedUser, error: updateError } = await supabase
                     .from('users')
                     .update({
