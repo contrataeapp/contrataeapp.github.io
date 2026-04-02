@@ -80,7 +80,7 @@
             <% } %>
 
             <div class="panel">
-                <form method="POST" action="/auth/cadastro">
+                <form method="POST" action="/auth/cadastro" novalidate id="signupForm">
                     <input type="hidden" name="user_type" value="<%= userType %>">
                     <div class="grid-2">
                         <div>
@@ -96,7 +96,7 @@
                     <div class="grid-2">
                         <div>
                             <label>WhatsApp</label>
-                            <input type="tel" name="phone_number" class="mask-phone" inputmode="numeric" pattern="[0-9]*" placeholder="(00) 00000-0000" maxlength="15">
+                            <input type="tel" name="phone_number" class="mask-phone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15">
                         </div>
                         <div>
                             <label>Tipo de conta</label>
@@ -153,7 +153,12 @@
         }
     </script>
 <script>document.querySelectorAll('form input').forEach((field)=>field.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); }}));</script>
-<script>document.querySelectorAll('.mask-phone').forEach(el=>el.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,11)})); document.querySelectorAll('form input').forEach(field=>field.addEventListener('keydown',e=>{ if(e.key==='Enter') e.preventDefault(); }));</script>
+<script>
+function formatPhone(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,11); if(!digits) return ''; if(digits.length<=10){ return digits.replace(/(\d{2})(\d{0,4})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); } return digits.replace(/(\d{2})(\d{0,5})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); }
+document.querySelectorAll('.mask-phone').forEach(el=>{ if(el.value) el.value=formatPhone(el.value); el.addEventListener('input',e=>{e.target.value=formatPhone(e.target.value)}); });
+document.getElementById('signupForm')?.addEventListener('submit', ()=>{ document.querySelectorAll('.mask-phone').forEach(el=>{ el.value = String(el.value||'').replace(/\D/g,'').slice(0,11); }); });
+document.querySelectorAll('form input').forEach(field=>field.addEventListener('keydown',e=>{ if(e.key==='Enter') e.preventDefault(); }));
+</script>
 
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>

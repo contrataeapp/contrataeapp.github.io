@@ -1,0 +1,29 @@
+Use exatamente a pasta deste ZIP e faça o push no repositório CORRETO existente, sem criar repositório novo:
+
+Repositorio alvo:
+https://github.com/contrataeapp/contrataeapp.github.io
+
+Regras obrigatórias:
+- NÃO criar outro repositório
+- NÃO mudar nome do repositório
+- NÃO refatorar layout além do que já veio pronto no ZIP
+- apenas substituir os arquivos alterados por esta versão
+- manter histórico normal de commit no repo existente
+
+Passos:
+1. Abrir o repositório contrataeapp/contrataeapp.github.io
+2. Substituir o conteúdo pelos arquivos desta versão v11.3.10
+3. Confirmar que server.js, routes/dashboards.js, views/auth/cadastro.ejs, views/auth/completar-perfil.ejs e views/dashboards/profissional-onboarding.ejs foram atualizados
+4. Fazer commit com a mensagem:
+   feat: v11.3.10 cadastro profissional mais estável e sem regressão
+5. Fazer push para a branch principal usada pelo Render
+
+Objetivo desta versão:
+- corrigir máscara e validação de WhatsApp no cadastro nativo e na etapa completar perfil
+- evitar bloqueio por validação nativa do navegador
+- melhorar fallback de CEP e manter cidade/estado preenchidos
+- trocar alertas críticos do onboarding por modal interno
+- corrigir validação da etapa 3 com lógica melhor para atendimento 24h
+- reduzir tamanho visual dos checkboxes do onboarding
+- evitar erro 404 em rotas GET indevidas de salvar/finalizar/cancelar
+- manter o fluxo profissional sem quebrar layout atual

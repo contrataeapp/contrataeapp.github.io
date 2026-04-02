@@ -72,7 +72,7 @@
             .profession-grid .field-search{order:1}
             .profession-grid .field-select{order:2}
         }
-</style>
+.compact-toggle input[type="checkbox"], .chip input[type="checkbox"]{width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;} .input-error-modal{position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1400;display:none;align-items:center;justify-content:center;padding:20px}.input-error-modal .box{width:min(420px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;color:#fff}.input-error-modal .box h3{color:#ffb21e;margin-bottom:10px}</style>
 </head>
 <body>
     <nav class="bottom-nav safe-onboarding-nav">
@@ -111,7 +111,7 @@
                 <div class="pill" data-step-pill="4">4. Imagens e revisão</div>
             </div>
 
-            <form id="onboardingForm" action="/profissional/onboarding/salvar" method="POST" enctype="multipart/form-data">
+            <form id="onboardingForm" action="/profissional/onboarding/finalizar" method="POST" enctype="multipart/form-data">
                                 <input type="hidden" name="current_step" id="currentStepInput" value="<%= startStep || 1 %>">
 
                 <div class="step" data-step="1">
@@ -398,6 +398,7 @@
             </div>
         </div>
     </div>
+<div id="inputErrorModal" class="input-error-modal"><div class="box"><h3>Ajuste necessário</h3><p id="inputErrorText" style="color:#d0d0d7;line-height:1.55"></p><div class="actions" style="margin-top:18px;justify-content:flex-end"><button type="button" class="btn btn-primary" onclick="closeInputErrorModal()">Entendi</button></div></div></div>
 <script>
 // FIX v11.3.7 cadastro profissional: cancelamento real, validação por etapa e profissão "Outros" por posição
 let currentStep = Number('<%= startStep || 1 %>') || 1;
@@ -450,11 +451,11 @@ function validateCurrentStep(){
         for (let slot = 1; slot <= cfg.slots; slot++) {
             const select = document.querySelector(`select[data-slot="${slot}"]`);
             const hidden = document.getElementById(`newProfessionRequest${slot}`);
-            if (!select || !select.value) { alert(`Selecione a Profissão ${slot} para continuar.`); select?.focus(); return false; }
+            if (!select || !select.value) { showInputError(`Selecione a Profissão ${slot} para continuar.`); select?.focus(); return false; }
             const selectedText = select.options[select.selectedIndex]?.textContent?.trim().toLowerCase() || '';
-            if (used.has(select.value) && !['outros','outro'].includes(selectedText)) { alert('Não repita a mesma profissão em mais de uma posição.'); select.focus(); return false; }
+            if (used.has(select.value) && !['outros','outro'].includes(selectedText)) { showInputError('Não repita a mesma profissão em mais de uma posição.'); select.focus(); return false; }
             used.add(select.value);
-            if (['outros','outro'].includes(selectedText) && !(hidden?.value || '').trim()) { alert(`Escreva a nova profissão da posição ${slot} antes de continuar.`); openOtherProfessionModal(slot); return false; }
+            if (['outros','outro'].includes(selectedText) && !(hidden?.value || '').trim()) { showInputError(`Escreva a nova profissão da posição ${slot} antes de continuar.`); openOtherProfessionModal(slot); return false; }
         }
     }
     if (currentStep === 3) {
@@ -469,17 +470,21 @@ function validateCurrentStep(){
         const start = document.getElementById('availabilityStartSelect')?.value || '';
         const end = document.getElementById('availabilityEndSelect')?.value || '';
         const days = document.querySelectorAll('input[name="working_days"]:checked').length;
-        if (phone.length < 10) { alert('Informe um WhatsApp válido com DDD.'); return false; }
-        if (cep && cep.length !== 8) { alert('Informe um CEP válido com 8 números ou deixe o campo vazio e preencha cidade/estado.'); return false; }
-        if (!city || city.length < 2 || !state || state.length < 2) { alert('Preencha cidade e estado corretamente.'); return false; }
-        if (description.length < 20) { alert('Descreva um pouco melhor o seu serviço antes de continuar.'); return false; }
-        if (serviceToggle?.checked && !fee) { alert('Informe o valor da taxa de visita ou desmarque a cobrança.'); return false; }
-        if (days === 0) { alert('Selecione pelo menos um dia da semana em que você atende.'); return false; }
+        if (phone.length < 10) { showInputError('Informe um WhatsApp válido com DDD.'); return false; }
+        if (cep && cep.length !== 8) { showInputError('Informe um CEP válido com 8 números ou deixe o campo vazio e preencha cidade/estado.'); return false; }
+        if (!city || city.length < 2 || !state || state.length < 2) { showInputError('Preencha cidade e estado corretamente.'); return false; }
+        if (description.length < 20) { showInputError('Descreva um pouco melhor o seu serviço antes de continuar.'); return false; }
+        if (serviceToggle?.checked && !fee) { showInputError('Informe o valor da taxa de visita ou desmarque a cobrança.'); return false; }
+        if (!is24 && days === 0) { showInputError('Selecione pelo menos um dia da semana em que você atende.'); return false; }
         if (is24) {
             const note = (document.getElementById('availability24hNote')?.value || '').trim();
-            if (!note) { alert('Explique em quais dias você atende 24 horas.'); return false; }
+            const selected24 = document.querySelectorAll('input[name="working_days_24h"]:checked').length;
+            const allDays24 = !!document.getElementById('available24hAllDays')?.checked;
+            const sunday24 = !!document.getElementById('available24hSundays')?.checked;
+            const holiday24 = !!document.getElementById('available24hHolidays')?.checked;
+            if (!note || (!allDays24 && !selected24 && !sunday24 && !holiday24)) { showInputError('Marque os dias em que o atendimento 24h realmente acontece.'); return false; }
         } else if (!start || !end) {
-            alert('Selecione o horário de início e o horário de encerramento.'); return false;
+            showInputError('Selecione o horário de início e o horário de encerramento.'); return false;
         }
     }
     if (currentStep === 4) {
@@ -487,11 +492,13 @@ function validateCurrentStep(){
         const existingAvatar = document.querySelector('input[name="existing_avatar_url"]')?.value || '';
         const hasAvatar = Boolean(existingAvatar || avatarInput?.files?.length);
         const cardsWithImage = Array.from(document.querySelectorAll('#portfolioPreviewGrid .preview-card img')).length;
-        if (!hasAvatar) { alert('Adicione uma foto de perfil antes de finalizar.'); return false; }
-        if (cardsWithImage < 3) { alert('Adicione 3 imagens iniciais ao portfólio antes de finalizar.'); return false; }
+        if (!hasAvatar) { showInputError('Adicione uma foto de perfil antes de finalizar.'); return false; }
+        if (cardsWithImage < 3) { showInputError('Adicione 3 imagens iniciais ao portfólio antes de finalizar.'); return false; }
     }
     return true;
 }
+function showInputError(message){ const modal=document.getElementById('inputErrorModal'); const text=document.getElementById('inputErrorText'); if(text) text.textContent=message; if(modal) modal.style.display='flex'; }
+function closeInputErrorModal(){ const modal=document.getElementById('inputErrorModal'); if(modal) modal.style.display='none'; }
 function setLoadingState(btn, text){ if (!btn) return; btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.textContent = text; }
 function nextStep(btn){ if(!validateCurrentStep()) return; setLoadingState(btn, 'Continuando...'); setTimeout(()=>{ if(currentStep < 4){ currentStep++; updateStepUI(); window.scrollTo({top:0, behavior:'smooth'});} btn.disabled=false; btn.textContent=btn.dataset.originalText || 'Continuar'; }, 250); }
 function prevStep(){ if(currentStep > 1){ currentStep--; updateStepUI(); window.scrollTo({top:0, behavior:'smooth'}); return; } openCancelModal(); }
@@ -499,11 +506,11 @@ function openCancelModal(){ const modal=document.getElementById('cancelModal'); 
 function closeCancelModal(){ const modal=document.getElementById('cancelModal'); if(modal){ modal.classList.add('hide'); modal.style.display='none'; } }
 function openOtherProfessionModal(slot){ activeOtherProfessionSlot = Number(slot); const modal=document.getElementById('otherProfessionModal'); const input=document.getElementById('otherProfessionModalInput'); const label=document.getElementById('otherProfessionModalLabel'); const hidden=document.getElementById(`newProfessionRequest${slot}`); if(label) label.textContent = `Digite a nova profissão da posição ${slot}`; if(input) input.value = hidden?.value || ''; if(modal){ modal.classList.remove('hide'); modal.style.display='flex'; } }
 function closeOtherProfessionModal(){ const modal=document.getElementById('otherProfessionModal'); if(modal){ modal.classList.add('hide'); modal.style.display='none'; } }
-function saveOtherProfession(){ const slot = activeOtherProfessionSlot; const input=document.getElementById('otherProfessionModalInput'); const hidden=document.getElementById(`newProfessionRequest${slot}`); const display=document.getElementById(`customProfessionDisplay${slot}`); const value=(input?.value || '').trim(); if(!slot || !value){ alert('Digite o nome da profissão para continuar.'); return; } if(hidden) hidden.value = value; if(display){ display.innerHTML = `Nova profissão sugerida: <strong style="color:#ffd58a">${value}</strong> <button type="button" class="btn btn-ghost" style="padding:6px 10px;margin-left:8px" onclick="openOtherProfessionModal(${slot})">Editar</button>`; display.classList.remove('hide'); } closeOtherProfessionModal(); }
+function saveOtherProfession(){ const slot = activeOtherProfessionSlot; const input=document.getElementById('otherProfessionModalInput'); const hidden=document.getElementById(`newProfessionRequest${slot}`); const display=document.getElementById(`customProfessionDisplay${slot}`); const value=(input?.value || '').trim(); if(!slot || !value){ showInputError('Digite o nome da profissão para continuar.'); return; } if(hidden) hidden.value = value; if(display){ display.innerHTML = `Nova profissão sugerida: <strong style="color:#ffd58a">${value}</strong> <button type="button" class="btn btn-ghost" style="padding:6px 10px;margin-left:8px" onclick="openOtherProfessionModal(${slot})">Editar</button>`; display.classList.remove('hide'); } closeOtherProfessionModal(); }
 function formatPhone(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,11); if(digits.length<=10){ return digits.replace(/(\d{2})(\d{0,4})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); } return digits.replace(/(\d{2})(\d{0,5})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); }
 function formatCep(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,8); return digits.replace(/(\d{5})(\d{0,3})/, (_,a,b)=> b ? `${a}-${b}` : a); }
 async function buscarCep(cep){ const raw=String(cep||'').replace(/\D/g,''); if(raw.length!==8) return; try{ const res=await fetch(`/api/cep/${raw}`); if(!res.ok) return; const data=await res.json(); const city=document.getElementById('onboardingCity'); const state=document.getElementById('onboardingState'); const cepField=document.getElementById('onboardingCep'); if(city) city.value=data.city||''; if(state) state.value=data.state||''; if(cepField) cepField.value=formatCep(data.cep||raw); }catch(e){} }
-function setupSearchableSelect(selectId, searchId){ const select=document.getElementById(selectId); const search=document.getElementById(searchId); if(!select||!search) return; const master=Array.from(select.options).map(opt=>({value:opt.value,text:opt.textContent})); function render(){ const q=search.value.toLowerCase().trim(); const placeholder=master[0]; const filtered=master.slice(1).filter(opt=>!q||opt.text.toLowerCase().includes(q)); const previous=select.value; select.innerHTML=[placeholder,...filtered].map(opt=>`<option value="${opt.value}">${opt.text}</option>`).join(''); if(filtered.find(opt=>opt.value===previous)) select.value=previous; else if(filtered.length===1) select.value=filtered[0].value; else select.value=''; handleProfessionChange(select); } search.addEventListener('input', render); if(search.value.trim()) render(); }
+function setupSearchableSelect(selectId, searchId){ const select=document.getElementById(selectId); const search=document.getElementById(searchId); if(!select||!search) return; const master=Array.from(select.options).map(opt=>({value:opt.value,text:opt.textContent})); function render(){ const q=search.value.toLowerCase().trim(); const placeholder=master[0]; let filtered=master.slice(1).filter(opt=>!q||opt.text.toLowerCase().includes(q)); const previous=select.value; if(q && !filtered.length){ const other=master.find(opt=>['outros','outro'].includes(String(opt.text||'').toLowerCase().trim())); if(other) filtered=[other]; } select.innerHTML=[placeholder,...filtered].map(opt=>`<option value="${opt.value}">${opt.text}</option>`).join(''); if(filtered.find(opt=>opt.value===previous)) select.value=previous; else if(filtered.length===1) select.value=filtered[0].value; else select.value=''; handleProfessionChange(select); } search.addEventListener('input', render); if(search.value.trim()) render(); }
 function handleProfessionChange(select){ const slot=Number(select.dataset.slot); const selectedText=select.options[select.selectedIndex]?.textContent?.trim().toLowerCase() || ''; const hidden=document.getElementById(`newProfessionRequest${slot}`); const display=document.getElementById(`customProfessionDisplay${slot}`); if(['outros','outro'].includes(selectedText)){ if(hidden?.value){ if(display){ display.innerHTML=`Nova profissão sugerida: <strong style="color:#ffd58a">${hidden.value}</strong> <button type="button" class="btn btn-ghost" style="padding:6px 10px;margin-left:8px" onclick="openOtherProfessionModal(${slot})">Editar</button>`; display.classList.remove('hide'); } } else { openOtherProfessionModal(slot); } } else { if(hidden) hidden.value=''; if(display){ display.textContent=''; display.classList.add('hide'); } } }
 function setupAvatarPreview(){ const input=document.getElementById('avatarInput'); const preview=document.getElementById('avatarPreview'); if(!input||!preview) return; input.addEventListener('change', ()=>{ const file=input.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=e=>preview.innerHTML=`<img src="${e.target.result}" alt="Avatar">`; reader.readAsDataURL(file); }); }
 function setupPortfolioPreview(){ const input=document.getElementById('portfolioInput'); const slotInput=document.getElementById('portfolioSlotInput'); const grid=document.getElementById('portfolioPreviewGrid'); const form=document.getElementById('onboardingForm'); if(!input||!slotInput||!grid||!form) return; const cards=Array.from(grid.querySelectorAll('.preview-card')); const selectedFiles=[null,null,null]; let activeSlotIndex=0; function renderCard(index,fileOrUrl){ const card=cards[index]; if(!card) return; if(!fileOrUrl){ card.classList.add('empty-slot'); card.innerHTML='<span style="color:#d9dde5">+ adicionar imagem</span>'; return; } if(typeof fileOrUrl==='string'){ card.classList.remove('empty-slot'); card.innerHTML=`<div style="width:100%"><img src="${fileOrUrl}" alt="Prévia"><div style="padding:8px 10px;font-size:12px;color:#ffd58a;text-align:center">Alterar imagem</div></div>`; return; } const reader=new FileReader(); reader.onload=e=>{ card.classList.remove('empty-slot'); card.innerHTML=`<div style="width:100%"><img src="${e.target.result}" alt="Prévia"><div style="padding:8px 10px;font-size:12px;color:#ffd58a;text-align:center">Alterar imagem</div></div>`; }; reader.readAsDataURL(fileOrUrl); } cards.forEach((card,index)=>{ const existingImg=card.querySelector('img'); if(existingImg) renderCard(index, existingImg.getAttribute('src')); else renderCard(index, null); card.addEventListener('click',()=>{ activeSlotIndex=index; slotInput.click(); }); }); slotInput.addEventListener('change',()=>{ const file=slotInput.files?.[0]; if(!file) return; selectedFiles[activeSlotIndex]=file; renderCard(activeSlotIndex,file); slotInput.value=''; }); input.addEventListener('change',()=>{ const files=Array.from(input.files||[]).slice(0,3); files.forEach((file,index)=>{ selectedFiles[index]=file; renderCard(index,file); }); input.value=''; }); form.addEventListener('submit',()=>{ const dt=new DataTransfer(); selectedFiles.filter(Boolean).forEach(file=>dt.items.add(file)); input.files=dt.files; }); }
@@ -517,8 +524,8 @@ document.addEventListener('DOMContentLoaded', ()=>{ updateStepUI(); updatePlanUI
     setupSearchableSelect('primaryCategorySelect','primaryCategorySearch'); setupSearchableSelect('additionalCategorySelect1','additionalCategorySearch'); setupSearchableSelect('additionalCategorySelect2','additionalCategorySearch2');
     document.querySelectorAll('select[data-category-select]').forEach(el=>{ el.addEventListener('change',()=>handleProfessionChange(el)); handleProfessionChange(el); });
     document.getElementById('serviceFeeAmount')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^\d,]/g,''); });
-    document.querySelector('input[name="phone_number"]')?.addEventListener('input',e=>{ e.target.value=formatPhone(e.target.value); });
-    document.getElementById('onboardingCep')?.addEventListener('input',e=>{ e.target.value=formatCep(e.target.value); });
+    const onboardingPhone=document.querySelector('input[name="phone_number"]'); if(onboardingPhone?.value) onboardingPhone.value=formatPhone(onboardingPhone.value); onboardingPhone?.addEventListener('input',e=>{ e.target.value=formatPhone(e.target.value); });
+    const onboardingCep=document.getElementById('onboardingCep'); if(onboardingCep?.value) onboardingCep.value=formatCep(onboardingCep.value); onboardingCep?.addEventListener('input',e=>{ e.target.value=formatCep(e.target.value); });
     document.getElementById('onboardingCity')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g,''); });
     document.getElementById('onboardingState')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ]/g,'').toUpperCase().slice(0,2); });
     document.querySelectorAll('input, textarea, select').forEach(field=>field.addEventListener('keydown',e=>{ if(e.key==='Enter' && field.tagName!=='TEXTAREA') e.preventDefault(); }));
@@ -535,7 +542,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ updateStepUI(); updatePlanUI
     const workingDayChecks=Array.from(document.querySelectorAll('input[name="working_days"]'));
     const working24Checks=Array.from(document.querySelectorAll('input[name="working_days_24h"]'));
     function syncClosingOptions(){ if(!openingSelect || !closingSelect) return; const start=openingSelect.value; const options=Array.from(openingSelect.options).map(o=>o.value).filter(Boolean); const filtered=options.filter(v=>!start || v>start); const current=closingSelect.value; closingSelect.innerHTML=['<option value="">Selecione um horário</option>'].concat(filtered.map(v=>`<option value="${v}">${v}</option>`)).join(''); if(filtered.includes(current)) closingSelect.value=current; else closingSelect.value=''; closingSelect.disabled=!start; }
-    function sync24h(){ const is24=!!available24h?.checked; if(openingSelect){ openingSelect.disabled=is24; if(is24) openingSelect.value=''; } if(closingSelect){ closingSelect.disabled=is24 || !openingSelect?.value; if(is24) closingSelect.value=''; } if(is24){ workingDayChecks.forEach(el=>{ el.checked=false; }); } if(availability24hWrap) availability24hWrap.classList.toggle('hide', !is24); const allDays=!!available24hAllDays?.checked; working24Checks.forEach(el=>{ el.disabled=!is24 || allDays; if(allDays){ el.checked=true; } else if(!is24){ el.checked=false; }}); if(!is24 && available24hAllDays) available24hAllDays.checked=false; if(!is24 && available24hHolidays) available24hHolidays.checked=false; if(!is24 && available24hSundays) available24hSundays.checked=false; const selected24=working24Checks.filter(el=>el.checked).map(el=>el.value); const extras=[]; if(available24hSundays?.checked && !selected24.includes('Dom')) extras.push('domingos'); if(available24hHolidays?.checked) extras.push('feriados'); const note = is24 ? (allDays ? `Atendimento 24h todos os dias${available24hHolidays?.checked ? ', incluindo feriados' : ''}` : `Atendimento 24h em ${selected24.join(', ') || 'dias selecionados'}${extras.length ? ' • '+extras.join(' • ') : ''}`) : ''; if(availability24hNote) availability24hNote.value = note; if(availability24hPreview) availability24hPreview.textContent = note || 'Exemplo: Atendimento 24h em Seg, Ter e Qua. Feriados: não.'; }
+    function sync24h(){ const is24=!!available24h?.checked; if(openingSelect){ openingSelect.disabled=is24; if(is24) openingSelect.value=''; } if(closingSelect){ closingSelect.disabled=is24 || !openingSelect?.value; if(is24) closingSelect.value=''; } if(is24){ workingDayChecks.forEach(el=>{ el.checked=false; }); } if(availability24hWrap) availability24hWrap.classList.toggle('hide', !is24); const allDays=!!available24hAllDays?.checked; working24Checks.forEach(el=>{ el.disabled=!is24 || allDays; if(allDays){ el.checked=true; } else if(!is24){ el.checked=false; }}); if(!is24 && available24hAllDays) available24hAllDays.checked=false; if(!is24 && available24hHolidays) available24hHolidays.checked=false; if(!is24 && available24hSundays) available24hSundays.checked=false; const selected24=working24Checks.filter(el=>el.checked).map(el=>el.value); const extras=[]; if(available24hSundays?.checked && !selected24.includes('Dom')) extras.push('domingos'); if(available24hHolidays?.checked) extras.push('feriados'); const note = is24 ? (allDays ? `Atendimento 24h todos os dias${available24hHolidays?.checked ? ', incluindo feriados' : ''}` : `Atendimento 24h em ${selected24.join(', ')}${extras.length ? (selected24.length ? ' • ' : '') + extras.join(' • ') : ''}`.trim()) : ''; if(availability24hNote) availability24hNote.value = note; if(availability24hPreview) availability24hPreview.textContent = note || 'Exemplo: Atendimento 24h em Seg, Ter e Qua. Feriados: não.'; }
     openingSelect?.addEventListener('change',()=>{ syncClosingOptions(); sync24h(); });
     available24h?.addEventListener('change', sync24h); available24hAllDays?.addEventListener('change', sync24h); available24hHolidays?.addEventListener('change', sync24h); available24hSundays?.addEventListener('change', sync24h); working24Checks.forEach(el=>el.addEventListener('change', sync24h));
     syncClosingOptions(); sync24h();
@@ -547,7 +554,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ updateStepUI(); updatePlanUI
     document.getElementById('mobileHomeBtn')?.addEventListener('click', ()=>openCancelModal());
     document.getElementById('mobileMenuBtn')?.addEventListener('click', ()=>openCancelModal());
     document.getElementById('mobileCurrentBtn')?.addEventListener('click', e=>{ e.preventDefault(); openCancelModal(); });
-    onboardingForm?.addEventListener('submit', (e)=>{ if(!validateCurrentStep()){ e.preventDefault(); return; } if(finishProfileBtn){ setLoadingState(finishProfileBtn, 'Finalizando...'); } });
+    onboardingForm?.addEventListener('submit', (e)=>{ if(!validateCurrentStep()){ e.preventDefault(); return; } const phoneEl=document.querySelector('input[name="phone_number"]'); const cepEl=document.getElementById('onboardingCep'); if(phoneEl) phoneEl.value=String(phoneEl.value||'').replace(/\D/g,'').slice(0,11); if(cepEl) cepEl.value=String(cepEl.value||'').replace(/\D/g,'').slice(0,8); if(finishProfileBtn){ setLoadingState(finishProfileBtn, 'Finalizando...'); } });
 });</script>
 
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>

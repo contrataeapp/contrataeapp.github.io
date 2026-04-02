@@ -232,7 +232,7 @@ async function getProfessionalBundle(userId) {
 
 router.get('/profissional/onboarding', requireProfessional, catchAsync(async (req, res) => {
     const bundle = await getProfessionalBundle(req.session.userId);
-    const basicProfileComplete = Boolean(bundle.profissional.phone_number && bundle.profissional.cep && bundle.profissional.city && bundle.profissional.state);
+    const basicProfileComplete = Boolean(bundle.profissional.phone_number && bundle.profissional.city && bundle.profissional.state);
 
     if (!basicProfileComplete) {
         return res.redirect('/auth/completar-perfil');
@@ -500,7 +500,7 @@ router.get('/profissional/dashboard', requireProfessional, catchAsync(async (req
 
     const bundle = await getProfessionalBundle(req.session.userId);
     const profissional = bundle.profissional;
-    const basicProfileComplete = Boolean(profissional.phone_number && profissional.cep && profissional.city && profissional.state);
+    const basicProfileComplete = Boolean(profissional.phone_number && profissional.city && profissional.state);
     if (!basicProfileComplete) return res.redirect('/auth/completar-perfil');
     if (!profissional.profile_completed) return res.redirect('/profissional/onboarding?step=1&error=Conclua as 4 etapas do cadastro antes de acessar sua dashboard');
     const profileReadyForApproval = Boolean(basicProfileComplete && profissional.description && profissional.category_id && bundle.portfolio.length > 0);
@@ -566,7 +566,7 @@ router.post('/profissional/solicitar-aprovacao', requireProfessional, upload.sin
     const body = req.body || {};
     const bundle = await getProfessionalBundle(req.session.userId);
     const profissional = bundle.profissional || {};
-    const basicProfileComplete = Boolean(profissional.phone_number && profissional.cep && profissional.city && profissional.state);
+    const basicProfileComplete = Boolean(profissional.phone_number && profissional.city && profissional.state);
     const profileReadyForApproval = Boolean(basicProfileComplete && profissional.description && profissional.category_id && bundle.portfolio.length > 0);
 
     if (profissional.approval_requested) {

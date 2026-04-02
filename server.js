@@ -581,7 +581,7 @@ app.get("/auth/completar-perfil", async (req, res) => {
     try {
         const { data: user } = await supabase.from('users').select('*').eq('id', req.session.userId).single();
         const { data: profissional } = await supabase.from('professionals').select('*').eq('user_id', req.session.userId).maybeSingle();
-        const basicProfileComplete = Boolean(profissional && profissional.phone_number && profissional.cep && profissional.city && profissional.state);
+        const basicProfileComplete = Boolean(profissional && profissional.phone_number && profissional.city && profissional.state);
         if (basicProfileComplete && profissional?.profile_completed) {
             req.session.professionalReady = true;
             return res.redirect('/profissional/dashboard');
@@ -600,6 +600,8 @@ app.get("/auth/completar-perfil", async (req, res) => {
         res.redirect('/');
     }
 });
+
+app.get('/auth/cancelar-profissional', (req, res) => res.redirect('/'));
 
 app.post("/auth/cancelar-profissional", async (req, res) => {
     console.log("--- INÍCIO POST /auth/cancelar-profissional ---");

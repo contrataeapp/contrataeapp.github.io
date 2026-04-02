@@ -108,7 +108,7 @@
                 <div class="avatar-label">Foto puxada da sua conta atual. Você poderá trocar depois.</div>
             </div>
 
-            <form action="/auth/completar-perfil" method="POST" enctype="multipart/form-data">
+            <form action="/auth/completar-perfil" method="POST" enctype="multipart/form-data" novalidate id="completeProfileForm">
                 <div class="grid-2">
                     <div>
                         <label>Nome completo</label>
@@ -124,23 +124,23 @@
                 <div class="grid-2">
                     <div>
                         <label>WhatsApp</label>
-                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" inputmode="numeric" pattern="[0-9]*" maxlength="15" required>
+                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15">
                     </div>
                     <div>
                         <label>CEP</label>
-                        <input type="text" name="cep" id="cep" value="<%= profissional?.cep || '' %>" placeholder="00000-000" inputmode="numeric" maxlength="9" required>
-                        <div class="help">Ao digitar o CEP, vamos sugerir cidade e estado automaticamente.</div>
+                        <input type="text" name="cep" id="cep" value="<%= profissional?.cep || '' %>" placeholder="00000-000" inputmode="numeric" maxlength="9">
+                        <div class="help">Ao digitar o CEP, vamos sugerir cidade e estado automaticamente. Se você não souber o CEP, pode preencher cidade e estado manualmente.</div>
                     </div>
                 </div>
 
                 <div class="grid-2">
                     <div>
                         <label>Cidade</label>
-                        <input type="text" name="city" id="city" value="<%= profissional?.city || '' %>" placeholder="Sua cidade" pattern="[A-Za-zÀ-ÿ\s]+" required>
+                        <input type="text" name="city" id="city" value="<%= profissional?.city || '' %>" placeholder="Sua cidade" >
                     </div>
                     <div>
                         <label>Estado</label>
-                        <input type="text" name="state" id="state" value="<%= profissional?.state || '' %>" placeholder="UF" maxlength="2" pattern="[A-Za-zÀ-ÿ\s]+" required>
+                        <input type="text" name="state" id="state" value="<%= profissional?.state || '' %>" placeholder="UF" maxlength="2" >
                     </div>
                 </div>
 
@@ -187,6 +187,8 @@
         const cepInput = document.getElementById('cep');
         const cityInput = document.getElementById('city');
         const stateInput = document.getElementById('state');
+        if (phoneInput?.value) phoneInput.value = formatPhone(phoneInput.value);
+        if (cepInput?.value) cepInput.value = formatCep(cepInput.value);
         phoneInput?.addEventListener('input', e => { e.target.value = formatPhone(e.target.value); });
         cepInput?.addEventListener('input', e => { e.target.value = formatCep(e.target.value); });
         cityInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''); });
@@ -199,13 +201,16 @@
         const completeProfileSubmit = document.getElementById('completeProfileSubmit');
         if (completeProfileForm && completeProfileSubmit) {
             completeProfileForm.addEventListener('submit', () => {
+                const phoneEl = document.getElementById('phone_number');
+                const cepEl = document.getElementById('cep');
+                if (phoneEl) phoneEl.value = String(phoneEl.value || '').replace(/\D/g, '').slice(0, 11);
+                if (cepEl) cepEl.value = String(cepEl.value || '').replace(/\D/g, '').slice(0, 8);
                 completeProfileSubmit.disabled = true;
                 completeProfileSubmit.innerHTML = '⏳ Continuando...';
             });
         }
     </script>
 
-<script>document.getElementById('phone_number')?.addEventListener('input',e=>{e.target.value=formatPhone(e.target.value)});document.getElementById('cep')?.addEventListener('input',e=>{e.target.value=formatCep(e.target.value)});document.getElementById('city')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g,'')});document.getElementById('state')?.addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ]/g,'').toUpperCase().slice(0,2)});</script>
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
 
