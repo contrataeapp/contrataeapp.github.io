@@ -124,7 +124,7 @@
                 <div class="grid-2">
                     <div>
                         <label>WhatsApp</label>
-                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15" autocomplete="tel" novalidate>
+                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15" autocomplete="tel">
                     </div>
                     <div>
                         <label>CEP</label>
@@ -188,12 +188,12 @@
         const cityInput = document.getElementById('city');
         const stateInput = document.getElementById('state');
         if (phoneInput?.value) phoneInput.value = formatPhone(phoneInput.value);
+        phoneInput?.addEventListener('blur', e => { e.target.value = formatPhone(e.target.value); });
         if (cepInput?.value) cepInput.value = formatCep(cepInput.value);
         phoneInput?.addEventListener('input', e => { e.target.value = formatPhone(e.target.value); });
-        phoneInput?.addEventListener('blur', e => { e.target.value = formatPhone(e.target.value); });
         cepInput?.addEventListener('input', e => { e.target.value = formatCep(e.target.value); });
-        cityInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''); e.target.dataset.autoFill = '0'; });
-        stateInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0,2); e.target.dataset.autoFill = '0'; });
+        cityInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''); });
+        stateInput?.addEventListener('input', e => { e.target.value = e.target.value.replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0,2); });
         document.getElementById('cep')?.addEventListener('blur', e => buscarCep(e.target.value));
         document.querySelectorAll('form input').forEach(field => field.addEventListener('keydown', (e) => { if (e.key === 'Enter') e.preventDefault(); }));
     </script>
@@ -208,8 +208,6 @@
                 const stateEl = document.getElementById('state');
                 const cleanPhone = String(phoneEl?.value || '').replace(/\D/g, '').slice(0, 11);
                 const cleanCep = String(cepEl?.value || '').replace(/\D/g, '').slice(0, 8);
-                if (phoneEl) phoneEl.setCustomValidity('');
-                if (cepEl) cepEl.setCustomValidity('');
                 const cleanCity = String(cityEl?.value || '').trim();
                 const cleanState = String(stateEl?.value || '').trim();
                 const clientError = document.getElementById('completeProfileClientError'); const showClientError = (msg) => { if (clientError) { clientError.textContent = msg; clientError.style.display = 'block'; } }; if (cleanPhone.length < 10) { e.preventDefault(); showClientError('Informe um WhatsApp válido com DDD.'); phoneEl?.focus(); return; }

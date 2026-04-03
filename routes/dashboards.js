@@ -77,42 +77,40 @@ function buildAvailability(body) {
         ? body.working_days_24h
         : body.working_days_24h ? [body.working_days_24h] : [];
 
-    const saturdayMode = compactText(body.saturday_service_mode) || 'same';
-    const sundayMode = compactText(body.sunday_service_mode) || 'no';
-    const holidayMode = compactText(body.holiday_service_mode) || 'no';
-
-    const buildCustomPiece = (label, mode, start, end) => {
-        if (mode === 'same') return `${label}: mesmo horário padrão`;
-        if (mode === 'custom' && start && end) return `${label}: ${start} às ${end}`;
-        return `${label}: não atende`;
-    };
+    const pieces = [];
+    const start = compactText(body.availability_start);
+    const end = compactText(body.availability_end);
 
     if (body.available_24h) {
         const customNote = compactText(body.availability_24h_note);
-        const attendsAllDays = Boolean(body.available_24h_all_days);
-        const attendsHolidays = Boolean(body.available_24h_holidays);
-        if (customNote) return customNote;
-        if (attendsAllDays) {
-            return `Atendimento 24h todos os dias${attendsHolidays ? ', incluindo feriados' : ''}`;
-        }
-        const pieces = [];
-        if (days24.length) pieces.push(`24h em ${days24.join(', ')}`);
-        if (attendsHolidays) pieces.push('24h em feriados');
-        return pieces.join(' • ') || 'Atendimento 24h';
+        if (customNote) pieces.push(customNote);
+    } else {
+        const dayText = days.join(', ');
+        const hourText = start && end ? `${start} às ${end}` : '';
+        const regular = [dayText, hourText].filter(Boolean).join(' • ');
+        if (regular) pieces.push(regular);
     }
 
-    const start = compactText(body.availability_start);
-    const end = compactText(body.availability_end);
-    const standard = start && end ? `${start} às ${end}` : null;
-    const parts = [];
-    if (days.length) parts.push(`Dias: ${days.join(', ')}`);
-    if (standard) parts.push(`Padrão: ${standard}`);
+    const specialMap = [
+        { key: 'saturday', label: 'Sábado' },
+        { key: 'sunday', label: 'Domingo' },
+        { key: 'holiday', label: 'Feriado' }
+    ];
+    for (const item of specialMap) {
+        const mode = compactText(body[`${item.key}_service_mode`]) || (item.key === 'saturday' ? 'same' : 'no');
+        if (mode === 'no') continue;
+        if (mode === 'same') {
+            pieces.push(`${item.label}: mesmo horário padrão`);
+            continue;
+        }
+        const specialStart = compactText(body[`${item.key}_start`]);
+        const specialEnd = compactText(body[`${item.key}_end`]);
+        if (specialStart && specialEnd) {
+            pieces.push(`${item.label}: ${specialStart} às ${specialEnd}`);
+        }
+    }
 
-    parts.push(buildCustomPiece('Sábado', saturdayMode, compactText(body.saturday_start), compactText(body.saturday_end)));
-    parts.push(buildCustomPiece('Domingo', sundayMode, compactText(body.sunday_start), compactText(body.sunday_end)));
-    parts.push(buildCustomPiece('Feriado', holidayMode, compactText(body.holiday_start), compactText(body.holiday_end)));
-
-    return parts.filter(Boolean).join(' • ') || null;
+    return pieces.filter(Boolean).join(' • ') || null;
 }
 
 
