@@ -97,7 +97,7 @@
             <span class="badge">Etapa inicial</span>
             <h2 class="title">Complete seu Perfil</h2>
             <p class="subtitle">Nesta etapa você cria sua conta profissional com os dados básicos. O restante será feito em um cadastro em etapas, sem te jogar em formulários confusos dentro da área.</p>
-            <% if (typeof error !== 'undefined' && error) { %><div class="panel" style="border-color:#6e2d2d;background:rgba(205,60,60,.12);color:#ffb3b3;margin-bottom:16px"><%= error %></div><% } %><div id="completeProfileClientError" class="panel" style="display:none;border-color:#6e2d2d;background:rgba(205,60,60,.12);color:#ffb3b3;margin-bottom:16px"></div>
+            <% if (typeof error !== 'undefined' && error) { %><div class="panel" style="border-color:#6e2d2d;background:rgba(205,60,60,.12);color:#ffb3b3;margin-bottom:16px"><%= error %></div><% } %>
 
             <div class="avatar-box">
                 <% if (user && user.avatar_url) { %>
@@ -124,7 +124,7 @@
                 <div class="grid-2">
                     <div>
                         <label>WhatsApp</label>
-                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15" autocomplete="tel">
+                        <input type="text" name="phone_number" id="phone_number" value="<%= profissional?.phone_number || '' %>" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15">
                     </div>
                     <div>
                         <label>CEP</label>
@@ -188,7 +188,6 @@
         const cityInput = document.getElementById('city');
         const stateInput = document.getElementById('state');
         if (phoneInput?.value) phoneInput.value = formatPhone(phoneInput.value);
-        phoneInput?.addEventListener('blur', e => { e.target.value = formatPhone(e.target.value); });
         if (cepInput?.value) cepInput.value = formatCep(cepInput.value);
         phoneInput?.addEventListener('input', e => { e.target.value = formatPhone(e.target.value); });
         cepInput?.addEventListener('input', e => { e.target.value = formatCep(e.target.value); });
@@ -201,22 +200,12 @@
         const completeProfileForm = document.querySelector('form[action="/auth/completar-perfil"]');
         const completeProfileSubmit = document.getElementById('completeProfileSubmit');
         if (completeProfileForm && completeProfileSubmit) {
-            completeProfileForm.addEventListener('submit', (e) => {
+            completeProfileForm.addEventListener('submit', () => {
                 const phoneEl = document.getElementById('phone_number');
                 const cepEl = document.getElementById('cep');
-                const cityEl = document.getElementById('city');
-                const stateEl = document.getElementById('state');
-                const cleanPhone = String(phoneEl?.value || '').replace(/\D/g, '').slice(0, 11);
-                const cleanCep = String(cepEl?.value || '').replace(/\D/g, '').slice(0, 8);
-                const cleanCity = String(cityEl?.value || '').trim();
-                const cleanState = String(stateEl?.value || '').trim();
-                const clientError = document.getElementById('completeProfileClientError'); const showClientError = (msg) => { if (clientError) { clientError.textContent = msg; clientError.style.display = 'block'; } }; if (cleanPhone.length < 10) { e.preventDefault(); showClientError('Informe um WhatsApp válido com DDD.'); phoneEl?.focus(); return; }
-                if (cleanCep && cleanCep.length !== 8) { e.preventDefault(); showClientError('Informe um CEP válido com 8 números ou deixe o campo vazio e preencha cidade e estado.'); cepEl?.focus(); return; }
-                if ((!cleanCep && (!cleanCity || cleanCity.length < 2 || !cleanState || cleanState.length < 2)) || false) {}
-                if (!cleanCity || cleanCity.length < 2 || !cleanState || cleanState.length < 2) { e.preventDefault(); showClientError('Preencha cidade e estado corretamente.'); if (!cleanCity) cityEl?.focus(); else stateEl?.focus(); return; }
-                if (phoneEl) phoneEl.value = cleanPhone;
-                if (cepEl) cepEl.value = cleanCep;
-                if (clientError) clientError.style.display = 'none'; completeProfileSubmit.disabled = true;
+                if (phoneEl) phoneEl.value = String(phoneEl.value || '').replace(/\D/g, '').slice(0, 11);
+                if (cepEl) cepEl.value = String(cepEl.value || '').replace(/\D/g, '').slice(0, 8);
+                completeProfileSubmit.disabled = true;
                 completeProfileSubmit.innerHTML = '⏳ Continuando...';
             });
         }

@@ -97,7 +97,28 @@ function buildAvailability(body) {
     const end = compactText(body.availability_end);
     const dayText = days.join(', ');
     const hourText = start && end ? `${start} às ${end}` : '';
-    return [dayText, hourText].filter(Boolean).join(' • ') || null;
+    const pieces = [dayText, hourText].filter(Boolean);
+
+    const specialModes = [
+        { key: 'saturday', label: 'Sábado' },
+        { key: 'sunday', label: 'Domingo' },
+        { key: 'holiday', label: 'Feriado' }
+    ];
+    for (const item of specialModes) {
+        const mode = compactText(body[`${item.key}_mode`]);
+        if (!mode || mode === 'off') continue;
+        if (mode === 'same') {
+            pieces.push(`${item.label}: mesmo horário padrão`);
+            continue;
+        }
+        const customStart = compactText(body[`${item.key}_start`]);
+        const customEnd = compactText(body[`${item.key}_end`]);
+        if (customStart && customEnd) {
+            pieces.push(`${item.label}: ${customStart} às ${customEnd}`);
+        }
+    }
+
+    return pieces.join(' • ') || null;
 }
 
 
