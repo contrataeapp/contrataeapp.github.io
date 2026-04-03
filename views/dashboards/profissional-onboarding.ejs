@@ -47,7 +47,7 @@
         .avatar-preview{width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid #ffb21e;background:#6a1bb2;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800}
         .avatar-preview img{width:100%;height:100%;object-fit:cover}
         .chips{display:flex;flex-wrap:wrap;gap:8px}
-        .chip{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;background:#181a1f;border:1px solid #2c3037}.chip input[type=checkbox],.toggle-row input[type=checkbox]{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:2px solid #8b95a7;border-radius:4px;background:#111114;display:inline-block;position:relative;cursor:pointer;flex:0 0 16px}.chip input[type=checkbox]:checked,.toggle-row input[type=checkbox]:checked{background:#ffb020;border-color:#ffb020}.chip input[type=checkbox]:checked::after,.toggle-row input[type=checkbox]:checked::after{content:'';position:absolute;left:3px;top:0px;width:4px;height:8px;border:solid #111;border-width:0 2px 2px 0;transform:rotate(45deg)}.chip.small{padding:8px 10px;font-size:13px}.toggle-row{display:flex;align-items:center;gap:10px}.compact-toggle{padding:8px 12px;border-radius:18px;background:#15171b;border:1px solid #2c3037;width:fit-content}.compact-toggle input[type=checkbox]{width:15px;height:15px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1e1e1e;border-top:1px solid #333;display:none;justify-content:space-around;align-items:center;height:70px;z-index:1000}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:#999;text-decoration:none;font-size:12px;gap:5px}.nav-item i{font-size:22px}.nav-item.active,.nav-item:hover{color:#ffa500}
+        .chip{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;background:#181a1f;border:1px solid #2c3037}.chip input[type=checkbox],.toggle-row input[type=checkbox]{appearance:none;-webkit-appearance:none;width:14px;height:14px;border:2px solid #8b95a7;border-radius:4px;background:#111114;display:inline-block;position:relative;cursor:pointer;flex:0 0 14px}.chip input[type=checkbox]:checked,.toggle-row input[type=checkbox]:checked{background:#ffb020;border-color:#ffb020}.chip input[type=checkbox]:checked::after,.toggle-row input[type=checkbox]:checked::after{content:'';position:absolute;left:3px;top:0px;width:4px;height:8px;border:solid #111;border-width:0 2px 2px 0;transform:rotate(45deg)}.chip.small{padding:8px 10px;font-size:13px}.toggle-row{display:flex;align-items:center;gap:10px}.compact-toggle{padding:8px 12px;border-radius:18px;background:#15171b;border:1px solid #2c3037;width:fit-content}.compact-toggle input[type=checkbox]{width:15px;height:15px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1e1e1e;border-top:1px solid #333;display:none;justify-content:space-around;align-items:center;height:70px;z-index:1000}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:#999;text-decoration:none;font-size:12px;gap:5px}.nav-item i{font-size:22px}.nav-item.active,.nav-item:hover{color:#ffa500}
         .upload-box{padding:18px;border-radius:18px;border:1px dashed #50545c;background:#111215;text-align:center}
         .preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}
         .preview-card{border:1px solid #2c3037;border-radius:14px;overflow:hidden;background:#141517;min-height:140px;display:flex;align-items:center;justify-content:center}
@@ -67,12 +67,21 @@
     
         .profession-slot{padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);margin-top:12px}.profession-slot[data-slot='1']{border-left:4px solid #ffb020}.profession-slot[data-slot='2']{border-left:4px solid #4cc9f0}.profession-slot[data-slot='3']{border-left:4px solid #b892ff}.profession-grid .field-search{order:1}
         .profession-grid .field-select{order:2}
+        .search-wrap{position:relative}
+        .search-suggestions{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;list-style:none;margin:0;padding:6px;background:#16171c;border:1px solid #2e3138;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.35);max-height:220px;overflow:auto}
+        .search-suggestions.show{display:block}
+        .search-suggestions li{padding:10px 12px;border-radius:10px;color:#eef1f5;cursor:pointer;font-size:14px}
+        .search-suggestions li:hover{background:#23252b}
+        .search-suggestions li.empty{color:#ffcf82;background:rgba(255,176,32,.08)}
+        .special-day-panel{margin-top:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .special-day-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
         @media (max-width: 640px){
             .profession-grid{grid-template-columns:1fr !important;}
             .profession-grid .field-search{order:1}
             .profession-grid .field-select{order:2}
+            .special-day-grid{grid-template-columns:1fr}
         }
-.compact-toggle input[type="checkbox"], .chip input[type="checkbox"]{width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;} .input-error-modal{position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1400;display:none;align-items:center;justify-content:center;padding:20px}.input-error-modal .box{width:min(420px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;color:#fff}.input-error-modal .box h3{color:#ffb21e;margin-bottom:10px}</style>
+.compact-toggle input[type="checkbox"], .chip input[type="checkbox"]{width:14px!important;height:14px!important;min-width:14px!important;min-height:14px!important;} .input-error-modal{position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1400;display:none;align-items:center;justify-content:center;padding:20px}.input-error-modal .box{width:min(420px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;color:#fff}.input-error-modal .box h3{color:#ffb21e;margin-bottom:10px}</style>
 </head>
 <body>
     <nav class="bottom-nav safe-onboarding-nav">
@@ -176,7 +185,7 @@
                         <div class="grid-2 profession-grid">
                             <div class="field field-search">
                                 <label>Busca rápida · Profissão 1</label>
-                                <input type="text" id="primaryCategorySearch" placeholder="Digite para filtrar a profissão 1">
+                                <div class="search-wrap"><input type="text" id="primaryCategorySearch" placeholder="Digite para filtrar a profissão 1"><ul id="primaryCategorySuggestions" class="search-suggestions"></ul></div>
                             </div>
                             <div class="field field-select">
                                 <label>Profissão 1</label>
@@ -196,7 +205,7 @@
                         <div class="grid-2 profession-grid">
                             <div class="field field-search">
                                 <label>Busca rápida · Profissão 2</label>
-                                <input type="text" id="additionalCategorySearch" placeholder="Digite para filtrar a profissão 2">
+                                <div class="search-wrap"><input type="text" id="additionalCategorySearch" placeholder="Digite para filtrar a profissão 2"><ul id="additionalCategorySuggestions" class="search-suggestions"></ul></div>
                             </div>
                             <div class="field field-select">
                                 <label>Profissão 2</label>
@@ -216,7 +225,7 @@
                         <div class="grid-2 profession-grid">
                             <div class="field field-search">
                                 <label>Busca rápida · Profissão 3</label>
-                                <input type="text" id="additionalCategorySearch2" placeholder="Digite para filtrar a profissão 3">
+                                <div class="search-wrap"><input type="text" id="additionalCategorySearch2" placeholder="Digite para filtrar a profissão 3"><ul id="additionalCategorySuggestions2" class="search-suggestions"></ul></div>
                             </div>
                             <div class="field field-select">
                                 <label>Profissão 3</label>
@@ -312,49 +321,51 @@
                             <input type="hidden" name="availability_24h_note" id="availability24hNote">
                             <div class="help" id="availability24hPreview" style="margin-top:10px">Exemplo: Atendimento 24h em Seg, Ter e Qua. Feriados: não.</div>
                         </div>
-                        <div class="subpanel hide" id="specialScheduleWrap" style="margin-top:10px">
-                            <strong style="color:#ffb020">Ajustes para sábado, domingo e feriados</strong>
-                            <p class="help" style="margin-top:6px">Use estas opções só quando o horário for diferente do seu horário padrão.</p>
-                            <div class="grid-3" style="margin-top:10px">
-                                <div class="field hide" id="saturdayModeWrap">
-                                    <label>Sábado</label>
-                                    <select name="saturday_mode" id="saturdayMode">
-                                        <option value="same">Mesmo horário dos dias marcados</option>
+                        <div class="help">Informe os dias em que você atende e o horário em que normalmente trabalha.</div>
+                        <div class="special-day-panel">
+                            <strong style="color:#ffb020;font-size:14px">Ajustes de sábado, domingo e feriado</strong>
+                            <p class="help" style="margin-top:6px">Você pode manter o horário padrão, atender em horário diferente ou indicar que não atende nessas situações.</p>
+                            <div class="special-day-grid" style="margin-top:10px">
+                                <div class="field">
+                                    <label style="margin-bottom:4px">Sábado</label>
+                                    <select name="saturday_service_mode" id="saturdayServiceMode">
+                                        <option value="same">Mesmo horário padrão</option>
                                         <option value="custom">Atendo em horário diferente</option>
-                                        <option value="off">Não atendo</option>
+                                        <option value="no">Não atendo</option>
                                     </select>
                                 </div>
-                                <div class="field hide" id="sundayModeWrap">
-                                    <label>Domingo</label>
-                                    <select name="sunday_mode" id="sundayMode">
-                                        <option value="same">Mesmo horário dos dias marcados</option>
+                                <div class="field">
+                                    <label style="margin-bottom:4px">Domingo</label>
+                                    <select name="sunday_service_mode" id="sundayServiceMode">
+                                        <option value="no">Não atendo</option>
+                                        <option value="same">Mesmo horário padrão</option>
                                         <option value="custom">Atendo em horário diferente</option>
-                                        <option value="off">Não atendo</option>
                                     </select>
                                 </div>
-                                <div class="field" id="holidayModeWrap">
-                                    <label>Atende aos feriados?</label>
-                                    <select name="holiday_mode" id="holidayMode">
-                                        <option value="off">Não atendo</option>
-                                        <option value="same">Mesmo horário dos dias marcados</option>
+                                <div class="field">
+                                    <label style="margin-bottom:4px">Feriado</label>
+                                    <select name="holiday_service_mode" id="holidayServiceMode">
+                                        <option value="no">Não atendo</option>
+                                        <option value="same">Mesmo horário padrão</option>
                                         <option value="custom">Atendo em horário diferente</option>
                                     </select>
                                 </div>
                             </div>
-                            <div class="grid-2 hide" id="saturdayCustomWrap" style="margin-top:10px">
-                                <div class="field"><label>Início no sábado</label><select name="saturday_start" id="saturdayStartSelect"></select></div>
-                                <div class="field"><label>Encerramento no sábado</label><select name="saturday_end" id="saturdayEndSelect"></select></div>
-                            </div>
-                            <div class="grid-2 hide" id="sundayCustomWrap" style="margin-top:10px">
-                                <div class="field"><label>Início no domingo</label><select name="sunday_start" id="sundayStartSelect"></select></div>
-                                <div class="field"><label>Encerramento no domingo</label><select name="sunday_end" id="sundayEndSelect"></select></div>
-                            </div>
-                            <div class="grid-2 hide" id="holidayCustomWrap" style="margin-top:10px">
-                                <div class="field"><label>Início no feriado</label><select name="holiday_start" id="holidayStartSelect"></select></div>
-                                <div class="field"><label>Encerramento no feriado</label><select name="holiday_end" id="holidayEndSelect"></select></div>
+                            <div class="grid-3" style="margin-top:12px">
+                                <div class="grid-2 hide" id="saturdayTimeWrap" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+                                    <div class="field"><label style="margin-bottom:4px">Início no sábado</label><select name="saturday_start" id="saturdayStartSelect"></select></div>
+                                    <div class="field"><label style="margin-bottom:4px">Encerramento no sábado</label><select name="saturday_end" id="saturdayEndSelect"></select></div>
+                                </div>
+                                <div class="grid-2 hide" id="sundayTimeWrap" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+                                    <div class="field"><label style="margin-bottom:4px">Início no domingo</label><select name="sunday_start" id="sundayStartSelect"></select></div>
+                                    <div class="field"><label style="margin-bottom:4px">Encerramento no domingo</label><select name="sunday_end" id="sundayEndSelect"></select></div>
+                                </div>
+                                <div class="grid-2 hide" id="holidayTimeWrap" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+                                    <div class="field"><label style="margin-bottom:4px">Início no feriado</label><select name="holiday_start" id="holidayStartSelect"></select></div>
+                                    <div class="field"><label style="margin-bottom:4px">Encerramento no feriado</label><select name="holiday_end" id="holidayEndSelect"></select></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="help">Informe os dias em que você atende e o horário em que normalmente trabalha.</div>
                     </div>
                     <div class="actions">
                         <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="openCancelModal()">Cancelar cadastro</button></div>
@@ -442,214 +453,259 @@
     </div>
 <div id="inputErrorModal" class="input-error-modal"><div class="box"><h3>Ajuste necessário</h3><p id="inputErrorText" style="color:#d0d0d7;line-height:1.55"></p><div class="actions" style="margin-top:18px;justify-content:flex-end"><button type="button" class="btn btn-primary" onclick="closeInputErrorModal()">Entendi</button></div></div></div>
 <script>
-// FIX v11.3.7 cadastro profissional: cancelamento real, validação por etapa e profissão "Outros" por posição
 let currentStep = Number('<%= startStep || 1 %>') || 1;
 let activeOtherProfessionSlot = null;
 const PLAN_CONFIG = {
-    basic: { slots: 1, monthly: 30, label: 'Plano Básico' },
-    professional: { slots: 2, monthly: 50, label: 'Plano Profissional' },
-    premium: { slots: 3, monthly: 70, label: 'Plano Premium' }
+  basic: { slots: 1, monthly: 30, label: 'Plano Básico' },
+  professional: { slots: 2, monthly: 50, label: 'Plano Profissional' },
+  premium: { slots: 3, monthly: 70, label: 'Plano Premium' }
 };
-function monthDiscount(months){ if(months >= 12) return 20; if(months >= 6) return 12; if(months >= 3) return 6; return 0; }
+function monthDiscount(months){ if(months>=12) return 20; if(months>=6) return 12; if(months>=3) return 6; return 0; }
 function fmtMoney(v){ return `R$ ${Number(v || 0).toFixed(2).replace('.', ',')}`; }
-function updateStepUI(){
-    document.querySelectorAll('.step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) === currentStep));
-    document.querySelectorAll('[data-step-pill]').forEach(el => el.classList.toggle('active', Number(el.dataset.stepPill) === currentStep));
-    const input = document.getElementById('currentStepInput'); if (input) input.value = currentStep;
-}
-function getCurrentPlanConfig(){ const checked = document.querySelector('input[name="plan_tier"]:checked'); return PLAN_CONFIG[checked ? checked.value : 'basic']; }
-function updatePlanUI(){
-    const checked = document.querySelector('input[name="plan_tier"]:checked');
-    const tier = checked ? checked.value : 'basic';
-    const cfg = PLAN_CONFIG[tier];
-    document.querySelectorAll('.plan-card').forEach(card => card.classList.toggle('active', card.dataset.planCard === tier));
-    const months = Number(document.getElementById('planMonths').value || 1);
-    const discount = monthDiscount(months);
-    const total = cfg.monthly * months * (1 - discount / 100);
-    document.getElementById('planSummary').innerHTML = `Plano: ${cfg.label}<br>Mensalidade base: ${fmtMoney(cfg.monthly)}<br>Desconto: ${discount}%`;
-    document.getElementById('planTotal').textContent = fmtMoney(total);
-    document.querySelectorAll('.additional-slot-2').forEach(el => el.classList.toggle('hide', cfg.slots < 2));
-    document.querySelectorAll('.additional-slot-3').forEach(el => el.classList.toggle('hide', cfg.slots < 3));
-    if (cfg.slots < 2) clearProfessionSlot(2);
-    if (cfg.slots < 3) clearProfessionSlot(3);
-}
-function clearProfessionSlot(slot){
-    const select = document.querySelector(`select[data-slot="${slot}"]`);
-    const hidden = document.getElementById(`newProfessionRequest${slot}`);
-    const display = document.getElementById(`customProfessionDisplay${slot}`);
-    const search = slot === 1 ? document.getElementById('primaryCategorySearch') : slot === 2 ? document.getElementById('additionalCategorySearch') : document.getElementById('additionalCategorySearch2');
-    if (select) select.value = '';
-    if (hidden) hidden.value = '';
-    if (display) { display.textContent=''; display.classList.add('hide'); }
-    if (search) search.value = '';
-}
-function validateCurrentStep(){
-    if (currentStep === 1) {
-        return Boolean(document.querySelector('input[name="plan_tier"]:checked'));
-    }
-    if (currentStep === 2) {
-        const cfg = getCurrentPlanConfig();
-        const used = new Set();
-        for (let slot = 1; slot <= cfg.slots; slot++) {
-            const select = document.querySelector(`select[data-slot="${slot}"]`);
-            const hidden = document.getElementById(`newProfessionRequest${slot}`);
-            if (!select || !select.value) { showInputError(`Selecione a Profissão ${slot} para continuar.`); select?.focus(); return false; }
-            const selectedText = select.options[select.selectedIndex]?.textContent?.trim().toLowerCase() || '';
-            if (used.has(select.value) && !['outros','outro'].includes(selectedText)) { showInputError('Não repita a mesma profissão em mais de uma posição.'); select.focus(); return false; }
-            used.add(select.value);
-            if (['outros','outro'].includes(selectedText) && !(hidden?.value || '').trim()) { showInputError(`Escreva a nova profissão da posição ${slot} antes de continuar.`); openOtherProfessionModal(slot); return false; }
-        }
-    }
-    if (currentStep === 3) {
-        const phone = (document.querySelector('[name="phone_number"]')?.value || '').replace(/\D/g,'');
-        const cep = (document.getElementById('onboardingCep')?.value || '').replace(/\D/g,'');
-        const city = (document.getElementById('onboardingCity')?.value || '').trim();
-        const state = (document.getElementById('onboardingState')?.value || '').trim();
-        const description = (document.querySelector('textarea[name="description"]')?.value || '').trim();
-        const serviceToggle = document.getElementById('serviceFeeToggle');
-        const fee = (document.getElementById('serviceFeeAmount')?.value || '').trim();
-        const is24 = !!document.getElementById('available24h')?.checked;
-        const start = document.getElementById('availabilityStartSelect')?.value || '';
-        const end = document.getElementById('availabilityEndSelect')?.value || '';
-        const checkedDays = Array.from(document.querySelectorAll('input[name="working_days"]:checked')).map(el=>el.value);
-        const days = checkedDays.length;
-        if (phone.length < 10) { showInputError('Informe um WhatsApp válido com DDD.'); return false; }
-        if (cep && cep.length !== 8) { showInputError('Informe um CEP válido com 8 números ou deixe o campo vazio e preencha cidade/estado.'); return false; }
-        if (!city || city.length < 2 || !state || state.length < 2) { showInputError('Preencha cidade e estado corretamente.'); return false; }
-        if (description.length < 20) { showInputError('Descreva um pouco melhor o seu serviço antes de continuar.'); return false; }
-        if (serviceToggle?.checked && !fee) { showInputError('Informe o valor da taxa de visita ou desmarque a cobrança.'); return false; }
-        if (!is24 && days === 0) { showInputError('Selecione pelo menos um dia da semana em que você atende.'); return false; }
-        if (!is24 && (!start || !end)) { showInputError('Selecione o horário em que você começa e para de trabalhar.'); return false; }
-        if (is24) {
-            const allDays = !!document.getElementById('available24hAllDays')?.checked;
-            const days24 = document.querySelectorAll('input[name="working_days_24h"]:checked').length;
-            if (!allDays && days24 === 0 && !document.getElementById('available24hSundays')?.checked && !document.getElementById('available24hHolidays')?.checked) { showInputError('Marque pelo menos um dia ou opção de atendimento 24h.'); return false; }
-        } else {
-            const saturdayChecked = checkedDays.includes('Sáb');
-            const sundayChecked = checkedDays.includes('Dom');
-            const saturdayMode = document.getElementById('saturdayMode')?.value || 'same';
-            const sundayMode = document.getElementById('sundayMode')?.value || 'same';
-            const holidayMode = document.getElementById('holidayMode')?.value || 'off';
-            if (saturdayChecked && saturdayMode === 'custom') {
-                const ss = document.getElementById('saturdayStartSelect')?.value || ''; const se = document.getElementById('saturdayEndSelect')?.value || '';
-                if (!ss || !se) { showInputError('Defina o horário de sábado ou troque para mesmo horário padrão.'); return false; }
-            }
-            if (sundayChecked && sundayMode === 'custom') {
-                const ss = document.getElementById('sundayStartSelect')?.value || ''; const se = document.getElementById('sundayEndSelect')?.value || '';
-                if (!ss || !se) { showInputError('Defina o horário de domingo ou troque para mesmo horário padrão.'); return false; }
-            }
-            if (holidayMode === 'custom') {
-                const hs = document.getElementById('holidayStartSelect')?.value || ''; const he = document.getElementById('holidayEndSelect')?.value || '';
-                if (!hs || !he) { showInputError('Defina o horário de feriado ou escolha outra opção.'); return false; }
-            }
-        }
-    }
-    return true;
-}
 function showInputError(message){ const modal=document.getElementById('inputErrorModal'); const text=document.getElementById('inputErrorText'); if(text) text.textContent=message; if(modal) modal.style.display='flex'; }
 function closeInputErrorModal(){ const modal=document.getElementById('inputErrorModal'); if(modal) modal.style.display='none'; }
 function setLoadingState(btn, text){ if (!btn) return; btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.textContent = text; }
-function nextStep(btn){ if(!validateCurrentStep()) return; setLoadingState(btn, 'Continuando...'); setTimeout(()=>{ if(currentStep < 4){ currentStep++; updateStepUI(); window.scrollTo({top:0, behavior:'smooth'});} btn.disabled=false; btn.textContent=btn.dataset.originalText || 'Continuar'; }, 250); }
-function prevStep(){ if(currentStep > 1){ currentStep--; updateStepUI(); window.scrollTo({top:0, behavior:'smooth'}); return; } openCancelModal(); }
-function openCancelModal(){ const modal=document.getElementById('cancelModal'); const stepField=document.getElementById('cancelCurrentStep'); if(stepField){ stepField.value = currentStep; } if(modal){ modal.classList.remove('hide'); modal.style.display='flex'; } }
-function closeCancelModal(){ const modal=document.getElementById('cancelModal'); if(modal){ modal.classList.add('hide'); modal.style.display='none'; } }
-function openOtherProfessionModal(slot){ activeOtherProfessionSlot = Number(slot); const modal=document.getElementById('otherProfessionModal'); const input=document.getElementById('otherProfessionModalInput'); const label=document.getElementById('otherProfessionModalLabel'); const hidden=document.getElementById(`newProfessionRequest${slot}`); if(label) label.textContent = `Digite a nova profissão da posição ${slot}`; if(input) input.value = hidden?.value || ''; if(modal){ modal.classList.remove('hide'); modal.style.display='flex'; } }
-function closeOtherProfessionModal(){ const modal=document.getElementById('otherProfessionModal'); if(modal){ modal.classList.add('hide'); modal.style.display='none'; } }
-function saveOtherProfession(){ const slot = activeOtherProfessionSlot; const input=document.getElementById('otherProfessionModalInput'); const hidden=document.getElementById(`newProfessionRequest${slot}`); const display=document.getElementById(`customProfessionDisplay${slot}`); const value=(input?.value || '').trim(); if(!slot || !value){ showInputError('Digite o nome da profissão para continuar.'); return; } if(hidden) hidden.value = value; if(display){ display.innerHTML = `Nova profissão sugerida: <strong style="color:#ffd58a">${value}</strong> <button type="button" class="btn btn-ghost" style="padding:6px 10px;margin-left:8px" onclick="openOtherProfessionModal(${slot})">Editar</button>`; display.classList.remove('hide'); } closeOtherProfessionModal(); }
-function formatPhone(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,11); if(digits.length<=10){ return digits.replace(/(\d{2})(\d{0,4})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); } return digits.replace(/(\d{2})(\d{0,5})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); }
-function formatCep(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,8); return digits.replace(/(\d{5})(\d{0,3})/, (_,a,b)=> b ? `${a}-${b}` : a); }
-async function buscarCep(cep){ const raw=String(cep||'').replace(/\D/g,''); if(raw.length!==8) return; try{ const res=await fetch(`/api/cep/${raw}`); if(!res.ok) return; const data=await res.json(); const city=document.getElementById('onboardingCity'); const state=document.getElementById('onboardingState'); const cepField=document.getElementById('onboardingCep'); if(city) city.value=data.city||''; if(state) state.value=data.state||''; if(cepField) cepField.value=formatCep(data.cep||raw); }catch(e){} }
-function normalizeProfessionText(value){ return String(value||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim(); }
-function professionSubsequenceMatch(text, query){ if(!query) return true; let i=0; for(const ch of text){ if(ch===query[i]) i++; if(i===query.length) return true; } return false; }
-function setupSearchableSelect(selectId, searchId){
-    const select=document.getElementById(selectId); const search=document.getElementById(searchId); if(!select||!search) return;
-    const master=Array.from(select.options).map(opt=>({value:opt.value,text:opt.textContent,norm:normalizeProfessionText(opt.textContent)}));
-    const placeholder=master[0];
-    function score(opt,q){ if(!q) return 999; if(opt.norm===q) return 0; if(opt.norm.startsWith(q)) return 1; if(opt.norm.includes(q)) return 2; if(professionSubsequenceMatch(opt.norm,q)) return 3; return 999; }
-    function render(){
-        const q=normalizeProfessionText(search.value); const previous=select.value;
-        let filtered=master.slice(1).filter(opt=>!q || score(opt,q) < 999).sort((a,b)=>score(a,q)-score(b,q) || a.text.localeCompare(b.text,'pt-BR'));
-        if(q && !filtered.length){ const other=master.find(opt=>['outros','outro'].includes(opt.norm)); if(other) filtered=[other]; }
-        select.innerHTML=[placeholder,...filtered].map(opt=>`<option value="${opt.value}">${opt.text}</option>`).join('');
-        if(filtered.find(opt=>opt.value===previous)) select.value=previous;
-        else if(q){ const best=filtered[0]; if(best && !['outros','outro'].includes(best.norm) && score(best,q) <= 3) select.value=best.value; else select.value=''; }
-        else select.value=previous || '';
-        handleProfessionChange(select,{userTriggered:false});
-    }
-    search.addEventListener('input', render);
-    select.addEventListener('change', ()=>handleProfessionChange(select,{userTriggered:true}));
-    if(search.value.trim()) render();
+function updateStepUI(){
+  document.querySelectorAll('.step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) === currentStep));
+  document.querySelectorAll('[data-step-pill]').forEach(el => el.classList.toggle('active', Number(el.dataset.stepPill) === currentStep));
+  const input = document.getElementById('currentStepInput'); if (input) input.value = currentStep;
 }
-function handleProfessionChange(select, options={}){ const slot=Number(select.dataset.slot); const selectedText=select.options[select.selectedIndex]?.textContent?.trim().toLowerCase() || ''; const hidden=document.getElementById(`newProfessionRequest${slot}`); const display=document.getElementById(`customProfessionDisplay${slot}`); const isOther=['outros','outro'].includes(selectedText); if(isOther){ if(hidden?.value){ if(display){ display.innerHTML=`Nova profissão sugerida: <strong style="color:#ffd58a">${hidden.value}</strong> <button type="button" class="btn btn-ghost" style="padding:6px 10px;margin-left:8px" onclick="openOtherProfessionModal(${slot})">Editar</button>`; display.classList.remove('hide'); } } else if(options.userTriggered){ openOtherProfessionModal(slot); } return; } if(hidden) hidden.value=''; if(display){ display.textContent=''; display.classList.add('hide'); } }
-function setupAvatarPreview(){ const input=document.getElementById('avatarInput'); const preview=document.getElementById('avatarPreview'); if(!input||!preview) return; input.addEventListener('change', ()=>{ const file=input.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=e=>preview.innerHTML=`<img src="${e.target.result}" alt="Avatar">`; reader.readAsDataURL(file); }); }
-function setupPortfolioPreview(){ const input=document.getElementById('portfolioInput'); const slotInput=document.getElementById('portfolioSlotInput'); const grid=document.getElementById('portfolioPreviewGrid'); const form=document.getElementById('onboardingForm'); if(!input||!slotInput||!grid||!form) return; const cards=Array.from(grid.querySelectorAll('.preview-card')); const selectedFiles=[null,null,null]; let activeSlotIndex=0; function renderCard(index,fileOrUrl){ const card=cards[index]; if(!card) return; if(!fileOrUrl){ card.classList.add('empty-slot'); card.innerHTML='<span style="color:#d9dde5">+ adicionar imagem</span>'; return; } if(typeof fileOrUrl==='string'){ card.classList.remove('empty-slot'); card.innerHTML=`<div style="width:100%"><img src="${fileOrUrl}" alt="Prévia"><div style="padding:8px 10px;font-size:12px;color:#ffd58a;text-align:center">Alterar imagem</div></div>`; return; } const reader=new FileReader(); reader.onload=e=>{ card.classList.remove('empty-slot'); card.innerHTML=`<div style="width:100%"><img src="${e.target.result}" alt="Prévia"><div style="padding:8px 10px;font-size:12px;color:#ffd58a;text-align:center">Alterar imagem</div></div>`; }; reader.readAsDataURL(fileOrUrl); } cards.forEach((card,index)=>{ const existingImg=card.querySelector('img'); if(existingImg) renderCard(index, existingImg.getAttribute('src')); else renderCard(index, null); card.addEventListener('click',()=>{ activeSlotIndex=index; slotInput.click(); }); }); slotInput.addEventListener('change',()=>{ const file=slotInput.files?.[0]; if(!file) return; selectedFiles[activeSlotIndex]=file; renderCard(activeSlotIndex,file); slotInput.value=''; }); input.addEventListener('change',()=>{ const files=Array.from(input.files||[]).slice(0,3); files.forEach((file,index)=>{ selectedFiles[index]=file; renderCard(index,file); }); input.value=''; }); form.addEventListener('submit',()=>{ const dt=new DataTransfer(); selectedFiles.filter(Boolean).forEach(file=>dt.items.add(file)); input.files=dt.files; }); }
-function fillTimeSelect(id){ const el=document.getElementById(id); if(!el) return; const opts=['']; for(let h=0;h<24;h++){ for(let m=0;m<60;m+=30){ opts.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`); }} el.innerHTML=opts.map(v=>`<option value="${v}">${v||'Selecione um horário'}</option>`).join(''); }
-document.addEventListener('DOMContentLoaded', ()=>{ updateStepUI(); updatePlanUI(); setupAvatarPreview(); setupPortfolioPreview();
-    const onboardingForm = document.getElementById('onboardingForm');
-    const finishProfileBtn = document.getElementById('finishProfileBtn');
-    document.querySelectorAll('.plan-card').forEach(card=>card.addEventListener('click',()=>{ const input=card.querySelector('input[name="plan_tier"]'); if(input){ input.checked=true; updatePlanUI(); }}));
-    document.querySelectorAll('input[name="plan_tier"]').forEach(el=>el.addEventListener('change', updatePlanUI));
-    document.getElementById('planMonths')?.addEventListener('change', updatePlanUI);
-    setupSearchableSelect('primaryCategorySelect','primaryCategorySearch'); setupSearchableSelect('additionalCategorySelect1','additionalCategorySearch'); setupSearchableSelect('additionalCategorySelect2','additionalCategorySearch2');
-    document.querySelectorAll('select[data-category-select]').forEach(el=>{ el.addEventListener('change',()=>handleProfessionChange(el)); handleProfessionChange(el); });
-    document.getElementById('serviceFeeAmount')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^\d,]/g,''); });
-    const onboardingPhone=document.querySelector('input[name="phone_number"]'); if(onboardingPhone?.value) onboardingPhone.value=formatPhone(onboardingPhone.value); onboardingPhone?.addEventListener('input',e=>{ e.target.value=formatPhone(e.target.value); });
-    const onboardingCep=document.getElementById('onboardingCep'); if(onboardingCep?.value) onboardingCep.value=formatCep(onboardingCep.value); onboardingCep?.addEventListener('input',e=>{ e.target.value=formatCep(e.target.value); });
-    document.getElementById('onboardingCity')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g,''); });
-    document.getElementById('onboardingState')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ]/g,'').toUpperCase().slice(0,2); });
-    document.querySelectorAll('input, textarea, select').forEach(field=>field.addEventListener('keydown',e=>{ if(e.key==='Enter' && field.tagName!=='TEXTAREA') e.preventDefault(); }));
-    fillTimeSelect('availabilityStartSelect'); fillTimeSelect('availabilityEndSelect');
-    const openingSelect=document.getElementById('availabilityStartSelect');
-    const closingSelect=document.getElementById('availabilityEndSelect');
-    const saturdayMode=document.getElementById('saturdayMode');
-    const sundayMode=document.getElementById('sundayMode');
-    const holidayMode=document.getElementById('holidayMode');
-    const saturdayCustomWrap=document.getElementById('saturdayCustomWrap');
-    const sundayCustomWrap=document.getElementById('sundayCustomWrap');
-    const holidayCustomWrap=document.getElementById('holidayCustomWrap');
-    const saturdayModeWrap=document.getElementById('saturdayModeWrap');
-    const sundayModeWrap=document.getElementById('sundayModeWrap');
-    const specialScheduleWrap=document.getElementById('specialScheduleWrap');
-    const available24h=document.getElementById('available24h');
-    const available24hAllDays=document.getElementById('available24hAllDays');
-    const available24hHolidays=document.getElementById('available24hHolidays');
-    const available24hSundays=document.getElementById('available24hSundays');
-    const availability24hWrap=document.getElementById('availability24hNoteWrap');
-    const availability24hPreview=document.getElementById('availability24hPreview');
-    const availability24hNote=document.getElementById('availability24hNote');
-    const workingDayChecks=Array.from(document.querySelectorAll('input[name="working_days"]'));
-    const working24Checks=Array.from(document.querySelectorAll('input[name="working_days_24h"]'));
-    function syncSelectPair(startId,endId){ const startEl=document.getElementById(startId); const endEl=document.getElementById(endId); if(!startEl||!endEl) return; const options=Array.from(startEl.options).map(o=>o.value).filter(Boolean); const start=startEl.value; const current=endEl.value; const filtered=options.filter(v=>!start || v>start); endEl.innerHTML=['<option value="">Selecione um horário</option>'].concat(filtered.map(v=>`<option value="${v}">${v}</option>`)).join(''); if(filtered.includes(current)) endEl.value=current; else endEl.value=''; endEl.disabled=!start; }
-    function isDayChecked(label){ return !!workingDayChecks.find(el=>el.value===label && el.checked); }
-    function syncSpecialSchedules(){
-        const is24=!!available24h?.checked;
-        if(specialScheduleWrap) specialScheduleWrap.classList.toggle('hide', is24);
-        if(saturdayModeWrap) saturdayModeWrap.classList.toggle('hide', is24 || !isDayChecked('Sáb'));
-        if(sundayModeWrap) sundayModeWrap.classList.toggle('hide', is24 || !isDayChecked('Dom'));
-        if(saturdayCustomWrap) saturdayCustomWrap.classList.toggle('hide', is24 || !isDayChecked('Sáb') || saturdayMode?.value!=='custom');
-        if(sundayCustomWrap) sundayCustomWrap.classList.toggle('hide', is24 || !isDayChecked('Dom') || sundayMode?.value!=='custom');
-        if(holidayCustomWrap) holidayCustomWrap.classList.toggle('hide', is24 || holidayMode?.value!=='custom');
+function getCurrentPlanConfig(){ const checked=document.querySelector('input[name="plan_tier"]:checked'); return PLAN_CONFIG[checked ? checked.value : 'basic']; }
+function clearProfessionSlot(slot){
+  const select=document.querySelector(`select[data-slot="${slot}"]`);
+  const hidden=document.getElementById(`newProfessionRequest${slot}`);
+  const display=document.getElementById(`customProfessionDisplay${slot}`);
+  const search=slot===1?document.getElementById('primaryCategorySearch'):slot===2?document.getElementById('additionalCategorySearch'):document.getElementById('additionalCategorySearch2');
+  if(select) select.value=''; if(hidden) hidden.value=''; if(display){display.textContent=''; display.classList.add('hide');} if(search) search.value='';
+}
+function updatePlanUI(){
+  const checked = document.querySelector('input[name="plan_tier"]:checked');
+  const tier = checked ? checked.value : 'basic';
+  const cfg = PLAN_CONFIG[tier];
+  document.querySelectorAll('.plan-card').forEach(card => card.classList.toggle('active', card.dataset.planCard === tier));
+  const months = Number(document.getElementById('planMonths').value || 1);
+  const discount = monthDiscount(months);
+  const total = cfg.monthly * months * (1 - discount / 100);
+  document.getElementById('planSummary').innerHTML = `Plano: ${cfg.label}<br>Mensalidade base: ${fmtMoney(cfg.monthly)}<br>Desconto: ${discount}%`;
+  document.getElementById('planTotal').textContent = fmtMoney(total);
+  document.querySelectorAll('.additional-slot-2').forEach(el => el.classList.toggle('hide', cfg.slots < 2));
+  document.querySelectorAll('.additional-slot-3').forEach(el => el.classList.toggle('hide', cfg.slots < 3));
+  if (cfg.slots < 2) clearProfessionSlot(2); if (cfg.slots < 3) clearProfessionSlot(3);
+}
+function openCancelModal(){ const modal=document.getElementById('cancelModal'); const stepField=document.getElementById('cancelCurrentStep'); if(stepField) stepField.value=currentStep; if(modal) modal.style.display='flex'; }
+function closeCancelModal(){ const modal=document.getElementById('cancelModal'); if(modal) modal.style.display='none'; }
+function prevStep(){ if(currentStep > 1){ currentStep--; updateStepUI(); window.scrollTo({top:0,behavior:'smooth'}); } else { openCancelModal(); } }
+function nextStep(btn){ if(!validateCurrentStep()) return; setLoadingState(btn,'Continuando...'); setTimeout(()=>{ if(currentStep<4){ currentStep++; updateStepUI(); window.scrollTo({top:0,behavior:'smooth'});} btn.disabled=false; btn.textContent=btn.dataset.originalText || 'Continuar'; },250); }
+function openOtherProfessionModal(slot){
+  activeOtherProfessionSlot = Number(slot);
+  const modal=document.getElementById('otherProfessionModal');
+  const input=document.getElementById('otherProfessionModalInput');
+  const label=document.getElementById('otherProfessionModalLabel');
+  const hidden=document.getElementById(`newProfessionRequest${slot}`);
+  if(label) label.textContent=`Digite a nova profissão da posição ${slot}`;
+  if(input) input.value=hidden?.value || '';
+  if(modal) modal.style.display='flex';
+}
+function closeOtherProfessionModal(){ const modal=document.getElementById('otherProfessionModal'); if(modal) modal.style.display='none'; }
+function saveOtherProfession(){
+  const slot=activeOtherProfessionSlot;
+  const input=document.getElementById('otherProfessionModalInput');
+  const hidden=document.getElementById(`newProfessionRequest${slot}`);
+  const display=document.getElementById(`customProfessionDisplay${slot}`);
+  const select=document.querySelector(`select[data-slot="${slot}"]`);
+  const value=(input?.value||'').trim();
+  if(!slot || value.length < 3){ showInputError('Digite uma profissão válida com pelo menos 3 letras.'); return; }
+  if(hidden) hidden.value=value;
+  if(display){ display.innerHTML=`Nova profissão sugerida: <strong style="color:#ffd58a">${value}</strong> <button type="button" class="btn btn-ghost" style="padding:6px 10px;margin-left:8px" onclick="openOtherProfessionModal(${slot})">Editar</button>`; display.classList.remove('hide'); }
+  if(select){
+    const otherOption=[...select.options].find(opt=>['outros','outro'].includes(String(opt.textContent||'').toLowerCase().trim()));
+    if(otherOption) select.value=otherOption.value;
+    select.dataset.userTriggered='0';
+  }
+  closeOtherProfessionModal();
+}
+function handleProfessionChange(select){
+  const slot=Number(select.dataset.slot);
+  const selectedText=select.options[select.selectedIndex]?.textContent?.trim().toLowerCase() || '';
+  const hidden=document.getElementById(`newProfessionRequest${slot}`);
+  const display=document.getElementById(`customProfessionDisplay${slot}`);
+  if(['outros','outro'].includes(selectedText)){
+    if(hidden?.value){ if(display){ display.innerHTML=`Nova profissão sugerida: <strong style="color:#ffd58a">${hidden.value}</strong> <button type="button" class="btn btn-ghost" style="padding:6px 10px;margin-left:8px" onclick="openOtherProfessionModal(${slot})">Editar</button>`; display.classList.remove('hide'); } }
+    else if(select.dataset.userTriggered === '1'){ openOtherProfessionModal(slot); }
+  } else {
+    if(hidden) hidden.value='';
+    if(display){ display.textContent=''; display.classList.add('hide'); }
+  }
+  select.dataset.userTriggered='0';
+}
+function formatPhone(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,11); if(digits.length<=10) return digits.replace(/(\d{2})(\d{0,4})(\d{0,4})/,(_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); return digits.replace(/(\d{2})(\d{0,5})(\d{0,4})/,(_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); }
+function formatCep(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,8); return digits.replace(/(\d{5})(\d{0,3})/,(_,a,b)=> b ? `${a}-${b}` : a); }
+async function buscarCep(cep){ const raw=String(cep||'').replace(/\D/g,''); if(raw.length!==8) return; try{ const res=await fetch(`/api/cep/${raw}`); if(!res.ok) return; const data=await res.json(); const city=document.getElementById('onboardingCity'); const state=document.getElementById('onboardingState'); const cepField=document.getElementById('onboardingCep'); if(city && (!city.value || city.dataset.autoFill==='1')){ city.value=data.city||''; city.dataset.autoFill='1'; } if(state && (!state.value || state.dataset.autoFill==='1')){ state.value=data.state||''; state.dataset.autoFill='1'; } if(cepField) cepField.value=formatCep(data.cep||raw); }catch(e){ console.warn('Erro ao buscar CEP', e);} }
+function setupSearchableSelect(selectId, searchId, suggestionId){
+  const select=document.getElementById(selectId);
+  const search=document.getElementById(searchId);
+  const suggestionBox=document.getElementById(suggestionId);
+  if(!select || !search || !suggestionBox) return;
+  const master=[...select.options].map(opt=>({value:opt.value,text:opt.textContent.trim()}));
+  function closeBox(){ suggestionBox.classList.remove('show'); }
+  function openBox(){ suggestionBox.classList.add('show'); }
+  function render(){
+    const q=search.value.toLowerCase().trim();
+    suggestionBox.innerHTML='';
+    if(!q){ closeBox(); return; }
+    const filtered=master.slice(1).filter(opt=>opt.text.toLowerCase().includes(q));
+    if(filtered.length){
+      filtered.forEach(opt=>{
+        const li=document.createElement('li');
+        li.textContent=opt.text;
+        li.addEventListener('mousedown', (e)=>{ e.preventDefault(); select.value=opt.value; search.value=opt.text; handleProfessionChange(select); closeBox(); });
+        suggestionBox.appendChild(li);
+      });
+    } else {
+      const li=document.createElement('li');
+      li.className='empty';
+      li.innerHTML=`Nenhum resultado para <strong>${search.value}</strong>. Clique aqui para sugerir uma nova profissão.`;
+      li.addEventListener('mousedown', (e)=>{ e.preventDefault(); const other=[...select.options].find(opt=>['outros','outro'].includes(String(opt.textContent||'').toLowerCase().trim())); if(other){ select.value=other.value; select.dataset.userTriggered='1'; handleProfessionChange(select); } closeBox(); });
+      suggestionBox.appendChild(li);
     }
-    function syncClosingOptions(){ if(!openingSelect || !closingSelect) return; const start=openingSelect.value; const options=Array.from(openingSelect.options).map(o=>o.value).filter(Boolean); const filtered=options.filter(v=>!start || v>start); const current=closingSelect.value; closingSelect.innerHTML=['<option value="">Selecione um horário</option>'].concat(filtered.map(v=>`<option value="${v}">${v}</option>`)).join(''); if(filtered.includes(current)) closingSelect.value=current; else closingSelect.value=''; closingSelect.disabled=!start; }
-    function sync24h(){ const is24=!!available24h?.checked; if(openingSelect){ openingSelect.disabled=is24; if(is24) openingSelect.value=''; } if(closingSelect){ closingSelect.disabled=is24 || !openingSelect?.value; if(is24) closingSelect.value=''; } if(is24){ workingDayChecks.forEach(el=>{ el.checked=false; }); } if(availability24hWrap) availability24hWrap.classList.toggle('hide', !is24); const allDays=!!available24hAllDays?.checked; working24Checks.forEach(el=>{ el.disabled=!is24 || allDays; if(allDays){ el.checked=true; } else if(!is24){ el.checked=false; }}); if(!is24 && available24hAllDays) available24hAllDays.checked=false; if(!is24 && available24hHolidays) available24hHolidays.checked=false; if(!is24 && available24hSundays) available24hSundays.checked=false; const selected24=working24Checks.filter(el=>el.checked).map(el=>el.value); const extras=[]; if(available24hSundays?.checked && !selected24.includes('Dom')) extras.push('domingos'); if(available24hHolidays?.checked) extras.push('feriados'); const note = is24 ? (allDays ? `Atendimento 24h todos os dias${available24hHolidays?.checked ? ', incluindo feriados' : ''}` : `Atendimento 24h em ${selected24.join(', ')}${extras.length ? (selected24.length ? ' • ' : '') + extras.join(' • ') : ''}`.trim()) : ''; if(availability24hNote) availability24hNote.value = note; if(availability24hPreview) availability24hPreview.textContent = note || 'Exemplo: Atendimento 24h em Seg, Ter e Qua. Feriados: não.'; syncSpecialSchedules(); }
-    openingSelect?.addEventListener('change',()=>{ syncClosingOptions(); sync24h(); });
-    document.getElementById('saturdayStartSelect')?.addEventListener('change',()=>syncSelectPair('saturdayStartSelect','saturdayEndSelect'));
-    document.getElementById('sundayStartSelect')?.addEventListener('change',()=>syncSelectPair('sundayStartSelect','sundayEndSelect'));
-    document.getElementById('holidayStartSelect')?.addEventListener('change',()=>syncSelectPair('holidayStartSelect','holidayEndSelect'));
-    available24h?.addEventListener('change', sync24h); available24hAllDays?.addEventListener('change', sync24h); available24hHolidays?.addEventListener('change', sync24h); available24hSundays?.addEventListener('change', sync24h); working24Checks.forEach(el=>el.addEventListener('change', sync24h)); workingDayChecks.forEach(el=>el.addEventListener('change', syncSpecialSchedules)); saturdayMode?.addEventListener('change', syncSpecialSchedules); sundayMode?.addEventListener('change', syncSpecialSchedules); holidayMode?.addEventListener('change', syncSpecialSchedules);
-    syncClosingOptions(); syncSelectPair('saturdayStartSelect','saturdayEndSelect'); syncSelectPair('sundayStartSelect','sundayEndSelect'); syncSelectPair('holidayStartSelect','holidayEndSelect'); sync24h(); syncSpecialSchedules(); });
-    available24h?.addEventListener('change', sync24h); available24hAllDays?.addEventListener('change', sync24h); available24hHolidays?.addEventListener('change', sync24h); available24hSundays?.addEventListener('change', sync24h); working24Checks.forEach(el=>el.addEventListener('change', sync24h));
-    syncClosingOptions(); sync24h();
-    document.getElementById('onboardingCep')?.addEventListener('blur',e=>buscarCep(e.target.value));
-    const serviceToggle=document.getElementById('serviceFeeToggle'); const serviceAmount=document.getElementById('serviceFeeAmount'); const savedPriceValue=`<%= profissional.price_value || '' %>`;
-    function syncServiceFee(){ const enabled=!!serviceToggle?.checked; if(serviceAmount){ serviceAmount.classList.toggle('hide', !enabled); if(!enabled) serviceAmount.value=''; } }
-    if(serviceAmount && savedPriceValue){ serviceAmount.value=savedPriceValue.replace('.', ','); } if(serviceToggle && serviceAmount && serviceAmount.value){ serviceToggle.checked=true; } serviceToggle?.addEventListener('change', syncServiceFee); syncServiceFee();
-    document.getElementById('mobileBackBtn')?.addEventListener('click', ()=>prevStep());
-    document.getElementById('mobileHomeBtn')?.addEventListener('click', ()=>openCancelModal());
-    document.getElementById('mobileMenuBtn')?.addEventListener('click', ()=>openCancelModal());
-    document.getElementById('mobileCurrentBtn')?.addEventListener('click', e=>{ e.preventDefault(); openCancelModal(); });
-    onboardingForm?.addEventListener('submit', (e)=>{ if(!validateCurrentStep()){ e.preventDefault(); return; } const phoneEl=document.querySelector('input[name="phone_number"]'); const cepEl=document.getElementById('onboardingCep'); if(phoneEl) phoneEl.value=String(phoneEl.value||'').replace(/\D/g,'').slice(0,11); if(cepEl) cepEl.value=String(cepEl.value||'').replace(/\D/g,'').slice(0,8); if(finishProfileBtn){ setLoadingState(finishProfileBtn, 'Finalizando...'); } });
-});</script>
+    openBox();
+  }
+  search.addEventListener('input', render);
+  search.addEventListener('focus', render);
+  document.addEventListener('click', (e)=>{ if(!suggestionBox.contains(e.target) && e.target!==search){ closeBox(); } });
+}
+function setupAvatarPreview(){ const input=document.getElementById('avatarInput'); const preview=document.getElementById('avatarPreview'); if(!input||!preview) return; input.addEventListener('change',()=>{ const file=input.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=e=>preview.innerHTML=`<img src="${e.target.result}" alt="Avatar">`; reader.readAsDataURL(file); }); }
+function setupPortfolioPreview(){ const input=document.getElementById('portfolioInput'); const slotInput=document.getElementById('portfolioSlotInput'); const grid=document.getElementById('portfolioPreviewGrid'); const form=document.getElementById('onboardingForm'); if(!input||!slotInput||!grid||!form) return; const cards=Array.from(grid.querySelectorAll('.preview-card')); const selectedFiles=[null,null,null]; let activeSlotIndex=0; function renderCard(index,fileOrUrl){ const card=cards[index]; if(!card) return; if(!fileOrUrl){ card.classList.add('empty-slot'); card.innerHTML='<span style="color:#d9dde5">+ adicionar imagem</span>'; return; } if(typeof fileOrUrl==='string'){ card.classList.remove('empty-slot'); card.innerHTML=`<div style="width:100%"><img src="${fileOrUrl}" alt="Prévia"><div style="padding:8px 10px;font-size:12px;color:#ffd58a;text-align:center">Alterar imagem</div></div>`; return; } const reader=new FileReader(); reader.onload=e=>{ card.classList.remove('empty-slot'); card.innerHTML=`<div style="width:100%"><img src="${e.target.result}" alt="Prévia"><div style="padding:8px 10px;font-size:12px;color:#ffd58a;text-align:center">Alterar imagem</div></div>`; }; reader.readAsDataURL(fileOrUrl); } cards.forEach((card,index)=>{ const existingImg=card.querySelector('img'); if(existingImg) renderCard(index, existingImg.getAttribute('src')); else renderCard(index,null); card.addEventListener('click',()=>{ activeSlotIndex=index; slotInput.click(); }); }); slotInput.addEventListener('change',()=>{ const file=slotInput.files?.[0]; if(!file) return; selectedFiles[activeSlotIndex]=file; renderCard(activeSlotIndex,file); slotInput.value=''; }); input.addEventListener('change',()=>{ const files=Array.from(input.files||[]).slice(0,3); files.forEach((file,index)=>{ selectedFiles[index]=file; renderCard(index,file); }); input.value=''; }); form.addEventListener('submit',()=>{ const dt=new DataTransfer(); selectedFiles.filter(Boolean).forEach(file=>dt.items.add(file)); input.files=dt.files; }); }
+function fillTimeSelect(id){ const el=document.getElementById(id); if(!el) return; const opts=['']; for(let h=0;h<24;h++){ for(let m=0;m<60;m+=30){ opts.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`); }} el.innerHTML=opts.map(v=>`<option value="${v}">${v || 'Selecione um horário'}</option>`).join(''); }
+function validateCurrentStep(){
+  if(currentStep===1){ return Boolean(document.querySelector('input[name="plan_tier"]:checked')); }
+  if(currentStep===2){
+    const cfg=getCurrentPlanConfig();
+    const usedTexts=new Set();
+    for(let slot=1; slot<=cfg.slots; slot++){
+      const select=document.querySelector(`select[data-slot="${slot}"]`);
+      const hidden=document.getElementById(`newProfessionRequest${slot}`);
+      if(!select || !select.value){ showInputError(`Selecione a profissão ${slot} para continuar.`); return false; }
+      const selectedText=select.options[select.selectedIndex]?.textContent?.trim().toLowerCase() || '';
+      const uniqueKey=['outros','outro'].includes(selectedText) ? `custom:${(hidden?.value||'').trim().toLowerCase()}` : String(select.value);
+      if(usedTexts.has(uniqueKey)){ showInputError('Não repita a mesma profissão em mais de uma posição.'); return false; }
+      usedTexts.add(uniqueKey);
+      if(['outros','outro'].includes(selectedText) && !(hidden?.value||'').trim()){ showInputError(`Escreva a nova profissão da posição ${slot} antes de continuar.`); openOtherProfessionModal(slot); return false; }
+    }
+  }
+  if(currentStep===3){
+    const phone=(document.querySelector('[name="phone_number"]')?.value || '').replace(/\D/g,'');
+    const cep=(document.getElementById('onboardingCep')?.value || '').replace(/\D/g,'');
+    const city=(document.getElementById('onboardingCity')?.value || '').trim();
+    const state=(document.getElementById('onboardingState')?.value || '').trim();
+    const description=(document.querySelector('textarea[name="description"]')?.value || '').trim();
+    const serviceToggle=document.getElementById('serviceFeeToggle');
+    const fee=(document.getElementById('serviceFeeAmount')?.value || '').trim();
+    const is24=!!document.getElementById('available24h')?.checked;
+    const start=document.getElementById('availabilityStartSelect')?.value || '';
+    const end=document.getElementById('availabilityEndSelect')?.value || '';
+    const days=[...document.querySelectorAll('input[name="working_days"]:checked')].map(el=>el.value);
+    if(phone.length < 10){ showInputError('Informe um WhatsApp válido com DDD.'); return false; }
+    if(cep && cep.length !== 8){ showInputError('Informe um CEP válido com 8 números ou deixe o campo vazio.'); return false; }
+    if(!city || city.length < 2 || !state || state.length < 2){ showInputError('Preencha cidade e estado corretamente.'); return false; }
+    if(description.length < 20){ showInputError('Descreva um pouco melhor o seu serviço antes de continuar.'); return false; }
+    if(serviceToggle?.checked && !fee){ showInputError('Informe o valor da taxa de visita ou desmarque a cobrança.'); return false; }
+    const saturdayMode=document.getElementById('saturdayServiceMode')?.value || 'same';
+    const sundayMode=document.getElementById('sundayServiceMode')?.value || 'no';
+    const holidayMode=document.getElementById('holidayServiceMode')?.value || 'no';
+    if(!is24 && days.length===0){ showInputError('Selecione pelo menos um dia da semana em que você atende.'); return false; }
+    if(!is24 && (!start || !end)){ showInputError('Selecione o horário em que você começa e para de trabalhar.'); return false; }
+    for (const [modeId,startId,endId,label] of [['saturdayServiceMode','saturdayStartSelect','saturdayEndSelect','sábado'],['sundayServiceMode','sundayStartSelect','sundayEndSelect','domingo'],['holidayServiceMode','holidayStartSelect','holidayEndSelect','feriado']]){
+      const mode=document.getElementById(modeId)?.value || 'no';
+      const st=document.getElementById(startId)?.value || '';
+      const en=document.getElementById(endId)?.value || '';
+      if(mode==='custom' && (!st || !en)){ showInputError(`Defina o horário diferenciado de ${label}.`); return false; }
+    }
+    if(is24){
+      const allDays=!!document.getElementById('available24hAllDays')?.checked;
+      const selected24=[...document.querySelectorAll('input[name="working_days_24h"]:checked')].map(el=>el.value);
+      const holidays24=!!document.getElementById('available24hHolidays')?.checked;
+      if(!allDays && !selected24.length && !holidays24){ showInputError('Marque os dias em que o atendimento 24h realmente acontece.'); return false; }
+    }
+  }
+  if(currentStep===4){
+    const avatarInput=document.getElementById('avatarInput'); const existingAvatar=document.querySelector('input[name="existing_avatar_url"]')?.value || ''; const hasAvatar=Boolean(existingAvatar || avatarInput?.files?.length); const cardsWithImage=Array.from(document.querySelectorAll('#portfolioPreviewGrid .preview-card img')).length; if(!hasAvatar){ showInputError('Adicione uma foto de perfil antes de finalizar.'); return false; } if(cardsWithImage < 3){ showInputError('Adicione 3 imagens iniciais ao portfólio antes de finalizar.'); return false; }
+  }
+  return true;
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  updateStepUI(); updatePlanUI(); setupAvatarPreview(); setupPortfolioPreview();
+  const onboardingForm=document.getElementById('onboardingForm');
+  const finishProfileBtn=document.getElementById('finishProfileBtn');
+  document.querySelectorAll('.plan-card').forEach(card=>card.addEventListener('click',()=>{ const input=card.querySelector('input[name="plan_tier"]'); if(input){ input.checked=true; updatePlanUI(); }}));
+  document.querySelectorAll('input[name="plan_tier"]').forEach(el=>el.addEventListener('change', updatePlanUI));
+  document.getElementById('planMonths')?.addEventListener('change', updatePlanUI);
+  setupSearchableSelect('primaryCategorySelect','primaryCategorySearch','primaryCategorySuggestions');
+  setupSearchableSelect('additionalCategorySelect1','additionalCategorySearch','additionalCategorySuggestions');
+  setupSearchableSelect('additionalCategorySelect2','additionalCategorySearch2','additionalCategorySuggestions2');
+  document.querySelectorAll('select[data-category-select]').forEach(el=>{ el.addEventListener('change',()=>{ el.dataset.userTriggered='1'; handleProfessionChange(el); }); handleProfessionChange(el); });
+  document.getElementById('serviceFeeAmount')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^\d,]/g,''); });
+  const onboardingPhone=document.querySelector('input[name="phone_number"]'); if(onboardingPhone?.value) onboardingPhone.value=formatPhone(onboardingPhone.value); onboardingPhone?.addEventListener('input',e=>{ e.target.value=formatPhone(e.target.value); });
+  const onboardingCep=document.getElementById('onboardingCep'); if(onboardingCep?.value) onboardingCep.value=formatCep(onboardingCep.value); onboardingCep?.addEventListener('input',e=>{ e.target.value=formatCep(e.target.value); });
+  document.getElementById('onboardingCity')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g,''); e.target.dataset.autoFill='0'; });
+  document.getElementById('onboardingState')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ]/g,'').toUpperCase().slice(0,2); e.target.dataset.autoFill='0'; });
+  document.querySelectorAll('input, textarea, select').forEach(field=>field.addEventListener('keydown',e=>{ if(e.key==='Enter' && field.tagName!=='TEXTAREA') e.preventDefault(); }));
+  ['availabilityStartSelect','availabilityEndSelect','holidayStartSelect','holidayEndSelect','saturdayStartSelect','saturdayEndSelect','sundayStartSelect','sundayEndSelect'].forEach(fillTimeSelect);
+  const openingSelect=document.getElementById('availabilityStartSelect');
+  const closingSelect=document.getElementById('availabilityEndSelect');
+  const available24h=document.getElementById('available24h');
+  const available24hAllDays=document.getElementById('available24hAllDays');
+  const available24hHolidays=document.getElementById('available24hHolidays');
+  const availability24hWrap=document.getElementById('availability24hNoteWrap');
+  const availability24hPreview=document.getElementById('availability24hPreview');
+  const availability24hNote=document.getElementById('availability24hNote');
+  const holidayServiceMode=document.getElementById('holidayServiceMode');
+  const holidayTimeWrap=document.getElementById('holidayTimeWrap');
+  const holidayStartSelect=document.getElementById('holidayStartSelect');
+  const holidayEndSelect=document.getElementById('holidayEndSelect');
+  const saturdayServiceMode=document.getElementById('saturdayServiceMode');
+  const saturdayTimeWrap=document.getElementById('saturdayTimeWrap');
+  const saturdayStartSelect=document.getElementById('saturdayStartSelect');
+  const saturdayEndSelect=document.getElementById('saturdayEndSelect');
+  const sundayServiceMode=document.getElementById('sundayServiceMode');
+  const sundayTimeWrap=document.getElementById('sundayTimeWrap');
+  const sundayStartSelect=document.getElementById('sundayStartSelect');
+  const sundayEndSelect=document.getElementById('sundayEndSelect');
+  const workingDayChecks=[...document.querySelectorAll('input[name="working_days"]')];
+  const working24Checks=[...document.querySelectorAll('input[name="working_days_24h"]')];
+  const syncClosing=(startEl,endEl)=>{ if(!startEl || !endEl) return; const start=startEl.value; const options=[...startEl.options].map(o=>o.value).filter(Boolean); const filtered=options.filter(v=>!start || v>start); const current=endEl.value; endEl.innerHTML=['<option value="">Selecione um horário</option>'].concat(filtered.map(v=>`<option value="${v}">${v}</option>`)).join(''); endEl.value=filtered.includes(current)?current:''; endEl.disabled=!start; };
+  const syncMode=(modeEl, wrapEl, startEl, endEl)=>{ const mode=modeEl?.value || 'no'; if(wrapEl) wrapEl.classList.toggle('hide', mode !== 'custom'); if(mode !== 'custom'){ if(startEl) startEl.value=''; if(endEl) endEl.value=''; } syncClosing(startEl, endEl); };
+  function sync24h(){ const is24=!!available24h?.checked; if(openingSelect){ openingSelect.disabled=is24; if(is24) openingSelect.value=''; } if(closingSelect){ closingSelect.disabled=is24 || !openingSelect?.value; if(is24) closingSelect.value=''; } if(is24){ workingDayChecks.forEach(el=>{ el.checked=false; }); }
+    if(availability24hWrap) availability24hWrap.classList.toggle('hide', !is24);
+    const allDays=!!available24hAllDays?.checked; working24Checks.forEach(el=>{ el.disabled=!is24 || allDays; if(allDays){ el.checked=true; } else if(!is24){ el.checked=false; } }); if(!is24 && available24hAllDays) available24hAllDays.checked=false; if(!is24 && available24hHolidays) available24hHolidays.checked=false;
+    const selected24=working24Checks.filter(el=>el.checked).map(el=>el.value);
+    const note = is24 ? (allDays ? `Atendimento 24h todos os dias${available24hHolidays?.checked ? ', incluindo feriados' : ''}` : `Atendimento 24h em ${selected24.join(', ')}${available24hHolidays?.checked ? (selected24.length ? ' • ' : '') + 'feriados' : ''}`.trim()) : '';
+    if(availability24hNote) availability24hNote.value=note; if(availability24hPreview) availability24hPreview.textContent=note || 'Exemplo: Atendimento 24h em Seg, Ter e Qua. Feriados: não.';
+    ['saturdayServiceMode','sundayServiceMode','holidayServiceMode'].forEach(id=>{ const el=document.getElementById(id); if(el) el.disabled=is24; });
+    [saturdayTimeWrap,sundayTimeWrap,holidayTimeWrap].forEach(el=>{ if(el && is24) el.classList.add('hide'); });
+    if(!is24){ syncMode(saturdayServiceMode,saturdayTimeWrap,saturdayStartSelect,saturdayEndSelect); syncMode(sundayServiceMode,sundayTimeWrap,sundayStartSelect,sundayEndSelect); syncMode(holidayServiceMode,holidayTimeWrap,holidayStartSelect,holidayEndSelect); }
+    syncClosing(openingSelect, closingSelect);
+  }
+  openingSelect?.addEventListener('change',()=>syncClosing(openingSelect, closingSelect));
+  holidayStartSelect?.addEventListener('change',()=>syncClosing(holidayStartSelect, holidayEndSelect));
+  saturdayStartSelect?.addEventListener('change',()=>syncClosing(saturdayStartSelect, saturdayEndSelect));
+  sundayStartSelect?.addEventListener('change',()=>syncClosing(sundayStartSelect, sundayEndSelect));
+  holidayServiceMode?.addEventListener('change',()=>syncMode(holidayServiceMode,holidayTimeWrap,holidayStartSelect,holidayEndSelect));
+  saturdayServiceMode?.addEventListener('change',()=>syncMode(saturdayServiceMode,saturdayTimeWrap,saturdayStartSelect,saturdayEndSelect));
+  sundayServiceMode?.addEventListener('change',()=>syncMode(sundayServiceMode,sundayTimeWrap,sundayStartSelect,sundayEndSelect));
+  available24h?.addEventListener('change', sync24h); available24hAllDays?.addEventListener('change', sync24h); available24hHolidays?.addEventListener('change', sync24h); working24Checks.forEach(el=>el.addEventListener('change', sync24h));
+  syncClosing(openingSelect, closingSelect); syncMode(holidayServiceMode,holidayTimeWrap,holidayStartSelect,holidayEndSelect); syncMode(saturdayServiceMode,saturdayTimeWrap,saturdayStartSelect,saturdayEndSelect); syncMode(sundayServiceMode,sundayTimeWrap,sundayStartSelect,sundayEndSelect); sync24h();
+  document.getElementById('onboardingCep')?.addEventListener('blur', e=>buscarCep(e.target.value));
+  const serviceToggle=document.getElementById('serviceFeeToggle'); const serviceAmount=document.getElementById('serviceFeeAmount'); const savedPriceValue=`<%= profissional.price_value || '' %>`;
+  function syncServiceFee(){ const enabled=!!serviceToggle?.checked; if(serviceAmount){ serviceAmount.classList.toggle('hide', !enabled); if(!enabled) serviceAmount.value=''; } }
+  if(serviceAmount && savedPriceValue) serviceAmount.value=savedPriceValue.replace('.', ','); if(serviceToggle && serviceAmount && serviceAmount.value) serviceToggle.checked=true; serviceToggle?.addEventListener('change', syncServiceFee); syncServiceFee();
+  document.getElementById('mobileBackBtn')?.addEventListener('click', ()=>prevStep());
+  document.getElementById('mobileHomeBtn')?.addEventListener('click', ()=>openCancelModal());
+  document.getElementById('mobileMenuBtn')?.addEventListener('click', ()=>openCancelModal());
+  document.getElementById('mobileCurrentBtn')?.addEventListener('click', e=>e.preventDefault());
+  onboardingForm?.addEventListener('submit', (e)=>{ if(!validateCurrentStep()){ e.preventDefault(); return; } const phoneEl=document.querySelector('input[name="phone_number"]'); const cepEl=document.getElementById('onboardingCep'); if(phoneEl) phoneEl.value=String(phoneEl.value||'').replace(/\D/g,'').slice(0,11); if(cepEl) cepEl.value=String(cepEl.value||'').replace(/\D/g,'').slice(0,8); if(finishProfileBtn) setLoadingState(finishProfileBtn, 'Finalizando...'); });
+});
+</script>
 
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
