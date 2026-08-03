@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #121212; 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 90px 0 80px; 
+        }
+        
+        .page-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;z-index:1000;padding:14px}.page-top-inner{width:min(980px,calc(100% - 24px));display:flex;justify-content:space-between;align-items:center;background:rgba(17,17,20,.9);border:1px solid #2f3137;border-radius:16px;padding:10px 14px;backdrop-filter:blur(8px)}.page-top a{color:#fff;text-decoration:none;font-weight:700}.page-top .highlight{color:#ffa500}.auth-container { width: 100%; max-width: 450px; padding: 20px; }
+        .auth-card { 
+            background: #1e1e1e; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+            padding: 40px; 
+            border: 1px solid #333;
+        }
+        
+        .auth-header { text-align: center; margin-bottom: 40px; }
+        .auth-header h1 { font-size: 32px; color: #ffa500; margin-bottom: 10px; font-weight: 800; }
+        .auth-header p { color: #ccc; font-size: 14px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #fff; font-size: 14px; }
+        .form-group input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 1px solid #444; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            transition: 0.3s; 
+            background: #2c2c2c;
+            color: #fff;
+        }
+        .form-group input:focus { outline: none; border-color: #ffa500; box-shadow: 0 0 0 3px rgba(255,165,0,0.1); }
+        
+        .password-wrapper { position: relative; }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999; }
+        
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-size: 15px; 
+            text-align: center; 
+            text-decoration: none; 
+            display: block; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-primary { background: #ffa500; color: #000; margin-bottom: 15px; }
+        .btn-primary:hover { background: #ffb733; transform: translateY(-2px); }
+        
+        .divider { display: flex; align-items: center; margin: 30px 0; }
+        .divider span { background: #444; flex: 1; height: 1px; }
+        .divider p { margin: 0 15px; color: #999; font-size: 14px; }
+        
+        .btn-google { 
+            background: #fff; 
+            color: #000; 
+            border: none; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+        }
+        .btn-google:hover { background: #f0f0f0; transform: translateY(-2px); }
+        
+        .auth-footer { text-align: center; margin-top: 25px; font-size: 15px; color: #b8b8bf; line-height: 1.6; }
+        .auth-footer a { color: #ffa500; text-decoration: none; font-weight: 800; font-size: 15px; }
+        .signup-cta { margin-top: 6px; font-size: 16px; }
+        .signup-cta a { font-size: 18px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .auth-footer a:hover { text-decoration: underline; }
+        
+        .error-message { 
+            background: rgba(220, 53, 69, 0.1); 
+            color: #ff4d4d; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            font-size: 14px; 
+            border: 1px solid rgba(220, 53, 69, 0.2); 
+            text-align: center;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e1e1e;
+            border-top: 1px solid #333;
+            display: none;
+            justify-content: space-around;
+            align-items: center;
+            height: 70px;
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .bottom-nav {
+                display: flex;
+            }
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            transition: 0.3s;
+            gap: 5px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: #ffa500;
+        }
+
+        .nav-item i {
+            font-size: 24px;
+        }
+        
+        @media (max-width: 480px) {
+            .auth-card { padding: 25px; }
+            .auth-header h1 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-top"><div class="page-top-inner"><a href="/"><i class="fas fa-arrow-left"></i> Voltar para a plataforma</a><a class="highlight" href="/auth/cadastro">Criar conta</a></div></div>
+    <nav class="bottom-nav">
+        <a href="javascript:void(0)" class="nav-item" id="mobileHomeBtn" title="Inicio">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileBackBtn" title="Voltar">
+            <i class="fas fa-arrow-left"></i>
+            <span>Voltar</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileMenuBtn" title="Ajuda">
+            <i class="fas fa-circle-question"></i>
+            <span>Menu</span>
+        </a>
+        <a href="/auth/login" class="nav-item active" title="Entrar">
+            <i class="fas fa-user"></i>
+            <span>Entrar</span>
+        </a>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Contrataê</h1>
+                <p>Conecte-se à plataforma</p>
+            </div>
+            
+            <% if (erro) { %>
+                <div class="error-message"><%= erro %></div>
+            <% } %>
+            
+            <form method="POST" action="/auth/login">
+                <input type="hidden" name="next" value="<%= typeof next !== 'undefined' ? next : '' %>">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" name="email" required placeholder="seu@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Senha</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password-login" name="password" required placeholder="Sua senha">
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('password-login')"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Entrar</button>
+            </form>
+            
+            <div class="divider">
+                <span></span>
+                <p>ou</p>
+                <span></span>
+            </div>
+            
+            <a href="/auth/google<%= (typeof next !== 'undefined' && next) ? `?next=${encodeURIComponent(next)}` : '' %>" class="btn btn-google">
+                <i class="fab fa-google"></i> Continuar com Google
+            </a>
+            
+            <div class="auth-footer">
+                <p class="signup-cta">Não tem conta? <a href="/auth/cadastro">Cadastre-se</a></p>
+                <p><a href="/auth/login" style="color:#ffcf73;font-weight:900;font-size:19px;text-shadow:0 0 18px rgba(255,178,30,.18)">Já sou usuário · Entrar na conta</a><br><span style="font-size:14px;color:#c8c8d2">Você pode criar conta com e-mail e senha ou seguir com Google.</span></p>
+                <p style="margin-top: 15px;"><a href="/esqueci-senha">Esqueceu a senha?</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = event.target;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
+</body>
+</html>

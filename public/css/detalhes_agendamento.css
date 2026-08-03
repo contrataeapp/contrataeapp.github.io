@@ -1,0 +1,131 @@
+/* detalhes_agendamento.css */
+
+/* Estilos específicos para a seção de detalhes do profissional */
+.professional-details-section {
+    background-color: #333;
+    padding: 2em;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #f8f9fa;
+    margin-bottom: 2em;
+    text-align: center; /* Centraliza o texto nesta seção */
+}
+
+.professional-details-section h2 {
+    color: #ffa500;
+    margin-bottom: 0.5em;
+    font-size: 2.2em;
+}
+
+.professional-details-section p {
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+/* Estilos específicos para o formulário de agendamento */
+.appointment-form-section {
+    background-color: #333;
+    padding: 3em 2em;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    max-width: 650px; /* Aumentei um pouco a largura do formulário */
+    margin: 2em auto;
+    color: #eee; /* Melhor contraste do texto */
+}
+
+.appointment-form-section h2 {
+    color: #ffa500;
+    text-align: center;
+    margin-bottom: 1.5em;
+    font-size: 2em;
+}
+
+.appointment-form-section .form-group {
+    margin-bottom: 1.5em;
+}
+
+.appointment-form-section label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    color: #ccc; /* Cor das labels */
+}
+
+.appointment-form-section input[type="text"],
+.appointment-form-section input[type="email"],
+.appointment-form-section input[type="tel"],
+.appointment-form-section input[type="date"],
+.appointment-form-section input[type="time"],
+.appointment-form-section textarea {
+    width: calc(100% - 20px); /* Ajuste para o padding */
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #444; /* Fundo do input */
+    color: #f8f9fa; /* Texto do input */
+    font-size: 1em;
+}
+
+.appointment-form-section input::placeholder,
+.appointment-form-section textarea::placeholder {
+    color: #aaa;
+}
+
+.appointment-form-section button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #ffa500;
+    color: #222;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.appointment-form-section button[type="submit"]:hover {
+    background-color: #e69500;
+}
+
+/* Mensagem de confirmação */
+.confirmation-message {
+    text-align: center;
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 2em;
+    font-size: 1.2em;
+    display: none; /* Inicia oculto */
+}
+
+.confirmation-message p {
+    margin-bottom: 1em;
+}
+
+.confirmation-message .back-to-home {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #222;
+    color: #ffa500;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.confirmation-message .back-to-home:hover {
+    background-color: #000;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .appointment-form-section {
+        max-width: 95%;
+        padding: 2em 1em;
+    }
+    .appointment-form-section h2 {
+        font-size: 1.8em;
+    }
+}

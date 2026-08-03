@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê · Cadastro do profissional</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#101114">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#1d1d20 0%,#0b0b0c 70%);color:#fff;min-height:100vh;padding:24px 24px 96px}
+        .shell{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:.85fr 1.15fr;gap:22px}
+        .lead,.panel{background:linear-gradient(180deg,rgba(28,28,30,.96),rgba(20,20,22,.98));border:1px solid rgba(255,255,255,.08);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+        .lead{padding:30px;display:flex;flex-direction:column;justify-content:space-between}
+        .panel{padding:26px}
+        .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,178,30,.1);border:1px solid rgba(255,178,30,.25);color:#ffd58a;font-size:13px;font-weight:700;margin-bottom:14px}
+        h1{font-size:38px;line-height:1.05;color:#ffb21e;margin-bottom:14px}
+        h2{font-size:28px;color:#ffb21e;margin-bottom:10px}
+        p{color:#d0d0d7;line-height:1.6}
+        .steps-info{display:grid;gap:12px;margin-top:22px}
+        .steps-info .box{padding:15px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .steps-info strong{display:block;color:#ffb21e;margin-bottom:6px}
+        .progress{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+        .pill{padding:12px;border-radius:14px;border:1px solid #2f3136;background:#141517;color:#a5adb7;font-size:13px}
+        .pill.active{border-color:#ffb020;color:#ffb020;background:rgba(255,176,32,.08)}
+        .step{display:none}
+        .step.active{display:block}
+        .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+        .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        .field{display:grid;gap:6px}
+        .field label{font-size:13px;font-weight:700;color:#eef1f5}
+        .field input,.field textarea,.field select{width:100%;background:#111114;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px 13px;font-size:14px;min-height:44px}
+        .field textarea{min-height:110px;resize:vertical}
+        .help{color:#9ea7b1;font-size:12px;line-height:1.45}
+        .plan-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        .plan-card{position:relative;padding:16px;border-radius:18px;border:1px solid #34373d;background:#121316;cursor:pointer}
+        .plan-card input{position:absolute;opacity:0;pointer-events:none}
+        .plan-card.active{border-color:#ffb020;box-shadow:0 0 0 1px rgba(255,176,32,.18) inset}
+        .plan-card .mini{color:#ffb020;font-size:13px;font-weight:700}
+        .plan-card .big{font-size:30px;font-weight:800;margin:6px 0}
+        .plan-card .small{color:#c8cdd6;font-size:13px}
+        .summary-box,.subpanel{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .subpanel{margin-top:14px}
+        .summary-strip{padding:12px 14px;border-radius:12px;border:1px solid #5f4b1e;background:rgba(255,176,32,.08);color:#ffd07a}
+        .avatar-row{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center}
+        .avatar-preview{width:110px;height:110px;border-radius:50%;overflow:hidden;border:3px solid #ffb21e;background:#6a1bb2;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800}
+        .avatar-preview img{width:100%;height:100%;object-fit:cover}
+        .chips{display:flex;flex-wrap:wrap;gap:8px}
+        .chip{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:999px;background:#181a1f;border:1px solid #2c3037}.chip input[type=checkbox],.toggle-row input[type=checkbox]{appearance:none;-webkit-appearance:none;width:14px;height:14px;border:2px solid #8b95a7;border-radius:4px;background:#111114;display:inline-block;position:relative;cursor:pointer;flex:0 0 14px}.chip input[type=checkbox]:checked,.toggle-row input[type=checkbox]:checked{background:#ffb020;border-color:#ffb020}.chip input[type=checkbox]:checked::after,.toggle-row input[type=checkbox]:checked::after{content:'';position:absolute;left:3px;top:0px;width:4px;height:8px;border:solid #111;border-width:0 2px 2px 0;transform:rotate(45deg)}.chip.small{padding:8px 10px;font-size:13px}.toggle-row{display:flex;align-items:center;gap:10px}.compact-toggle{padding:8px 12px;border-radius:18px;background:#15171b;border:1px solid #2c3037;width:fit-content}.compact-toggle input[type=checkbox]{width:15px;height:15px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1e1e1e;border-top:1px solid #333;display:none;justify-content:space-around;align-items:center;height:70px;z-index:1000}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:#999;text-decoration:none;font-size:12px;gap:5px}.nav-item i{font-size:22px}.nav-item.active,.nav-item:hover{color:#ffa500}
+        .upload-box{padding:18px;border-radius:18px;border:1px dashed #50545c;background:#111215;text-align:center}
+        .preview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}
+        .preview-card{border:1px solid #2c3037;border-radius:14px;overflow:hidden;background:#141517;min-height:140px;display:flex;align-items:center;justify-content:center}
+        .preview-card img{width:100%;height:140px;object-fit:cover}
+        .actions{display:flex;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap}.actions-left,.actions-right{display:flex;gap:10px;flex-wrap:wrap}
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:14px;padding:13px 16px;font-weight:800;text-decoration:none;cursor:pointer}
+        .btn-secondary{background:#34343c;color:#fff}
+        .btn-primary{background:#ffb21e;color:#111}
+        .btn-ghost{background:#1a1b1f;border:1px solid #393c44;color:#fff}
+        .btn-danger{background:#8f2630;color:#fff}
+        .hide{display:none!important}
+        .flash{padding:12px 14px;border-radius:12px;margin-bottom:14px}
+        .flash.error{background:#291717;border:1px solid #6e2d2d;color:#ffb5b5}
+        .flash.success{background:#142513;border:1px solid #285c27;color:#b9efb7}
+        @media(max-width:980px){.shell{grid-template-columns:1fr}.plan-cards,.grid-3{grid-template-columns:1fr}}
+        @media(max-width:720px){body{padding:12px 12px 96px}.panel,.lead{padding:20px}.progress,.grid-2,.avatar-row{grid-template-columns:1fr}h1{font-size:31px}h2{font-size:25px}} @media(max-width:768px){.bottom-nav{display:flex}}
+    
+        .profession-slot{padding:14px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);margin-top:12px}.profession-slot[data-slot='1']{border-left:4px solid #ffb020}.profession-slot[data-slot='2']{border-left:4px solid #4cc9f0}.profession-slot[data-slot='3']{border-left:4px solid #b892ff}.profession-grid .field-search{order:1}
+        .profession-grid .field-select{order:2}
+        .search-wrap{position:relative}
+        .search-suggestions{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;list-style:none;margin:0;padding:6px;background:#16171c;border:1px solid #2e3138;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.35);max-height:220px;overflow:auto}
+        .search-suggestions.show{display:block}
+        .search-suggestions li{padding:10px 12px;border-radius:10px;color:#eef1f5;cursor:pointer;font-size:14px}
+        .search-suggestions li:hover,.search-suggestions li.active{background:#23252b}
+        .search-suggestions li.empty{color:#ffcf82;background:rgba(255,176,32,.08)}
+        .special-day-panel{margin-top:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .special-day-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+        .special-day-cell{padding:10px;border-radius:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05)}
+        @media (max-width: 640px){
+            .profession-grid{grid-template-columns:1fr !important;}
+            .profession-grid .field-search{order:1}
+            .profession-grid .field-select{order:2}
+            .special-day-grid{grid-template-columns:1fr}
+        }
+.compact-toggle input[type="checkbox"], .chip input[type="checkbox"]{width:14px!important;height:14px!important;min-width:14px!important;min-height:14px!important;} .input-error-modal{position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1400;display:none;align-items:center;justify-content:center;padding:20px}.input-error-modal .box{width:min(420px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;color:#fff}.input-error-modal .box h3{color:#ffb21e;margin-bottom:10px}</style>
+</head>
+<body>
+    <nav class="bottom-nav safe-onboarding-nav">
+        <a href="javascript:void(0)" class="nav-item" id="mobileHomeBtn"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileBackBtn"><i class="fas fa-arrow-left"></i><span>Voltar</span></a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileMenuBtn"><i class="fas fa-bars"></i><span>Menu</span></a>
+        <a href="javascript:void(0)" class="nav-item active" id="mobileCurrentBtn"><i class="fas fa-lock"></i><span>Fluxo</span></a>
+    </nav>
+    <div class="shell">
+        <aside class="lead">
+            <div>
+                <span class="badge">Cadastro profissional Contrataê</span>
+                <h1>Monte seu perfil em etapas claras, sem cair em telas confusas.</h1>
+                <p>Agora o cadastro profissional segue um caminho direto: plano, profissões, perfil e imagens. Só depois disso você entra na sua área para gerenciar com calma.</p>
+                <div class="steps-info">
+                    <div class="box"><strong>1. Escolha seu plano</strong>Defina quantas profissões quer ativar e por quantos meses quer manter seu perfil em destaque.</div>
+                    <div class="box"><strong>2. Escolha suas profissões</strong>Escolha suas profissões na ordem em que faz sentido para o seu trabalho. Se precisar, sugira uma nova categoria.</div>
+                    <div class="box"><strong>3. Mostre confiança</strong>Complete descrição, disponibilidade e envie sua foto de perfil e seu portfólio inicial.</div>
+                </div>
+            </div>
+            <div class="help">Seu nome real fica protegido na conta. Dentro do perfil você define o que será exibido para clientes.</div>
+        </aside>
+
+        <section class="panel">
+            <span class="badge">Cadastro guiado</span>
+            <h2>Concluir cadastro profissional</h2>
+            <p style="margin-bottom:16px">Siga as etapas abaixo. Você pode voltar uma etapa por vez, cancelar o cadastro se quiser sair e continuar até finalizar com segurança.</p>
+
+            <% if (flashError) { %><div class="flash error"><%= flashError %></div><% } %>
+            <% if (flashSuccess) { %><div class="flash success"><%= flashSuccess %></div><% } %>
+
+            <div class="progress">
+                <div class="pill" data-step-pill="1">1. Plano</div>
+                <div class="pill" data-step-pill="2">2. Profissões</div>
+                <div class="pill" data-step-pill="3">3. Perfil</div>
+                <div class="pill" data-step-pill="4">4. Imagens e revisão</div>
+            </div>
+
+            <form id="onboardingForm" action="/profissional/onboarding/finalizar" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="current_step" id="currentStepInput" value="<%= startStep || 1 %>">
+                                <input type="hidden" name="availability_summary" id="availabilitySummaryInput" value="">
+
+                <div class="step" data-step="1">
+                    <div class="grid-2">
+                        <div class="subpanel">
+                            <strong style="color:#ffb020">Plano atual de entrada</strong>
+                            <p class="help" style="margin-top:6px">Escolha primeiro quantas profissões quer liberar. Depois o formulário abre exatamente a quantidade certa.</p>
+                            <div class="plan-cards" style="margin-top:14px">
+                                <label class="plan-card" data-plan-card="basic">
+                                    <input type="radio" name="plan_tier" value="basic" <%= (savedPlanTier || 'basic') === 'basic' ? 'checked' : '' %>>
+                                    <div class="mini">Plano Básico</div>
+                                    <div class="big">1</div>
+                                    <div class="small">1 profissão<br>Boa escolha para quem quer começar com clareza.</div>
+                                </label>
+                                <label class="plan-card" data-plan-card="professional">
+                                    <input type="radio" name="plan_tier" value="professional" <%= savedPlanTier === 'professional' ? 'checked' : '' %>>
+                                    <div class="mini">Plano Profissional</div>
+                                    <div class="big">2</div>
+                                    <div class="small">2 profissões<br>Mais espaço para mostrar variações do seu trabalho.</div>
+                                </label>
+                                <label class="plan-card" data-plan-card="premium">
+                                    <input type="radio" name="plan_tier" value="premium" <%= savedPlanTier === 'premium' ? 'checked' : '' %>>
+                                    <div class="mini">Plano Premium</div>
+                                    <div class="big">3</div>
+                                    <div class="small">3 profissões<br>Mais categorias para quem realmente atua em várias frentes.</div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="summary-box">
+                            <strong style="color:#ffb020">Resumo estimado</strong>
+                            <div class="field" style="margin-top:12px">
+                                <label>Quantidade de meses</label>
+                                <select id="planMonths" name="plan_months">
+                                    <% for(let m=1;m<=12;m++){ %>
+                                        <option value="<%= m %>" <%= Number(savedPlanMonths || 1) === m ? 'selected' : '' %>><%= m %> <%= m > 1 ? 'meses' : 'mês' %></option>
+                                    <% } %>
+                                </select>
+                            </div>
+                            <div class="summary-strip" style="margin-top:14px" id="planSummary"></div>
+                            <div style="margin-top:10px;font-size:28px;font-weight:800;color:#ffb020" id="planTotal">R$ 30,00</div>
+                        </div>
+                    </div>
+                    <div class="summary-strip" style="margin-top:14px">Quer mais visibilidade? Profissionais com 2 ou 3 categorias costumam aparecer para mais buscas.</div>
+                    <div class="actions">
+                        <div class="actions-left">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button>
+                            <button type="button" class="btn btn-danger" onclick="openCancelModal('cancel')">Cancelar cadastro</button>
+                        </div>
+                        <div class="actions-right">
+                                                        <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" data-step="2">
+                    <div class="subpanel">
+                        <strong style="color:#ffb020">Escolha suas profissões</strong>
+                        <p class="help" style="margin-top:6px">Escolha em ordem: Profissão 1, Profissão 2 e Profissão 3. Se selecionar “Outros”, a nova profissão será criada de forma guiada no modal da posição escolhida.</p>
+                    </div>
+
+                    <div class="profession-slot" data-slot="1">
+                        <div class="grid-2 profession-grid">
+                            <div class="field field-search">
+                                <label>Busca rápida · Profissão 1</label>
+                                <div class="search-wrap"><input type="text" id="primaryCategorySearch" placeholder="Digite para filtrar a profissão 1"><ul id="primaryCategorySuggestions" class="search-suggestions"></ul></div>
+                            </div>
+                            <div class="field field-select">
+                                <label>Profissão 1</label>
+                                <select name="primary_category_id" data-category-select="1" data-slot="1" id="primaryCategorySelect" required>
+                                    <option value="">Selecione uma profissão</option>
+                                    <% (categorias || []).forEach(cat => { %>
+                                        <option value="<%= cat.id %>" <%= currentPrimaryCategory && currentPrimaryCategory.id === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+                                    <% }); %>
+                                </select>
+                                <input type="hidden" name="new_profession_request_1" id="newProfessionRequest1" value="<%= (professionRequests || []).find(item => item.related_slot === 1)?.requested_name || '' %>">
+                                <div class="help hide" id="customProfessionDisplay1" style="margin-top:8px"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profession-slot additional-slot additional-slot-2 hide" data-slot="2">
+                        <div class="grid-2 profession-grid">
+                            <div class="field field-search">
+                                <label>Busca rápida · Profissão 2</label>
+                                <div class="search-wrap"><input type="text" id="additionalCategorySearch" placeholder="Digite para filtrar a profissão 2"><ul id="additionalCategorySuggestions" class="search-suggestions"></ul></div>
+                            </div>
+                            <div class="field field-select">
+                                <label>Profissão 2</label>
+                                <select name="additional_category_1" data-category-select="1" data-slot="2" id="additionalCategorySelect1" class="extraCategorySelect">
+                                    <option value="">Selecione uma profissão</option>
+                                    <% (categorias || []).forEach(cat => { %>
+                                        <option value="<%= cat.id %>" <%= selectedAdditionalIds && selectedAdditionalIds[0] === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+                                    <% }); %>
+                                </select>
+                                <input type="hidden" name="new_profession_request_2" id="newProfessionRequest2" value="<%= (professionRequests || []).find(item => item.related_slot === 2)?.requested_name || '' %>">
+                                <div class="help hide" id="customProfessionDisplay2" style="margin-top:8px"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profession-slot additional-slot additional-slot-3 hide" data-slot="3">
+                        <div class="grid-2 profession-grid">
+                            <div class="field field-search">
+                                <label>Busca rápida · Profissão 3</label>
+                                <div class="search-wrap"><input type="text" id="additionalCategorySearch2" placeholder="Digite para filtrar a profissão 3"><ul id="additionalCategorySuggestions2" class="search-suggestions"></ul></div>
+                            </div>
+                            <div class="field field-select">
+                                <label>Profissão 3</label>
+                                <select name="additional_category_2" data-category-select="1" data-slot="3" id="additionalCategorySelect2" class="extraCategorySelect">
+                                    <option value="">Selecione uma profissão</option>
+                                    <% (categorias || []).forEach(cat => { %>
+                                        <option value="<%= cat.id %>" <%= selectedAdditionalIds && selectedAdditionalIds[1] === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+                                    <% }); %>
+                                </select>
+                                <input type="hidden" name="new_profession_request_3" id="newProfessionRequest3" value="<%= (professionRequests || []).find(item => item.related_slot === 3)?.requested_name || '' %>">
+                                <div class="help hide" id="customProfessionDisplay3" style="margin-top:8px"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="openCancelModal('cancel')">Cancelar cadastro</button></div>
+                        <div class="actions-right" style="display:flex;gap:10px;flex-wrap:wrap">
+                            <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
+                        </div>
+                    </div>
+                </div>
+
+<div class="step" data-step="3">
+                    <div class="grid-2">
+                        <div class="field">
+                            <label>Nome que será exibido aos clientes <span style="color:#ffb020">(apelido / nome profissional)</span></label>
+                            <input type="text" name="display_name" value="<%= displayName || user?.full_name || '' %>" placeholder="Ex: Japa Eletricista, Augusto Pinturas" style="border-color:#5b4820"> 
+                            <div class="help">Seu nome do Google pode ser ajustado aqui para aparecer melhor aos clientes.</div>
+                        </div>
+                        <div class="field">
+                            <label>Telefone / WhatsApp</label>
+                            <input type="text" name="phone_number" value="<%= profissional.phone_number || '' %>" inputmode="numeric" maxlength="15" required>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="field"><label>CEP</label><input type="text" name="cep" id="onboardingCep" value="<%= profissional.cep || '' %>" inputmode="numeric" maxlength="9" required></div>
+                        <div class="field"><label>Cidade</label><input type="text" name="city" id="onboardingCity" value="<%= profissional.city || '' %>" pattern="[A-Za-zÀ-ÿ\s]+" required></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="field"><label>Estado</label><input type="text" name="state" id="onboardingState" value="<%= profissional.state || '' %>" maxlength="2" pattern="[A-Za-zÀ-ÿ\s]+" required></div>
+                        <div class="field"><label>Especialidades</label><input type="text" name="specialties" value="<%= profissional.specialties || '' %>" placeholder="Ex: instalação, manutenção, residencial">
+                            <div class="help">Escreva de forma simples. Use um telefone válido para receber contatos e respostas da análise.</div></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="field">
+                            <label>Informações de preço</label>
+                            <input type="text" inputmode="decimal" id="serviceFeeAmount" name="service_fee_amount" placeholder="Ex: 50" class="hide">
+                            <div class="help" id="serviceFeeHelp">Marque abaixo somente se você cobra taxa de visita.</div>
+                        </div>
+                        <div class="field">
+                            <label>Taxa de serviço</label>
+                            <div class="toggle-row compact-toggle">
+                                <input type="checkbox" id="serviceFeeToggle" name="service_fee_enabled">
+                                <label for="serviceFeeToggle" style="margin:0;font-size:14px">Cobro taxa de visita</label>
+                            </div>
+                            <div class="help">Marque para exibir essa taxa para os clientes.</div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Descrição profissional</label>
+                        <textarea name="description" placeholder="Explique em poucas linhas o que você faz e por que o cliente pode confiar no seu trabalho."><%= profissional.description || '' %></textarea>
+                    </div>
+                    <div class="field">
+                        <label>Horário em que você começa e para de trabalhar</label>
+                        <div class="chips">
+                            <% ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(day => { %>
+                                <label class="chip"><input type="checkbox" name="working_days" value="<%= day %>"> <%= day %></label>
+                            <% }); %>
+                            <label class="chip compact-toggle"><input type="checkbox" name="available_24h" id="available24h"> Atendimento 24h</label>
+                        </div>
+                        <div class="grid-2" style="margin-top:10px">
+                            <div class="field"><label style="margin-bottom:4px">Hora em que você começa a trabalhar</label><select name="availability_start" id="availabilityStartSelect"></select></div>
+                            <div class="field"><label style="margin-bottom:4px">Hora em que você para de trabalhar</label><select name="availability_end" id="availabilityEndSelect"></select></div>
+                        </div>
+                        <div class="subpanel hide" id="availability24hNoteWrap" style="margin-top:10px">
+                            <strong style="color:#ffb020">Você oferece serviço 24 horas?</strong>
+                            <p class="help" style="margin-top:6px">Defina com clareza em quais dias esse atendimento 24h realmente acontece. Se não for em todos, marque só os dias realmente cobertos.</p>
+                            <div class="grid-2" style="margin-top:10px">
+                                <label class="chip"><input type="checkbox" id="available24hAllDays" name="available_24h_all_days"> Atendo 24h todos os dias</label>
+                                <label class="chip"><input type="checkbox" id="available24hSundays" name="available_24h_sundays"> Atendo domingos</label>
+                                <label class="chip"><input type="checkbox" id="available24hHolidays" name="available_24h_holidays"> Atendo feriados</label>
+                            </div>
+                            <div class="grid-2" id="availability24hDaysWrap" style="margin-top:10px">
+                                <label class="chip"><input type="checkbox" name="working_days_24h" value="Seg"> Seg</label>
+                                <label class="chip"><input type="checkbox" name="working_days_24h" value="Ter"> Ter</label>
+                                <label class="chip"><input type="checkbox" name="working_days_24h" value="Qua"> Qua</label>
+                                <label class="chip"><input type="checkbox" name="working_days_24h" value="Qui"> Qui</label>
+                                <label class="chip"><input type="checkbox" name="working_days_24h" value="Sex"> Sex</label>
+                                <label class="chip"><input type="checkbox" name="working_days_24h" value="Sáb"> Sáb</label>
+                                <label class="chip"><input type="checkbox" name="working_days_24h" value="Dom"> Dom</label>
+                            </div>
+                            <input type="hidden" name="availability_24h_note" id="availability24hNote">
+                            <div class="help" id="availability24hPreview" style="margin-top:10px">Exemplo: Atendimento 24h em Seg, Ter e Qua. Feriados: não.</div>
+                        </div>
+                        <div class="help">Informe os dias em que você atende e o horário em que normalmente trabalha.</div>
+                        <div class="special-day-panel">
+                            <strong style="color:#ffb020;font-size:14px">Ajustes de sábado, domingo e feriado</strong>
+                            <p class="help" style="margin-top:6px">Você pode manter o horário padrão, atender em horário diferente ou indicar que não atende nessas situações.</p>
+                            <div class="special-day-grid" style="margin-top:10px">
+                                <div class="special-day-cell">
+                                    <div class="field">
+                                        <label style="margin-bottom:4px">Sábado</label>
+                                        <select name="saturday_service_mode" id="saturdayServiceMode">
+                                            <option value="same">Mesmo horário padrão</option>
+                                            <option value="custom">Atendo em horário diferente</option>
+                                            <option value="no">Não atendo</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid-2 hide" id="saturdayTimeWrap" style="margin-top:10px;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+                                        <div class="field"><label style="margin-bottom:4px">Início no sábado</label><select name="saturday_start" id="saturdayStartSelect"></select></div>
+                                        <div class="field"><label style="margin-bottom:4px">Encerramento no sábado</label><select name="saturday_end" id="saturdayEndSelect"></select></div>
+                                    </div>
+                                </div>
+                                <div class="special-day-cell">
+                                    <div class="field">
+                                        <label style="margin-bottom:4px">Domingo</label>
+                                        <select name="sunday_service_mode" id="sundayServiceMode">
+                                            <option value="no">Não atendo</option>
+                                            <option value="same">Mesmo horário padrão</option>
+                                            <option value="custom">Atendo em horário diferente</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid-2 hide" id="sundayTimeWrap" style="margin-top:10px;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+                                        <div class="field"><label style="margin-bottom:4px">Início no domingo</label><select name="sunday_start" id="sundayStartSelect"></select></div>
+                                        <div class="field"><label style="margin-bottom:4px">Encerramento no domingo</label><select name="sunday_end" id="sundayEndSelect"></select></div>
+                                    </div>
+                                </div>
+                                <div class="special-day-cell">
+                                    <div class="field">
+                                        <label style="margin-bottom:4px">Feriado</label>
+                                        <select name="holiday_service_mode" id="holidayServiceMode">
+                                            <option value="no">Não atendo</option>
+                                            <option value="same">Mesmo horário padrão</option>
+                                            <option value="custom">Atendo em horário diferente</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid-2 hide" id="holidayTimeWrap" style="margin-top:10px;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+                                        <div class="field"><label style="margin-bottom:4px">Início no feriado</label><select name="holiday_start" id="holidayStartSelect"></select></div>
+                                        <div class="field"><label style="margin-bottom:4px">Encerramento no feriado</label><select name="holiday_end" id="holidayEndSelect"></select></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="openCancelModal('cancel')">Cancelar cadastro</button></div>
+                        <div class="actions-right" style="display:flex;gap:10px;flex-wrap:wrap">
+                                                        <button type="button" class="btn btn-primary" onclick="nextStep(this)">Continuar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" data-step="4">
+                    <div class="avatar-row">
+                        <div class="avatar-preview" id="avatarPreview">
+                            <% if (user?.avatar_url) { %>
+                                <img src="<%= user.avatar_url %>" alt="Avatar">
+                            <% } else { %>
+                                <%= (user?.full_name || 'P').charAt(0).toUpperCase() %>
+                            <% } %>
+                        </div>
+                        <div class="field">
+                            <label>Foto de perfil</label>
+                            <input type="hidden" name="existing_avatar_url" value="<%= user?.avatar_url || "" %>"><input type="file" name="avatar" id="avatarInput" accept="image/*">
+                            <div class="help">A foto de perfil ajuda a passar mais confiança. Você pode trocar depois.</div>
+                        </div>
+                    </div>
+                    <div class="upload-box" style="margin-top:16px">
+                        <strong style="color:#ffb020">Portfólio inicial</strong>
+                        <p class="help" style="margin:10px 0 12px">Envie até 3 fotos iniciais agora. Depois você poderá editar e completar em “Meu Portfólio”.</p>
+                        <div class="help">Cada espaço abaixo representa uma imagem.</div>
+                        <input type="file" name="portfolio_images" id="portfolioInput" accept="image/*" multiple style="display:none">
+                        <input type="file" id="portfolioSlotInput" accept="image/*" style="display:none">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('portfolioInput').click()">Selecionar imagens</button>
+                    </div>
+                    <div class="preview-grid" id="portfolioPreviewGrid">
+                        <% const initialPreview = (portfolio || []).slice(0,3); %>
+                        <% for (let i = 0; i < 3; i++) { const item = initialPreview[i]; %>
+                            <button type="button" class="preview-card <%= item ? '' : 'empty-slot' %>" data-slot-index="<%= i %>">
+                                <% if (item) { %><div style="width:100%"><img src="<%= item.image_url %>" alt="Portfólio"><div style="padding:8px 10px;font-size:12px;color:#ffd58a;text-align:center">Alterar imagem</div></div><% } else { %><span style="color:#d9dde5">+ adicionar imagem</span><% } %>
+                            </button>
+                        <% } %>
+                    </div>
+                    <div class="subpanel">
+                        <strong style="color:#ffb020">Antes de terminar</strong>
+                        <p class="help" style="margin-top:8px">Ao salvar, seu perfil fica pronto para revisão dentro da sua área. Depois você ajusta o que quiser e só então pede análise.</p>
+                    </div>
+                    <div class="actions">
+                        <div class="actions-left"><button type="button" class="btn btn-secondary" onclick="prevStep()">Voltar</button><button type="button" class="btn btn-danger" onclick="openCancelModal('cancel')">Cancelar cadastro</button></div>
+                        <div class="actions-right" style="display:flex;gap:10px;flex-wrap:wrap">
+                                                        <button type="submit" class="btn btn-primary" id="finishProfileBtn">Finalizar perfil</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </section>
+    </div>
+    <div id="cancelModal" class="hide" style="position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1200;align-items:center;justify-content:center;padding:20px;">
+        <div style="width:min(460px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.45)">
+            <h3 id="cancelModalTitle" style="color:#ffb21e;margin-bottom:10px">Cancelar cadastro?</h3>
+            <p id="cancelModalText" style="color:#d0d0d7;margin-bottom:14px">Se você confirmar, o cadastro guiado será encerrado, seus dados parciais serão removidos com segurança e você voltará para a plataforma.</p>
+            <div class="summary-strip" style="margin-bottom:16px">Concluir o cadastro aumenta suas chances de aparecer com mais confiança para os clientes.</div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
+                <button type="button" class="btn btn-secondary" onclick="closeCancelModal()">Continuar cadastro</button>
+                <form method="POST" action="/auth/cancelar-profissional" style="margin:0">
+                    <input type="hidden" name="current_step" id="cancelCurrentStep" value="1">
+                    <button type="submit" class="btn btn-danger" id="cancelModalConfirm" style="background:#b12c3a">Confirmar cancelamento</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="otherProfessionModal" class="hide" style="position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1200;align-items:center;justify-content:center;padding:20px;">
+        <div style="width:min(560px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;">
+            <h3 style="color:#ffb21e;margin-bottom:10px">Nova profissão para análise</h3>
+            <p style="color:#d0d0d7;line-height:1.6;margin-bottom:14px">Se você não encontrou a profissão desejada, pode sugerir uma nova categoria. Nossa equipe revisará se a atividade respeita as diretrizes éticas, legais e de segurança da plataforma. Sugestões como atividades ilícitas, ofensivas ou que firam as diretrizes não serão aprovadas.</p>
+            <div class="field" style="margin-bottom:14px">
+                <label id="otherProfessionModalLabel">Digite a nova profissão</label>
+                <input type="text" id="otherProfessionModalInput" placeholder="Ex: Babá de pets">
+                <div class="help">Ao salvar, o nome ficará vinculado à posição escolhida no cadastro.</div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
+                <button type="button" class="btn btn-secondary" onclick="closeOtherProfessionModal()">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="saveOtherProfession()">Salvar profissão</button>
+            </div>
+        </div>
+    </div>
+<div id="inputErrorModal" class="input-error-modal"><div class="box"><h3>Ajuste necessário</h3><p id="inputErrorText" style="color:#d0d0d7;line-height:1.55"></p><div class="actions" style="margin-top:18px;justify-content:flex-end"><button type="button" class="btn btn-primary" onclick="closeInputErrorModal()">Entendi</button></div></div></div>
+<script>
+// FIX v11.3.7 cadastro profissional: cancelamento real, validação por etapa e profissão "Outros" por posição
+let currentStep = Number('<%= startStep || 1 %>') || 1;
+let activeOtherProfessionSlot = null;
+const PLAN_CONFIG = {
+    basic: { slots: 1, monthly: 30, label: 'Plano Básico' },
+    professional: { slots: 2, monthly: 50, label: 'Plano Profissional' },
+    premium: { slots: 3, monthly: 70, label: 'Plano Premium' }
+};
+function monthDiscount(months){ if(months >= 12) return 20; if(months >= 6) return 12; if(months >= 3) return 6; return 0; }
+function fmtMoney(v){ return `R$ ${Number(v || 0).toFixed(2).replace('.', ',')}`; }
+function updateStepUI(){
+    document.querySelectorAll('.step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) === currentStep));
+    document.querySelectorAll('[data-step-pill]').forEach(el => el.classList.toggle('active', Number(el.dataset.stepPill) === currentStep));
+    const input = document.getElementById('currentStepInput'); if (input) input.value = currentStep;
+    const url = new URL(window.location.href);
+    url.searchParams.set('step', String(currentStep));
+    const checked = document.querySelector('input[name="plan_tier"]:checked');
+    if (checked) url.searchParams.set('tier', checked.value);
+    const months = document.getElementById('planMonths')?.value;
+    if (months) url.searchParams.set('months', months);
+    window.history.replaceState({}, '', url.toString());
+}
+function getCurrentPlanConfig(){ const checked = document.querySelector('input[name="plan_tier"]:checked'); return PLAN_CONFIG[checked ? checked.value : 'basic']; }
+function updatePlanUI(){
+    const checked = document.querySelector('input[name="plan_tier"]:checked');
+    const tier = checked ? checked.value : 'basic';
+    const cfg = PLAN_CONFIG[tier];
+    document.querySelectorAll('.plan-card').forEach(card => card.classList.toggle('active', card.dataset.planCard === tier));
+    const months = Number(document.getElementById('planMonths').value || 1);
+    const discount = monthDiscount(months);
+    const total = cfg.monthly * months * (1 - discount / 100);
+    document.getElementById('planSummary').innerHTML = `Plano: ${cfg.label}<br>Mensalidade base: ${fmtMoney(cfg.monthly)}<br>Desconto: ${discount}%`;
+    document.getElementById('planTotal').textContent = fmtMoney(total);
+    if (typeof currentStep !== 'undefined' && currentStep === 1) { const url = new URL(window.location.href); url.searchParams.set('tier', tier); url.searchParams.set('months', String(months)); history.replaceState({}, '', url.toString()); }
+    document.querySelectorAll('.additional-slot-2').forEach(el => el.classList.toggle('hide', cfg.slots < 2));
+    document.querySelectorAll('.additional-slot-3').forEach(el => el.classList.toggle('hide', cfg.slots < 3));
+    if (cfg.slots < 2) clearProfessionSlot(2);
+    if (cfg.slots < 3) clearProfessionSlot(3);
+}
+function clearProfessionSlot(slot){
+    const select = document.querySelector(`select[data-slot="${slot}"]`);
+    const hidden = document.getElementById(`newProfessionRequest${slot}`);
+    const display = document.getElementById(`customProfessionDisplay${slot}`);
+    const search = slot === 1 ? document.getElementById('primaryCategorySearch') : slot === 2 ? document.getElementById('additionalCategorySearch') : document.getElementById('additionalCategorySearch2');
+    if (select) select.value = '';
+    if (hidden) hidden.value = '';
+    if (display) { display.textContent=''; display.classList.add('hide'); }
+    if (search) search.value = '';
+}
+function validateCurrentStep(){
+    if (currentStep === 1) {
+        return Boolean(document.querySelector('input[name="plan_tier"]:checked'));
+    }
+    if (currentStep === 2) {
+        const cfg = getCurrentPlanConfig();
+        const used = new Set();
+        for (let slot = 1; slot <= cfg.slots; slot++) {
+            const select = document.querySelector(`select[data-slot="${slot}"]`);
+            const hidden = document.getElementById(`newProfessionRequest${slot}`);
+            if (!select || !select.value) {
+                if (autoResolveProfession(slot)) continue;
+                const search = slot === 1 ? document.getElementById('primaryCategorySearch') : slot === 2 ? document.getElementById('additionalCategorySearch') : document.getElementById('additionalCategorySearch2');
+                if ((search?.value || '').trim()) {
+                    const other = getOtherOption(select);
+                    if (other) {
+                        select.dataset.userTriggered = '1';
+                        select.value = other.value;
+                        handleProfessionChange(select);
+                        showInputError(`Revise a Profissão ${slot}. Se ela não existir na lista, use “Outros” e salve a nova profissão.`);
+                        return false;
+                    }
+                }
+                showInputError(`Selecione a Profissão ${slot} para continuar.`);
+                select?.focus();
+                return false;
+            }
+            const selectedText = normalizeText(select.options[select.selectedIndex]?.textContent);
+            if (used.has(select.value) && !['outros','outro'].includes(selectedText)) { showInputError('Não repita a mesma profissão em mais de uma posição.'); select.focus(); return false; }
+            used.add(select.value);
+            if (['outros','outro'].includes(selectedText) && !(hidden?.value || '').trim()) { showInputError(`Escreva a nova profissão da posição ${slot} antes de continuar.`); openOtherProfessionModal(slot); return false; }
+        }
+    }
+    if (currentStep === 3) {
+        const phone = (document.querySelector('[name="phone_number"]')?.value || '').replace(/\D/g,'');
+        const cep = (document.getElementById('onboardingCep')?.value || '').replace(/\D/g,'');
+        const city = (document.getElementById('onboardingCity')?.value || '').trim();
+        const state = (document.getElementById('onboardingState')?.value || '').trim();
+        const description = (document.querySelector('textarea[name="description"]')?.value || '').trim();
+        const serviceToggle = document.getElementById('serviceFeeToggle');
+        const fee = (document.getElementById('serviceFeeAmount')?.value || '').trim();
+        const is24 = !!document.getElementById('available24h')?.checked;
+        const start = document.getElementById('availabilityStartSelect')?.value || '';
+        const end = document.getElementById('availabilityEndSelect')?.value || '';
+        const days = document.querySelectorAll('input[name="working_days"]:checked').length;
+        if (phone.length < 10) { showInputError('Informe um WhatsApp válido com DDD.'); return false; }
+        if (cep && cep.length !== 8) { showInputError('Informe um CEP válido com 8 números ou deixe o campo vazio e preencha cidade/estado.'); return false; }
+        if (!city || city.length < 2 || !state || state.length < 2) { showInputError('Preencha cidade e estado corretamente.'); return false; }
+        if (description.length < 20) { showInputError('Descreva um pouco melhor o seu serviço antes de continuar.'); return false; }
+        if (serviceToggle?.checked && !fee) { showInputError('Informe o valor da taxa de visita ou desmarque a cobrança.'); return false; }
+        const saturdayMode = document.getElementById('saturdayServiceMode')?.value || 'same';
+        const sundayMode = document.getElementById('sundayServiceMode')?.value || 'no';
+        const holidayMode = document.getElementById('holidayServiceMode')?.value || 'no';
+        const saturdayStart = document.getElementById('saturdayStartSelect')?.value || '';
+        const saturdayEnd = document.getElementById('saturdayEndSelect')?.value || '';
+        const sundayStart = document.getElementById('sundayStartSelect')?.value || '';
+        const sundayEnd = document.getElementById('sundayEndSelect')?.value || '';
+        const holidayStart = document.getElementById('holidayStartSelect')?.value || '';
+        const holidayEnd = document.getElementById('holidayEndSelect')?.value || '';
+        if (!is24 && days === 0 && saturdayMode === 'no' && sundayMode === 'no' && holidayMode === 'no') { showInputError('Selecione pelo menos um dia da semana em que você atende.'); return false; }
+        if (saturdayMode === 'custom' && (!saturdayStart || !saturdayEnd)) { showInputError('Selecione o horário de início e o horário de encerramento do sábado.'); return false; }
+        if (sundayMode === 'custom' && (!sundayStart || !sundayEnd)) { showInputError('Selecione o horário de início e o horário de encerramento do domingo.'); return false; }
+        if (holidayMode === 'custom' && (!holidayStart || !holidayEnd)) { showInputError('Selecione o horário de início e o horário de encerramento para os feriados.'); return false; }
+        const needsStandardHours = days > 0 || saturdayMode === 'same' || sundayMode === 'same' || holidayMode === 'same';
+        if (is24) {
+            const note = (document.getElementById('availability24hNote')?.value || '').trim();
+            const selected24 = document.querySelectorAll('input[name="working_days_24h"]:checked').length;
+            const allDays24 = !!document.getElementById('available24hAllDays')?.checked;
+            const sunday24 = !!document.getElementById('available24hSundays')?.checked;
+            const holiday24 = !!document.getElementById('available24hHolidays')?.checked;
+            if (!note || (!allDays24 && !selected24 && !sunday24 && !holiday24)) { showInputError('Marque os dias em que o atendimento 24h realmente acontece.'); return false; }
+            if (!allDays24 && needsStandardHours && (!start || !end)) { showInputError('Selecione o horário padrão para os dias que não são 24h.'); return false; }
+        } else if (needsStandardHours && (!start || !end)) {
+            showInputError('Selecione o horário de início e o horário de encerramento.'); return false;
+        }
+    }
+    if (currentStep === 4) {
+        const avatarInput = document.getElementById('avatarInput');
+        const existingAvatar = document.querySelector('input[name="existing_avatar_url"]')?.value || '';
+        const hasAvatar = Boolean(existingAvatar || avatarInput?.files?.length);
+        const cardsWithImage = Array.from(document.querySelectorAll('#portfolioPreviewGrid .preview-card img')).length;
+        if (!hasAvatar) { showInputError('Adicione uma foto de perfil antes de finalizar.'); return false; }
+        if (cardsWithImage < 3) { showInputError('Adicione 3 imagens iniciais ao portfólio antes de finalizar.'); return false; }
+    }
+    return true;
+}
+function showInputError(message){ const modal=document.getElementById('inputErrorModal'); const text=document.getElementById('inputErrorText'); if(text) text.textContent=message; if(modal) modal.style.display='flex'; }
+function closeInputErrorModal(){ const modal=document.getElementById('inputErrorModal'); if(modal) modal.style.display='none'; }
+function setLoadingState(btn, text){ if (!btn) return; btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.textContent = text; }
+function nextStep(btn){ if(!validateCurrentStep()) return; setLoadingState(btn, 'Continuando...'); setTimeout(()=>{ if(currentStep < 4){ currentStep++; updateStepUI(); window.scrollTo({top:0, behavior:'smooth'});} btn.disabled=false; btn.textContent=btn.dataset.originalText || 'Continuar'; }, 250); }
+function prevStep(){ if(currentStep > 1){ currentStep--; updateStepUI(); window.scrollTo({top:0, behavior:'smooth'}); return; } openCancelModal('back'); }
+function openCancelModal(reason='cancel'){
+    const modal=document.getElementById('cancelModal');
+    const stepField=document.getElementById('cancelCurrentStep');
+    const title=document.getElementById('cancelModalTitle');
+    const text=document.getElementById('cancelModalText');
+    const confirm=document.getElementById('cancelModalConfirm');
+    if(stepField){ stepField.value = currentStep; }
+    if(reason === 'back'){
+        if(title) title.textContent='Sair desta etapa?';
+        if(text) text.textContent='Você está na primeira etapa do cadastro guiado. Ao confirmar a saída, o cadastro profissional iniciado será cancelado com segurança e você voltará para a plataforma.';
+        if(confirm) confirm.textContent='Confirmar saída';
+    } else {
+        if(title) title.textContent='Cancelar cadastro?';
+        if(text) text.textContent='Se você confirmar, o cadastro guiado será encerrado, seus dados parciais serão removidos com segurança e você voltará para a plataforma.';
+        if(confirm) confirm.textContent='Confirmar cancelamento';
+    }
+    if(modal){ modal.classList.remove('hide'); modal.style.display='flex'; }
+}
+function closeCancelModal(){ const modal=document.getElementById('cancelModal'); if(modal){ modal.classList.add('hide'); modal.style.display='none'; } }
+function openOtherProfessionModal(slot){ activeOtherProfessionSlot = Number(slot); const modal=document.getElementById('otherProfessionModal'); const input=document.getElementById('otherProfessionModalInput'); const label=document.getElementById('otherProfessionModalLabel'); const hidden=document.getElementById(`newProfessionRequest${slot}`); if(label) label.textContent = `Digite a nova profissão da posição ${slot}`; if(input) input.value = hidden?.value || ''; if(modal){ modal.classList.remove('hide'); modal.style.display='flex'; } }
+function closeOtherProfessionModal(){ const modal=document.getElementById('otherProfessionModal'); if(modal){ modal.classList.add('hide'); modal.style.display='none'; } }
+function saveOtherProfession(){ const slot = activeOtherProfessionSlot; const input=document.getElementById('otherProfessionModalInput'); const hidden=document.getElementById(`newProfessionRequest${slot}`); const display=document.getElementById(`customProfessionDisplay${slot}`); const value=(input?.value || '').trim(); if(!slot || value.length < 3){ showInputError('Digite o nome da profissão com pelo menos 3 letras.'); return; } if(hidden) hidden.value = value; const select=document.querySelector(`select[data-slot="${slot}"]`); const other=getOtherOption(select); if(other) select.value=other.value; if(display){ display.innerHTML = `Nova profissão sugerida: <strong style="color:#ffd58a">${value}</strong> <button type="button" class="btn btn-ghost" style="padding:6px 10px;margin-left:8px" onclick="openOtherProfessionModal(${slot})">Editar</button>`; display.classList.remove('hide'); } closeOtherProfessionModal(); }
+function formatPhone(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,11); if(digits.length<=10){ return digits.replace(/(\d{2})(\d{0,4})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); } return digits.replace(/(\d{2})(\d{0,5})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); }
+function formatCep(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,8); return digits.replace(/(\d{5})(\d{0,3})/, (_,a,b)=> b ? `${a}-${b}` : a); }
+async function buscarCep(cep){ const raw=String(cep||'').replace(/\D/g,''); if(raw.length!==8) return; try{ const res=await fetch(`/api/cep/${raw}`); if(!res.ok) return; const data=await res.json(); const city=document.getElementById('onboardingCity'); const state=document.getElementById('onboardingState'); const cepField=document.getElementById('onboardingCep'); if(city) city.value=data.city||''; if(state) state.value=data.state||''; if(cepField) cepField.value=formatCep(data.cep||raw); }catch(e){} }
+function normalizeText(value){ return String(value||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim(); }
+function levenshtein(a,b){ const m=a.length,n=b.length; const dp=Array.from({length:m+1},()=>Array(n+1).fill(0)); for(let i=0;i<=m;i++) dp[i][0]=i; for(let j=0;j<=n;j++) dp[0][j]=j; for(let i=1;i<=m;i++){ for(let j=1;j<=n;j++){ const c=a[i-1]===b[j-1]?0:1; dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+c); } } return dp[m][n]; }
+function getOtherOption(select){ return Array.from(select?.options || []).find(opt => ['outros','outro'].includes(normalizeText(opt.textContent))); }
+function setProfessionSelection(slot, option, searchValue=''){ const select=document.querySelector(`select[data-slot="${slot}"]`); const search=slot===1?document.getElementById('primaryCategorySearch'):slot===2?document.getElementById('additionalCategorySearch'):document.getElementById('additionalCategorySearch2'); if(!select||!option) return false; select.value=option.value; if(searchValue && search) search.value=searchValue; handleProfessionChange(select); return true; }
+function autoResolveProfession(slot){ const search=slot===1?document.getElementById('primaryCategorySearch'):slot===2?document.getElementById('additionalCategorySearch'):document.getElementById('additionalCategorySearch2'); const select=document.querySelector(`select[data-slot="${slot}"]`); if(!search||!select) return false; const query=normalizeText(search.value); if(!query) return false; const opts=Array.from(select.options).slice(1).map(opt=>({opt, text:normalizeText(opt.textContent)})).filter(item=>!['outros','outro'].includes(item.text)); const scored=opts.map(item=>{ let score=999; if(item.text===query) score=0; else if(item.text.startsWith(query)) score=1; else if(item.text.includes(query)) score=2; else if(query.includes(item.text)) score=3; else score=10+levenshtein(item.text, query); return {...item, score}; }).sort((a,b)=>a.score-b.score); if(scored[0] && scored[0].score<=3){ return setProfessionSelection(slot, scored[0].opt, scored[0].opt.textContent); } return false; }
+function setupSearchableSelect(selectId, searchId, suggestionId){ const select=document.getElementById(selectId); const search=document.getElementById(searchId); const suggestionBox=document.getElementById(suggestionId); if(!select||!search||!suggestionBox) return; const master=Array.from(select.options).slice(1); function closeBox(){ suggestionBox.classList.remove('show'); suggestionBox.innerHTML=''; } function render(){ const q=normalizeText(search.value); if(!q){ closeBox(); return; } const regular=master.filter(opt=>!['outros','outro'].includes(normalizeText(opt.textContent))).map(opt=>({opt, text:normalizeText(opt.textContent)})); const matches=regular.map(item=>{ let score=999; if(item.text===q) score=0; else if(item.text.startsWith(q)) score=1; else if(item.text.includes(q)) score=2; else if(q.includes(item.text)) score=3; else score=10+levenshtein(item.text, q); return {...item, score}; }).filter(item=>item.score<=12).sort((a,b)=>a.score-b.score).slice(0,6); suggestionBox.innerHTML=''; if(matches.length){ matches.forEach((item,idx)=>{ const li=document.createElement('li'); li.textContent=item.opt.textContent; if(idx===0) li.classList.add('active'); li.addEventListener('mousedown',(e)=>{ e.preventDefault(); search.value=item.opt.textContent; select.value=item.opt.value; handleProfessionChange(select); closeBox(); }); suggestionBox.appendChild(li); }); } else { const li=document.createElement('li'); li.className='empty'; li.innerHTML=`Nenhum resultado para "${search.value}". Clique para sugerir em “Outros”.`; li.addEventListener('mousedown',(e)=>{ e.preventDefault(); const other=getOtherOption(select); if(other){ select.dataset.userTriggered='1'; select.value=other.value; handleProfessionChange(select); } closeBox(); }); suggestionBox.appendChild(li); } suggestionBox.classList.add('show'); }
+  search.addEventListener('input', ()=>{ if(!normalizeText(search.value)){ select.value=''; handleProfessionChange(select); } render(); });
+  search.addEventListener('focus', render);
+  search.addEventListener('keydown',(e)=>{ const items=[...suggestionBox.querySelectorAll('li:not(.empty)')]; let active=suggestionBox.querySelector('li.active'); let idx=items.indexOf(active); if(e.key==='ArrowDown' && items.length){ e.preventDefault(); idx=Math.min(items.length-1, idx+1); items.forEach(li=>li.classList.remove('active')); items[idx].classList.add('active'); } else if(e.key==='ArrowUp' && items.length){ e.preventDefault(); idx=Math.max(0, idx-1); items.forEach(li=>li.classList.remove('active')); items[idx].classList.add('active'); } else if(e.key==='Enter'){ const target=active || suggestionBox.querySelector('li'); if(target && suggestionBox.classList.contains('show')){ e.preventDefault(); target.dispatchEvent(new MouseEvent('mousedown', {bubbles:true})); } } });
+  document.addEventListener('click',(e)=>{ if(!search.contains(e.target) && !suggestionBox.contains(e.target)) closeBox(); });
+}
+function handleProfessionChange(select){ const slot=Number(select.dataset.slot); const selectedText=normalizeText(select.options[select.selectedIndex]?.textContent); const hidden=document.getElementById(`newProfessionRequest${slot}`); const display=document.getElementById(`customProfessionDisplay${slot}`); if(['outros','outro'].includes(selectedText)){ if(hidden?.value){ if(display){ display.innerHTML=`Nova profissão sugerida: <strong style="color:#ffd58a">${hidden.value}</strong> <button type="button" class="btn btn-ghost" style="padding:6px 10px;margin-left:8px" onclick="openOtherProfessionModal(${slot})">Editar</button>`; display.classList.remove('hide'); } } else if(select.dataset.userTriggered === '1'){ openOtherProfessionModal(slot); } } else { if(hidden) hidden.value=''; if(display){ display.textContent=''; display.classList.add('hide'); } } select.dataset.userTriggered='0'; }
+function setupAvatarPreview(){ const input=document.getElementById('avatarInput'); const preview=document.getElementById('avatarPreview'); if(!input||!preview) return; input.addEventListener('change', ()=>{ const file=input.files?.[0]; if(!file) return; const reader=new FileReader(); reader.onload=e=>preview.innerHTML=`<img src="${e.target.result}" alt="Avatar">`; reader.readAsDataURL(file); }); }
+function setupPortfolioPreview(){ const input=document.getElementById('portfolioInput'); const slotInput=document.getElementById('portfolioSlotInput'); const grid=document.getElementById('portfolioPreviewGrid'); const form=document.getElementById('onboardingForm'); if(!input||!slotInput||!grid||!form) return; const cards=Array.from(grid.querySelectorAll('.preview-card')); const selectedFiles=[null,null,null]; let activeSlotIndex=0; function renderCard(index,fileOrUrl){ const card=cards[index]; if(!card) return; if(!fileOrUrl){ card.classList.add('empty-slot'); card.innerHTML='<span style="color:#d9dde5">+ adicionar imagem</span>'; return; } if(typeof fileOrUrl==='string'){ card.classList.remove('empty-slot'); card.innerHTML=`<div style="width:100%"><img src="${fileOrUrl}" alt="Prévia"><div style="padding:8px 10px;font-size:12px;color:#ffd58a;text-align:center">Alterar imagem</div></div>`; return; } const reader=new FileReader(); reader.onload=e=>{ card.classList.remove('empty-slot'); card.innerHTML=`<div style="width:100%"><img src="${e.target.result}" alt="Prévia"><div style="padding:8px 10px;font-size:12px;color:#ffd58a;text-align:center">Alterar imagem</div></div>`; }; reader.readAsDataURL(fileOrUrl); } cards.forEach((card,index)=>{ const existingImg=card.querySelector('img'); if(existingImg) renderCard(index, existingImg.getAttribute('src')); else renderCard(index, null); card.addEventListener('click',()=>{ activeSlotIndex=index; slotInput.click(); }); }); slotInput.addEventListener('change',()=>{ const file=slotInput.files?.[0]; if(!file) return; selectedFiles[activeSlotIndex]=file; renderCard(activeSlotIndex,file); slotInput.value=''; }); input.addEventListener('change',()=>{ const files=Array.from(input.files||[]).slice(0,3); files.forEach((file,index)=>{ selectedFiles[index]=file; renderCard(index,file); }); input.value=''; }); form.addEventListener('submit',()=>{ const dt=new DataTransfer(); selectedFiles.filter(Boolean).forEach(file=>dt.items.add(file)); input.files=dt.files; }); }
+
+function buildAvailabilitySummary(){
+    const pieces=[];
+    const days=Array.from(document.querySelectorAll('input[name="working_days"]:checked')).map(el=>el.value);
+    const days24=Array.from(document.querySelectorAll('input[name="working_days_24h"]:checked')).map(el=>el.value);
+    const is24=!!document.getElementById('available24h')?.checked;
+    const allDays24=!!document.getElementById('available24hAllDays')?.checked;
+    const start=document.getElementById('availabilityStartSelect')?.value||'';
+    const end=document.getElementById('availabilityEndSelect')?.value||'';
+    const note=(document.getElementById('availability24hNote')?.value||'').trim();
+    if(is24){ pieces.push(note || (allDays24 ? 'Atendimento 24h todos os dias' : (days24.length ? `Atendimento 24h em ${days24.join(', ')}` : ''))); }
+    if(!allDays24){ const regular=[days.join(', '), (start&&end)?`${start} às ${end}`:''].filter(Boolean).join(' • '); if(regular) pieces.push(regular); }
+    [['saturday','Sábado'],['sunday','Domingo'],['holiday','Feriado']].forEach(([key,label])=>{
+        const mode=document.getElementById(`${key}ServiceMode`)?.value||'no';
+        if(mode==='same') pieces.push(`${label}: mesmo horário padrão`);
+        if(mode==='custom'){
+            const s=document.getElementById(`${key}StartSelect`)?.value||'';
+            const e=document.getElementById(`${key}EndSelect`)?.value||'';
+            if(s&&e) pieces.push(`${label}: ${s} às ${e}`);
+        }
+    });
+    return pieces.filter(Boolean).join(' • ');
+}
+
+function fillTimeSelect(id){ const el=document.getElementById(id); if(!el) return; const opts=['']; for(let h=0;h<24;h++){ for(let m=0;m<60;m+=30){ opts.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`); }} el.innerHTML=opts.map(v=>`<option value="${v}">${v||'Selecione um horário'}</option>`).join(''); }
+document.addEventListener('DOMContentLoaded', ()=>{ updateStepUI(); updatePlanUI(); setupAvatarPreview(); setupPortfolioPreview();
+    const onboardingForm = document.getElementById('onboardingForm');
+    const finishProfileBtn = document.getElementById('finishProfileBtn');
+    document.querySelectorAll('.plan-card').forEach(card=>card.addEventListener('click',()=>{ const input=card.querySelector('input[name="plan_tier"]'); if(input){ input.checked=true; updatePlanUI(); }}));
+    document.querySelectorAll('input[name="plan_tier"]').forEach(el=>el.addEventListener('change', updatePlanUI));
+    document.getElementById('planMonths')?.addEventListener('change', updatePlanUI);
+    setupSearchableSelect('primaryCategorySelect','primaryCategorySearch','primaryCategorySuggestions'); setupSearchableSelect('additionalCategorySelect1','additionalCategorySearch','additionalCategorySuggestions'); setupSearchableSelect('additionalCategorySelect2','additionalCategorySearch2','additionalCategorySuggestions2');
+    document.querySelectorAll('select[data-category-select]').forEach(el=>{ el.addEventListener('change',()=>{ el.dataset.userTriggered='1'; handleProfessionChange(el); }); handleProfessionChange(el); });
+    document.getElementById('serviceFeeAmount')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^\d,]/g,''); });
+    const onboardingPhone=document.querySelector('input[name="phone_number"]'); if(onboardingPhone?.value) onboardingPhone.value=formatPhone(onboardingPhone.value); onboardingPhone?.addEventListener('input',e=>{ e.target.value=formatPhone(e.target.value); });
+    const onboardingCep=document.getElementById('onboardingCep'); if(onboardingCep?.value) onboardingCep.value=formatCep(onboardingCep.value); onboardingCep?.addEventListener('input',e=>{ e.target.value=formatCep(e.target.value); });
+    document.getElementById('onboardingCity')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g,''); });
+    document.getElementById('onboardingState')?.addEventListener('input',e=>{ e.target.value=e.target.value.replace(/[^A-Za-zÀ-ÿ]/g,'').toUpperCase().slice(0,2); });
+    document.querySelectorAll('input, textarea, select').forEach(field=>field.addEventListener('keydown',e=>{ if(e.key==='Enter' && field.tagName!=='TEXTAREA') e.preventDefault(); }));
+    fillTimeSelect('availabilityStartSelect'); fillTimeSelect('availabilityEndSelect'); fillTimeSelect('holidayStartSelect'); fillTimeSelect('holidayEndSelect'); fillTimeSelect('saturdayStartSelect'); fillTimeSelect('saturdayEndSelect'); fillTimeSelect('sundayStartSelect'); fillTimeSelect('sundayEndSelect');
+    const openingSelect=document.getElementById('availabilityStartSelect');
+    const closingSelect=document.getElementById('availabilityEndSelect');
+    const available24h=document.getElementById('available24h');
+    const available24hAllDays=document.getElementById('available24hAllDays');
+    const available24hHolidays=document.getElementById('available24hHolidays');
+    const available24hSundays=document.getElementById('available24hSundays');
+    const availability24hWrap=document.getElementById('availability24hNoteWrap');
+    const availability24hPreview=document.getElementById('availability24hPreview');
+    const availability24hNote=document.getElementById('availability24hNote');
+    const holidayServiceMode=document.getElementById('holidayServiceMode');
+    const holidayTimeWrap=document.getElementById('holidayTimeWrap');
+    const holidayStartSelect=document.getElementById('holidayStartSelect');
+    const holidayEndSelect=document.getElementById('holidayEndSelect');
+    const saturdayServiceMode=document.getElementById('saturdayServiceMode');
+    const saturdayTimeWrap=document.getElementById('saturdayTimeWrap');
+    const saturdayStartSelect=document.getElementById('saturdayStartSelect');
+    const saturdayEndSelect=document.getElementById('saturdayEndSelect');
+    const sundayServiceMode=document.getElementById('sundayServiceMode');
+    const sundayTimeWrap=document.getElementById('sundayTimeWrap');
+    const sundayStartSelect=document.getElementById('sundayStartSelect');
+    const sundayEndSelect=document.getElementById('sundayEndSelect');
+    const workingDayChecks=Array.from(document.querySelectorAll('input[name="working_days"]'));
+    const working24Checks=Array.from(document.querySelectorAll('input[name="working_days_24h"]'));
+    function syncEndOptions(startSelect, endSelect){ if(!startSelect || !endSelect) return; const start=startSelect.value; const options=Array.from(startSelect.options).map(o=>o.value).filter(Boolean); const filtered=options.filter(v=>!start || v>start); const current=endSelect.value; endSelect.innerHTML=['<option value="">Selecione um horário</option>'].concat(filtered.map(v=>`<option value="${v}">${v}</option>`)).join(''); if(filtered.includes(current)) endSelect.value=current; else endSelect.value=''; endSelect.disabled=!start; }
+    function syncSpecialFields(modeSelect, wrap, startSelect, endSelect){ const mode = modeSelect?.value || 'no'; if(wrap) wrap.classList.toggle('hide', mode !== 'custom'); if(mode !== 'custom'){ if(startSelect) startSelect.value=''; if(endSelect) endSelect.value=''; } syncEndOptions(startSelect, endSelect); }
+    function sync24h(){
+        const is24=!!available24h?.checked;
+        const allDays=!!available24hAllDays?.checked;
+        const hasRegularDays=workingDayChecks.some(el=>el.checked);
+        if(availability24hWrap) availability24hWrap.classList.toggle('hide', !is24);
+        workingDayChecks.forEach(el=>{ el.disabled = is24 && allDays; if(is24 && allDays) el.checked=false; });
+        if(openingSelect){ openingSelect.disabled=is24 && allDays; if(is24 && allDays) openingSelect.value=''; }
+        if(closingSelect){ closingSelect.disabled=(is24 && allDays) || !openingSelect?.value; if(is24 && allDays) closingSelect.value=''; }
+        working24Checks.forEach(el=>{ el.disabled=!is24 || allDays; if(allDays){ el.checked=true; } else if(!is24){ el.checked=false; }});
+        if(!is24){ if(available24hAllDays) available24hAllDays.checked=false; if(available24hHolidays) available24hHolidays.checked=false; if(available24hSundays) available24hSundays.checked=false; }
+        const selected24=working24Checks.filter(el=>el.checked).map(el=>el.value);
+        const extras=[]; if(available24hSundays?.checked && !selected24.includes('Dom')) extras.push('domingos'); if(available24hHolidays?.checked) extras.push('feriados');
+        const note = is24 ? (allDays ? `Atendimento 24h todos os dias${available24hHolidays?.checked ? ', incluindo feriados' : ''}` : `Atendimento 24h em ${selected24.join(', ')}${extras.length ? (selected24.length ? ' • ' : '') + extras.join(' • ') : ''}`.trim()) : '';
+        if(availability24hNote) availability24hNote.value = note;
+        if(availability24hPreview) availability24hPreview.textContent = note || 'Exemplo: Atendimento 24h em Seg, Ter e Qua. Feriados: não.';
+        if(!allDays && hasRegularDays) syncEndOptions(openingSelect, closingSelect);
+    }
+    openingSelect?.addEventListener('change',()=>{ syncEndOptions(openingSelect, closingSelect); sync24h(); });
+    holidayStartSelect?.addEventListener('change', ()=>syncEndOptions(holidayStartSelect, holidayEndSelect));
+    saturdayStartSelect?.addEventListener('change', ()=>syncEndOptions(saturdayStartSelect, saturdayEndSelect));
+    sundayStartSelect?.addEventListener('change', ()=>syncEndOptions(sundayStartSelect, sundayEndSelect));
+    holidayServiceMode?.addEventListener('change', ()=>syncSpecialFields(holidayServiceMode, holidayTimeWrap, holidayStartSelect, holidayEndSelect));
+    saturdayServiceMode?.addEventListener('change', ()=>syncSpecialFields(saturdayServiceMode, saturdayTimeWrap, saturdayStartSelect, saturdayEndSelect));
+    sundayServiceMode?.addEventListener('change', ()=>syncSpecialFields(sundayServiceMode, sundayTimeWrap, sundayStartSelect, sundayEndSelect));
+    available24h?.addEventListener('change', sync24h); available24hAllDays?.addEventListener('change', sync24h); available24hHolidays?.addEventListener('change', sync24h); available24hSundays?.addEventListener('change', sync24h); working24Checks.forEach(el=>el.addEventListener('change', sync24h)); workingDayChecks.forEach(el=>el.addEventListener('change', sync24h));
+    syncEndOptions(openingSelect, closingSelect); sync24h(); syncSpecialFields(holidayServiceMode, holidayTimeWrap, holidayStartSelect, holidayEndSelect); syncSpecialFields(saturdayServiceMode, saturdayTimeWrap, saturdayStartSelect, saturdayEndSelect); syncSpecialFields(sundayServiceMode, sundayTimeWrap, sundayStartSelect, sundayEndSelect);
+    document.getElementById('onboardingCep')?.addEventListener('blur',e=>buscarCep(e.target.value));
+    const serviceToggle=document.getElementById('serviceFeeToggle'); const serviceAmount=document.getElementById('serviceFeeAmount'); const savedPriceValue=`<%= profissional.price_value || '' %>`;
+    function syncServiceFee(){ const enabled=!!serviceToggle?.checked; if(serviceAmount){ serviceAmount.classList.toggle('hide', !enabled); if(!enabled) serviceAmount.value=''; } }
+    if(serviceAmount && savedPriceValue){ serviceAmount.value=savedPriceValue.replace('.', ','); } if(serviceToggle && serviceAmount && serviceAmount.value){ serviceToggle.checked=true; } serviceToggle?.addEventListener('change', syncServiceFee); syncServiceFee();
+    document.getElementById('mobileBackBtn')?.addEventListener('click', ()=>prevStep());
+    document.getElementById('mobileHomeBtn')?.addEventListener('click', ()=>openCancelModal('cancel'));
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', ()=>openCancelModal('cancel'));
+    document.getElementById('mobileCurrentBtn')?.addEventListener('click', e=>{ e.preventDefault(); openCancelModal(); });
+    onboardingForm?.addEventListener('submit', (e)=>{ if(!validateCurrentStep()){ e.preventDefault(); return; } const phoneEl=document.querySelector('input[name="phone_number"]'); const cepEl=document.getElementById('onboardingCep'); if(phoneEl) phoneEl.value=String(phoneEl.value||'').replace(/\D/g,'').slice(0,11); if(cepEl) cepEl.value=String(cepEl.value||'').replace(/\D/g,'').slice(0,8); const availabilitySummary=document.getElementById('availabilitySummaryInput'); if(availabilitySummary) availabilitySummary.value=buildAvailabilitySummary(); if(finishProfileBtn){ setLoadingState(finishProfileBtn, 'Finalizando...'); } });
+});</script>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
+</body>
+</html>

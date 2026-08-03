@@ -1,0 +1,98 @@
+<header class="airbnb-header">
+    <div class="container header-grid">
+        <div class="header-left">
+            <a href="/" class="site-logo"><img src="/imagens/logo/logo_contratae.png" alt="Logo Contrataê"></a>
+        </div>
+
+        <div class="header-center desktop-only">
+            <div class="search-pill">
+                <input type="text" class="search-input-pill" placeholder="Busque por pintor, pedreiro...">
+                <button class="search-btn-round"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <!-- Google Translate Element (Apenas um) -->
+            <div id="google_translate_element" class="desktop-only"></div>
+            
+            <button id="theme-toggle" class="icon-btn" title="Alternar Tema">
+                <i class="fas fa-moon"></i>
+            </button>
+            
+            <% if (typeof adminLogado !== 'undefined' && adminLogado) { %>
+                <a href="/admin" class="login-pill">
+                    <span class="login-text">Painel ADM</span>
+                    <span class="login-icon"><i class="fas fa-user-shield"></i></span>
+                </a>
+            <% } else if (typeof userId !== 'undefined' && userId) { %>
+                <div class="user-menu-wrapper">
+                    <button type="button" class="login-pill user-menu-toggle" id="userMenuToggle">
+                        <span class="login-text"><%= fullName ? fullName.split(' ')[0] : 'Minha Conta' %></span>
+                        <span class="login-icon"><i class="fas fa-user-circle"></i></span>
+                        <span class="caret"><i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="<%= userType === 'professional' ? '/profissional/dashboard?tab=perfil' : '/cliente/dashboard?tab=perfil' %>"><i class="fas fa-id-card"></i> Perfil</a>
+                        <a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>"><i class="fas fa-gauge-high"></i> Dashboard</a>
+                        <form method="POST" action="/auth/logout" class="logout-inline-form"><button type="submit" class="logout-inline-btn"><i class="fas fa-right-from-bracket"></i> Sair</button></form>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/auth/login" class="login-pill">
+                    <span class="login-text">Entrar / Cadastrar</span>
+                    <span class="login-icon"><i class="fas fa-user-circle"></i></span>
+                </a>
+            <% } %>
+        </div>
+    </div>
+
+    <nav class="categories-nav" id="main-nav">
+        <div class="container">
+            <div class="nav-header mobile-only">
+                <h3>Menu</h3>
+                <button id="close-menu-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <ul>
+                <li><a href="/" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'index') ? 'active' : '' %>"><i class="fas fa-home"></i> Início</a></li>
+                <li><a href="/categoria/pintores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pintores') ? 'active' : '' %>"><i class="fas fa-paint-roller"></i> Pintores</a></li>
+                <li><a href="/categoria/pedreiros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pedreiros') ? 'active' : '' %>"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
+                <li><a href="/categoria/eletricistas" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'eletricistas') ? 'active' : '' %>"><i class="fas fa-bolt"></i> Eletricistas</a></li>
+                <li><a href="/categoria/encanadores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'encanadores') ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
+                <li><a href="/categoria/outros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'outros') ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
+                <li><a href="/contato" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'contato') ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
+                <% if (adminLogado) { %>
+                    <li class="mobile-only"><a href="/admin"><i class="fas fa-user-shield"></i> Painel ADM</a></li>
+                <% } else if (userId) { %>
+                    <li class="mobile-only"><a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>"><i class="fas fa-gauge-high"></i> Dashboard</a></li>
+                    <li class="mobile-only"><form method="POST" action="/auth/logout" class="logout-inline-form"><button type="submit" class="logout-inline-btn"><i class="fas fa-right-from-bracket"></i> Sair</button></form></li>
+                <% } else { %>
+                    <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </nav>
+        <style>
+        .logout-inline-form{margin:0}
+        .logout-inline-btn{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0;display:flex;align-items:center;gap:8px;width:100%;text-align:left}
+        .user-dropdown .logout-inline-btn{padding:0}
+        .mobile-logout-form .logout-inline-btn{padding:0;color:inherit}
+    </style>
+    <script>
+        (function(){
+            const toggle = document.getElementById('userMenuToggle');
+            const menu = document.getElementById('userDropdown');
+            if (!toggle || !menu) return;
+            toggle.addEventListener('click', function(e){
+                e.preventDefault();
+                e.stopPropagation();
+                menu.classList.toggle('open');
+            });
+            document.addEventListener('click', function(e){
+                if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+                    menu.classList.remove('open');
+                }
+            });
+            if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistration) { navigator.serviceWorker.getRegistration('/').then(reg=>reg&&reg.unregister()).catch(()=>{}); }
+        })();
+    </script>
+</header>

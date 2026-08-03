@@ -1,0 +1,13 @@
+{
+  "name": "Contrataê",
+  "short_name": "Contrataê",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0c",
+  "theme_color": "#101114",
+  "description": "Contrataê conecta clientes e profissionais locais.",
+  "icons": [
+    { "src": "/imagens/equipe_site/Mascote.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/imagens/equipe_site/Mascote.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

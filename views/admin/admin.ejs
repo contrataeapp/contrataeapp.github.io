@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Gestão ADM v2.0</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-wrapper">
+        <aside class="sidebar">
+            <div class="logo"><a href="/">Contrataê</a></div>
+            <nav>
+                <ul>
+                    <li><a href="#dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                    <li><a href="#profissionais"><i class="fas fa-tools"></i> Profissionais</a></li>
+                    <li><a href="#solicitacoes"><i class="fas fa-user-check"></i> Solicitações <span class="badge-count" id="count-solicitacoes">0</span></a></li>
+                    <li><a href="#banners"><i class="fas fa-ad"></i> Banners</a></li>
+                    <li><a href="#categorias"><i class="fas fa-list"></i> Categorias</a></li>
+                    <li><a href="#comentarios"><i class="fas fa-star"></i> Moderação</a></li>
+                    <li><a href="#relatorios"><i class="fas fa-file-pdf"></i> Relatórios</a></li>
+                    
+                    <li><a href="#mensagens"><i class="fas fa-envelope"></i> Mensagens</a></li>
+                    <li><a href="#notificacoes"><i class="fas fa-bell"></i> Notificações</a></li>
+                    <li><a href="#configuracoes"><i class="fas fa-cog"></i> Configurações</a></li>
+                    
+                    <li><a href="/admin/logout"><i class="fas fa-power-off"></i> Sair</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <header>
+                <button id="mobile-sidebar-trigger" class="mobile-only" style="background:none; border:none; font-size:1.5rem; color:var(--primary); cursor:pointer; margin-right:15px;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>Painel de Controle</h1>
+                <div class="user-info">
+                    <span>Administrador</span>
+                    <div class="avatar">ADM</div>
+                </div>
+            </header>
+
+            <section class="admin-section active" id="dashboard">
+                <div class="section-header">
+                    <h2>Resumo do Sistema</h2>
+                    
+                    <div class="section-controls" style="width: auto;">
+                        <select id="filtro-categoria-dash" class="filter-select" onchange="aplicarFiltroDash()">
+                            <option value="" <%= typeof filtroAtivo !== 'undefined' && !filtroAtivo.categoria ? 'selected' : '' %>>Geral (Todas as Categorias)</option>
+                            <option value="Pintor" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.categoria === 'Pintor' ? 'selected' : '' %>>Somente Pintores</option>
+                            <option value="Pedreiro" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.categoria === 'Pedreiro' ? 'selected' : '' %>>Somente Pedreiros</option>
+                            <option value="Eletricista" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.categoria === 'Eletricista' ? 'selected' : '' %>>Somente Eletricistas</option>
+                            <option value="Encanador" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.categoria === 'Encanador' ? 'selected' : '' %>>Somente Encanadores</option>
+                        </select>
+                    </div>
+                </div>
+              
+                <div class="summary-cards">
+                    <div class="card finance">
+                        <div class="icon"><i class="fas fa-wallet"></i></div>
+                        <div class="details">
+                            <h3>Receita Total <i class="fas fa-info-circle info-icon" title="Soma total de todos os pagamentos registrados pelos profissionais na plataforma até hoje."></i></h3>
+                            <p>R$ <%= typeof totais !== 'undefined' ? totais.receitaTotal.toFixed(2).replace('.', ',') : '0,00' %></p>
+                        </div>
+                    </div>
+                    
+                    <!-- GRÁFICO DE RECEITA -->
+                    <div class="card chart-card" style="grid-column: span 2;">
+                        <h3>Receita Mensal</h3>
+                        <canvas id="chartReceita"></canvas>
+                    </div>
+ 
+                    <div class="card monthly">
+                        <div class="icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="details">
+                            <h3>Este Mês <i class="fas fa-info-circle info-icon" title="Soma dos pagamentos realizados por profissionais no mês atual (cadastros e renovações)."></i></h3>
+                            <p>R$ <%= typeof totais !== 'undefined' ? totais.receitaMes.toFixed(2).replace('.', ',') : '0,00' %></p>
+                        </div>
+                    </div>
+      
+                    <div class="card active-users">
+                        <div class="icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="details">
+                            <h3>Ativos</h3>
+                            <p><%= typeof totais !== 'undefined' ? totais.ativos : '0' %></p>
+                        </div>
+                    </div>
+                    <div class="card pending-users">
+                        <div class="icon"><i class="fas fa-clock"></i></div>
+                        <div class="details">
+                            <h3>Pendentes</h3>
+                            <p><%= typeof totais !== 'undefined' ? totais.pendentes : '0' %></p>
+                        </div>
+                    </div>
+                    <div class="card paused-users">
+                        <div class="icon"><i class="fas fa-pause-circle"></i></div>
+                        <div class="details">
+                            <h3>Pausados</h3>
+                            <p><%= typeof totais !== 'undefined' ? totais.pausados : '0' %></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-section" id="solicitacoes">
+                <div class="section-header">
+                    <h2>Solicitações de Aprovação</h2>
+                    <p>Profissionais que completaram o perfil e aguardam ativação.</p>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Profissional</th>
+                                <th>Categoria</th>
+                                <th>Data Solicitação</th>
+                                <th>Pagamento</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-solicitacoes">
+                            <!-- Preenchido via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-section" id="profissionais">
+                <div class="section-header">
+                    <h2>Gestão de Profissionais</h2>
+                    <div class="section-controls">
+                        <input type="text" id="busca" class="search-input" placeholder="Aperte Enter para buscar..." value="<%= typeof filtroAtivo !== 'undefined' ? filtroAtivo.busca || '' : '' %>">
+                        
+                        <select id="filtro-categoria" class="filter-select">
+                            <option value="" <%= typeof filtroAtivo !== 'undefined' && !filtroAtivo.categoria ? 'selected' : '' %>>Todas as Categorias</option>
+                            <option value="Pintor" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.categoria === 'Pintor' ? 'selected' : '' %>>Pintores</option>
+                            <option value="Pedreiro" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.categoria === 'Pedreiro' ? 'selected' : '' %>>Pedreiros</option>
+                            <option value="Eletricista" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.categoria === 'Eletricista' ? 'selected' : '' %>>Eletricistas</option>
+                            <option value="Encanador" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.categoria === 'Encanador' ? 'selected' : '' %>>Encanadores</option>
+                        </select>
+                        
+                        <select id="filtro-status" class="filter-select">
+                            <option value="" <%= typeof filtroAtivo !== 'undefined' && !filtroAtivo.status ? 'selected' : '' %>>Todos (Exceto Excluídos)</option>
+                            <option value="active" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.status === 'active' ? 'selected' : '' %>>Ativos</option>
+                            <option value="pending" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.status === 'pending' ? 'selected' : '' %>>Pendentes</option>
+                            <option value="paused" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.status === 'paused' ? 'selected' : '' %>>Pausados</option>
+                            <option value="excluded" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.status === 'excluded' ? 'selected' : '' %>>Contas Excluídas</option>
+                        </select>
+
+                        <input type="text" id="filtro-cidade" class="search-input" placeholder="Filtrar por cidade..." value="<%= typeof filtroAtivo !== 'undefined' ? filtroAtivo.cidade || '' : '' %>">
+                        
+                        <select id="ordenar" class="filter-select">
+                            <option value="" <%= typeof filtroAtivo !== 'undefined' && !filtroAtivo.ordenar ? 'selected' : '' %>>Ordenação Padrão</option>
+                            <option value="vencimento" <%= typeof filtroAtivo !== 'undefined' && filtroAtivo.ordenar === 'vencimento' ? 'selected' : '' %>>Vencimento (Próximo)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Profissional</th>
+                                <th>Categoria</th>
+                                <th>Status</th>
+                                <th>Vencimento</th>
+                                <th>Valor Pago</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+  
+                        <tbody id="tabela-profissionais">
+                            <% if (typeof profissionais === 'undefined' || profissionais.length === 0) { %>
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: #999;">Nenhum profissional encontrado com estes filtros</td>
+                                </tr>
+                            <% } else { %>
+                                <% profissionais.forEach(function(p) { %>
+                                    <tr class="profissional-row" data-id="<%= p.id %>">
+                                        <td>
+                                            <div class="profissional-info">
+                                                <img src="<%= p.foto || '/imagens/equipe_site/Mascote.png' %>" alt="<%= p.nome %>" class="avatar-mini">
+                                                <div>
+                                                    <strong><%= p.nome %></strong>
+                                                    <small style="color: #666;"><i class="fas fa-envelope"></i> <%= p.email || 'Sem e-mail cadastrado' %></small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><%= p.profissao %></td>
+                                        <td>
+                                            <span class="badge <%= p.status ? p.status.toLowerCase() : '' %> <%= p.alerta_status ? 'alerta-' + p.alerta_status : '' %>">
+                                                <%= p.status %>
+                                                <% if (p.alerta_status === 'critico') { %>
+                                                    <i class="fas fa-exclamation-triangle" title="Perto do Vencimento"></i>
+                                                <% } else if (p.alerta_status === 'vencido') { %>
+                                                    <i class="fas fa-times-circle" title="Vencido"></i>
+                                                <% } %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <% if (p.data_vencimento) { %>
+                                                <%= new Date(p.data_vencimento).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) %>
+                                            <% } else { %>
+                                                <span style="color: #999;">---</span>
+                                            <% } %>
+                                        </td>
+                                        <td>R$ <%= (Number(p.valor_pago) || 0).toFixed(2).replace('.', ',') %></td>
+                                        <td class="acoes-cell">
+                                            
+                                            <% if (p.status === 'PENDENTE') { %>
+                                                <button class="btn-action approve" onclick="abrirModalAprovar('<%= p.id %>', '<%= p.nome %>')" title="Aprovar">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                
+                                                <button class="btn-action suspend" onclick="abrirModalExcluir('<%= p.id %>', '<%= p.nome %>')" title="Excluir Perfil">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            
+                                            <% } else if (p.status === 'EXCLUIDO') { %>
+                                                <button class="btn-action approve" onclick="abrirModalReativar('<%= p.id %>', '<%= p.nome %>')" title="Reativar e Recuperar Conta">
+                                                    <i class="fas fa-undo"></i> Reativar
+                                                </button>
+                                                <button class="btn-action logs" onclick="abrirModalLogs('<%= p.id %>', '<%= p.nome %>')" title="Ver Histórico e Motivo de Saída">
+                                                    <i class="fas fa-history"></i> Logs
+                                                </button>
+
+                                            <% } else { %>
+                                                <button class="btn-action edit" onclick="abrirModalEditar('<%= p.id %>', '<%= p.nome %>', '<%= p.valor_pago || 0 %>', '<%= p.data_vencimento || '' %>')" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                
+                                                <% if (p.status === 'ATIVO') { %>
+                                                    <button class="btn-action suspend" onclick="alterarStatusPausar('<%= p.id %>')" title="Pausar">
+                                                        <i class="fas fa-pause"></i>
+                                                    </button>
+                                                <% } else { %>
+                                                    <button class="btn-action approve" onclick="abrirModalReativar('<%= p.id %>', '<%= p.nome %>')" title="Reativar e/ou Renovar">
+                                                        <i class="fas fa-play"></i>
+                                                    </button>
+                                                <% } %>
+
+                                                <button class="btn-action whatsapp" onclick="abrirWhatsApp('<%= p.whatsapp %>', '<%= p.nome %>', '<%= p.alerta_status || '' %>')" title="Falar no WhatsApp">
+                                                    <i class="fab fa-whatsapp"></i>
+                                                </button>
+                                                
+                                                <button class="btn-action logs" onclick="abrirModalLogs('<%= p.id %>', '<%= p.nome %>')" title="Histórico de Pagamentos">
+                                                    <i class="fas fa-file-invoice-dollar"></i>
+                                                </button>
+                                                
+                                                <button class="btn-action suspend" onclick="abrirModalExcluir('<%= p.id %>', '<%= p.nome %>')" title="Excluir Perfil">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-section" id="banners">
+                <div class="section-header">
+                    <h2>Gestão de Banners (Nuvem)</h2>
+                    <p style="color: #666; font-size: 0.9em; margin-top: 5px;">Selecione o banner. Se digitar apenas um número (Ex: 16999999999) o sistema cria o link de WhatsApp.</p>
+                </div>
+                <div class="banners-grid-container">
+                    <div class="banner-group">
+                        <h3><i class="fas fa-images"></i> Carrossel do Topo (Até 5 Imagens)</h3>
+                        <div class="slots-grid" id="slots-topo"></div>
+                    </div>
+                    <div class="banner-group">
+                        <h3><i class="fas fa-images"></i> Carrossel do Rodapé (Até 5 Parceiros)</h3>
+                        <div class="slots-grid" id="slots-rodape"></div>
+                    </div>
+                    <div class="banner-group">
+                        <h3><i class="fas fa-pager"></i> Banners Laterais (Fixos)</h3>
+                        <div class="slots-grid" id="slots-laterais"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-section" id="comentarios">
+                <div class="section-header">
+                    <h2>Moderação de Avaliações</h2>
+                    <p style="color: #666; font-size: 0.9em; margin-top: 5px;">Aprove ou oculte os comentários dos clientes antes de irem para o site.</p>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Profissional</th>
+                                <th>Nota</th>
+                                <th>Comentário</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-comentarios">
+                            <tr>
+                                <td colspan="6" style="text-align: center;">Carregando dados...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-section" id="categorias">
+                <div class="section-header">
+                    <h2>Gestão de Categorias</h2>
+                    <button class="btn-confirm" onclick="abrirModalCategoria()" style="width: auto; padding: 10px 20px;">
+                        <i class="fas fa-plus"></i> Nova Categoria
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Slug</th>
+                                <th>Ícone (FontAwesome)</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-categorias">
+                            <!-- Carregado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-section" id="relatorios">
+                <div class="section-header">
+                    <h2>Relatórios Avançados</h2>
+                </div>
+                
+                <div class="filter-bar" style="background: #222; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <label>Data Início</label>
+                        <input type="date" id="rep-data-inicio" class="filter-select">
+                    </div>
+                    <div class="form-group">
+                        <label>Data Fim</label>
+                        <input type="date" id="rep-data-fim" class="filter-select">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="rep-categoria" class="filter-select">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="rep-status" class="filter-select">
+                            <option value="">Todos</option>
+                            <option value="active">Ativos</option>
+                            <option value="pending">Pendentes</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end; gap: 10px;">
+                        <button class="btn-confirm" onclick="gerarRelatorioAvancado('pdf')" style="margin: 0; background: #e03c31;"><i class="fas fa-file-pdf"></i> PDF</button>
+                        <button class="btn-confirm" onclick="gerarRelatorioAvancado('csv')" style="margin: 0; background: #28a745;"><i class="fas fa-file-csv"></i> CSV</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="tabela-relatorio-preview">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Profissional</th>
+                                <th>Categoria</th>
+                                <th>Status</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-relatorio">
+                            <tr><td colspan="5" style="text-align: center; color: #999;">Use os filtros acima para gerar um relatório</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-section" id="mensagens">
+                <div class="section-header">
+                    <h2>Mensagens de Contato</h2>
+                    <p style="color: #666; font-size: 0.9em; margin-top: 5px;">Caixa de entrada do formulário "Fale Conosco".</p>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Assunto</th>
+                                <th>Mensagem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #999;">Nenhuma mensagem recebida ainda.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-section" id="notificacoes">
+                <div class="section-header">
+                    <h2>Sistema de Notificações</h2>
+                </div>
+                <div style="background: white; padding: 40px; border-radius: 8px; text-align: center; border: 1px dashed #ccc;">
+                    <i class="fas fa-bell" style="font-size: 40px; color: var(--accent); margin-bottom: 15px;"></i>
+                    <h3>Disparo de Avisos</h3>
+                    <p style="color: #666;">Em breve você poderá disparar mensagens para todos os profissionais de uma vez.</p>
+                </div>
+            </section>
+
+            <section class="admin-section" id="configuracoes">
+                <div class="section-header">
+                    <h2>Configurações do Site</h2>
+                </div>
+                <div style="background: white; padding: 40px; border-radius: 8px; text-align: center; border: 1px dashed #ccc;">
+                    <i class="fas fa-cogs" style="font-size: 40px; color: var(--accent); margin-bottom: 15px;"></i>
+                    <h3>Ajustes Globais</h3>
+                    <p style="color: #666;">Aqui você poderá alterar os textos e taxas do sistema futuramente.</p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <div id="modal-aprovar" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-aprovar')">&times;</span>
+            <h2>Aprovar: <span id="nome-prof-aprovar"></span></h2>
+            <div id="aprovar-resumo" style="margin-bottom:15px;padding:12px;background:#f8f8f8;border-radius:10px;font-size:13px;color:#444;"></div>
+            <form id="form-aprovar">
+                <input type="hidden" id="id-prof-aprovar">
+                
+                <div class="form-group">
+                    <label>Valor Pago (R$) *</label>
+                    <input type="number" id="valor-aprovar" step="0.01" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo de Prazo *</label>
+                    <select id="tipo-prazo-aprovar" onchange="atualizarCampoPrazo('aprovar')">
+                        <option value="dias">Dias</option>
+                        <option value="meses">Meses</option>
+                        <option value="data">Data Específica</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label id="label-prazo-aprovar">Quantidade de Dias *</label>
+                    <input type="number" id="prazo-aprovar" min="1" value="30" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Motivo (Opcional)</label>
+                    <textarea id="motivo-aprovar" rows="2" placeholder="Ex: Cadastro novo via Pix"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="payment-checked-whatsapp"> Conferi o pagamento enviado pelo WhatsApp</label>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="fecharModal('modal-aprovar')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Aprovar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-editar" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-editar')">&times;</span>
+            <h2>Editar: <span id="nome-prof-editar"></span></h2>
+            <form id="form-editar">
+                <input type="hidden" id="id-prof-editar">
+                
+                <div class="form-group">
+                    <label>Novo Valor Pago (R$)</label>
+                    <input type="number" id="valor-editar" step="0.01" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label>Prorrogar/Alterar Prazo?</label>
+                    <select id="tipo-prazo-editar" onchange="atualizarCampoPrazo('editar')">
+                        <option value="">Não alterar Vencimento</option>
+                        <option value="dias">Adicionar Dias</option>
+                        <option value="meses">Adicionar Meses</option>
+                        <option value="data">Nova Data Específica</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="grupo-prazo-editar" style="display: none;">
+                    <label id="label-prazo-editar">Quantidade</label>
+                    <input type="number" id="prazo-editar" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Motivo da Edição (Obrigatório) *</label>
+                    <textarea id="motivo-editar" rows="2" placeholder="Ex: Renovação mensal, ajuste de erro..." required></textarea>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="fecharModal('modal-editar')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Salvar Edição</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-reativar" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-reativar')">&times;</span>
+            <h2>Reativar Profissional: <span id="nome-prof-reativar"></span></h2>
+            <form id="form-reativar">
+                <input type="hidden" id="id-prof-reativar">
+                
+                <div class="form-group">
+                    <label>Ação Desejada</label>
+                    <select id="tipo-reativacao" onchange="atualizarCamposReativacao()">
+                        <option value="renovar">Renovar Assinatura (Alterar Valor e Vencimento)</option>
+                        <option value="apenas_reativar">Apenas Reativar (Manter valores e prazos antigos)</option>
+                    </select>
+                </div>
+
+                <div id="grupo-renovacao">
+                    <div class="form-group">
+                        <label>Novo Valor Recebido (R$) *</label>
+                        <input type="number" id="valor-reativar" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Prorrogar Vencimento em: *</label>
+                        <select id="tipo-prazo-reativar" onchange="atualizarCampoPrazo('reativar')">
+                            <option value="dias">Dias</option>
+                            <option value="meses">Meses</option>
+                            <option value="data">Data Específica</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="label-prazo-reativar">Quantidade de Dias *</label>
+                        <input type="number" id="prazo-reativar" min="1" value="30" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Motivo da Reativação (Obrigatório) *</label>
+                    <textarea id="motivo-reativar" rows="2" placeholder="Ex: Efetuou o pagamento do Pix, Cortesia da gerência..." required></textarea>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="fecharModal('modal-reativar')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Confirmar Reativação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-excluir" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-excluir')">&times;</span>
+            <h2><i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i> Excluir Conta: <span id="nome-prof-excluir"></span></h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">O profissional será ocultado da plataforma pública, mas seu histórico financeiro ficará salvo. Você poderá recuperá-lo a qualquer momento usando a aba "Excluídos".</p>
+            
+            <form id="form-excluir">
+                <input type="hidden" id="id-prof-excluir">
+                
+                <div class="form-group">
+                    <label>Motivo da Exclusão (Para os registros) *</label>
+                    <textarea id="motivo-excluir" rows="2" placeholder="Ex: Cliente solicitou cancelamento..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Senha do Administrador *</label>
+                    <input type="password" id="senha-excluir" required placeholder="Digite sua senha para confirmar a exclusão">
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="fecharModal('modal-excluir')">Cancelar</button>
+                    <button type="submit" class="btn-confirm" style="background-color: #dc3545;">Ocultar Conta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-logs" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="fecharModal('modal-logs')">&times;</span>
+            <h2>Histórico de Pagamentos: <span id="nome-prof-logs"></span></h2>
+            <div id="logs-container" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                <p style="color: #999;">Carregando histórico...</p>
+            </div>
+            
+            <div class="modal-buttons" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 0;">
+                <div style="display: flex; gap: 10px;" id="div-botoes-relatorio">
+                    <button type="button" class="btn-confirm" id="btn-baixar-relatorio" style="display: none; background-color: #28a745; margin: 0;" onclick="baixarRelatorioProfissional()">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </button>
+                    <button type="button" class="btn-action suspend" id="btn-baixar-pdf" style="display: none; margin: 0; padding: 10px 20px; background-color: #e03c31;" onclick="baixarRelatorioProfissionalPDF()">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                </div>
+                <button type="button" class="btn-cancel" onclick="fecharModal('modal-logs')" style="margin-left: auto;">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-categoria" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-categoria')">&times;</span>
+            <h2 id="titulo-modal-categoria">Nova Categoria</h2>
+            <form id="form-categoria">
+                <input type="hidden" id="id-categoria">
+                <div class="form-group">
+                    <label>Nome da Categoria *</label>
+                    <input type="text" id="nome-categoria" required placeholder="Ex: Pintor">
+                </div>
+                <div class="form-group">
+                    <label>Slug (URL) *</label>
+                    <input type="text" id="slug-categoria" required placeholder="Ex: pintores">
+                </div>
+                <div class="form-group">
+                    <label>Ícone (FontAwesome Class)</label>
+                    <input type="text" id="icon-categoria" placeholder="Ex: fas fa-paint-roller">
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="fecharModal('modal-categoria')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-banner" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal('modal-banner')">&times;</span>
+            <h2 id="titulo-modal-banner">Upload de Imagem</h2>
+            
+            <form id="form-banner">
+                <input type="hidden" id="id-banner">
+                <input type="hidden" id="posicao-banner">
+                <input type="hidden" id="ordem-banner">
+                
+                <div class="form-group">
+                    <label>Título / Nome da Empresa (Opcional)</label>
+                    <input type="text" id="titulo-banner" placeholder="Ex: Ponto Forte">
+                </div>
+
+                <div class="form-group">
+                    <label>Procurar no Computador (Imagem) *</label>
+                    <input type="file" id="arquivo-banner" accept="image/png, image/jpeg, image/jpg" style="padding: 10px; border: 1px solid #ccc; width: 100%;">
+                </div>
+
+                <div class="form-group">
+                    <label>Link ao clicar na foto (Instagram/WhatsApp)</label>
+                    <input type="text" id="link-banner" placeholder="https://...">
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="ativo-banner" checked style="width: 20px; height: 20px;">
+                        <span>Deixar Visível no Site?</span>
+                    </label>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="fecharModal('modal-banner')">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Fazer Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="/js/admin.js"></script>
+</body>
+</html>

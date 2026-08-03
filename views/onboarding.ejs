@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <%- include('partials/head', { title: 'Contrataê - Escolha seu Perfil' }) %>
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body class="dark-mode">
+    <%- include('partials/header') %>
+
+    <main style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+        <div class="container" style="max-width: 600px; text-align: center;">
+            <h1 style="color: #ffa500; margin-bottom: 10px;">Bem-vindo ao Contrataê!</h1>
+            <p style="color: #ccc; margin-bottom: 40px;">Para continuarmos, conte-nos como você pretende usar a plataforma:</p>
+
+            <% if (typeof erro !== 'undefined' && erro) { %>
+                <div style="background: rgba(255, 0, 0, 0.1); color: #ff4444; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ff4444;">
+                    <%= erro %>
+                </div>
+            <% } %>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <form action="/onboarding" method="POST">
+                    <input type="hidden" name="user_type" value="client">
+                    <button type="submit" class="card" style="width: 100%; cursor: pointer; background: #222;">
+                        <i class="fas fa-user-search" style="font-size: 3rem; color: #ffa500; margin-bottom: 15px;"></i>
+                        <h3 style="color: #fff;">Sou Cliente</h3>
+                        <p style="color: #888; font-size: 0.9rem;">Quero encontrar e contratar profissionais qualificados.</p>
+                    </button>
+                </form>
+
+                <form action="/onboarding" method="POST">
+                    <input type="hidden" name="user_type" value="professional">
+                    <button type="submit" class="card" style="width: 100%; cursor: pointer; background: #222;">
+                        <i class="fas fa-tools" style="font-size: 3rem; color: #ffa500; margin-bottom: 15px;"></i>
+                        <h3 style="color: #fff;">Sou Profissional</h3>
+                        <p style="color: #888; font-size: 0.9rem;">Quero oferecer meus serviços e conquistar novos clientes.</p>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

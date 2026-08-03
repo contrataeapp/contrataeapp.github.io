@@ -1,0 +1,54 @@
+
+        /* Estilos específicos para a página de Termos de Uso */
+        .terms-section {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: #f8f9fa;
+        }
+
+        .terms-section h1 {
+            color: #ffa500;
+            text-align: center;
+            margin-bottom: 1.5em;
+            font-size: 2.5em;
+        }
+
+        .terms-section h2 {
+            color: #ffcc00; /* Um tom ligeiramente diferente para sub-títulos */
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-size: 1.8em;
+        }
+
+        .terms-section p {
+            line-height: 1.8;
+            margin-bottom: 1em;
+        }
+
+        .terms-section ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            margin-bottom: 1em;
+        }
+
+        .terms-section ul li {
+            margin-bottom: 0.5em;
+        }
+
+        @media (max-width: 768px) {
+            .terms-section {
+                max-width: 95%;
+                margin: 20px auto;
+                padding: 20px;
+            }
+            .terms-section h1 {
+                font-size: 2em;
+            }
+            .terms-section h2 {
+                font-size: 1.5em;
+            }
+        }

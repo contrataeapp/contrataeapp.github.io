@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contrataê · Criar conta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Inter,Arial,sans-serif;min-height:100vh;background:radial-gradient(circle at top,#1f1f22 0%,#0b0b0c 65%);color:#fff;display:grid;place-items:center;padding:88px 24px 96px}.page-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:center;z-index:1000;padding:14px}.page-top-inner{width:min(980px,calc(100% - 24px));display:flex;justify-content:space-between;align-items:center;background:rgba(17,17,20,.9);border:1px solid #2f3137;border-radius:16px;padding:10px 14px;backdrop-filter:blur(8px)}.page-top a{color:#fff;text-decoration:none;font-weight:700}.page-top .highlight{color:#ffa500}
+        .shell{width:100%;max-width:1080px;display:grid;grid-template-columns:.9fr 1.1fr;gap:22px}
+        .lead,.form-card{background:linear-gradient(180deg,rgba(28,28,30,.96),rgba(20,20,22,.98));border:1px solid rgba(255,255,255,.08);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+        .lead{padding:34px 28px;display:flex;flex-direction:column;justify-content:space-between}
+        .form-card{padding:28px}
+        .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,178,30,.1);border:1px solid rgba(255,178,30,.25);color:#ffd58a;font-size:13px;font-weight:700;margin-bottom:16px}
+        .lead h1{color:#ffb21e;font-size:38px;line-height:1.05;margin-bottom:14px}
+        .lead p,.subtitle,.muted{color:#d5d5da;line-height:1.6}
+        .steps{display:grid;gap:14px;margin-top:26px}
+        .step{padding:16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+        .step strong{display:block;color:#ffb21e;margin-bottom:6px}
+        .title{margin:16px 0 8px;font-size:34px;color:#ffb21e}
+        .panel{padding:18px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);margin-bottom:18px}
+        form{display:grid;gap:16px}
+        .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        label{display:block;font-weight:700;margin-bottom:6px}
+        input,select{width:100%;background:#111114;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 15px;font-size:15px}
+        input[disabled]{background:#2a2a2f;color:#cfcfd5;cursor:not-allowed}
+        .help{color:#a9a9b1;font-size:13px;margin-top:6px;line-height:1.45}
+        .error{background:rgba(205,60,60,.12);border:1px solid rgba(205,60,60,.25);color:#ff9f9f;padding:12px 14px;border-radius:14px}
+        .password-wrap{position:relative}
+        .toggle-password{position:absolute;right:15px;top:50%;transform:translateY(-50%);cursor:pointer;color:#999}
+        .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+        .btn{flex:1;min-width:180px;border:0;border-radius:14px;padding:15px 18px;font-weight:800;cursor:pointer;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:10px}
+        .btn-secondary{background:#33343a;color:#fff}
+        .btn-primary{background:#ffb21e;color:#111}
+        .btn-google{background:#fff;color:#111}
+        .divider{display:flex;align-items:center;gap:12px;color:#9898a1;font-size:13px}
+        .divider:before,.divider:after{content:'';flex:1;height:1px;background:rgba(255,255,255,.09)}
+        .footer{text-align:center;color:#9f9fa8;font-size:14px;margin-top:8px}
+        .footer a,.link{color:#ffb21e;text-decoration:none;font-weight:700}
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1e1e1e;border-top:1px solid #333;display:none;justify-content:space-around;align-items:center;height:70px;z-index:1000}.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;height:100%;color:#999;text-decoration:none;font-size:12px;gap:5px}.nav-item i{font-size:22px}.nav-item.active,.nav-item:hover{color:#ffa500} @media (max-width: 900px){.shell{grid-template-columns:1fr}.lead{order:1}.form-card{order:2}}
+        @media (max-width: 640px){.grid-2{grid-template-columns:1fr}body{padding:12px 12px 90px}.form-card,.lead{padding:20px}.title{font-size:28px}.lead h1{font-size:30px}.page-top{display:none}} @media (max-width: 768px){.bottom-nav{display:flex}}
+    </style>
+</head>
+<body>
+    <div class="page-top"><div class="page-top-inner"><a href="/auth/cadastro"><i class="fas fa-arrow-left"></i> Voltar</a></div></div>
+    <nav class="bottom-nav safe-auth-nav">
+        <a href="javascript:void(0)" class="nav-item" id="mobileHomeBtn"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileBackBtn"><i class="fas fa-arrow-left"></i><span>Voltar</span></a>
+        <a href="javascript:void(0)" class="nav-item" id="mobileMenuBtn"><i class="fas fa-circle-question"></i><span>Menu</span></a>
+        <a href="/auth/cadastro" class="nav-item active"><i class="fas fa-user-plus"></i><span>Cadastro</span></a>
+    </nav>
+    <div class="shell">
+        <aside class="lead">
+            <div>
+                <span class="badge">Cadastro <%= userType === 'professional' ? 'profissional' : 'de cliente' %></span>
+                <h1><%= userType === 'professional' ? 'Crie sua conta e siga por etapas claras.' : 'Crie sua conta e encontre profissionais com facilidade.' %></h1>
+                <p><%= userType === 'professional' ? 'Depois desta conta inicial, você segue para o fluxo bonito do Contrataê: dados básicos, plano, profissões, perfil e imagens.' : 'Entre rápido como cliente para buscar profissionais, comparar perfis e acompanhar suas contratações sem confusão.' %></p>
+                <div class="steps">
+                    <div class="step"><strong>1. Crie sua conta</strong>Informe seu nome, e-mail e senha para liberar seu acesso.</div>
+                    <% if (userType === 'professional') { %>
+                    <div class="step"><strong>2. Complete o perfil</strong>Você continua no onboarding em etapas, sem perder o padrão visual.</div>
+                    <div class="step"><strong>3. Publique com confiança</strong>Monte seu perfil, portfólio e envie para análise quando estiver pronto.</div>
+                    <% } else { %>
+                    <div class="step"><strong>2. Entre no dashboard</strong>Depois do login, você já acessa sua área de cliente.</div>
+                    <div class="step"><strong>3. Contrate com praticidade</strong>Busque profissionais, veja perfis e acompanhe tudo de forma simples.</div>
+                    <% } %>
+                </div>
+            </div>
+            <div class="footer"><a href="/auth/cadastro">Voltar e mudar tipo de conta</a></div>
+        </aside>
+
+        <section class="form-card">
+            <span class="badge">Conta inicial</span>
+            <h2 class="title">Crie sua conta</h2>
+            <p class="subtitle">Seu fluxo continua do jeito certo depois desta etapa.</p>
+
+            <% if (erro) { %>
+                <div class="error"><%= erro %></div>
+            <% } %>
+
+            <div class="panel">
+                <form method="POST" action="/auth/cadastro" novalidate id="signupForm">
+                    <input type="hidden" name="user_type" value="<%= userType %>">
+                    <input type="hidden" name="next" value="<%= typeof next !== 'undefined' ? next : '' %>">
+                    <div class="grid-2">
+                        <div>
+                            <label>Nome completo</label>
+                            <input type="text" name="full_name" required placeholder="Seu nome completo" autocomplete="name">
+                        </div>
+                        <div>
+                            <label>E-mail</label>
+                            <input type="email" name="email" required placeholder="seu@email.com" autocomplete="email">
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div>
+                            <label>WhatsApp</label>
+                            <input type="tel" name="phone_number" class="mask-phone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15">
+                        </div>
+                        <div>
+                            <label>Tipo de conta</label>
+                            <input type="text" value="<%= userType === 'professional' ? 'Profissional' : 'Cliente' %>" disabled>
+                            <div class="help">Quer mudar? <a class="link" href="/auth/cadastro">Clique aqui</a></div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div>
+                            <label>Senha</label>
+                            <div class="password-wrap">
+                                <input type="password" id="password-registro" name="password" required placeholder="Crie uma senha">
+                                <i class="fas fa-eye toggle-password" onclick="togglePassword('password-registro', this)"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <label>Confirmar senha</label>
+                            <div class="password-wrap">
+                                <input type="password" id="password-confirm" name="password_confirm" required placeholder="Confirme a senha">
+                                <i class="fas fa-eye toggle-password" onclick="togglePassword('password-confirm', this)"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="btn btn-primary">Criar conta</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="divider">ou</div>
+            <div class="actions" style="margin-top:18px;">
+                <a href="/auth/google?type=<%= userType %><%= (typeof next !== 'undefined' && next) ? `&next=${encodeURIComponent(next)}` : '' %>" class="btn btn-google"><i class="fab fa-google"></i> Cadastrar com Google</a>
+            </div>
+
+            <div class="footer" style="margin-top:18px;font-size:16px;line-height:1.7"><span style="font-size:17px;color:#fff;font-weight:700">Já tem uma conta?</span> <a href="/auth/login<%= (typeof next !== 'undefined' && next) ? `?next=${encodeURIComponent(next)}` : '' %>" style="font-size:19px;font-weight:900;color:#ffcf73;text-shadow:0 0 18px rgba(255,178,30,.18)">Entrar na conta</a><br>Ou volte e escolha outro tipo de acesso.</div>
+        </section>
+    </div>
+
+    <script>
+        function togglePassword(id, icon) {
+            const input = document.getElementById(id);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+<script>document.querySelectorAll('form input').forEach((field)=>field.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); }}));</script>
+<script>
+function formatPhone(value){ const digits=String(value||'').replace(/\D/g,'').slice(0,11); if(!digits) return ''; if(digits.length<=10){ return digits.replace(/(\d{2})(\d{0,4})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); } return digits.replace(/(\d{2})(\d{0,5})(\d{0,4})/, (_,a,b,c)=>`(${a}) ${b}${c?'-'+c:''}`.trim()); }
+document.querySelectorAll('.mask-phone').forEach(el=>{ if(el.value) el.value=formatPhone(el.value); el.addEventListener('input',e=>{e.target.value=formatPhone(e.target.value)}); });
+document.getElementById('signupForm')?.addEventListener('submit', ()=>{ document.querySelectorAll('.mask-phone').forEach(el=>{ el.value = String(el.value||'').replace(/\D/g,'').slice(0,11); }); });
+document.querySelectorAll('form input').forEach(field=>field.addEventListener('keydown',e=>{ if(e.key==='Enter') e.preventDefault(); }));
+</script>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>window.addEventListener("load", function(){ if(window.VLibras){ new window.VLibras.Widget("https://vlibras.gov.br/app"); }});</script>
+
+<div id="authLeaveModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:1200;align-items:center;justify-content:center;padding:20px;">
+  <div style="width:min(420px,100%);background:#17181d;border:1px solid #2f3137;border-radius:20px;padding:22px;">
+    <h3 style="color:#ffb21e;margin-bottom:10px">Sair do cadastro?</h3>
+    <p style="color:#d0d0d7;margin-bottom:14px">Se você prosseguir, o fluxo atual será interrompido e você voltará para a plataforma.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+      <button type="button" onclick="closeAuthLeaveModal()" class="btn btn-secondary">Continuar cadastro</button>
+      <a href="/" class="btn" style="background:#b12c3a;color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center">Confirmar saída</a>
+    </div>
+  </div>
+</div>
+<script>
+function openAuthLeaveModal(){ const m=document.getElementById('authLeaveModal'); if(m){m.style.display='flex';} }
+function closeAuthLeaveModal(){ const m=document.getElementById('authLeaveModal'); if(m){m.style.display='none';} }
+document.getElementById('mobileBackBtn')?.addEventListener('click', ()=>history.back());
+document.getElementById('mobileHomeBtn')?.addEventListener('click', openAuthLeaveModal);
+document.getElementById('mobileMenuBtn')?.addEventListener('click', openAuthLeaveModal);
+</script>
+
+</body>
+</html>
