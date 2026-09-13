@@ -1,0 +1,129 @@
+/* cadastro.css */
+.cadastro-section {
+    max-width: 950px; /* Aumentei a largura para deixar o formulário maior. Pode ajustar se quiser mais ou menos. */
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #333; /* Mantendo a cor de fundo */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #f8f9fa; /* Cor do texto padrão para melhor contraste com o fundo */
+}
+
+.cadastro-section h2 {
+    color: #ffa500; /* Mantendo a cor laranja do título */
+    margin-bottom: 1em;
+    text-align: center; /* Centralizando o título da seção */
+}
+
+.form-group {
+    margin-bottom: 1.5em;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    color: #eee; /* Deixando a cor da label bem clara */
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="password"], /* Adicionado input de password */
+.form-group select,
+.form-group textarea {
+    width: calc(100% - 20px); /* Ajustado para 100% menos o padding lateral */
+    padding: 10px; /* Aumentado um pouco o padding dos inputs */
+    border: 1px solid #666; /* Borda um pouco mais visível */
+    border-radius: 4px;
+    background-color: #555; /* Fundo mais escuro para o input */
+    color: #f8f9fa; /* Cor do texto dentro do input */
+}
+
+/* Estilo para placeholders */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #bbb; /* Cor do texto placeholder */
+}
+
+/* Estilo para selects */
+.form-group select {
+    appearance: none; /* Remove estilo padrão do sistema */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23f8f9fa%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.4H18.4c-6.5%200-13%203.4-13.2%206.4l136.8%20136.9a17.6%2017.6%200%200%200%2025.2%200z%22%2F%3E%3C%2Fsvg%3E'); /* Seta customizada */
+    background-repeat: no-repeat;
+    background-position: right 8px top 50%;
+    background-size: 12px auto;
+}
+
+/* Botões */
+.cadastro-section button[type="submit"],
+.cadastro-section .voltar-button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 1.5em;
+    font-size: 1.1em;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.cadastro-section button[type="submit"] {
+    background-color: #ffa500;
+    color: #222;
+    border: 2px solid #ffa500;
+}
+
+.cadastro-section button[type="submit"]:hover {
+    background-color: #e69500;
+    border-color: #e69500;
+}
+
+.cadastro-section .voltar-button {
+    background-color: transparent;
+    color: #ffa500;
+    border: 2px solid #ffa500;
+    margin-bottom: 1em; /* Espaçamento entre o botão voltar e o formulário */
+}
+
+.cadastro-section .voltar-button:hover {
+    background-color: #ffa500;
+    color: #222;
+}
+
+/* Opcional: Estilo para a caixa de "Outros Serviços" */
+#outros-servico {
+    margin-top: 1em;
+    padding: 1em;
+    background-color: #444;
+    border-radius: 5px;
+    display: none; /* Inicia oculto */
+}
+
+#outros-servico label {
+    color: #f8f9fa;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+    .cadastro-section {
+        max-width: 95%; /* Reduz a largura em telas menores para não ficar colado nas bordas */
+        padding: 15px;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group input[type="password"],
+    .form-group select,
+    .form-group textarea {
+        width: calc(100% - 16px); /* Ajusta padding para telas menores */
+        padding: 8px;
+    }
+    .cadastro-section h2 {
+        font-size: 1.8em;
+    }
+}

@@ -1,0 +1,27 @@
+<% if (!adminLogado && userId && userType === 'professional' && professionalReady) { %>
+<div class="admin-top-bar" style="background: #ffa500; color: #000; padding: 10px 0; text-align: center; font-weight: bold;">
+    <div class="container">
+        <span><i class="fas fa-briefcase"></i> Modo Profissional Ativo</span>
+        <a href="/profissional/dashboard" style="margin-left: 15px; background: #000; color: #fff; padding: 5px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8rem;">Acessar Dashboard</a>
+    </div>
+</div>
+<% } %>
+
+
+<% if (!adminLogado && userId && userType === 'client') { %>
+<div class="admin-top-bar client-top-bar" style="background: #2563eb; color: #fff; padding: 10px 0; text-align: center; font-weight: bold;">
+    <div class="container">
+        <span><i class="fas fa-user"></i> Área do Cliente</span>
+        <a href="/cliente/dashboard" style="margin-left: 15px; background: #fff; color: #0b2f7a; padding: 5px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8rem;">Minha Dashboard</a>
+    </div>
+</div>
+<% } %>
+
+<% if (adminLogado) { %>
+<div class="admin-top-bar" style="background: #ffa500; color: #000; padding: 10px 0; text-align: center; font-weight: bold;">
+    <div class="container">
+        <span><i class="fas fa-user-shield"></i> Modo Administrador Ativo</span>
+        <a href="/admin" style="margin-left: 15px; background: #000; color: #fff; padding: 5px 15px; border-radius: 20px; text-decoration: none; font-size: 0.8rem;">Acessar Painel</a>
+    </div>
+</div>
+<% } %>

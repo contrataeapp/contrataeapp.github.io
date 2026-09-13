@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contato - Contrataê</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .contato-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .contato-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .contato-header h1 {
+            font-size: 36px;
+            color: #ffa500;
+            margin-bottom: 10px;
+        }
+
+        .contato-header p {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        .contato-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .contato-info {
+            background: #222;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+        }
+
+        .contato-info h2 {
+            color: #ffa500;
+            margin-bottom: 25px;
+            font-size: 22px;
+            text-align: center;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            transition: 0.3s;
+            border: 1px solid #444;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffa500;
+        }
+
+        .info-card i {
+            font-size: 30px;
+            color: #ffa500;
+            margin-bottom: 15px;
+        }
+
+        .info-card h3 {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .info-card p, .info-card a {
+            color: #ccc;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .info-card a:hover {
+            color: #ffa500;
+        }
+
+        .contato-form {
+            background: #222;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+        }
+
+        .contato-form h2 {
+            color: #ffa500;
+            margin-bottom: 25px;
+            font-size: 22px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffa500;
+            box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn-submit {
+            background: #ffa500;
+            color: #000;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #ff8c00;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.3);
+        }
+
+        .sobre-section {
+            background: #222;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 50px;
+            border: 1px solid #333;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .sobre-section h2 {
+            color: #ffa500;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .sobre-section p {
+            color: #ccc;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .sobre-section strong {
+            color: #ffa500;
+        }
+
+        @media (max-width: 768px) {
+            .contato-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .contato-header h1 {
+                font-size: 28px;
+            }
+
+            .contato-container {
+                margin: 20px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <% const bannerEsq = typeof banners !== 'undefined' && banners.find(b => b.posicao === 3); %>
+    <% if (bannerEsq) { %>
+    <div class="banner-lateral banner-esquerda" id="banner-mov">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerEsq.link_destino || bannerEsq.link_destination || '#' %>">
+            <img src="<%= bannerEsq.imagem_url || bannerEsq.image_url %>" alt="<%= bannerEsq.titulo || bannerEsq.title || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
+    <% const bannerDir = typeof banners !== 'undefined' && banners.find(b => b.posicao === 4); %>
+    <% if (bannerDir) { %>
+    <div class="banner-lateral banner-direita" id="banner-speed">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerDir.link_destino || bannerDir.link_destination || '#' %>">
+            <img src="<%= bannerDir.imagem_url || bannerDir.image_url %>" alt="<%= bannerDir.titulo || bannerDir.title || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
+    <%- include('partials/top-status-bar') %>
+    <%- include('partials/header', { currentPage: 'contato' }) %>
+
+    <main>
+        <div class="contato-container">
+            <div class="contato-header">
+                <h1>Entre em Contato</h1>
+                <p>Tem dúvidas ou sugestões? Adoraríamos ouvir de você!</p>
+            </div>
+
+            <div class="sobre-section">
+                <h2>Conheça a Contrataê</h2>
+                <p>
+                    Na <strong>Contrataê</strong>, nossa paixão é conectar pessoas que precisam de soluções com profissionais que as oferecem com excelência. Acreditamos que a tecnologia pode simplificar o dia a dia e trazer mais eficiência para a contratação de serviços.
+                </p>
+                <p>
+                    Desde a nossa fundação, trabalhamos incansavelmente para construir uma plataforma intuitiva, segura e confiável, onde clientes encontram desde pequenos reparos até grandes projetos, e profissionais expandem suas oportunidades de trabalho.
+                </p>
+                <p>
+                    Nosso compromisso é com a <strong>qualidade</strong>, a <strong>transparência</strong> e a <strong>inovação</strong>. Estamos sempre buscando novas maneiras de aprimorar a experiência de todos os usuários, garantindo que cada conexão seja um sucesso.
+                </p>
+            </div>
+
+            <div class="contato-grid">
+                <div class="contato-info">
+                    <h2>Informações</h2>
+                    <div class="info-cards">
+                        <div class="info-card">
+                            <i class="fas fa-envelope"></i>
+                            <h3>E-mail</h3>
+                            <p>time.contratae@gmail.com</p>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <h3>Localização</h3>
+                            <p>Taquaritinga - SP</p>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-share-alt"></i>
+                            <h3>Redes Sociais</h3>
+                            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px;">
+                                <a href="#"><i class="fab fa-facebook"></i></a>
+                                <a href="#"><i class="fab fa-instagram"></i></a>
+                                <a href="#"><i class="fab fa-twitter"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contato-form">
+                    <h2>Envie uma Mensagem</h2>
+                    <form action="/api/contato" method="POST">
+                        <div class="form-group">
+                            <label for="nome">Nome Completo</label>
+                            <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mensagem">Mensagem</label>
+                            <textarea id="mensagem" name="mensagem" placeholder="Como podemos ajudar?" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">Enviar Mensagem</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+    
+    <!-- Barra de Navegação Inferior (Mobile) -->
+    <nav class="mobile-bottom-nav mobile-only">
+        <a href="/" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="#" class="nav-item" id="mobile-menu-trigger">
+            <i class="fas fa-search"></i>
+            <span>Explorar</span>
+        </a>
+        <a href="/auth/login" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+</body>
+</html>

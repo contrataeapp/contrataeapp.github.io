@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê · Área do Profissional</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#101114">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Inter,Arial,sans-serif;background:#0f0f10;color:#f5f5f5}
+        .dashboard-container{display:flex;min-height:100vh}
+        .sidebar{width:230px;background:#111;padding:24px 12px;position:fixed;inset:0 auto 0 0;border-right:1px solid #232323}
+        .logo{font-size:22px;font-weight:800;margin-bottom:28px;text-align:center}.logo a{color:#ffb020;text-decoration:none}
+        .sidebar ul{list-style:none}.sidebar li{margin-bottom:8px}
+        .sidebar a,.sidebar-logout-btn{display:flex;align-items:center;gap:12px;color:#b8c0cc;text-decoration:none;padding:12px 14px;border-radius:12px;transition:.2s;width:100%;background:none;border:0;font:inherit;cursor:pointer;text-align:left}
+.sidebar-logout-form{margin:0}
+        .sidebar a:hover,.sidebar a.active,.sidebar-logout-btn:hover{background:rgba(255,176,32,.12);color:#ffb020}
+        .main{margin-left:230px;width:calc(100% - 230px);padding:28px}
+        header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px} h1{color:#ffb020;font-size:24px}
+        .user-chip{display:flex;align-items:center;gap:12px}.avatar{width:42px;height:42px;border-radius:50%;background:#ffb020;color:#111;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.avatar-action{border:2px solid transparent;cursor:pointer;position:relative;padding:0}.avatar-action:hover{border-color:#ffb020;box-shadow:0 0 0 4px rgba(255,176,32,.14)}.avatar-action::after{content:'Trocar foto';position:absolute;right:0;top:46px;background:#1d1f24;color:#fff;border:1px solid #393d46;border-radius:9px;padding:6px 8px;font-size:11px;white-space:nowrap;opacity:0;transform:translateY(-4px);pointer-events:none;transition:.15s;z-index:5}.avatar-action:hover::after{opacity:1;transform:translateY(0)}
+        .tab-content{display:none}.tab-content.active{display:block}
+        .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.card,.panel{background:linear-gradient(180deg,#171717,#141414);border:1px solid #252525;border-radius:18px;padding:18px}
+        .metric .icon{color:#ffb020;font-size:30px;margin-bottom:10px}.metric h3{color:#c2c9d1;font-size:13px;margin-bottom:8px}.metric .value{color:#ffb020;font-size:26px;font-weight:800}
+        .banner{padding:18px 20px;border-radius:16px;border:1px solid #67491a;background:#2b1f0c;margin-bottom:20px}.banner h3{color:#ffb020;margin-bottom:6px;font-size:15px}.banner p{color:#f2e7d3;line-height:1.55}.approved-banner{background:#122518;border-color:#2d6e3b}.approved-banner h3{color:#8ee7a2}.approved-banner p{color:#d9f1df}
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;padding:11px 16px;font-weight:700;cursor:pointer;text-decoration:none;transition:.18s ease}.btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+        .btn-primary{background:#ffb020;color:#111}.btn-secondary{background:#24262b;color:#fff;border:1px solid #393c44}.btn-danger{background:#ad3030;color:#fff}
+        .top-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+        .small{color:#a9b0ba;font-size:13px}.flash{padding:14px 16px;border-radius:12px;margin-bottom:18px;border:1px solid #444}.flash.success{background:#142513;border-color:#285c27;color:#b9efb7}.flash.error{background:#291717;border-color:#6e2d2d;color:#ffb5b5}.flash.info{background:rgba(60,98,255,.12);border-color:rgba(60,98,255,.35);color:#dbe5ff}.btn-muted{background:#2e3138;color:#bfc7d3;cursor:not-allowed}.modal-overlay-local{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:20px;z-index:3000}.modal-overlay-local.active{display:flex}.modal-card-local{width:min(460px,100%);background:#17181c;border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:24px;box-shadow:0 30px 60px rgba(0,0,0,.45)}.modal-card-local h3{font-size:24px;color:#ffb020;margin-bottom:12px}.modal-card-local p{color:#d0d0d7;line-height:1.6}.modal-actions-local{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
+        .summary-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}.detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.detail{padding:14px;border-radius:14px;border:1px solid #2a2d33;background:rgba(255,255,255,.02)}.detail strong{display:block;color:#ffb020;font-size:12px;margin-bottom:6px}
+        .chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.chip{padding:8px 12px;border-radius:999px;background:#181a1f;border:1px solid #2c3037;color:#dde3ea;font-size:13px}
+        .portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}.portfolio-thumb{position:relative;border:1px solid #2c3037;border-radius:14px;overflow:hidden;background:#121316;min-height:140px;display:flex;align-items:center;justify-content:center}.portfolio-thumb img{width:100%;height:140px;object-fit:cover}
+        .table-wrap{overflow:auto} table{width:100%;border-collapse:collapse} th,td{padding:12px;border-bottom:1px solid #282b31;text-align:left} th{color:#a8b0ba;font-size:12px;text-transform:uppercase}
+        .badge{padding:6px 10px;border-radius:999px;font-size:12px;display:inline-block}.badge.pending{background:#463514;color:#ffd27d}.badge.completed{background:#15331a;color:#a2f0b1}
+
+        .profession-manager-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:16px;margin-top:16px}
+        .profession-manager-card{border:1px solid #2b2f36;border-radius:18px;background:#15161a;padding:16px;display:flex;flex-direction:column;gap:12px}
+        .profession-manager-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;border-bottom:1px solid #272b31;padding-bottom:10px}
+        .profession-manager-head h3{color:#ffb020;font-size:18px}.profession-manager-head span{color:#9ca6b3;font-size:12px}
+        .profession-disabled{opacity:.72}.profession-disabled .field input,.profession-disabled .field textarea{opacity:.72}
+        .profession-portfolio-mini{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.profession-portfolio-mini .mini-slot{height:84px;border-radius:10px;background:#0f1014;border:1px dashed #343943;display:flex;align-items:center;justify-content:center;color:#8d98a6;font-size:11px;text-align:center;overflow:hidden;position:relative}.profession-portfolio-mini img{width:100%;height:100%;object-fit:cover}.mini-slot form{position:absolute;right:4px;top:4px}.mini-slot button{border:0;border-radius:999px;background:#b73232;color:#fff;width:22px;height:22px;cursor:pointer;font-weight:900;line-height:1}.mini-slot.empty-click{cursor:pointer;transition:.15s}.mini-slot.empty-click:hover{border-color:#ffb020;color:#ffb020;background:rgba(255,176,32,.06)}.profession-upload-box{margin-top:12px;border:1px solid #2b2f36;border-radius:14px;background:#101116;padding:12px}.profession-upload-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.profession-file-name{color:#aeb7c4;font-size:12px}.profession-preview{display:none;margin-top:10px;border:1px solid rgba(255,176,32,.25);border-radius:12px;padding:10px;background:rgba(255,176,32,.06);align-items:center;gap:12px}.profession-preview.active{display:flex}.profession-preview img{width:96px;height:72px;object-fit:cover;border-radius:10px;background:#050505}.profession-preview strong{color:#ffb020}.visually-hidden-file{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.availability-builder{margin-top:8px;border:1px solid #282d34;border-radius:14px;background:#101116;padding:12px}.availability-builder-title{color:#ffb020;font-weight:800;margin-bottom:8px}.availability-builder-grid{display:grid;grid-template-columns:1.4fr .8fr .8fr 1fr auto;gap:8px;align-items:end}.availability-builder label{font-size:11px;color:#b7bfca;display:block;margin-bottom:4px}.availability-builder select,.availability-builder input{width:100%;background:#0b0c10;color:#fff;border:1px solid #363b44;border-radius:10px;padding:9px}.portfolio-context-box{border:1px solid #2b2f36;border-radius:16px;background:#121318;padding:14px;margin:12px 0 16px}.portfolio-context-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.portfolio-context-actions select{min-width:260px;background:#0f1014;color:#fff;border:1px solid #363b44;border-radius:12px;padding:11px 14px;font-weight:700}
+        .availability-editor{margin-top:14px;border:1px solid #2b2f36;border-radius:16px;background:#101116;padding:14px}.availability-24h-panel{margin:0 0 12px;padding:12px;border:1px solid rgba(255,176,32,.22);border-radius:12px;background:rgba(255,176,32,.05)}.availability-24h-panel strong{color:#ffb020}.availability-editor-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.availability-editor-head strong{color:#ffb020}.draft-state{font-size:11px;border:1px solid #3b4653;border-radius:999px;padding:6px 9px;color:#b9c4d2}.profession-draft-banner{display:flex;align-items:center;gap:9px;margin:12px 0;padding:10px 12px;border:1px solid #2f343c;border-radius:12px;background:#101116;color:#b9c4d2;font-size:12px}.profession-draft-banner i{color:#7f8a98}.profession-draft-banner[data-state="saved"]{border-color:#6c531d;background:rgba(255,176,32,.06);color:#ffd27d}.profession-draft-banner[data-state="saved"] i{color:#ffb020}.profession-draft-banner[data-state="published"]{border-color:#245c34;background:rgba(52,168,83,.07);color:#a9e7b8}.profession-draft-banner[data-state="published"] i{color:#73d38a}.profession-draft-banner[data-state="saving"] i{color:#ffb020}.availability-days-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}.availability-chip{display:inline-flex;align-items:center;gap:7px;background:#151820;border:1px solid #343943;border-radius:999px;padding:9px 11px;cursor:pointer}.availability-chip:has(input:checked){border-color:#ffb020;background:rgba(255,176,32,.1);color:#ffd17a}.availability-time-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.special-day-grid-dashboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.special-day-dashboard{border:1px solid #292e36;border-radius:12px;padding:10px;background:#0d0f13}.special-time-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.availability-summary-preview{margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(255,176,32,.07);border:1px solid rgba(255,176,32,.18);color:#dbe2ec;line-height:1.5}.availability-summary-preview strong{color:#ffb020}.price-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.price-option-card{border:1px solid #2b2f36;border-radius:14px;padding:13px;background:#101116}.price-toggle-row{display:flex;align-items:center;gap:9px;margin-bottom:10px;cursor:pointer}.fee-disabled{opacity:.45}.portfolio-summary-link{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding:13px 14px;border:1px solid #2b2f36;border-radius:14px;background:#101116}.portfolio-summary-link strong{display:block;color:#ffb020;margin-bottom:4px}.portfolio-summary-link .small{display:block}.portfolio-pane-header{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:6px 0 12px}.portfolio-pane-header h3{color:#ffb020}.portfolio-upload-card{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px;border:1px solid #2b2f36;border-radius:14px;background:#101116}.portfolio-upload-card .profession-preview{width:100%}.portfolio-info-note{margin-top:12px;border:1px solid rgba(255,176,32,.2);background:rgba(255,176,32,.06);padding:11px 12px;border-radius:12px;color:#d8caa9;font-size:12px}.legacy-photo-badge{position:absolute;left:8px;bottom:8px;padding:5px 7px;border-radius:8px;background:rgba(0,0,0,.75);font-size:10px;color:#ffd17a}.avatar-uploading::after{content:'Enviando...';position:absolute;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px}.avatar-upload-status{margin-top:8px;color:#ffcf73;font-size:12px}.avatar-global-status{position:fixed;right:22px;top:22px;z-index:5000;background:#1c1d21;border:1px solid rgba(255,176,32,.45);color:#ffd27d;border-radius:12px;padding:11px 14px;box-shadow:0 12px 34px rgba(0,0,0,.4);font-size:13px;font-weight:700}.profession-save-note{margin-top:9px}.portfolio-remove-form button{box-shadow:0 3px 12px rgba(0,0,0,.35)}
+        .portfolio-draft-banner{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:10px 0 14px;padding:12px 14px;border-radius:14px;border:1px solid #2f5d3a;background:rgba(53,145,77,.08);color:#bce9c6}.portfolio-draft-banner.pending{border-color:#795817;background:rgba(255,176,32,.08);color:#ffd27d}.portfolio-draft-banner strong{display:block;margin-bottom:3px}.portfolio-draft-banner-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.portfolio-draft-banner .btn{white-space:nowrap}
+        .portfolio-context-confirm{display:flex;align-items:center;gap:8px;margin:8px 0 12px;padding:11px 13px;border-radius:12px;border:1px solid rgba(255,176,32,.38);background:rgba(255,176,32,.08);color:#f5dfb2;font-size:12px;font-weight:700}.portfolio-context-confirm strong{color:#ffb020;font-size:14px}.portfolio-context-confirm.active{animation:contextPulse .7s ease 3}.profession-focus-pulse{animation:contextPulse .7s ease 2}.portfolio-selector-attention{animation:selectorAttention .78s ease 3;border-color:#ffb020!important;box-shadow:0 0 0 4px rgba(255,176,32,.13)!important}@keyframes contextPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,176,32,0)}50%{box-shadow:0 0 0 4px rgba(255,176,32,.24)}}@keyframes selectorAttention{0%,100%{transform:translateX(0)}35%{transform:translateX(3px)}65%{transform:translateX(-3px)}}
+        .portfolio-inline-flash{margin:10px 0;padding:10px 12px;border-radius:11px;font-size:12px;font-weight:700}.portfolio-inline-flash.success{background:#142513;border:1px solid #285c27;color:#b9efb7}.portfolio-inline-flash.error{background:#291717;border:1px solid #6e2d2d;color:#ffb5b5}
+        .btn-preview-strong{background:#ffb020!important;color:#111!important;border:1px solid #ffca68!important;box-shadow:0 0 0 3px rgba(255,176,32,.08)}.portfolio-draft-banner.pending .btn-preview-strong{animation:previewNudge 2.4s ease-in-out infinite}@keyframes previewNudge{0%,80%,100%{transform:translateY(0)}88%{transform:translateY(-2px)}}
+        .portfolio-order-actions{position:absolute;left:7px;top:7px;bottom:auto;z-index:5;display:flex;gap:5px}.portfolio-order-btn{width:29px;height:29px;border-radius:999px;border:1px solid #4a4f59;background:rgba(20,22,27,.94);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.35)}.portfolio-order-btn:disabled{opacity:.28;cursor:not-allowed}
+        @media(max-width:760px){.slot-action-btn{width:30px;height:30px;padding:0;justify-content:center}.slot-action-btn .action-label{display:none}.portfolio-order-btn{width:30px;height:30px}.portfolio-caption-preview{bottom:80px}.portfolio-state-badge{bottom:44px}.portfolio-context-confirm{align-items:flex-start}.portfolio-context-confirm strong{font-size:13px}}
+        @media (prefers-reduced-motion:reduce){.profession-focus-pulse,.portfolio-context-confirm.active,.portfolio-draft-banner.pending .btn-preview-strong{animation:none!important}}
+        .slot.portfolio-draft-new{border-color:#b77c16;box-shadow:inset 0 0 0 1px rgba(255,176,32,.15)}.slot.portfolio-pending-delete{opacity:.5;border-color:#8a3434}.slot.portfolio-pending-delete img{filter:grayscale(.65)}.portfolio-state-badge{position:absolute;left:8px;bottom:44px;z-index:3;padding:5px 8px;border-radius:999px;background:rgba(0,0,0,.78);color:#fff;font-size:10px;font-weight:800;border:1px solid rgba(255,255,255,.16)}.portfolio-state-badge.new{color:#ffd27d;border-color:#8a641c}.portfolio-state-badge.remove{color:#ffc0c0;border-color:#863737}.slot-actions{position:absolute;right:7px;bottom:7px;z-index:4;display:flex;justify-content:flex-end;gap:5px;flex-wrap:nowrap}.slot .slot-actions form{position:static}.slot-action-btn{border:0;border-radius:999px;padding:6px 9px;font-weight:800;cursor:pointer;font-size:11px;box-shadow:0 3px 12px rgba(0,0,0,.35);white-space:nowrap}.slot-action-caption{background:#252830;color:#fff;border:1px solid #484d57}.slot-action-remove{background:#b73232;color:#fff}.slot-action-undo{background:#285b37;color:#d5f6dd}.portfolio-caption-preview{position:absolute;left:8px;right:8px;bottom:78px;background:rgba(0,0,0,.7);padding:6px 7px;border-radius:8px;color:#f1f1f1;font-size:10px;line-height:1.3;max-height:46px;overflow:hidden}.portfolio-upload-hint{color:#aeb7c4;font-size:12px;line-height:1.45}.portfolio-upload-card.uploading{border-color:#a8751d;background:rgba(255,176,32,.06)}.portfolio-upload-card.uploading .choose-portfolio-image{pointer-events:none;opacity:.8}.caption-counter{display:block;text-align:right;color:#8f99a8;font-size:11px;margin-top:5px}
+
+        @media(max-width:980px){.special-day-grid-dashboard,.price-editor-grid{grid-template-columns:1fr}.availability-time-grid{grid-template-columns:1fr 1fr}.portfolio-summary-link{align-items:flex-start;flex-direction:column}}
+        @media(max-width:560px){.availability-time-grid,.special-time-pair{grid-template-columns:1fr}.portfolio-upload-card{align-items:stretch}.portfolio-upload-card .btn{width:100%}.portfolio-pane-header{align-items:flex-start;flex-direction:column}.portfolio-pane-header>div:last-child{width:100%;justify-content:flex-start!important}.portfolio-draft-banner{flex-direction:column}.portfolio-draft-banner-actions{width:100%;justify-content:flex-start}.portfolio-draft-banner-actions .btn{width:100%}.portfolio-slots.profession-portfolio-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:380px){.portfolio-slots.profession-portfolio-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.availability-builder-grid{grid-template-columns:1fr 1fr}.profession-portfolio-mini{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+        .inline-pane-flash{margin:12px 0 0;padding:11px 13px;border-radius:12px;font-weight:700}.inline-pane-flash.success{background:#142513;border:1px solid #285c27;color:#b9efb7}.inline-pane-flash.error{background:#291717;border:1px solid #6e2d2d;color:#ffb5b5}
+        .mini-slot.previewing{border-color:#ffb020!important;background:rgba(255,176,32,.08)!important;color:#ffb020!important}.mini-slot.previewing img{width:100%;height:100%;object-fit:cover}.mini-slot .pending-preview-label{position:absolute;left:8px;bottom:8px;right:8px;border-radius:8px;background:rgba(0,0,0,.68);padding:4px 6px;color:#fff;font-size:10px}
+        .btn.is-loading{opacity:.78;pointer-events:none}.field textarea.availability-textarea{min-height:118px}.availability-builder-note{font-size:11px;color:#97a2b1;margin-top:8px;line-height:1.45}.profession-local-status{min-height:0}.profession-upload-box.is-busy,.profession-update-form.is-busy{opacity:.82}
+        .profile-photo-preview{cursor:pointer}.profile-photo-preview:hover{border-color:#ffb020;box-shadow:0 0 0 4px rgba(255,176,32,.12)}
+        .profile-status-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #3a3f48;border-radius:999px;padding:6px 10px;font-size:12px;color:#d6dce5;background:#11141a}.profile-status-pill.active{border-color:#3f7e45;color:#b9efb7}.profile-status-pill.pending{border-color:#7a5a18;color:#ffd27d}.editing-notice{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0;padding:12px 14px;border:1px solid rgba(255,176,32,.28);border-radius:14px;background:rgba(255,176,32,.08);color:#f5e5c1;line-height:1.45}.editing-notice strong{color:#ffb020}.help-toggle{margin-top:12px}.quick-guide{display:none;margin-top:12px;border:1px solid #2b2f36;border-radius:16px;background:#111318;padding:14px;color:#d7dde6;line-height:1.55}.quick-guide.active{display:block}.quick-guide ol{margin:8px 0 0 20px}.analysis-list{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}.analysis-chip{border:1px solid #6d501b;background:rgba(255,176,32,.08);color:#ffd27d;border-radius:999px;padding:7px 10px;font-size:12px}.lead-floating{position:fixed;right:24px;bottom:24px;z-index:2400;width:min(380px,calc(100vw - 32px));background:#191a1f;border:1px solid rgba(255,176,32,.35);box-shadow:0 24px 60px rgba(0,0,0,.45);border-radius:18px;padding:16px;display:none}.lead-floating.active{display:block;animation:pulseLead .7s ease}.lead-floating h3{color:#ffb020;margin-bottom:6px}.lead-floating p{color:#d8dce4;line-height:1.45;margin-bottom:12px}@keyframes pulseLead{0%{transform:translateY(10px);opacity:.3}100%{transform:translateY(0);opacity:1}}
+
+        .profile-photo-editor{display:flex;align-items:center;gap:16px;margin:18px 0;padding:16px;border:1px solid #2b2f36;border-radius:18px;background:#121318}.profile-photo-form{display:flex;align-items:center;gap:12px}.profile-photo-preview{width:96px;height:96px;border-radius:50%;border:2px solid rgba(255,176,32,.75);background:#202126;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#ffb020;font-weight:800}.profile-photo-preview img{width:100%;height:100%;object-fit:cover}.profile-photo-preview span{position:absolute;inset:auto 0 0 0;background:rgba(0,0,0,.72);font-size:11px;text-align:center;padding:6px 2px;color:#fff}.profile-photo-copy h3{color:#ffb020;margin-bottom:4px}.profile-photo-copy p{color:#aab3bf;line-height:1.45}.profession-selector-shell{display:grid;grid-template-columns:minmax(220px,360px) 1fr;gap:14px;align-items:end;margin-top:16px;padding:16px;border:1px solid #2b2f36;border-radius:18px;background:#121318}.profession-selector-shell label{display:block;color:#ffb020;font-weight:800;margin-bottom:6px}.profession-selector-shell select{width:100%;background:#0f1014;color:#fff;border:1px solid #363b44;border-radius:12px;padding:12px 14px;font-weight:700}.profession-editor-pane{margin-top:16px;border:1px solid #2b2f36;border-radius:20px;background:#15161a;padding:18px}.profession-editor-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #2a2e35;padding-bottom:14px;margin-bottom:14px}.profession-editor-top h3{color:#ffb020;font-size:22px}.profession-stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.profession-stat{padding:13px;border:1px solid #2a2f37;background:#101116;border-radius:14px}.profession-stat strong{display:block;color:#aab3bf;font-size:12px;margin-bottom:5px}.profession-stat span{font-size:22px;color:#ffb020;font-weight:900}.profession-actions-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}.profession-help{padding:12px 14px;border-radius:14px;background:rgba(255,176,32,.08);border:1px solid rgba(255,176,32,.22);color:#e7d7b7;line-height:1.45}.hidden-pane{display:none!important}@media(max-width:980px){.profession-selector-shell{grid-template-columns:1fr}.profession-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-photo-editor{align-items:flex-start}}@media(max-width:560px){.profession-stats-grid{grid-template-columns:1fr}.profession-editor-top{flex-direction:column}.profile-photo-editor{flex-direction:column}}
+
+        .form-inline{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:13px;color:#d6dbe3;font-weight:700}.field input,.field textarea,.field select{background:#101115;color:#fff;border:1px solid #2b2f36;border-radius:12px;padding:11px 12px}.field textarea{min-height:100px;resize:vertical}.days{display:flex;flex-wrap:wrap;gap:8px}.days label{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;border:1px solid #2b2f36;background:#14161a}.portfolio-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}.slot{border:1px dashed #3a3f48;border-radius:18px;aspect-ratio:1/1;background:#111318;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.slot img{width:100%;height:100%;object-fit:cover}.slot.empty{color:#9aa4b2;font-size:13px;text-align:center;padding:8px}.slot form{position:absolute;top:8px;right:8px}@media(max-width:980px){.summary-grid,.detail-grid,.field-grid,.portfolio-slots{grid-template-columns:1fr}}
+        .reviews-dashboard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}.reviews-dashboard-head p{margin:6px 0 0}.reviews-overview{display:grid;grid-template-columns:repeat(2,minmax(0,220px));gap:12px;margin-top:18px}.review-overview-card{border:1px solid #2b2f36;background:#111318;border-radius:15px;padding:15px}.review-overview-card strong{display:block;color:#ffb020;font-size:27px;line-height:1.05;margin-top:6px}.review-overview-card span{color:#aeb7c4;font-size:12px}.professional-review-list{display:grid;gap:12px;margin-top:18px}.professional-review-card{border:1px solid #292d34;background:#111318;border-radius:15px;padding:15px}.professional-review-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.professional-review-stars{display:flex;gap:3px;color:#ffb020}.professional-review-card p{margin:0;color:#e7ebf0;line-height:1.55;white-space:pre-wrap}.professional-review-empty{margin-top:18px;padding:22px;border:1px dashed #343941;border-radius:15px;text-align:center;color:#aab3bf;background:#111318}.professional-review-empty i{display:block;color:#ffb020;font-size:24px;margin-bottom:9px}.plan-current-banner{display:flex;align-items:center;gap:12px;margin-top:14px;padding:14px 15px;border:1px solid #285f37;background:#102c18;border-radius:15px}.plan-current-banner i{color:#6fe28f;font-size:20px}.plan-current-banner strong{display:block;color:#8df1a7;margin-bottom:3px}.plan-current-banner span{color:#d3dfd6;font-size:13px}
+        @media(max-width:980px){.summary-grid,.detail-grid{grid-template-columns:1fr}}
+        @media(max-width:820px){
+            .desktop-theme-control{display:none!important}.sidebar{position:static;width:100%;height:auto}.dashboard-container{display:block}.main{margin-left:0;width:100%;padding:16px}header{flex-direction:column;align-items:flex-start;gap:12px}}
+
+
+        /* v11.3.36 — mobile-first: navegação compacta tipo app, conteúdo primeiro e alvos de toque >= 48px. */
+        .mobile-dashboard-topbar,.mobile-dashboard-bottom-nav,.mobile-more-overlay,.mobile-profession-context{display:none}
+        .mobile-dashboard-bottom-nav button,.mobile-more-sheet button{font:inherit}
+        @media(max-width:820px){
+            body{padding-bottom:calc(76px + env(safe-area-inset-bottom));overflow-x:hidden}
+            .dashboard-container{display:block;min-height:100vh}
+            .sidebar{display:none!important}
+            .main{margin-left:0;width:100%;max-width:720px;margin-inline:auto;padding:12px 12px calc(92px + env(safe-area-inset-bottom))}
+            header{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:2px 2px 4px}
+            header h1{font-size:21px;line-height:1.1}
+            header>div:first-child .small{font-size:11px;line-height:1.25;max-width:230px}
+            .user-chip{gap:6px;font-size:12px;max-width:none;justify-content:flex-end}.user-chip-name{display:none}.dashboard-theme-toggle{width:38px;height:38px;flex-basis:38px;font-size:17px}.avatar{width:38px;height:38px;flex:0 0 38px}.avatar-action::after{display:none}
+            .mobile-dashboard-topbar{display:flex;position:sticky;top:0;z-index:2250;align-items:center;gap:10px;margin:0 -2px 12px;padding:9px 10px;background:rgba(15,16,19,.96);border:1px solid #292d34;border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,.32);backdrop-filter:blur(10px)}
+            .mobile-dashboard-topbar .mobile-section-icon{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:rgba(255,176,32,.12);color:#ffb020;flex:0 0 38px}
+            .mobile-section-copy{min-width:0;flex:1}.mobile-section-copy small{display:block;color:#8994a2;font-size:10px;margin-bottom:3px}.mobile-section-copy strong{font-size:15px}
+            .cards-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+            .card,.panel{border-radius:15px;padding:14px}
+            .metric{min-height:114px;display:flex;flex-direction:column;justify-content:center}.metric .icon{font-size:21px;margin-bottom:6px}.metric h3{font-size:10.5px;line-height:1.25;margin-bottom:5px}.metric .value{font-size:23px;line-height:1}
+            #resumo>.panel{margin-top:12px!important}#resumo h2{font-size:19px}.summary-grid{grid-template-columns:1fr!important;gap:12px!important;margin-top:12px!important}
+            #resumo .summary-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}#resumo .summary-profile-grid .detail{padding:11px;font-size:12px;min-width:0}#resumo .summary-profile-grid .portfolio-summary-detail{grid-column:1/-1}
+            .performance-profession-grid{grid-template-columns:1fr!important;gap:8px!important}.performance-profession-grid .detail{padding:11px 12px;font-size:12px;line-height:1.4}
+            .summary-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.summary-shortcut{min-height:88px;padding:11px}.summary-shortcut:last-child:nth-child(odd){grid-column:1/-1;min-height:76px}
+            .profession-selector-shell{padding:12px;border-radius:15px;margin-top:12px;gap:9px}.profession-selector-shell>div:last-child{font-size:12px;line-height:1.4}.profession-editor-pane{padding:12px;margin-top:12px;border-radius:16px}.profession-editor-top{margin-bottom:10px;padding-bottom:10px}.profession-editor-top h3{font-size:20px}.editing-notice{padding:10px 11px;font-size:12px;align-items:flex-start}.editing-notice .profile-status-pill{flex:0 0 auto}
+            .mobile-profession-context{display:flex;position:sticky;top:75px;z-index:2100;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:9px 11px;border:1px solid #73541a;border-radius:12px;background:rgba(34,27,14,.96);box-shadow:0 8px 22px rgba(0,0,0,.3);font-size:11px;color:#d8dee7;backdrop-filter:blur(8px)}.mobile-profession-context strong{color:#ffb020;font-size:13px}.mobile-profession-context i{color:#ffb020}
+            .profession-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}.profession-stat{padding:10px;min-height:82px}.profession-stat strong{font-size:10px;line-height:1.2}.profession-stat span{font-size:19px;line-height:1.1}
+            .field-grid{grid-template-columns:1fr!important}.availability-editor{padding:11px}.availability-editor-head{gap:8px}.availability-days-row{gap:7px}.availability-chip{min-height:44px;padding:8px 10px}.availability-time-grid{grid-template-columns:1fr 1fr!important;gap:8px}.special-day-grid-dashboard{grid-template-columns:1fr!important;gap:8px}.special-time-pair{grid-template-columns:1fr 1fr!important}.price-editor-grid{grid-template-columns:1fr!important}.profession-actions-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.profession-actions-row .btn{min-height:48px;padding:10px 8px;font-size:12px}.profession-actions-row .draft-preserving-link{grid-column:1/-1}.portfolio-summary-link{padding:11px;gap:9px}.portfolio-summary-link .btn{width:100%}
+            .portfolio-pane-header{gap:8px}.portfolio-draft-banner{padding:10px}.portfolio-draft-banner-actions .btn{min-height:48px}.portfolio-upload-card{padding:10px}.portfolio-slots.profession-portfolio-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}.slot{border-radius:14px}.portfolio-order-actions{top:7px!important;bottom:auto!important;left:7px!important}.slot-actions{left:7px!important;right:7px!important;bottom:7px!important;justify-content:flex-end!important}.slot-action-btn,.portfolio-order-btn{min-width:34px!important;width:34px!important;height:34px!important;padding:0!important;justify-content:center!important}.slot-action-btn .action-label{display:none!important}.portfolio-caption-preview{left:8px;right:8px;top:50%;bottom:auto!important;transform:translateY(-50%);max-height:52px;font-size:10px}.portfolio-state-badge{left:8px;bottom:48px!important}.slot.portfolio-pending-delete .portfolio-state-badge{max-width:calc(100% - 16px)}
+            .profile-photo-editor{padding:12px;gap:12px}.profile-photo-preview{width:82px;height:82px}.profile-photo-copy p{font-size:12px}.field input,.field textarea,.field select{min-height:46px}.top-actions .btn{min-height:48px}
+            .mobile-dashboard-bottom-nav{display:grid;position:fixed;z-index:2800;left:0;right:0;bottom:0;grid-template-columns:repeat(5,1fr);padding:6px max(6px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-right));background:rgba(16,17,20,.98);border-top:1px solid #2e3239;box-shadow:0 -12px 30px rgba(0,0,0,.38);backdrop-filter:blur(12px)}
+            .mobile-dashboard-bottom-nav button{min-width:0;min-height:56px;border:0;background:transparent;color:#929daa;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:5px 2px;font-size:10px;font-weight:700;cursor:pointer}.mobile-dashboard-bottom-nav button i{font-size:18px}.mobile-dashboard-bottom-nav button.active{background:rgba(255,176,32,.12);color:#ffb020}.mobile-dashboard-bottom-nav button:active{transform:scale(.97)}
+            .mobile-more-overlay{position:fixed;inset:0;z-index:3500;background:rgba(0,0,0,.68);align-items:flex-end;padding:12px}.mobile-more-overlay.active{display:flex}.mobile-more-sheet{width:min(520px,100%);margin:0 auto;background:#17191e;border:1px solid #353a43;border-radius:22px 22px 16px 16px;padding:10px;box-shadow:0 -25px 70px rgba(0,0,0,.55);max-height:82vh;overflow:auto}.mobile-more-sheet-head{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 10px}.mobile-more-sheet-head strong{font-size:17px;color:#fff}.mobile-more-close{width:44px;height:44px;border:0;border-radius:999px;background:#272a31;color:#fff;cursor:pointer}.mobile-more-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mobile-more-grid button,.mobile-more-grid a{min-height:58px;border:1px solid #30353e;background:#111318;color:#e6ebf2;border-radius:13px;display:flex;align-items:center;gap:10px;padding:10px 12px;text-decoration:none;font-weight:750;cursor:pointer;text-align:left}.mobile-more-grid button i,.mobile-more-grid a i{width:20px;text-align:center;color:#ffb020}.mobile-more-grid .danger{color:#ffc0c0}.mobile-more-grid .danger i{color:#e35f5f}.mobile-more-logout{margin:0}
+            .lead-floating{bottom:calc(82px + env(safe-area-inset-bottom));right:12px;left:12px;width:auto}
+        }
+        @media(max-width:390px){
+            .main{padding-left:9px;padding-right:9px}.card,.panel{padding:12px}.cards-grid{gap:7px}.metric{min-height:108px}.metric h3{font-size:10px}.metric .value{font-size:21px}.mobile-dashboard-bottom-nav button{font-size:9px}.mobile-dashboard-bottom-nav button i{font-size:17px}.profession-actions-row{grid-template-columns:1fr}.profession-actions-row .draft-preserving-link{grid-column:auto}.availability-time-grid,.special-time-pair{grid-template-columns:1fr!important} .reviews-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.review-overview-card{padding:12px}.review-overview-card strong{font-size:22px}.professional-review-card{padding:12px}.professional-review-top{align-items:flex-start;flex-direction:column;gap:6px}
+        }
+        @media (prefers-reduced-motion:reduce){.mobile-dashboard-bottom-nav button:active{transform:none}}
+        /* v11.3.38 — tema unificado com a plataforma: um único botão sol/lua. */
+        .dashboard-theme-toggle{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:#b9c1cc;border-radius:999px;cursor:pointer;font-size:18px;transition:color .18s ease,background .18s ease,transform .18s ease;flex:0 0 42px}.dashboard-theme-toggle:hover{color:#ffb020;background:rgba(255,176,32,.08)}.dashboard-theme-toggle:active{transform:scale(.96)}
+        .mobile-section-copy strong{display:block;color:#f2f4f7;font-size:15px;line-height:1.2}.mobile-section-copy small{margin-bottom:2px}
+        .approved-banner-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.approved-banner-head h3{margin:0}.approved-collapse-toggle{width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(142,231,162,.28);background:rgba(255,255,255,.03);color:#8ee7a2;border-radius:12px;cursor:pointer;flex:0 0 42px;transition:.18s ease}.approved-collapse-toggle:hover{background:rgba(142,231,162,.08)}.approved-collapse-toggle i{transition:transform .18s ease}.approved-banner-body{overflow:hidden;padding-top:8px}.approved-banner.is-collapsed{padding-top:11px;padding-bottom:11px}.approved-banner.is-collapsed .approved-banner-body{display:none}.approved-banner.is-collapsed .approved-collapse-toggle i{transform:rotate(-90deg)}
+        .summary-shortcuts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:16px}.summary-shortcut{min-width:0;min-height:96px;border:1px solid #2b2f36;background:#13151a;color:#eef2f7;border-radius:15px;padding:13px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:10px;transition:.18s ease}.summary-shortcut:hover{border-color:#6b521d;background:#191711;transform:translateY(-1px)}.summary-shortcut i{color:#ffb020;font-size:19px}.summary-shortcut strong{display:block;font-size:13px;color:#f4f6f9}.summary-shortcut span{display:block;font-size:11px;color:#99a4b2;line-height:1.35}.summary-shortcut .shortcut-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.summary-shortcut .shortcut-arrow{font-size:11px;color:#717c8a}.performance-profession-card{width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;transition:.18s ease}.performance-profession-card:hover{border-color:#6b521d;background:rgba(255,176,32,.05)}.performance-profession-card .performance-return{display:block;margin-top:6px;color:#aeb7c4;font-size:11px}.performance-profession-card .performance-go{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;color:#ffb020;font-size:11px;font-weight:800}.pwa-install-action[hidden]{display:none!important}.btn:disabled,.preview-from-portfolio:disabled,.publish-from-portfolio:disabled{opacity:.48;cursor:not-allowed;transform:none!important;filter:none!important;box-shadow:none!important}.preview-profession-btn.is-ready,.preview-from-portfolio.is-ready{background:#ffb020!important;color:#111!important;border-color:#ffca68!important;opacity:1}.draft-preview-helper{font-size:11px;color:#8f9aa8;margin-top:6px}
+        @media(max-width:820px){.summary-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.summary-shortcut{min-height:88px;padding:11px}.summary-shortcut:last-child:nth-child(odd){grid-column:1/-1;min-height:76px}.dashboard-theme-toggle{width:38px;height:38px;flex-basis:38px;font-size:17px}}
+
+        /* v11.3.38: tema claro da Área Profissional com contraste reforçado. */
+        body.professional-dashboard-body.light-mode{background:#f3f5f8;color:#171a20}.light-mode .sidebar{background:#fff;border-color:#dde2e8}.light-mode .sidebar a,.light-mode .sidebar-logout-btn{color:#53606f}.light-mode .sidebar a:hover,.light-mode .sidebar a.active,.light-mode .sidebar-logout-btn:hover{background:#fff4df;color:#9b6100}.light-mode .card,.light-mode .panel,.light-mode .profession-editor-pane,.light-mode .profession-selector-shell,.light-mode .portfolio-context-box,.light-mode .availability-editor,.light-mode .price-option-card,.light-mode .portfolio-summary-link,.light-mode .portfolio-upload-card,.light-mode .special-day-dashboard,.light-mode .profession-manager-card{background:#fff!important;border-color:#dfe4eb!important;color:#1d222b}.light-mode .small{color:#4f5b69}.light-mode .metric h3{color:#4d5967}.light-mode .detail{background:#f8fafc;border-color:#dfe4eb}.light-mode .chip,.light-mode .availability-chip{background:#f7f9fc;border-color:#d9dfe7;color:#202733}.light-mode .field input,.light-mode .field textarea,.light-mode .field select,.light-mode .availability-time-grid select,.light-mode .special-day-dashboard select,.light-mode .portfolio-context-actions select{background:#f8fafc!important;color:#151922!important;border-color:#cfd6df!important}.light-mode .editing-notice,.light-mode .portfolio-context-confirm{background:#fff8ea;color:#513b13}.light-mode .profession-draft-banner{background:#f8fafc;color:#5a6675;border-color:#d8dee7}.light-mode .profession-draft-banner[data-state="saved"],.light-mode .portfolio-draft-banner.pending{background:#fff8e8;color:#6b4b0d}.light-mode .profession-draft-banner[data-state="published"],.light-mode .approved-banner{background:#edf9f0;color:#285d35}.light-mode .portfolio-draft-banner{background:#f1faf3;color:#2d6640}.light-mode .mobile-dashboard-topbar{background:rgba(255,255,255,.96);border-color:#dce1e8}.light-mode .mobile-section-copy strong{color:#171a20}.light-mode .mobile-dashboard-bottom-nav{background:rgba(255,255,255,.98);border-color:#d8dde5}.light-mode .mobile-dashboard-bottom-nav button{color:#657182}.light-mode .mobile-more-sheet{background:#fff;border-color:#d8dde5}.light-mode .mobile-more-sheet-head strong{color:#171a20}.light-mode .mobile-more-grid button,.light-mode .mobile-more-grid a{background:#f8fafc;color:#222a35;border-color:#d8dde5}.light-mode .dashboard-theme-toggle{color:#333b46}.light-mode .dashboard-theme-toggle:hover{color:#9b6100;background:#fff4df}.light-mode .flash.success{background:#edf9f0;color:#285d35}.light-mode .flash.error{background:#fff0f0;color:#8a2f2f}.light-mode .flash.info{background:#eef4ff;color:#244578}.light-mode .modal-card-local{background:#fff;color:#1d222b;border-color:#d8dde5}.light-mode .modal-card-local p{color:#5a6573}.light-mode .table-wrap table{color:#1d222b}.light-mode th,.light-mode td{border-color:#e1e6ec}.light-mode .lead-card{background:#fff;border-color:#dce2e8;color:#1d222b}.light-mode .mobile-profession-context{background:rgba(255,248,232,.98);color:#503b14}.light-mode .review-overview-card,.light-mode .professional-review-card,.light-mode .professional-review-empty{background:#f8fafc;border-color:#dce2e8;color:#1d222b}.light-mode .professional-review-card p{color:#303846}.light-mode .plan-current-banner{background:#edf9f0;border-color:#bde3c7}.light-mode .plan-current-banner strong{color:#285d35}.light-mode .plan-current-banner span{color:#4f6555}
+
+        .light-mode .approved-banner h3{color:#236b38}.light-mode .approved-banner p{color:#375440}.light-mode .approved-collapse-toggle{color:#236b38;border-color:#b7ddc1;background:#f8fff9}.light-mode .summary-shortcut{background:#fff;color:#1d222b;border-color:#d9e0e8}.light-mode .summary-shortcut:hover{background:#fff8ea;border-color:#d8b66f}.light-mode .summary-shortcut strong{color:#202731}.light-mode .summary-shortcut span{color:#556272}.light-mode .summary-shortcut .shortcut-arrow{color:#697586}.light-mode .performance-profession-card{color:#26313e}.light-mode .performance-profession-card .performance-return{color:#526071}.light-mode .performance-profession-card:hover{background:#fff8ea;border-color:#d8b66f}.light-mode .help,.light-mode .profile-photo-copy p,.light-mode .portfolio-info-note{color:#526071}.light-mode .field label{color:#3b4655}.light-mode .review-overview-card span{color:#596575}.light-mode .professional-review-empty{color:#596575}.light-mode .profession-help{color:#59461f;background:#fff8ea;border-color:#e8d1a0}.light-mode .portfolio-info-note{background:#fff8ea;border-color:#e8d1a0}.light-mode .availability-summary-preview{color:#374353;background:#fff8ea}.light-mode .plan-current-banner span{color:#405c49}
+
+    </style>
+</head>
+<body class="professional-dashboard-body">
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <div class="logo"><a href="/">Contrataê</a></div>
+        <ul>
+            <li><a href="/" class="nav-link"><i class="fas fa-home"></i> Início</a></li>
+            <li><a href="#" class="nav-link" data-tab="resumo"><i class="fas fa-chart-line"></i> Visão Geral</a></li>
+            <li><a href="#" class="nav-link" data-tab="servicos"><i class="fas fa-briefcase"></i> Meus Serviços</a></li>
+            <li><a href="#" class="nav-link" data-tab="avaliacoes"><i class="fas fa-star"></i> Avaliações</a></li>
+            <li><a href="#" class="nav-link" data-tab="perfil"><i class="fas fa-user"></i> Meu Perfil</a></li>
+            <li><a href="#" class="nav-link" data-tab="profissoes"><i class="fas fa-layer-group"></i> Minhas Profissões</a></li>
+            <li><a href="#" class="nav-link" data-tab="portfolio"><i class="fas fa-image"></i> Meu Portfólio</a></li>
+            <li><a href="#" class="nav-link" data-tab="planos"><i class="fas fa-credit-card"></i> Meu Plano</a></li>
+            <li><a href="#" class="nav-link" data-tab="pagamentos"><i class="fas fa-money-check"></i> Pagamentos</a></li>
+            <li><form method="POST" action="/auth/logout" class="sidebar-logout-form"><button type="submit" class="sidebar-logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</button></form></li>
+        </ul>
+    </aside>
+
+    <main class="main">
+        <header>
+            <div>
+                <h1>Área do Profissional</h1>
+                <div class="small">Gerencie seu perfil, portfólio e ativação da sua presença na plataforma.</div>
+            </div>
+            <div class="user-chip">
+                <button type="button" id="theme-toggle" class="dashboard-theme-toggle" title="Alternar tema" aria-label="Alternar entre modo claro e escuro" aria-pressed="false"><i class="fas fa-moon"></i></button>
+                <div class="user-chip-name"><%= fullName || 'Profissional' %></div>
+                <button type="button" class="avatar avatar-action" onclick="openProfilePhotoPicker()" title="Clique para trocar sua foto de perfil">
+                    <% if (profissional?.users?.avatar_url) { %><img src="<%= profissional.users.avatar_url %>" alt="Avatar"><% } else { %><%= (fullName || 'P').charAt(0).toUpperCase() %><% } %>
+                </button>
+            </div>
+        </header>
+
+        <div class="mobile-dashboard-topbar" aria-label="Seção atual da Área Profissional">
+            <div class="mobile-section-icon" id="mobileSectionIcon"><i class="fas fa-chart-line"></i></div>
+            <div class="mobile-section-copy">
+                <small>Área do Profissional</small>
+                <strong id="mobileSectionLabel">Visão Geral</strong>
+            </div>
+        </div>
+
+        <% if (flashError && activeTab !== 'portfolio') { %><div class="flash error"><%= flashError %></div><% } %>
+        <% if (flashSuccess && activeTab !== 'portfolio') { %><div class="flash success"><%= flashSuccess %></div><% } %>
+        <% if (approvalPending) { %><div class="flash info">Seu perfil está em análise. Agora é só aguardar a resposta da administração.</div><% } %>
+
+        <% if (!profileReadyForApproval) { %>
+            <div class="banner">
+                <h3>Seu perfil ainda não está pronto para aparecer no site</h3>
+                <p>Finalize as etapas do cadastro para definir plano, profissões, descrição e imagens. Depois disso, você poderá revisar tudo com calma e só então solicitar aprovação.</p>
+                <div class="top-actions">
+                    <a href="/profissional/dashboard?tab=perfil" class="btn btn-primary">Editar perfil</a>
+                    <form action="/auth/cancelar-profissional" method="POST"><button class="btn btn-secondary" type="submit">Cancelar cadastro</button></form>
+                </div>
+            </div>
+        <% } else if (isApproved) { %>
+            <div class="banner approved-banner" id="approvedProfileBanner">
+                <div class="approved-banner-head">
+                    <h3><i class="fas fa-circle-check"></i> Seu perfil está aprovado e publicado</h3>
+                    <button type="button" class="approved-collapse-toggle" id="approvedBannerToggle" aria-expanded="true" aria-controls="approvedBannerBody" title="Recolher aviso"><i class="fas fa-chevron-down"></i></button>
+                </div>
+                <div class="approved-banner-body" id="approvedBannerBody">
+                    <p>Agora você pode manter cada profissão atualizada sem refazer o cadastro. Ajuste os dados em “Minhas Profissões” e as fotos em “Meu Portfólio”.</p>
+                    <div class="top-actions">
+                        <button type="button" class="btn btn-primary" data-dashboard-shortcut="profissoes"><i class="fas fa-layer-group"></i> Minhas Profissões</button>
+                        <button type="button" class="btn btn-secondary" data-dashboard-shortcut="portfolio"><i class="fas fa-images"></i> Meu Portfólio</button>
+                    </div>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="banner">
+                <h3>Seu perfil está pronto para a próxima etapa</h3>
+                <p>Revise as informações abaixo. Quando estiver satisfeito, envie seu perfil para análise da plataforma.</p>
+                <div class="top-actions">
+                    <a href="/profissional/dashboard?tab=perfil" class="btn btn-secondary">Editar perfil</a>
+                    <% if (approvalPending) { %>
+                        <button class="btn btn-muted" type="button" disabled>Em análise</button>
+                    <% } else { %>
+                        <button class="btn btn-primary" type="button" id="openApprovalModal">Solicitar aprovação</button>
+                    <% } %>
+                </div>
+            </div>
+        <% } %>
+
+        <section id="resumo" class="tab-content">
+            <% const resumoVisits = (professionProfileCards || []).reduce((sum, card) => sum + Number(card.stats?.visits || 0), 0); %>
+            <% const resumoClicks = (professionProfileCards || []).reduce((sum, card) => sum + Number(card.stats?.clicks || 0), 0); %>
+            <div class="cards-grid">
+                <div class="card metric"><div class="icon"><i class="fas fa-eye"></i></div><h3>Visitas nos últimos 30 dias</h3><div class="value"><%= resumoVisits %></div></div>
+                <div class="card metric"><div class="icon"><i class="fab fa-whatsapp"></i></div><h3>Cliques em contratar</h3><div class="value"><%= resumoClicks %></div></div>
+                <div class="card metric"><div class="icon"><i class="fas fa-phone"></i></div><h3>Contatos Recebidos</h3><div class="value"><%= contatosRecebidos %></div></div>
+                <div class="card metric"><div class="icon"><i class="fas fa-star"></i></div><h3>Avaliação Média</h3><div class="value"><%= avaliacaoMedia %></div></div>
+            </div>
+            <% const resumoPortfolioCards = (professionProfileCards || []).filter(card => card.canEdit); %>
+            <% const resumoPortfolioTotal = resumoPortfolioCards.reduce((sum, card) => sum + (card.portfolioPublished || card.portfolioPreview || card.portfolio || []).length, 0); %>
+            <div class="summary-shortcuts" aria-label="Atalhos da Visão Geral">
+                <button type="button" class="summary-shortcut" data-dashboard-shortcut="servicos"><span class="shortcut-top"><i class="fas fa-briefcase"></i><i class="fas fa-arrow-right shortcut-arrow"></i></span><span><strong>Meus Serviços</strong><span><%= contatosRecebidos %> contato(s) recebido(s)</span></span></button>
+                <button type="button" class="summary-shortcut" data-dashboard-shortcut="profissoes"><span class="shortcut-top"><i class="fas fa-layer-group"></i><i class="fas fa-arrow-right shortcut-arrow"></i></span><span><strong>Minhas Profissões</strong><span><%= selectedCount %> profissão(ões) cadastrada(s)</span></span></button>
+                <button type="button" class="summary-shortcut" data-dashboard-shortcut="portfolio"><span class="shortcut-top"><i class="fas fa-images"></i><i class="fas fa-arrow-right shortcut-arrow"></i></span><span><strong>Meu Portfólio</strong><span><%= resumoPortfolioTotal %> foto(s) publicada(s)</span></span></button>
+                <button type="button" class="summary-shortcut" data-dashboard-shortcut="perfil"><span class="shortcut-top"><i class="fas fa-user-pen"></i><i class="fas fa-arrow-right shortcut-arrow"></i></span><span><strong>Meu Perfil</strong><span><%= basicProfileComplete ? 'Dados básicos concluídos' : 'Há dados básicos pendentes' %></span></span></button>
+                <button type="button" class="summary-shortcut" data-dashboard-shortcut="planos"><span class="shortcut-top"><i class="fas fa-gem"></i><i class="fas fa-arrow-right shortcut-arrow"></i></span><span><strong>Meu Plano</strong><span><%= currentPlanName %></span></span></button>
+            </div>
+            <div class="panel" style="margin-top:16px">
+                <h2>Desempenho por profissão</h2>
+                <p class="small" style="margin-top:6px">Visitas do próprio profissional e pré-visualizações não entram nas métricas. Use esta visão para comparar quais serviços estão gerando mais interesse.</p>
+                <div class="detail-grid performance-profession-grid" style="margin-top:12px">
+                    <% (professionProfileCards || []).filter(card => card.canEdit).forEach(function(card){ %>
+                        <button type="button" class="detail performance-profession-card" data-profession-shortcut-slot="<%= card.slot %>">
+                            <strong><%= card.professionName %></strong>
+                            <span><%= Number(card.stats?.visits || 0) %> visita(s) · <%= Number(card.stats?.clicks || 0) %> clique(s) · <%= Number(card.stats?.leads || 0) %> contato(s)</span>
+                            <span class="performance-return">Possível retorno: <%= Number(card.stats?.estimatedReturn || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) %></span>
+                            <span class="performance-go">Editar esta profissão <i class="fas fa-arrow-right"></i></span>
+                        </button>
+                    <% }) %>
+                </div>
+            </div>
+            <div class="panel lead-panel" id="pendingLeadsPanel" style="display:none;">
+                <h2><i class="fas fa-bell"></i> Serviços pendentes</h2>
+                <p class="small">Quando um cliente logado clicar em contratar, o contato aparece aqui. Marque se aceitou ou recusou para manter seu controle financeiro e histórico de segurança.</p>
+                <div class="lead-list" id="pendingLeadsList"></div>
+            </div>
+            <div class="panel" style="margin-top:16px">
+                <h2><i class="fas fa-clipboard-check"></i> Controle de serviços</h2>
+                <p class="small" style="margin-top:7px">Use “Meus Serviços” para acompanhar os contatos recebidos e registrar se cada oportunidade foi aceita, recusada ou ainda precisa de resposta.</p>
+                <div class="top-actions"><button type="button" class="btn btn-secondary" data-open-services><i class="fas fa-briefcase"></i> Abrir Meus Serviços</button></div>
+            </div>
+            <div class="summary-grid" style="margin-top:18px;">
+                <div class="panel">
+                    <h2>Andamento do perfil</h2>
+                    <div class="detail-grid summary-profile-grid" style="margin-top:14px;">
+                        <div class="detail"><strong>Dados básicos</strong><%= basicProfileComplete ? 'Concluídos' : 'Pendentes' %></div>
+                        <div class="detail"><strong>Plano atual</strong><%= currentPlanName %></div>
+                        <div class="detail"><strong>Profissões escolhidas</strong><%= selectedCount %></div>
+                        <div class="detail portfolio-summary-detail"><strong>Portfólio por profissão</strong><% if (resumoPortfolioCards.length) { %><div style="display:grid;gap:5px"><% resumoPortfolioCards.forEach(function(card){ const count = (card.portfolioPublished || card.portfolioPreview || card.portfolio || []).length; %><span><%= card.professionName %>: <b><%= count %></b> imagem(ns)</span><% }) %></div><% } else { %>Nenhuma imagem cadastrada<% } %></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h2>Dica para seu perfil</h2>
+                    <p class="small" style="margin-top:8px;">Mantenha descrições, horários e fotos atualizados. Perfis completos ajudam o cliente a entender seu trabalho antes de entrar em contato.</p>
+                    <div class="top-actions"><button type="button" class="btn btn-secondary" data-dashboard-shortcut="profissoes"><i class="fas fa-pen-to-square"></i> Revisar minhas profissões</button></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="perfil" class="tab-content">
+            <div class="panel">
+                <h2>Meu Perfil Profissional</h2>
+                <p class="small">Aqui fica a visão geral do perfil já salvo. Os ajustes rápidos podem ser feitos logo abaixo, sem precisar refazer tudo.</p>
+                <div class="profile-photo-editor">
+                    <form action="/profissional/foto/atualizar" method="POST" enctype="multipart/form-data" class="profile-photo-form" id="profilePhotoForm">
+                        <label for="profilePhotoInput" class="profile-photo-preview" title="Clique para trocar a foto">
+                            <% if (profissional?.users?.avatar_url) { %>
+                                <img src="<%= profissional.users.avatar_url %>" alt="Foto de perfil">
+                            <% } else { %>
+                                <%= (fullName || 'P').charAt(0).toUpperCase() %>
+                            <% } %>
+                            <span>Trocar foto</span>
+                        </label>
+                        <input type="file" name="profile_photo" id="profilePhotoInput" accept="image/*" hidden>
+                    </form>
+                    <div class="profile-photo-copy">
+                        <h3>Foto principal do profissional</h3>
+                        <p>Esta é a foto que aparece nos cards, no perfil público e na identificação da dashboard. As imagens de serviço ficam separadas dentro de cada profissão.</p>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('profilePhotoInput')?.click()"><i class="fas fa-camera"></i> Alterar foto</button>
+                    </div>
+                </div>
+                <div class="detail-grid" style="margin-top:14px;">
+                    <div class="detail"><strong>Nome</strong><%= profissional?.users?.full_name || fullName || 'Não informado' %></div>
+                    <div class="detail"><strong>Telefone</strong><%= profissional.phone_number || 'Não informado' %></div>
+                    <div class="detail"><strong>Cidade / Estado</strong><%= profissional.city ? `${profissional.city} - ${profissional.state || ''}` : 'Não informado' %></div>
+                    <div class="detail"><strong>CEP</strong><%= profissional.cep || 'Não informado' %></div>
+                </div>
+                <div class="detail" style="margin-top:12px;"><strong>Conteúdo dos serviços</strong>Descrição, especialidades, disponibilidade e preços são ajustados separadamente em <a href="/profissional/dashboard?tab=profissoes" style="color:#ffb020">Minhas Profissões</a>.</div>
+                <div class="detail" style="margin-top:12px;"><strong>Profissões escolhidas</strong>
+                    <% if ((selectedProfessionSlots || []).length) { %>
+                        <div class="chip-wrap" style="margin-top:8px">
+                            <% selectedProfessionSlots.forEach(item => { %>
+                                <span class="chip"><%= item.slot %>. <%= item.displayName %><% if (item.statusLabel) { %> · <%= item.statusLabel %><% } %></span>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        Ainda não definidas
+                    <% } %>
+                </div>
+                <form action="/profissional/perfil/atualizar" method="POST" class="panel" style="margin-top:16px;padding:16px">
+                    <h3>Ajustes rápidos do perfil</h3>
+                    <div class="field-grid">
+                        <div class="field"><label>Nome que aparece</label><input type="text" name="display_name" value="<%= profissional?.users?.full_name || fullName || '' %>"></div>
+                        <div class="field"><label>WhatsApp</label><input type="text" inputmode="tel" name="phone_number" data-mask="phone" placeholder="(16) 99999-9999" value="<%= profissional.phone_number || '' %>"><span class="small">Este número é usado no botão “Contratar pelo WhatsApp”.</span></div>
+                        <div class="field"><label>Telefone fixo (opcional)</label><input type="text" inputmode="tel" name="fixed_phone" data-mask="phone" placeholder="(16) 3252-0000" value="<%= profissional.fixed_phone || '' %>"></div>
+                        <div class="field"><label>CEP <span class="small">(opcional)</span></label><div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" inputmode="numeric" name="cep" id="profileCepInput" data-mask="cep" maxlength="9" placeholder="15900-000" value="<%= profissional.cep || '' %>" style="flex:1;min-width:150px"><button type="button" class="btn btn-secondary" id="lookupProfileCep"><i class="fas fa-magnifying-glass-location"></i> Buscar</button></div><span class="small" id="profileCepStatus">O CEP não é obrigatório. Você pode preencher o endereço manualmente; quando informado, ele ajuda a deixar a localização mais precisa no Maps.</span><button type="button" class="btn btn-secondary" id="lookupCepByAddress" style="margin-top:7px;align-self:flex-start"><i class="fas fa-location-crosshairs"></i> Não sei meu CEP · buscar pelo endereço</button></div>
+                        <div class="field"><label>Cidade</label><input type="text" name="city" id="profileCityInput" pattern="[A-Za-zÀ-ÿ\s]+" value="<%= profissional.city || '' %>"></div>
+                        <div class="field"><label>Estado</label><input type="text" maxlength="2" name="state" id="profileStateInput" pattern="[A-Za-zÀ-ÿ\s]+" value="<%= profissional.state || '' %>"></div>
+                        <div class="field"><label>Rua / Avenida (opcional)</label><input type="text" name="address_street" id="profileStreetInput" maxlength="160" value="<%= profissional.address_street || '' %>"></div>
+                        <div class="field"><label>Número</label><input type="text" name="address_number" maxlength="20" value="<%= profissional.address_number || '' %>"></div>
+                        <div class="field"><label>Bairro</label><input type="text" name="address_neighborhood" id="profileNeighborhoodInput" maxlength="120" value="<%= profissional.address_neighborhood || '' %>"></div>
+                        <div class="field"><label>Complemento (opcional)</label><input type="text" name="address_complement" id="profileComplementInput" maxlength="120" placeholder="Sala, bloco, referência..." value="<%= profissional.address_complement || '' %>"></div>
+                    </div>
+                    <label style="display:flex;align-items:flex-start;gap:9px;margin-top:14px;padding:12px 14px;border:1px solid #30343a;border-radius:12px;background:#111318;color:#fff"><input type="checkbox" name="show_full_address" style="margin-top:3px" <%= profissional.show_full_address ? 'checked' : '' %>><span><strong>Mostrar meu endereço profissional completo no perfil público</strong><br><span class="small">Se ficar desmarcado, o cliente continuará vendo somente sua cidade e estado.</span></span></label>
+                    <div class="profession-help" style="margin-top:12px"><strong>Dados do serviço ficam em Minhas Profissões.</strong> Assim você não corre o risco de alterar Marceneiro e, sem perceber, mudar também Analista de Sistemas.</div>
+                    <div class="top-actions"><button type="button" class="btn btn-secondary" onclick="cancelProfileEdit()">Cancelar edição</button><button type="submit" class="btn btn-primary">Salvar ajustes do perfil</button><button type="button" class="btn btn-danger" onclick="openDeleteProfileModal()">Excluir perfil</button></div>
+                </form>
+            </div>
+        </section>
+
+
+        <section id="profissoes" class="tab-content">
+            <div class="panel">
+                <h2>Minhas Profissões</h2>
+                <p class="small" style="margin-top:6px;line-height:1.55">Selecione a profissão que deseja editar. Aqui ficam somente as informações do serviço: descrição, especialidades, disponibilidade e preço. As fotos ficam concentradas em “Meu Portfólio” para evitar alterações duplicadas ou confusas.</p>
+                <button type="button" class="btn btn-secondary help-toggle" onclick="toggleQuickGuide()"><i class="fas fa-circle-info"></i> Ver guia rápido desta área</button>
+                <div class="quick-guide" id="quickGuideProfessions">
+                    <strong>Guia rápido:</strong> esta área organiza um mini-perfil para cada profissão aprovada.
+                    <ol>
+                        <li>Escolha a profissão na lista.</li>
+                        <li>Revise descrição, especialidades, disponibilidade e preço.</li>
+                        <li>Clique em “Visualizar antes de publicar”: a prévia usa exatamente o que está preenchido na tela, sem salvar nem contar visita.</li>
+                        <li>Se gostar do resultado, publique pela própria prévia ou volte para continuar editando.</li>
+                        <li>Para adicionar/remover fotos, use “Meu Portfólio”.</li>
+                    </ol>
+                </div>
+                <% const professionCards = Array.isArray(professionProfileCards) ? professionProfileCards : []; %>
+                <% const editableProfessionCards = professionCards.filter(card => card.canEdit); %>
+                <% const selectedSlotFromQuery = Number(selectedProfessionSlot || 0); %>
+                <% const firstEditableCard = professionCards.find(card => Number(card.slot) === selectedSlotFromQuery) || editableProfessionCards[0] || professionCards[0] || null; %>
+                <% const pendingProfessionCards = professionCards.filter(card => !card.canEdit); %>
+                <% if (!professionCards.length) { %>
+                    <div class="detail" style="margin-top:14px"><strong>Nenhuma profissão configurada</strong>Volte ao plano/cadastro para escolher suas profissões.</div>
+                <% } else { %>
+                    <div class="profession-selector-shell">
+                        <div>
+                            <label for="professionEditorSelect">Escolha a profissão</label>
+                            <select id="professionEditorSelect">
+                                <% professionCards.forEach(function(card) { %>
+                                    <option value="profession-pane-<%= card.slot %>" <%= firstEditableCard && Number(firstEditableCard.slot) === Number(card.slot) ? 'selected' : '' %>>
+                                        <%= card.professionName %><% if (!card.canEdit) { %> · em análise<% } %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="profession-help">
+                            <strong>Como funciona:</strong> a foto principal fica no Meu Perfil. Aqui você organiza cada profissão separadamente. Exemplo: Pedreiro mostra obras/reformas; Eletricista mostra instalações elétricas.
+                        </div>
+                    </div>
+                    <% if (pendingProfessionCards.length) { %>
+                        <div class="analysis-list">
+                            <% pendingProfessionCards.forEach(function(card) { %>
+                                <span class="analysis-chip"><i class="fas fa-clock"></i> <%= card.professionName %> em análise pelo ADM</span>
+                            <% }) %>
+                        </div>
+                    <% } %>
+
+                    <% professionCards.forEach(function(card) { %>
+                        <% const isDefaultPane = firstEditableCard && Number(firstEditableCard.slot) === Number(card.slot); %>
+                        <% const profileUrl = `/perfil/${profissional.user_id || profissional.id}?categoria=${encodeURIComponent(card.professionSlug || card.professionName || 'profissional')}`; %>
+                        <div class="profession-editor-pane <%= isDefaultPane ? '' : 'hidden-pane' %>" id="profession-pane-<%= card.slot %>">
+                            <div class="mobile-profession-context"><span><i class="fas fa-pen-to-square"></i> Editando agora</span><strong><%= card.professionName %></strong></div>
+                            <div class="profession-editor-top">
+                                <div>
+                                    <h3><%= card.professionName %></h3>
+                                    <p class="small">O cliente verá este conteúdo ao abrir seu perfil como <strong><%= card.professionName %></strong>.</p>
+                                </div>
+                                <% if (card.canEdit) { %>
+                                    <span class="profile-status-pill active"><i class="fas fa-check-circle"></i> Publicável</span>
+                                <% } else { %>
+                                    <span class="profile-status-pill pending"><i class="fas fa-clock"></i> Em análise pelo ADM</span>
+                                <% } %>
+                            </div>
+                            <div class="editing-notice">
+                                <div><strong>Você está editando:</strong> <%= card.professionName %><br><span class="small">Descrição, horários, especialidades e preços podem ser ajustados aqui. Fotos ficam em “Meu Portfólio”; troca de profissão ou profissão nova passa pelo ADM.</span></div>
+                                <% if (card.canEdit) { %><span class="profile-status-pill active"><i class="fas fa-pen-to-square"></i> edição liberada</span><% } %>
+                            </div>
+                            <% if (selectedSlotFromQuery && Number(selectedSlotFromQuery) === Number(card.slot) && flashSuccess) { %><div class="inline-pane-flash success"><%= flashSuccess %></div><% } %>
+                            <% if (selectedSlotFromQuery && Number(selectedSlotFromQuery) === Number(card.slot) && flashError) { %><div class="inline-pane-flash error"><%= flashError %></div><% } %>
+
+                            <% if (!card.canEdit) { %>
+                                <p class="small">Esta profissão ainda depende da análise do ADM. Ela não aparece para clientes e não pode receber portfólio público até ser aprovada.</p>
+                            <% } else { %>
+                                <% const stats = card.stats || {}; %>
+                                <% const estimatedReturn = Number(stats.estimatedReturn || 0).toFixed(2).replace('.', ','); %>
+                                <div class="profession-stats-grid">
+                                    <div class="profession-stat"><strong>Visitas 30 dias</strong><span><%= stats.visits || 0 %></span></div>
+                                    <div class="profession-stat"><strong>Cliques em contratar</strong><span><%= stats.clicks || 0 %></span></div>
+                                    <div class="profession-stat"><strong>Contatos gerados</strong><span><%= stats.leads || 0 %></span></div>
+                                    <div class="profession-stat"><strong>Possível retorno</strong><span>R$ <%= estimatedReturn %></span></div>
+                                </div>
+                                <p class="small" style="margin-top:-4px;margin-bottom:12px">A estimativa usa os contatos marcados como aceitos vezes o preço médio informado; se não houver preço médio, usa a taxa de visita. Visitas do próprio profissional e pré-visualizações não entram na contagem.</p>
+
+                                <form action="/profissional/profissoes/<%= card.slot %>/atualizar" method="POST" class="profession-update-form" data-slot="<%= card.slot %>" data-current-availability="<%= card.availability || '' %>">
+                                    <input type="hidden" name="portfolio_order" class="portfolio-order-input" value='<%- JSON.stringify((card.portfolioPreview || card.portfolio || []).map(item => String(item.id || "")).filter(Boolean)) %>'>
+                                    <div class="profession-draft-banner" data-draft-status data-state="published"><i class="fas fa-circle-check"></i><span>Tudo publicado. Se você editar algo, o Contrataê salva um rascunho automaticamente neste dispositivo.</span></div>
+                                    <div class="field-grid">
+                                        <div class="field"><label>Apresentação / mini biografia desta profissão</label><textarea name="description" placeholder="Conte brevemente quem você é, sua experiência e como trabalha nesta profissão"><%= card.description || '' %></textarea><small class="small">É o texto principal que o cliente lê em “Sobre o Profissional”.</small></div>
+                                        <div class="field"><label>Especialidades desta profissão</label><textarea name="specialties" placeholder="Ex: alvenaria, porcelanato, reforma, acabamento"><%= card.specialties || '' %></textarea></div>
+                                    </div>
+
+                                    <div class="availability-editor" data-availability-editor>
+                                        <input type="hidden" name="availability_summary" class="availability-summary" value="<%= card.availability || '' %>">
+                                        <div class="availability-editor-head">
+                                            <div>
+                                                <strong><i class="fas fa-calendar-days"></i> Disponibilidade desta profissão</strong>
+                                                <p class="small">Mesmo padrão do cadastro: marque os dias e escolha horários em intervalos de 30 minutos.</p>
+                                            </div>
+                                            <span class="draft-state"><i class="fas fa-pen"></i> edição automática</span>
+                                        </div>
+                                        <div class="availability-days-row">
+                                            <% ['Seg','Ter','Qua','Qui','Sex'].forEach(function(day){ %>
+                                                <label class="availability-chip"><input type="checkbox" name="working_days" value="<%= day %>"> <%= day %></label>
+                                            <% }) %>
+                                            <label class="availability-chip"><input type="checkbox" name="available_24h" class="availability-24h-toggle"> Atendimento 24h</label>
+                                        </div>
+                                        <div class="availability-24h-panel hidden-pane">
+                                            <strong>Atendimento 24h</strong>
+                                            <p class="small">Marque apenas os dias em que você realmente consegue atender 24 horas.</p>
+                                            <div class="availability-days-row" style="margin-top:9px;margin-bottom:0">
+                                                <label class="availability-chip"><input type="checkbox" name="available_24h_all_days" class="availability-24h-all"> Todos os dias</label>
+                                                <% ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(function(day){ %>
+                                                    <label class="availability-chip"><input type="checkbox" name="working_days_24h" value="<%= day %>"> <%= day %></label>
+                                                <% }) %>
+                                                <label class="availability-chip"><input type="checkbox" name="available_24h_holidays"> Feriados</label>
+                                            </div>
+                                        </div>
+                                        <div class="availability-time-grid">
+                                            <div class="field"><label>Início do horário padrão</label><select name="availability_start" class="availability-start-select"></select></div>
+                                            <div class="field"><label>Fim do horário padrão</label><select name="availability_end" class="availability-end-select"></select></div>
+                                        </div>
+                                        <div class="special-day-grid-dashboard">
+                                            <% [['saturday','Sábado','same'],['sunday','Domingo','no'],['holiday','Feriado','no']].forEach(function(def){ %>
+                                                <div class="special-day-dashboard" data-special-day="<%= def[0] %>">
+                                                    <div class="field"><label><%= def[1] %></label><select name="<%= def[0] %>_service_mode" class="special-day-mode">
+                                                        <option value="same">Mesmo horário padrão</option>
+                                                        <option value="custom">Horário diferente</option>
+                                                        <option value="no">Não atende</option>
+                                                    </select></div>
+                                                    <div class="special-time-pair hidden-pane">
+                                                        <div class="field"><label>Início</label><select name="<%= def[0] %>_start" class="special-start-select"></select></div>
+                                                        <div class="field"><label>Fim</label><select name="<%= def[0] %>_end" class="special-end-select"></select></div>
+                                                    </div>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                        <div class="availability-summary-preview"><strong>Como aparecerá:</strong> <span class="availability-summary-text"><%= card.availability || 'Defina seus dias e horários.' %></span></div>
+                                    </div>
+
+                                    <div class="price-editor-grid">
+                                        <div class="price-option-card">
+                                            <label class="price-toggle-row"><input type="checkbox" name="service_fee_enabled" class="service-fee-toggle" <%= card.priceValue !== '' && card.priceValue !== null && card.priceValue !== undefined ? 'checked' : '' %>> <strong>Cobro taxa de visita</strong></label>
+                                            <div class="field service-fee-field"><label>Valor da taxa de visita</label><input type="text" inputmode="decimal" class="currency-input" name="price_value" value="<%= card.priceValue || '' %>" placeholder="Ex: 35,00"><small class="small">Somente números. Desmarque se não cobrar visita.</small></div>
+                                        </div>
+                                        <div class="price-option-card">
+                                            <div class="field"><label>Preço médio do serviço <span class="small">(opcional)</span></label><input type="text" inputmode="decimal" class="currency-input" name="average_price" value="<%= card.averagePrice || '' %>" placeholder="Ex: 180,00"><small class="small">Ajuda o cliente a ter uma referência inicial; não substitui o orçamento.</small></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="profession-actions-row">
+                                        <a class="btn btn-secondary published-profile-view-link" href="/perfil/<%= profissional.user_id || profissional.id %>?categoria=<%= encodeURIComponent(card.professionSlug || card.professionName || 'profissional') %>&ownerView=1&returnTab=profissoes&slot=<%= card.slot %>"><i class="fas fa-window-maximize"></i> Ver publicado atual</a>
+                                        <button type="submit" formaction="/profissional/profissoes/<%= card.slot %>/preview" class="btn btn-secondary preview-profession-btn" data-requires-draft="1" disabled title="Faça uma alteração para liberar a pré-visualização"><i class="fas fa-eye"></i> Visualizar antes de publicar</button>
+                                        <button type="submit" class="btn btn-primary publish-profession-btn" disabled title="Faça uma alteração antes de publicar"><i class="fas fa-upload"></i> Publicar alterações</button>
+                                        <a href="/profissional/dashboard?tab=portfolio&slot=<%= card.slot %>" class="btn btn-secondary draft-preserving-link" data-draft-slot="<%= card.slot %>"><i class="fas fa-images"></i> Gerenciar fotos desta profissão</a>
+                                    </div>
+                                    <p class="small profession-save-note"><i class="fas fa-circle-info"></i> “Visualizar” não publica e não conta como visita. A publicação só acontece quando você confirmar.</p>
+                                </form>
+
+                                <div class="portfolio-summary-link">
+                                    <div>
+                                        <strong><i class="fas fa-images"></i> Portfólio de <%= card.professionName %></strong>
+                                        <span class="small"><%= (card.portfolioPreview || card.portfolio || []).length %> imagem(ns) no portfólio desta profissão. Fotos são gerenciadas somente em “Meu Portfólio”.</span>
+                                    </div>
+                                    <a href="/profissional/dashboard?tab=portfolio&slot=<%= card.slot %>" class="btn btn-secondary draft-preserving-link" data-draft-slot="<%= card.slot %>">Abrir portfólio</a>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </section>
+
+        <section id="portfolio" class="tab-content">
+            <div class="panel">
+                <h2>Meu Portfólio</h2>
+                <p class="small" style="margin:6px 0 14px;line-height:1.55">As fotos dos seus trabalhos ficam aqui, separadas por profissão. Trocar a profissão abaixo muda o portfólio imediatamente — sem mandar você para outra área da dashboard.</p>
+                <div class="portfolio-context-box">
+                    <strong style="color:#ffb020">Qual portfólio você quer editar?</strong>
+                    <div class="portfolio-context-actions" style="margin-top:10px">
+                        <div><label class="small">Profissão</label><br>
+                            <select id="portfolioProfessionSelect">
+                                <% editableProfessionCards.forEach(function(card){ %>
+                                    <option value="portfolio-pane-<%= card.slot %>" data-slot="<%= card.slot %>" <%= Number(selectedProfessionSlot || 0) === Number(card.slot) ? 'selected' : '' %>><%= card.professionName %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="small" style="margin-top:8px"><i class="fas fa-user-circle"></i> A foto do rosto continua em “Meu Perfil”. Aqui entram apenas fotos de trabalhos/serviços.</p>
+                </div>
+
+                <% editableProfessionCards.forEach(function(card, idx){ %>
+                    <% const showPortfolioPane = Number(selectedProfessionSlot || 0) ? Number(selectedProfessionSlot) === Number(card.slot) : idx === 0; %>
+                    <% const editorPortfolio = Array.isArray(card.portfolio) ? card.portfolio : []; %>
+                    <% const previewPortfolio = Array.isArray(card.portfolioPreview) ? card.portfolioPreview : editorPortfolio; %>
+                    <% const portfolioDraftPending = Boolean(card.portfolioHasDraft); %>
+                    <div class="portfolio-profession-pane <%= showPortfolioPane ? '' : 'hidden-pane' %>" id="portfolio-pane-<%= card.slot %>">
+                        <div class="portfolio-pane-header">
+                            <div><h3>Portfólio de <%= card.professionName %></h3><p class="small">Até 10 imagens de trabalhos/serviços. A foto de perfil é separada e não entra neste limite. Fotos, ordem, remoções e legendas ficam em rascunho até você publicar.</p></div>
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+                                <span class="profile-status-pill active"><%= previewPortfolio.length %>/10 imagens</span>
+                                <button type="button" class="btn btn-secondary return-to-profession-editor" data-slot="<%= card.slot %>"><i class="fas fa-arrow-left"></i> Voltar para editar esta profissão</button>
+                                <a class="btn btn-secondary published-profile-view-link" href="/perfil/<%= profissional.user_id || profissional.id %>?categoria=<%= encodeURIComponent(card.professionSlug || card.professionName || 'profissional') %>&ownerView=1&returnTab=portfolio&slot=<%= card.slot %>"><i class="fas fa-eye"></i> Ver perfil publicado atual</a>
+                            </div>
+                        </div>
+
+                        <div class="portfolio-context-confirm" data-portfolio-context-confirm="<%= card.slot %>" aria-live="polite"><i class="fas fa-location-dot"></i><span>Você está editando o portfólio de <strong><%= card.professionName %></strong>. Fotos desta tela afetam somente esta profissão.</span></div>
+                        <div id="portfolio-workspace-<%= card.slot %>"></div>
+                        <% if (selectedSlotFromQuery && Number(selectedSlotFromQuery) === Number(card.slot) && flashSuccess && activeTab === 'portfolio') { %><div class="portfolio-inline-flash success"><%= flashSuccess %></div><% } %>
+                        <% if (selectedSlotFromQuery && Number(selectedSlotFromQuery) === Number(card.slot) && flashError && activeTab === 'portfolio') { %><div class="portfolio-inline-flash error"><%= flashError %></div><% } %>
+                        <div class="portfolio-draft-banner <%= portfolioDraftPending ? 'pending' : '' %>" data-portfolio-draft-banner="<%= card.slot %>" data-photo-draft="<%= portfolioDraftPending ? '1' : '0' %>" data-info-draft="0">
+                            <div>
+                                <% if (portfolioDraftPending) { %>
+                                    <strong data-portfolio-draft-title><i class="fas fa-cloud"></i> Você tem mudanças de fotos ainda não publicadas</strong>
+                                    <span class="small" data-portfolio-draft-copy>A prévia mostra suas informações editadas + estas fotos. O perfil público continua como está até você confirmar.</span>
+                                <% } else { %>
+                                    <strong data-portfolio-draft-title><i class="fas fa-circle-check"></i> Portfólio publicado</strong>
+                                    <span class="small" data-portfolio-draft-copy>Escolha uma foto para criar um rascunho. O envio começa automaticamente.</span>
+                                <% } %>
+                            </div>
+                            <div class="portfolio-draft-banner-actions">
+                                <button type="button" class="btn btn-preview-strong preview-from-portfolio" data-slot="<%= card.slot %>" <%= portfolioDraftPending ? '' : 'disabled' %> title="<%= portfolioDraftPending ? 'Visualizar as alterações antes de publicar' : 'Faça uma alteração para liberar a pré-visualização' %>"><i class="fas fa-eye"></i> Visualizar antes de publicar</button>
+                                <button type="button" class="btn <%= portfolioDraftPending ? 'btn-primary' : 'btn-secondary' %> publish-from-portfolio" data-slot="<%= card.slot %>" <%= portfolioDraftPending ? '' : 'disabled' %>><i class="fas fa-upload"></i> Salvar e publicar tudo</button>
+                            </div>
+                        </div>
+
+                        <form action="/profissional/profissoes/<%= card.slot %>/portfolio/adicionar" method="POST" enctype="multipart/form-data" class="portfolio-upload-card profession-upload-form" data-slot="<%= card.slot %>">
+                            <input class="visually-hidden-file profession-file-input" id="portfolio-file-<%= card.slot %>" type="file" name="profession_portfolio_image" accept="image/jpeg,image/png,image/webp" required>
+                            <button type="button" class="btn btn-secondary choose-portfolio-image" data-input="portfolio-file-<%= card.slot %>"><i class="fas fa-image"></i> Escolher nova imagem</button>
+                            <span class="profession-file-name">Nenhuma imagem selecionada.</span>
+                            <span class="portfolio-upload-hint"><i class="fas fa-bolt"></i> Ao escolher, o Contrataê envia automaticamente e coloca a foto no rascunho.</span>
+                            <button type="submit" class="visually-hidden-file auto-portfolio-submit" tabindex="-1" aria-hidden="true">Enviar</button>
+                            <div class="profession-preview">
+                                <img alt="Prévia da nova imagem"><div><strong>Enviando imagem...</strong><br><span class="small">Aguarde. Ela aparecerá abaixo como “Nova · não publicada”.</span></div>
+                            </div>
+                        </form>
+                        <div class="portfolio-slots profession-portfolio-grid">
+                            <% for (let i = 0; i < Math.max(10, editorPortfolio.length); i++) { const item = editorPortfolio[i]; %>
+                                <% if (item) { const isNewDraft = item.is_published === false; const pendingDelete = item.pending_delete === true; const itemCaption = String(item.draft_caption ?? item.caption ?? '').trim(); %>
+                                    <div class="slot <%= isNewDraft ? 'portfolio-draft-new' : '' %> <%= pendingDelete ? 'portfolio-pending-delete' : '' %>" data-portfolio-item-id="<%= item.id || '' %>" data-portfolio-pending-delete="<%= pendingDelete ? '1' : '0' %>" data-slot="<%= card.slot %>">
+                                        <% if (item.profession_profile_id && !pendingDelete) { %><div class="portfolio-order-actions"><button type="button" class="portfolio-order-btn" data-portfolio-move="-1" title="Mover imagem para a esquerda"><i class="fas fa-arrow-left"></i></button><button type="button" class="portfolio-order-btn" data-portfolio-move="1" title="Mover imagem para a direita"><i class="fas fa-arrow-right"></i></button></div><% } %>
+                                        <img src="<%= item.image_url %>" alt="Imagem <%= i+1 %> de <%= card.professionName %>">
+                                        <% if (itemCaption && !pendingDelete) { %><div class="portfolio-caption-preview"><%= itemCaption %></div><% } %>
+                                        <% if (isNewDraft) { %><span class="portfolio-state-badge new">Nova · não publicada</span><% } %>
+                                        <% if (pendingDelete) { %><span class="portfolio-state-badge remove">Será removida ao publicar</span><% } %>
+                                        <div class="slot-actions">
+                                            <% if (pendingDelete) { %>
+                                                <form action="/profissional/profissoes/portfolio/desfazer-remocao" method="POST">
+                                                    <input type="hidden" name="id" value="<%= item.id %>"><input type="hidden" name="slot" value="<%= card.slot %>">
+                                                    <button class="slot-action-btn slot-action-undo" type="submit"><i class="fas fa-rotate-left"></i><span class="action-label"> Desfazer</span></button>
+                                                </form>
+                                            <% } else if (item.profession_profile_id) { %>
+                                                <button type="button" class="slot-action-btn slot-action-caption edit-portfolio-caption" data-id="<%= item.id %>" data-slot="<%= card.slot %>" data-caption="<%= itemCaption %>"><i class="fas fa-pen"></i><span class="action-label"> Legenda</span></button>
+                                                <form action="/profissional/profissoes/portfolio/remover" method="POST" class="portfolio-remove-form">
+                                                    <input type="hidden" name="id" value="<%= item.id %>"><input type="hidden" name="slot" value="<%= card.slot %>">
+                                                    <button class="slot-action-btn slot-action-remove" type="submit"><i class="fas fa-trash"></i><span class="action-label"> Remover</span></button>
+                                                </form>
+                                            <% } else { %>
+                                                <span class="legacy-photo-badge">Imagem inicial</span>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% } else { %>
+                                    <button type="button" class="slot empty portfolio-empty-trigger" data-input="portfolio-file-<%= card.slot %>">+ adicionar foto<br>de <%= card.professionName %></button>
+                                <% } %>
+                            <% } %>
+                        </div>
+                        <% if (card.legacyFallback) { %>
+                            <div class="portfolio-info-note"><i class="fas fa-circle-info"></i> Estas são as imagens iniciais do cadastro. Ao adicionar a primeira foto específica desta profissão, o Contrataê preservará a base para não fazer fotos sumirem do perfil.</div>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+
+<section id="planos" class="tab-content">
+            <div class="panel">
+                <h2>Meu Plano</h2>
+                <p class="small">Acompanhe aqui o plano vinculado à sua conta e quantas profissões estão liberadas no seu perfil.</p>
+                <div class="plan-current-banner">
+                    <i class="fas fa-circle-check" aria-hidden="true"></i>
+                    <div><strong><%= currentPlanName %></strong><span>Plano atual do seu perfil profissional.</span></div>
+                </div>
+                <div class="detail-grid" style="margin-top:14px;">
+                    <div class="detail"><strong>Profissões liberadas</strong><%= selectedCount || 1 %></div>
+                    <div class="detail"><strong>Status do perfil</strong><%= isApproved ? 'Aprovado e publicado' : (approvalPending ? 'Em análise' : (profileReadyForApproval ? 'Pronto para análise' : 'Em montagem')) %></div>
+                    <div class="detail"><strong>Valor informado</strong>R$ <%= Number(profissional.plan_price || profissional.payment_value || 0).toFixed(2).replace('.', ',') %></div>
+                    <div class="detail"><strong>Período</strong><%= profissional.plan_duration_months || 1 %> mês(es)</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="pagamentos" class="tab-content">
+            <div class="panel">
+                <h2>Histórico de Pagamentos</h2>
+                <div class="table-wrap" style="margin-top:14px;">
+                    <table>
+                        <thead><tr><th>Data</th><th>Plano</th><th>Valor</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <% if ((pagamentos || []).length) { %>
+                                <% pagamentos.forEach(pag => { %>
+                                    <tr>
+                                        <td><%= new Date(pag.payment_date).toLocaleDateString('pt-BR') %></td>
+                                        <td><%= pag.plans?.name || 'Plano' %></td>
+                                        <td>R$ <%= pag.amount %></td>
+                                        <td><span class="badge <%= pag.status %>"><%= pag.status === 'completed' ? 'Concluído' : 'Pendente' %></span></td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr><td colspan="4" class="small">Nenhum pagamento registrado ainda.</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="servicos" class="tab-content">
+            <div class="panel">
+                <h2>Meus Serviços</h2>
+                <p class="small">Aqui ficam os contatos recebidos pelo botão “Contratar”. Use esta área para lembrar se aceitou, recusou ou precisa responder o cliente.</p>
+                <div class="lead-list" id="servicesLeadsList"><p class="small">Carregando contatos...</p></div>
+            </div>
+        </section>
+        <section id="avaliacoes" class="tab-content">
+            <div class="panel">
+                <% const visibleProfessionalReviews = (avaliacoes || []).filter(r => String(r.status || 'visible').toLowerCase() === 'visible'); %>
+                <div class="reviews-dashboard-head">
+                    <div>
+                        <h2>Avaliações</h2>
+                        <p class="small">Veja a reputação que os clientes encontram no seu perfil público. As avaliações ajudam outros clientes a conhecer a experiência de quem já contratou você.</p>
+                    </div>
+                </div>
+                <div class="reviews-overview">
+                    <div class="review-overview-card"><span>Avaliação média</span><strong><i class="fas fa-star" style="font-size:.7em"></i> <%= avaliacaoMedia %></strong></div>
+                    <div class="review-overview-card"><span>Avaliações publicadas</span><strong><%= visibleProfessionalReviews.length %></strong></div>
+                </div>
+                <% if (visibleProfessionalReviews.length) { %>
+                    <div class="professional-review-list">
+                        <% visibleProfessionalReviews.slice(0, 8).forEach(review => { %>
+                            <article class="professional-review-card">
+                                <div class="professional-review-top">
+                                    <strong>Cliente verificado</strong>
+                                    <span class="professional-review-stars" aria-label="<%= Number(review.rating || 0) %> de 5 estrelas">
+                                        <% for (let i = 0; i < 5; i++) { %><i class="fas fa-star" style="opacity:<%= i < Number(review.rating || 0) ? 1 : .25 %>"></i><% } %>
+                                    </span>
+                                </div>
+                                <p><%= review.comment || 'Avaliação sem comentário.' %></p>
+                            </article>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="professional-review-empty"><i class="fas fa-star"></i><strong>Ainda não há avaliações publicadas.</strong><br><span class="small">Quando clientes avaliarem seu atendimento, elas aparecerão aqui e no perfil público.</span></div>
+                <% } %>
+            </div>
+        </section>
+    </main>
+</div>
+
+<nav class="mobile-dashboard-bottom-nav" aria-label="Navegação principal da Área Profissional">
+    <button type="button" data-mobile-tab="resumo"><i class="fas fa-chart-line"></i><span>Visão</span></button>
+    <button type="button" data-mobile-tab="servicos"><i class="fas fa-briefcase"></i><span>Serviços</span></button>
+    <button type="button" data-mobile-tab="profissoes"><i class="fas fa-layer-group"></i><span>Profissões</span></button>
+    <button type="button" data-mobile-tab="portfolio"><i class="fas fa-images"></i><span>Portfólio</span></button>
+    <button type="button" data-mobile-more><i class="fas fa-bars"></i><span>Mais</span></button>
+</nav>
+<div class="mobile-more-overlay" id="mobileMoreOverlay" aria-hidden="true">
+    <div class="mobile-more-sheet" role="dialog" aria-modal="true" aria-label="Mais opções da Área Profissional">
+        <div class="mobile-more-sheet-head"><strong>Mais opções</strong><button type="button" class="mobile-more-close" id="mobileMoreClose" aria-label="Fechar"><i class="fas fa-xmark"></i></button></div>
+        <div class="mobile-more-grid">
+            <button type="button" data-mobile-sheet-tab="perfil"><i class="fas fa-user"></i> Meu Perfil</button>
+            <button type="button" data-mobile-sheet-tab="avaliacoes"><i class="fas fa-star"></i> Avaliações</button>
+            <button type="button" data-mobile-sheet-tab="planos"><i class="fas fa-credit-card"></i> Meu Plano</button>
+            <button type="button" data-mobile-sheet-tab="pagamentos"><i class="fas fa-money-check"></i> Pagamentos</button>
+            <button type="button" id="installContrataeBtn" class="pwa-install-action" hidden><i class="fas fa-download"></i> Instalar Contrataê</button>
+            <a href="/"><i class="fas fa-house"></i> Ir para o início</a>
+            <form method="POST" action="/auth/logout" class="mobile-more-logout"><button type="submit" class="danger" style="width:100%"><i class="fas fa-right-from-bracket"></i> Sair</button></form>
+        </div>
+    </div>
+</div>
+
+<div class="lead-floating" id="leadFloatingAlert">
+  <h3><i class="fas fa-bell"></i> Novo contato recebido</h3>
+  <p>Um cliente demonstrou interesse pelo seu serviço. Abra “Meus Serviços” para aceitar ou recusar.</p>
+  <button type="button" class="btn btn-primary" onclick="openTab('servicos'); document.getElementById('leadFloatingAlert')?.classList.remove('active');">Ver contatos</button>
+</div>
+<audio id="leadSound" src="/audio/novo-contato.mp3" preload="auto"></audio>
+<audio id="leadAlertSound" src="/audio/alerta-contato.mp3" preload="auto"></audio>
+
+<div class="modal-overlay-local" id="cepAddressModal">
+  <div class="modal-card-local">
+    <h3>Encontrar CEP pelo endereço</h3>
+    <p>Preencha Estado, Cidade e Rua/Avenida no perfil. O Contrataê procura opções de CEP e você escolhe a correspondente.</p>
+    <div id="cepAddressResults" style="display:grid;gap:8px;margin-top:14px"></div>
+    <div class="modal-actions-local"><button type="button" class="btn btn-secondary" id="closeCepAddressModal">Fechar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay-local" id="portfolioRemoveModal">
+  <div class="modal-card-local">
+    <h3>Remover esta imagem?</h3>
+    <p>Se esta foto já estiver publicada, ela será apenas marcada para remoção e continuará visível aos clientes até você clicar em “Salvar e publicar”. Fotos novas ainda em rascunho são descartadas imediatamente.</p>
+    <div class="modal-actions-local">
+      <button type="button" class="btn btn-secondary" id="cancelPortfolioRemove">Cancelar</button>
+      <button type="button" class="btn btn-danger" id="confirmPortfolioRemove"><i class="fas fa-trash"></i><span class="action-label"> Remover</span> imagem</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay-local" id="portfolioCaptionModal">
+  <div class="modal-card-local">
+    <h3>Legenda da imagem</h3>
+    <p>Use uma frase curta para explicar o trabalho, material, ambiente ou resultado mostrado. A legenda só aparece para clientes depois de publicar.</p>
+    <form method="POST" action="/profissional/profissoes/portfolio/legenda" id="portfolioCaptionForm">
+      <input type="hidden" name="id" id="portfolioCaptionId">
+      <input type="hidden" name="slot" id="portfolioCaptionSlot">
+      <div class="field" style="margin-top:14px;text-align:left">
+        <label>Legenda (opcional)</label>
+        <textarea name="caption" id="portfolioCaptionText" maxlength="180" rows="4" placeholder="Ex: Instalação concluída com acabamento em madeira clara"></textarea>
+        <span class="caption-counter" id="portfolioCaptionCounter">0/180</span>
+      </div>
+      <div class="modal-actions-local">
+        <button type="button" class="btn btn-secondary" id="cancelPortfolioCaption">Cancelar</button>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-cloud"></i> Salvar legenda no rascunho</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay-local" id="deleteProfileModal">
+  <div class="modal-card-local">
+    <h3>Excluir perfil profissional?</h3>
+    <p>Seu perfil será ocultado da plataforma e você sairá da conta. O histórico financeiro e registros administrativos ficam preservados para segurança.</p>
+    <form method="POST" action="/profissional/perfil/excluir" id="deleteProfileForm">
+      <div class="field" style="margin-top:14px;text-align:left">
+        <label>Motivo da exclusão</label>
+        <textarea name="motivo_exclusao" placeholder="Ex: desejo refazer meu cadastro" required></textarea>
+      </div>
+      <div class="modal-actions-local">
+        <button type="button" class="btn btn-secondary" onclick="closeDeleteProfileModal()">Continuar com meu perfil</button>
+        <button type="submit" class="btn btn-danger">Confirmar exclusão</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay-local" id="approvalConfirmModal">
+  <div class="modal-card-local">
+    <h3>Enviar perfil para análise?</h3>
+    <p>Depois do envio, seu cadastro ficará em análise até a equipe revisar. Você pode continuar ajustando descrição, disponibilidade, foto e portfólio. Mudanças de plano ou profissões podem exigir nova conferência da equipe.</p>
+    <div class="modal-actions-local">
+      <form action="/profissional/solicitar-aprovacao" method="POST" enctype="multipart/form-data" id="approvalRequestForm">
+        <div class="field" style="margin-top:14px;text-align:left">
+            <label>Comprovante de pagamento</label>
+            <input type="file" name="payment_proof" id="paymentProofInput" accept="image/*,application/pdf">
+            <div class="help">Você pode anexar o comprovante aqui ou marcar abaixo que enviou pelo WhatsApp.</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:12px;color:#fff"><input type="checkbox" name="payment_sent_whatsapp" id="paymentWhatsappCheck"> Enviei o comprovante pelo WhatsApp</label>
+        <div class="modal-actions-local">
+            <button type="button" class="btn btn-secondary" id="closeApprovalModal">Cancelar</button>
+            <button class="btn btn-primary" type="submit" id="approvalSubmitBtn" disabled>Enviar para análise</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay-local" id="approvalSentModal">
+  <div class="modal-card-local">
+    <h3>Perfil enviado</h3>
+    <p>Seu pedido foi enviado com sucesso. Agora é só aguardar a resposta da administração.</p>
+    <div class="modal-actions-local">
+      <button type="button" class="btn btn-primary" id="closeApprovalSentModal">Entendi</button>
+    </div>
+  </div>
+</div>
+<script>
+const activeTab = '<%= activeTab || "resumo" %>';
+const currentProfessionalId = '<%= profissional.user_id || profissional.id || "professional" %>';
+
+// v11.3.38: tema da Área Profissional usa o mesmo botão sol/lua e a mesma preferência `theme` do restante da plataforma.
+const PROFESSIONAL_THEME_KEY='theme';
+function updateProfessionalThemeIcon(isLight){
+    const btn=document.getElementById('theme-toggle');
+    const icon=btn?.querySelector('i');
+    if(icon){ icon.classList.toggle('fa-sun',isLight); icon.classList.toggle('fa-moon',!isLight); }
+    if(btn){ btn.setAttribute('aria-pressed',isLight?'true':'false'); btn.title=isLight?'Usar modo escuro':'Usar modo claro'; }
+}
+function applyProfessionalTheme(choice='dark'){
+    const isLight=choice==='light';
+    document.body.classList.toggle('light-mode',isLight);
+    updateProfessionalThemeIcon(isLight);
+    const meta=document.querySelector('meta[name="theme-color"]'); if(meta) meta.setAttribute('content',isLight?'#f3f5f8':'#101114');
+    try{ localStorage.setItem(PROFESSIONAL_THEME_KEY,isLight?'light':'dark'); }catch(_){}
+}
+let initialProfessionalTheme='dark'; try{ initialProfessionalTheme=localStorage.getItem(PROFESSIONAL_THEME_KEY)==='light'?'light':'dark'; }catch(_){}
+applyProfessionalTheme(initialProfessionalTheme);
+document.getElementById('theme-toggle')?.addEventListener('click',()=>applyProfessionalTheme(document.body.classList.contains('light-mode')?'dark':'light'));
+
+let deferredInstallPrompt=null;
+window.addEventListener('beforeinstallprompt',event=>{ event.preventDefault(); deferredInstallPrompt=event; const btn=document.getElementById('installContrataeBtn'); if(btn) btn.hidden=false; });
+window.addEventListener('appinstalled',()=>{ deferredInstallPrompt=null; const btn=document.getElementById('installContrataeBtn'); if(btn) btn.hidden=true; });
+document.addEventListener('click',async e=>{ const btn=e.target?.closest?.('#installContrataeBtn'); if(!btn||!deferredInstallPrompt) return; btn.disabled=true; try{ await deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice; }catch(_){} finally{ deferredInstallPrompt=null; btn.hidden=true; btn.disabled=false; } });
+const mobileDashboardSections = {
+    resumo:{label:'Visão Geral',icon:'fa-chart-line'}, servicos:{label:'Meus Serviços',icon:'fa-briefcase'}, avaliacoes:{label:'Avaliações',icon:'fa-star'}, perfil:{label:'Meu Perfil',icon:'fa-user'}, profissoes:{label:'Minhas Profissões',icon:'fa-layer-group'}, portfolio:{label:'Meu Portfólio',icon:'fa-images'}, planos:{label:'Meu Plano',icon:'fa-credit-card'}, pagamentos:{label:'Pagamentos',icon:'fa-money-check'}
+};
+function syncMobileDashboardNavigation(tab){
+    const meta=mobileDashboardSections[tab] || mobileDashboardSections.resumo;
+    const icon=document.getElementById('mobileSectionIcon'); if(icon) icon.innerHTML=`<i class="fas ${meta.icon}"></i>`;
+    const label=document.getElementById('mobileSectionLabel'); if(label) label.textContent=meta.label;
+    document.querySelectorAll('[data-mobile-tab]').forEach(btn=>btn.classList.toggle('active',btn.dataset.mobileTab===tab));
+    const more=document.querySelector('[data-mobile-more]'); if(more) more.classList.toggle('active',!['resumo','servicos','profissoes','portfolio'].includes(tab));
+}
+function closeMobileMore(){ const overlay=document.getElementById('mobileMoreOverlay'); overlay?.classList.remove('active'); overlay?.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+function openTab(tab, options = {}){
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-link[data-tab]').forEach(el => el.classList.remove('active'));
+    const panel = document.getElementById(tab); if(panel) panel.classList.add('active');
+    const link = document.querySelector(`.nav-link[data-tab="${tab}"]`); if(link) link.classList.add('active');
+    syncMobileDashboardNavigation(tab);
+    if(options.mobileScroll && window.matchMedia('(max-width:820px)').matches){ window.scrollTo({top:0,behavior:'smooth'}); }
+    const url = new URL('/profissional/dashboard', window.location.origin);
+    url.searchParams.set('tab', tab);
+    if(options.slot){
+        url.searchParams.set('slot', String(options.slot));
+    } else if(options.preserveSlot){
+        const current = new URLSearchParams(window.location.search);
+        const slot = current.get('slot');
+        if(slot) url.searchParams.set('slot', slot);
+    }
+    history.replaceState({}, '', url.pathname + url.search);
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+    const initialParams = new URLSearchParams(window.location.search);
+    const selectedSlotParam = initialParams.get('slot');
+    if(selectedSlotParam){ setTimeout(()=>{ const pane=document.getElementById(`profession-pane-${selectedSlotParam}`); pane?.classList.add('profession-focus-pulse'); setTimeout(()=>pane?.classList.remove('profession-focus-pulse'),1800); },120); }
+    document.querySelectorAll('.nav-link[data-tab]').forEach(link => link.addEventListener('click', ev => { ev.preventDefault(); openTab(link.dataset.tab); }));
+    document.querySelectorAll('[data-mobile-tab]').forEach(btn=>btn.addEventListener('click',()=>openTab(btn.dataset.mobileTab,{mobileScroll:true})));
+    const moreOverlay=document.getElementById('mobileMoreOverlay');
+    document.querySelector('[data-mobile-more]')?.addEventListener('click',()=>{ moreOverlay?.classList.add('active'); moreOverlay?.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; });
+    document.getElementById('mobileMoreClose')?.addEventListener('click',closeMobileMore);
+    moreOverlay?.addEventListener('click',e=>{ if(e.target===moreOverlay) closeMobileMore(); });
+    document.querySelectorAll('[data-mobile-sheet-tab]').forEach(btn=>btn.addEventListener('click',()=>{ closeMobileMore(); openTab(btn.dataset.mobileSheetTab,{mobileScroll:true}); }));
+
+    const approvedBanner=document.getElementById('approvedProfileBanner');
+    const approvedBannerToggle=document.getElementById('approvedBannerToggle');
+    const APPROVED_BANNER_KEY='contratae-approved-banner-collapsed';
+    function setApprovedBannerCollapsed(collapsed){
+        approvedBanner?.classList.toggle('is-collapsed',collapsed);
+        approvedBannerToggle?.setAttribute('aria-expanded',collapsed?'false':'true');
+        if(approvedBannerToggle) approvedBannerToggle.title=collapsed?'Expandir aviso':'Recolher aviso';
+        try{ localStorage.setItem(APPROVED_BANNER_KEY,collapsed?'1':'0'); }catch(_){}
+    }
+    if(approvedBanner){ let collapsed=false; try{collapsed=localStorage.getItem(APPROVED_BANNER_KEY)==='1'}catch(_){} setApprovedBannerCollapsed(collapsed); }
+    approvedBannerToggle?.addEventListener('click',()=>setApprovedBannerCollapsed(!approvedBanner?.classList.contains('is-collapsed')));
+
+    document.querySelectorAll('[data-dashboard-shortcut]').forEach(btn=>btn.addEventListener('click',()=>openTab(btn.dataset.dashboardShortcut,{mobileScroll:true})));
+
+    openTab(activeTab || 'resumo', { preserveSlot: true });
+
+    const profilePhotoInput = document.getElementById('profilePhotoInput');
+    window.openProfilePhotoPicker = function(){
+        const input = document.getElementById('profilePhotoInput');
+        if(input){ input.click(); return; }
+        openTab('perfil');
+        setTimeout(()=>document.getElementById('profilePhotoInput')?.click(), 150);
+    };
+    window.toggleQuickGuide = function(){
+        document.getElementById('quickGuideProfessions')?.classList.toggle('active');
+    };
+    profilePhotoInput?.addEventListener('change', function(){
+        if(this.files && this.files.length){
+            const preview=document.querySelector('.profile-photo-preview'); const topAvatar=document.querySelector('.avatar-action'); const copy=document.querySelector('.profile-photo-copy');
+            preview?.classList.add('avatar-uploading'); topAvatar?.classList.add('avatar-uploading');
+            const status=document.createElement('div'); status.className='avatar-upload-status'; status.innerHTML='<i class="fas fa-spinner fa-spin"></i> Enviando foto...'; copy?.appendChild(status);
+            const globalStatus=document.createElement('div'); globalStatus.className='avatar-global-status'; globalStatus.innerHTML='<i class="fas fa-spinner fa-spin"></i> Enviando nova foto de perfil...'; document.body.appendChild(globalStatus);
+            document.getElementById('profilePhotoForm')?.requestSubmit();
+        }
+    });
+
+    const professionEditorSelect = document.getElementById('professionEditorSelect');
+    function syncProfessionEditor(){
+        const selected = professionEditorSelect?.value;
+        document.querySelectorAll('.profession-editor-pane').forEach(pane => pane.classList.add('hidden-pane'));
+        if(selected){
+            document.getElementById(selected)?.classList.remove('hidden-pane');
+        }
+    }
+    professionEditorSelect?.addEventListener('change', ()=>{
+        syncProfessionEditor();
+        const slot=String(professionEditorSelect.value||'').replace('profession-pane-','');
+        if(slot && document.getElementById('profissoes')?.classList.contains('active')){ const url=new URL(window.location.href); url.searchParams.set('tab','profissoes'); url.searchParams.set('slot',slot); history.replaceState({},'',url.pathname+url.search); }
+    });
+    syncProfessionEditor();
+    document.querySelectorAll('[data-profession-shortcut-slot]').forEach(btn=>btn.addEventListener('click',()=>{
+        const slot=String(btn.dataset.professionShortcutSlot||'');
+        const option=professionEditorSelect?Array.from(professionEditorSelect.options).find(o=>o.value===`profession-pane-${slot}`):null;
+        if(option){ professionEditorSelect.value=option.value; syncProfessionEditor(); }
+        openTab('profissoes',{slot,mobileScroll:true});
+        setTimeout(()=>document.getElementById(`profession-pane-${slot}`)?.scrollIntoView({behavior:'smooth',block:'start'}),100);
+    }));
+    if ((activeTab || '') === 'profissoes' && selectedSlotParam) {
+        setTimeout(() => document.getElementById(`profession-pane-${selectedSlotParam}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 180);
+    }
+
+    const portfolioProfessionSelect = document.getElementById('portfolioProfessionSelect');
+    function syncPortfolioPane(){
+        const target = portfolioProfessionSelect?.value;
+        document.querySelectorAll('.portfolio-profession-pane').forEach(pane => pane.classList.add('hidden-pane'));
+        if(target) document.getElementById(target)?.classList.remove('hidden-pane');
+        const slot = portfolioProfessionSelect?.selectedOptions?.[0]?.dataset?.slot;
+        if(slot && document.getElementById('portfolio')?.classList.contains('active')){
+            const url = new URL(window.location.href); url.searchParams.set('tab','portfolio'); url.searchParams.set('slot',slot); history.replaceState({},'',url.pathname+url.search);
+        }
+    }
+    portfolioProfessionSelect?.addEventListener('change', ()=>{
+        syncPortfolioPane();
+        const slot=portfolioProfessionSelect?.selectedOptions?.[0]?.dataset?.slot;
+        const context=document.querySelector(`[data-portfolio-context-confirm="${slot}"]`);
+        context?.classList.remove('active'); void context?.offsetWidth; context?.classList.add('active');
+        setTimeout(()=>context?.classList.remove('active'),2600);
+    });
+    syncPortfolioPane();
+    if ((activeTab || '') === 'portfolio') {
+        const slot=portfolioProfessionSelect?.selectedOptions?.[0]?.dataset?.slot;
+        const context=document.querySelector(`[data-portfolio-context-confirm="${slot}"]`);
+        portfolioProfessionSelect?.classList.add('portfolio-selector-attention'); context?.classList.add('active');
+        setTimeout(()=>{portfolioProfessionSelect?.classList.remove('portfolio-selector-attention');context?.classList.remove('active');},3600);
+    }
+
+    document.querySelectorAll('.choose-portfolio-image,.portfolio-empty-trigger').forEach(btn => {
+        btn.addEventListener('click', () => document.getElementById(btn.dataset.input)?.click());
+    });
+    document.querySelectorAll('.profession-file-input').forEach(input => {
+        input.addEventListener('change', () => {
+            const form = input.closest('.profession-upload-form');
+            const file = input.files && input.files[0];
+            const name = form?.querySelector('.profession-file-name');
+            const preview = form?.querySelector('.profession-preview');
+            const img = preview?.querySelector('img');
+            const choose = form?.querySelector('.choose-portfolio-image');
+            if(!file){ if(name) name.textContent='Nenhuma imagem selecionada.'; preview?.classList.remove('active'); return; }
+            if(name) name.textContent = file.name;
+            if(img){ img.src = URL.createObjectURL(file); preview?.classList.add('active'); }
+            form?.classList.add('uploading');
+            if(choose){ choose.disabled=true; choose.innerHTML='<i class="fas fa-spinner fa-spin"></i> Enviando...'; }
+            // Garante que qualquer texto ainda em edição esteja protegido antes do reload do upload.
+            document.querySelectorAll('.profession-update-form').forEach(draftForm=>saveProfessionDraft(draftForm,{immediate:true}));
+            setTimeout(()=>{
+                const submitter=form?.querySelector('.auto-portfolio-submit');
+                if(form && submitter) form.requestSubmit(submitter);
+                else form?.requestSubmit();
+            },120);
+        });
+    });
+
+    function timeValues(){ const values=[]; for(let h=0;h<24;h++){ for(let m=0;m<60;m+=30){ values.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`); }} return values; }
+    function fillTimeSelect(select, selected=''){
+        if(!select) return; const options=['<option value="">Selecione</option>'].concat(timeValues().map(v=>`<option value="${v}" ${v===selected?'selected':''}>${v}</option>`)); select.innerHTML=options.join('');
+    }
+    function syncEndOptions(startSelect,endSelect){
+        if(!startSelect||!endSelect) return; const start=startSelect.value; const current=endSelect.value; const values=timeValues().filter(v=>!start||v>start);
+        endSelect.innerHTML=['<option value="">Selecione</option>'].concat(values.map(v=>`<option value="${v}">${v}</option>`)).join('');
+        if(values.includes(current)) endSelect.value=current; else if(start && !current && values.length) endSelect.value=values[Math.min(19, values.length-1)] || values[0];
+        endSelect.disabled=!start;
+    }
+    function parseAvailability(text){
+        const out={days:[],start:'08:00',end:'18:00',saturday:'same',sunday:'no',holiday:'no',satStart:'',satEnd:'',sunStart:'',sunEnd:'',holStart:'',holEnd:'',is24:false,all24:false,days24:[],holiday24:false,recognized:false,raw:String(text||'').trim()};
+        const raw=out.raw; const low=raw.toLowerCase();
+        const all24=/atendimento\s*24h\s*todos\s*os\s*dias/i.test(raw); if(all24){out.is24=true;out.all24=true;out.recognized=true;}
+        const days24Match=raw.match(/atendimento\s*24h\s*em\s*([^•]+)/i); if(days24Match){out.is24=true;out.recognized=true;out.days24=days24Match[1].split(/,| e /).map(x=>x.trim()).filter(Boolean).map(x=>x==='Sab'?'Sáb':x);}
+        if(/feriados?:\s*(?:atendimento\s*)?24h|incluindo\s*feriados/i.test(raw)){out.holiday24=true;out.recognized=true;}
+        const hour=raw.match(/(\d{2}:\d{2})\s*(?:às|as)\s*(\d{2}:\d{2})/i); if(hour){out.start=hour[1];out.end=hour[2];out.recognized=true;}
+        if(/segunda a sexta|seg,?\s*ter,?\s*qua,?\s*qui,?\s*sex/.test(low)){ out.days=['Seg','Ter','Qua','Qui','Sex']; out.recognized=true; }
+        else ['Seg','Ter','Qua','Qui','Sex'].forEach(d=>{if(new RegExp(`\\b${d.toLowerCase()}\\b`,'i').test(raw)){out.days.push(d);out.recognized=true;}});
+        [['Sábado','saturday','sat'],['Domingo','sunday','sun'],['Feriado','holiday','hol']].forEach(([label,key,prefix])=>{
+            const same=new RegExp(label+':\\s*mesmo horário padrão','i'); const no=new RegExp(label+':\\s*(?:não atende|nao atende)','i'); const custom=new RegExp(label+':\\s*(\\d{2}:\\d{2})\\s*(?:às|as)\\s*(\\d{2}:\\d{2})','i');
+            if(no.test(raw)){out[key]='no';out.recognized=true;} else if(same.test(raw)){out[key]='same';out.recognized=true;} else { const m=raw.match(custom); if(m){out[key]='custom';out[prefix+'Start']=m[1];out[prefix+'End']=m[2];out.recognized=true;} }
+        });
+        return out;
+    }
+    function availabilitySummary(editor){
+        const is24=!!editor.querySelector('.availability-24h-toggle')?.checked;
+        const all24=!!editor.querySelector('.availability-24h-all')?.checked;
+        const holiday24=!!editor.querySelector('input[name="available_24h_holidays"]')?.checked;
+        const days24=Array.from(editor.querySelectorAll('input[name="working_days_24h"]:checked')).map(el=>el.value);
+        const pieces=[];
+        if(is24 && all24){ pieces.push('Atendimento 24h todos os dias'); if(holiday24) pieces.push('Feriados: atendimento 24h'); return pieces.join(' • '); }
+        if(is24 && days24.length) pieces.push(`Atendimento 24h em ${days24.join(', ')}`);
+        if(is24 && holiday24) pieces.push('Feriados: atendimento 24h');
+        const days=Array.from(editor.querySelectorAll('input[name="working_days"]:checked')).map(el=>el.value);
+        const start=editor.querySelector('.availability-start-select')?.value||''; const end=editor.querySelector('.availability-end-select')?.value||'';
+        if(days.length&&start&&end) pieces.push(`${days.join(', ')} • ${start} às ${end}`);
+        [['saturday','Sábado'],['sunday','Domingo'],['holiday','Feriado']].forEach(([key,label])=>{ const cell=editor.querySelector(`[data-special-day="${key}"]`); const mode=cell?.querySelector('.special-day-mode')?.value||'no'; if(key==='holiday'&&is24&&holiday24) return; if(mode==='same') pieces.push(`${label}: mesmo horário padrão`); if(mode==='no') pieces.push(`${label}: não atende`); if(mode==='custom'){ const s=cell.querySelector('.special-start-select')?.value||''; const e=cell.querySelector('.special-end-select')?.value||''; if(s&&e) pieces.push(`${label}: ${s} às ${e}`); }});
+        return pieces.join(' • ');
+    }
+    function updateAvailabilityEditor(editor){
+        const summary=availabilitySummary(editor); const hidden=editor.querySelector('.availability-summary'); const text=editor.querySelector('.availability-summary-text'); if(hidden) hidden.value=summary; if(text) text.textContent=summary||'Defina seus dias e horários.';
+        editor.dataset.touched='1';
+    }
+    function sync24hEditor(editor, skipSummary=false){
+        const toggle=editor.querySelector('.availability-24h-toggle'); const all=editor.querySelector('.availability-24h-all'); const panel=editor.querySelector('.availability-24h-panel'); const is24=!!toggle?.checked; const all24=!!all?.checked;
+        panel?.classList.toggle('hidden-pane',!is24);
+        editor.querySelectorAll('input[name="working_days_24h"]').forEach(cb=>{ cb.disabled=!is24||all24; if(all24) cb.checked=true; if(!is24) cb.checked=false; });
+        const start=editor.querySelector('.availability-start-select'); const end=editor.querySelector('.availability-end-select');
+        editor.querySelectorAll('input[name="working_days"]').forEach(cb=>{ cb.disabled=all24; if(all24) cb.checked=false; });
+        if(start) start.disabled=all24; if(end) end.disabled=all24||!start?.value;
+        editor.querySelectorAll('.special-day-mode,.special-start-select,.special-end-select').forEach(el=>el.disabled=all24);
+        if(!is24){ if(all) all.checked=false; const hol=editor.querySelector('input[name="available_24h_holidays"]'); if(hol) hol.checked=false; }
+        if(!skipSummary) updateAvailabilityEditor(editor);
+    }
+    document.querySelectorAll('[data-availability-editor]').forEach(editor=>{
+        const form=editor.closest('.profession-update-form'); const parsed=parseAvailability(form?.dataset.currentAvailability||'');
+        editor.querySelectorAll('input[name="working_days"]').forEach(cb=>cb.checked=parsed.days.includes(cb.value));
+        const start=editor.querySelector('.availability-start-select'); const end=editor.querySelector('.availability-end-select'); fillTimeSelect(start,parsed.start); fillTimeSelect(end,parsed.end); if(start) start.value=parsed.start; syncEndOptions(start,end); if(end&&parsed.end) end.value=parsed.end;
+        const toggle24=editor.querySelector('.availability-24h-toggle'); const all24=editor.querySelector('.availability-24h-all'); const holiday24=editor.querySelector('input[name="available_24h_holidays"]'); if(toggle24) toggle24.checked=parsed.is24; if(all24) all24.checked=parsed.all24; if(holiday24) holiday24.checked=parsed.holiday24; editor.querySelectorAll('input[name="working_days_24h"]').forEach(cb=>cb.checked=parsed.days24.includes(cb.value));
+        [['saturday','sat'],['sunday','sun'],['holiday','hol']].forEach(([key,prefix])=>{ const cell=editor.querySelector(`[data-special-day="${key}"]`); const mode=cell?.querySelector('.special-day-mode'); const ss=cell?.querySelector('.special-start-select'); const ee=cell?.querySelector('.special-end-select'); fillTimeSelect(ss,parsed[prefix+'Start']); fillTimeSelect(ee,parsed[prefix+'End']); if(mode) mode.value=parsed[key]; if(ss&&parsed[prefix+'Start']) ss.value=parsed[prefix+'Start']; syncEndOptions(ss,ee); if(ee&&parsed[prefix+'End']) ee.value=parsed[prefix+'End']; const pair=cell?.querySelector('.special-time-pair'); pair?.classList.toggle('hidden-pane', parsed[key]!=='custom'); mode?.addEventListener('change',()=>{pair?.classList.toggle('hidden-pane',mode.value!=='custom'); updateAvailabilityEditor(editor);}); ss?.addEventListener('change',()=>{syncEndOptions(ss,ee);updateAvailabilityEditor(editor);}); ee?.addEventListener('change',()=>updateAvailabilityEditor(editor)); });
+        start?.addEventListener('change',()=>{syncEndOptions(start,end);updateAvailabilityEditor(editor);}); end?.addEventListener('change',()=>updateAvailabilityEditor(editor));
+        editor.querySelectorAll('input[name="working_days"]').forEach(cb=>cb.addEventListener('change',()=>{ const same24=Array.from(editor.querySelectorAll('input[name="working_days_24h"]')).find(x=>x.value===cb.value); if(cb.checked&&same24) same24.checked=false; updateAvailabilityEditor(editor); }));
+        toggle24?.addEventListener('change',()=>sync24hEditor(editor)); all24?.addEventListener('change',()=>sync24hEditor(editor)); holiday24?.addEventListener('change',()=>updateAvailabilityEditor(editor)); editor.querySelectorAll('input[name="working_days_24h"]').forEach(cb=>cb.addEventListener('change',()=>{ const sameRegular=Array.from(editor.querySelectorAll('input[name="working_days"]')).find(x=>x.value===cb.value); if(cb.checked&&sameRegular) sameRegular.checked=false; updateAvailabilityEditor(editor); }));
+        sync24hEditor(editor,true);
+        if(parsed.recognized || !parsed.raw) updateAvailabilityEditor(editor); else { const hidden=editor.querySelector('.availability-summary'); const text=editor.querySelector('.availability-summary-text'); if(hidden) hidden.value=parsed.raw; if(text) text.textContent=parsed.raw; editor.dataset.touched='0'; }
+    });
+
+    document.querySelectorAll('.service-fee-toggle').forEach(toggle=>{ const form=toggle.closest('.profession-update-form'); const field=form?.querySelector('.service-fee-field'); const amount=field?.querySelector('input[name="price_value"]'); function sync(){field?.classList.toggle('fee-disabled',!toggle.checked); if(amount) amount.disabled=!toggle.checked;} toggle.addEventListener('change',sync); sync(); });
+    function parseCurrencyClient(value){
+        let raw=String(value||'').trim().replace(/[^\d,.-]/g,''); if(!raw) return null;
+        const comma=raw.lastIndexOf(','), dot=raw.lastIndexOf('.');
+        if(comma>=0&&dot>=0){ if(comma>dot) raw=raw.replace(/\./g,'').replace(',','.'); else raw=raw.replace(/,/g,''); }
+        else if(comma>=0) raw=raw.replace(/\./g,'').replace(',','.');
+        else if(dot>=0){ const decimals=raw.length-dot-1; const count=(raw.match(/\./g)||[]).length; if(count>1||decimals>2) raw=raw.replace(/\./g,''); }
+        const n=Number(raw); return Number.isFinite(n)?n:null;
+    }
+    function formatCurrencyInput(el){ const n=parseCurrencyClient(el?.value); if(n===null){ if(el) el.value=''; return; } el.value=n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+    document.querySelectorAll('.currency-input').forEach(el=>{
+        el.addEventListener('input',()=>{ el.value=el.value.replace(/[^\d,.-]/g,'').slice(0,16); });
+        el.addEventListener('blur',()=>{ formatCurrencyInput(el); el.dispatchEvent(new Event('change',{bubbles:true})); });
+        if(el.value) formatCurrencyInput(el);
+    });
+
+    // v11.3.32: rascunho automático por profissional + profissão.
+    // Evita perder descrição/horários/preços ao abrir Meu Portfólio, prévia ou atualizar a página.
+    const draftTimers = new WeakMap();
+    const draftSuppress = new WeakSet();
+    function professionDraftKey(form){ return `contratae-profession-draft-v11332-${currentProfessionalId}-${form?.dataset?.slot || '0'}`; }
+    function serializeProfessionForm(form){
+        form?.querySelectorAll('[data-availability-editor]').forEach(editor=>{ if(editor.dataset.touched!=='0') updateAvailabilityEditor(editor); });
+        const data={};
+        const availabilityEditor=form?.querySelector('[data-availability-editor]');
+        data.__availabilityTouched=availabilityEditor?.dataset?.touched==='0' ? '0' : '1';
+        form?.querySelectorAll('input[name],textarea[name],select[name]').forEach(el=>{
+            if(['file','submit','button'].includes(String(el.type||'').toLowerCase())) return;
+            if(el.type==='checkbox' || el.type==='radio'){
+                if(!Array.isArray(data[el.name])) data[el.name]=[];
+                if(el.checked) data[el.name].push(el.value || 'on');
+            } else { data[el.name]=el.value ?? ''; }
+        });
+        return data;
+    }
+    function stableDraftJson(data){
+        const ordered={}; Object.keys(data||{}).sort().forEach(k=>{ ordered[k]=Array.isArray(data[k])?[...data[k]].sort():data[k]; });
+        return JSON.stringify(ordered);
+    }
+    function syncDraftActionButtons(form){
+        const slot=String(form?.dataset?.slot||'');
+        const badge=form?.querySelector('[data-draft-status]');
+        const infoPending=badge?.dataset?.state==='saved'||badge?.dataset?.state==='saving';
+        const portfolioBanner=document.querySelector(`[data-portfolio-draft-banner="${slot}"]`);
+        const photoPending=portfolioBanner?.dataset?.photoDraft==='1';
+        const hasDraft=Boolean(infoPending||photoPending);
+        const preview=form?.querySelector('.preview-profession-btn');
+        const publish=form?.querySelector('.publish-profession-btn');
+        if(preview){ preview.disabled=!hasDraft; preview.classList.toggle('is-ready',hasDraft); preview.title=hasDraft?'Visualizar suas alterações antes de publicar':'Faça uma alteração para liberar a pré-visualização'; }
+        if(publish){ publish.disabled=!hasDraft; publish.title=hasDraft?'Publicar estas alterações':'Faça uma alteração antes de publicar'; }
+        const portfolioPreview=document.querySelector(`.preview-from-portfolio[data-slot="${slot}"]`);
+        const portfolioPublish=document.querySelector(`.publish-from-portfolio[data-slot="${slot}"]`);
+        if(portfolioPreview){ portfolioPreview.disabled=!hasDraft; portfolioPreview.classList.toggle('is-ready',hasDraft); portfolioPreview.title=hasDraft?'Visualizar suas alterações antes de publicar':'Faça uma alteração para liberar a pré-visualização'; }
+        if(portfolioPublish){ portfolioPublish.disabled=!hasDraft; portfolioPublish.classList.toggle('btn-primary',hasDraft); portfolioPublish.classList.toggle('btn-secondary',!hasDraft); }
+    }
+    function syncPortfolioDraftNotice(form,state){
+        const slot=String(form?.dataset?.slot||'');
+        const banner=document.querySelector(`[data-portfolio-draft-banner="${slot}"]`);
+        if(!banner) { syncDraftActionButtons(form); return; }
+        banner.dataset.infoDraft=state==='saved'||state==='saving'?'1':'0';
+        const hasPhoto=banner.dataset.photoDraft==='1'; const hasInfo=banner.dataset.infoDraft==='1';
+        const title=banner.querySelector('[data-portfolio-draft-title]'); const copy=banner.querySelector('[data-portfolio-draft-copy]');
+        banner.classList.toggle('pending',hasPhoto||hasInfo);
+        if(hasPhoto||hasInfo){
+            if(title) title.innerHTML='<i class="fas fa-cloud"></i> Você tem alterações ainda não publicadas nesta profissão';
+            if(copy) copy.textContent='A prévia reúne informações, horários, preços, fotos e legendas em rascunho. “Salvar e publicar tudo” confirma o conjunto.';
+        } else {
+            if(title) title.innerHTML='<i class="fas fa-circle-check"></i> Portfólio publicado';
+            if(copy) copy.textContent='Escolha uma foto para criar um rascunho. O envio começa automaticamente.';
+        }
+        syncDraftActionButtons(form);
+    }
+
+    function updateDraftBadge(form,state='published'){
+        const badge=form?.querySelector('[data-draft-status]'); if(!badge) return;
+        badge.dataset.state=state;
+        syncPortfolioDraftNotice(form,state);
+        if(state==='saving') badge.innerHTML='<i class="fas fa-spinner fa-spin"></i><span>Salvando rascunho...</span>';
+        else if(state==='saved') badge.innerHTML='<i class="fas fa-cloud-arrow-up"></i><span>Rascunho salvo automaticamente. Você pode abrir fotos ou outra área sem perder estas alterações.</span>';
+        else badge.innerHTML='<i class="fas fa-circle-check"></i><span>Tudo publicado. Se você editar algo, o Contrataê salva um rascunho automaticamente neste dispositivo.</span>';
+    }
+    function clearProfessionDraft(form){ try{ localStorage.removeItem(professionDraftKey(form)); }catch(_){} updateDraftBadge(form,'published'); }
+    function saveProfessionDraft(form,{immediate=false}={}){
+        if(!form || draftSuppress.has(form)) return;
+        const run=()=>{
+            const data=serializeProfessionForm(form);
+            const current=stableDraftJson(data);
+            const published=form.dataset.publishedSnapshot || '';
+            if(current===published){ clearProfessionDraft(form); return; }
+            try{ localStorage.setItem(professionDraftKey(form), JSON.stringify({savedAt:Date.now(),data})); }catch(_){}
+            updateDraftBadge(form,'saved');
+        };
+        const old=draftTimers.get(form); if(old) clearTimeout(old);
+        if(immediate){ run(); return; }
+        updateDraftBadge(form,'saving');
+        draftTimers.set(form,setTimeout(run,350));
+    }
+    function applyProfessionDraft(form,draft){
+        if(!form || !draft) return; draftSuppress.add(form);
+        try{
+            Object.entries(draft).forEach(([name,val])=>{
+                if(name.startsWith('__')) return;
+                const fields=Array.from(form.querySelectorAll(`[name="${name}"]`));
+                const vals=Array.isArray(val)?val:[val];
+                fields.forEach(field=>{
+                    if(field.type==='checkbox' || field.type==='radio') field.checked=vals.includes(field.value)||vals.includes('on');
+                    else if(field.type!=='file') field.value=vals[0] ?? '';
+                });
+            });
+            // Reaplica os comportamentos visuais/horários depois dos valores do rascunho.
+            form.querySelectorAll('.service-fee-toggle').forEach(toggle=>toggle.dispatchEvent(new Event('change',{bubbles:true})));
+            form.querySelectorAll('.special-day-mode').forEach(mode=>mode.dispatchEvent(new Event('change',{bubbles:true})));
+            const editor=form.querySelector('[data-availability-editor]');
+            if(editor){
+                const start=editor.querySelector('.availability-start-select'); const end=editor.querySelector('.availability-end-select');
+                syncEndOptions(start,end);
+                [['saturday'],['sunday'],['holiday']].forEach(([key])=>{ const cell=editor.querySelector(`[data-special-day="${key}"]`); syncEndOptions(cell?.querySelector('.special-start-select'),cell?.querySelector('.special-end-select')); });
+                sync24hEditor(editor,true);
+                if(String(draft.__availabilityTouched || '1')==='0'){
+                    const raw=String(draft.availability_summary || '');
+                    const hidden=editor.querySelector('.availability-summary'); const text=editor.querySelector('.availability-summary-text');
+                    if(hidden) hidden.value=raw; if(text) text.textContent=raw || 'Defina seus dias e horários.'; editor.dataset.touched='0';
+                } else updateAvailabilityEditor(editor);
+            }
+        } finally { draftSuppress.delete(form); }
+    }
+    document.querySelectorAll('.profession-update-form').forEach(form=>{
+        // O snapshot é capturado depois de o editor de disponibilidade ter sido inicializado.
+        form.dataset.publishedSnapshot=stableDraftJson(serializeProfessionForm(form));
+        if(initialParams.get('published')==='1' && String(selectedSlotParam||'')===String(form.dataset.slot||'')){ clearProfessionDraft(form); }
+        else {
+            try{
+                const raw=localStorage.getItem(professionDraftKey(form)); const saved=raw?JSON.parse(raw):null; const draft=saved?.data || saved;
+                if(draft){ applyProfessionDraft(form,draft); const restored=stableDraftJson(serializeProfessionForm(form)); if(restored!==form.dataset.publishedSnapshot) updateDraftBadge(form,'saved'); else clearProfessionDraft(form); }
+            }catch(_){}
+        }
+        syncDraftActionButtons(form);
+        form.addEventListener('input',()=>saveProfessionDraft(form));
+        form.addEventListener('change',()=>saveProfessionDraft(form));
+    });
+    window.addEventListener('pagehide',()=>{ document.querySelectorAll('.profession-update-form').forEach(form=>saveProfessionDraft(form,{immediate:true})); });
+    document.querySelectorAll('.preview-profession-btn').forEach(btn=>btn.addEventListener('click',()=>{ const form=btn.closest('.profession-update-form'); if(form) saveProfessionDraft(form,{immediate:true}); }));
+    document.querySelectorAll('.draft-preserving-link').forEach(link=>link.addEventListener('click',ev=>{
+        const form=document.querySelector(`.profession-update-form[data-slot="${link.dataset.draftSlot}"]`); if(form) saveProfessionDraft(form,{immediate:true});
+        const target=new URL(link.href,window.location.origin);
+        if(target.pathname==='/profissional/dashboard' && target.searchParams.get('tab')==='portfolio'){
+            ev.preventDefault(); const slot=target.searchParams.get('slot');
+            if(slot && portfolioProfessionSelect){ const option=Array.from(portfolioProfessionSelect.options).find(o=>String(o.dataset.slot)===String(slot)); if(option){ portfolioProfessionSelect.value=option.value; syncPortfolioPane(); } }
+            openTab('portfolio',{slot});
+            const context=document.querySelector(`[data-portfolio-context-confirm="${slot}"]`); const pane=document.getElementById(`portfolio-pane-${slot}`);
+            context?.classList.add('active'); pane?.classList.add('profession-focus-pulse'); setTimeout(()=>{context?.classList.remove('active');pane?.classList.remove('profession-focus-pulse');},5200);
+            setTimeout(()=>document.getElementById(`portfolio-workspace-${slot}`)?.scrollIntoView({behavior:'smooth',block:'start'}),80);
+        }
+    }));
+    function syncPortfolioOrder(slot){
+        const pane=document.getElementById(`portfolio-pane-${slot}`); const form=document.querySelector(`.profession-update-form[data-slot="${slot}"]`); if(!pane||!form) return;
+        const ids=Array.from(pane.querySelectorAll('.profession-portfolio-grid [data-portfolio-item-id]:not([data-portfolio-pending-delete="1"])')).map(el=>String(el.dataset.portfolioItemId||'')).filter(Boolean);
+        const input=form.querySelector('.portfolio-order-input'); if(input) input.value=JSON.stringify(ids);
+        saveProfessionDraft(form,{immediate:true});
+        pane.querySelectorAll('[data-portfolio-move]').forEach(btn=>{
+            const slotEl=btn.closest('[data-portfolio-item-id]'); const items=Array.from(pane.querySelectorAll('.profession-portfolio-grid [data-portfolio-item-id]:not([data-portfolio-pending-delete="1"])')); const index=items.indexOf(slotEl); const dir=Number(btn.dataset.portfolioMove||0);
+            btn.disabled=(dir<0&&index<=0)||(dir>0&&index>=items.length-1);
+        });
+    }
+    function restorePortfolioOrder(slot){
+        const pane=document.getElementById(`portfolio-pane-${slot}`); const form=document.querySelector(`.profession-update-form[data-slot="${slot}"]`); const grid=pane?.querySelector('.profession-portfolio-grid'); const input=form?.querySelector('.portfolio-order-input'); if(!grid||!input) return;
+        let order=[]; try{order=JSON.parse(input.value||'[]')}catch(_){} if(!Array.isArray(order)||!order.length){syncPortfolioOrder(slot);return;}
+        const byId=new Map(Array.from(grid.querySelectorAll('[data-portfolio-item-id]:not([data-portfolio-pending-delete="1"])')).map(el=>[String(el.dataset.portfolioItemId),el]));
+        const empty=Array.from(grid.querySelectorAll('.slot.empty')); order.forEach(id=>{const el=byId.get(String(id)); if(el) grid.insertBefore(el,empty[0]||null);});
+        Array.from(byId.values()).filter(el=>!order.includes(String(el.dataset.portfolioItemId))).forEach(el=>grid.insertBefore(el,empty[0]||null)); syncPortfolioOrder(slot);
+    }
+    document.querySelectorAll('[data-portfolio-move]').forEach(btn=>btn.addEventListener('click',()=>{
+        const item=btn.closest('[data-portfolio-item-id]'); const grid=item?.parentElement; if(!item||!grid) return; const dir=Number(btn.dataset.portfolioMove||0); const items=Array.from(grid.querySelectorAll('[data-portfolio-item-id]:not([data-portfolio-pending-delete="1"])')); const index=items.indexOf(item); const other=items[index+dir]; if(!other) return;
+        if(dir<0) grid.insertBefore(item,other); else grid.insertBefore(other,item);
+        syncPortfolioOrder(item.dataset.slot); item.classList.remove('profession-focus-pulse'); void item.offsetWidth; item.classList.add('profession-focus-pulse');
+    }));
+    document.querySelectorAll('.profession-update-form').forEach(form=>restorePortfolioOrder(String(form.dataset.slot||'')));
+
+    document.querySelectorAll('.preview-from-portfolio').forEach(btn=>btn.addEventListener('click',()=>{
+        const slot=String(btn.dataset.slot||'');
+        const form=document.querySelector(`.profession-update-form[data-slot="${slot}"]`);
+        if(!form) return;
+        saveProfessionDraft(form,{immediate:true});
+        const previewButton=form.querySelector('.preview-profession-btn');
+        if(previewButton){
+            btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Preparando prévia...';
+            previewButton.click();
+        }
+    }));
+
+    document.querySelectorAll('.publish-from-portfolio').forEach(btn=>btn.addEventListener('click',()=>{
+        const slot=String(btn.dataset.slot||'');
+        const form=document.querySelector(`.profession-update-form[data-slot="${slot}"]`);
+        if(!form) return;
+        saveProfessionDraft(form,{immediate:true});
+        const publishButton=form.querySelector('.publish-profession-btn');
+        if(publishButton){
+            btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Publicando tudo...';
+            publishButton.click();
+        }
+    }));
+
+    document.querySelectorAll('[data-open-services]').forEach(btn=>btn.addEventListener('click',()=>openTab('servicos')));
+
+    document.querySelectorAll('.return-to-profession-editor').forEach(btn=>btn.addEventListener('click',()=>{
+        const slot=String(btn.dataset.slot||''); const option=professionEditorSelect?Array.from(professionEditorSelect.options).find(o=>o.value===`profession-pane-${slot}`):null; if(option){ professionEditorSelect.value=option.value; syncProfessionEditor(); }
+        const url=new URL(window.location.href); url.searchParams.set('tab','profissoes'); url.searchParams.set('slot',slot); history.replaceState({},'',url.pathname+url.search);
+        openTab('profissoes',{slot}); setTimeout(()=>document.getElementById(`profession-pane-${slot}`)?.scrollIntoView({behavior:'smooth',block:'start'}),80);
+    }));
+
+    document.querySelectorAll('.profession-update-form, .profession-upload-form').forEach(form => {
+        form.addEventListener('submit', (ev) => {
+            form.classList.add('is-busy');
+            const button = ev.submitter || form.querySelector('button[type="submit"]');
+            if(button){
+                button.classList.add('is-loading'); button.disabled = true;
+                button.innerHTML = button.classList.contains('preview-profession-btn') ? '<i class="fas fa-spinner fa-spin"></i> Preparando prévia...' : '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            }
+        });
+    });
+
+let lastLeadIds = new Set();
+let soundUnlocked = false;
+document.addEventListener('click', () => { soundUnlocked = true; }, { once:true });
+function safePlayLeadSound(kind='new'){
+  if(!soundUnlocked) return;
+  const audio = document.getElementById(kind === 'alert' ? 'leadAlertSound' : 'leadSound');
+  if(audio){ audio.currentTime = 0; audio.play().catch(()=>{}); }
+}
+function escapeHtml(value){ return String(value || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch])); }
+function leadCardHtml(lead){
+  const date = lead.contacted_at ? new Date(lead.contacted_at).toLocaleString('pt-BR') : '';
+  const category = escapeHtml(lead.professional_category || 'Serviço');
+  const name = escapeHtml(lead.client_name || 'Cliente Contrataê');
+  const email = lead.client_email ? ` · ${escapeHtml(lead.client_email)}` : '';
+  const message = escapeHtml(lead.message || 'Cliente abriu contato pelo perfil público.');
+  return `<div class="lead-card new" data-lead-id="${lead.id}">
+    <div><strong>${category}</strong> solicitado por <strong>${name}</strong>${email}</div>
+    <div class="small">${date}</div>
+    <div class="small">${message}</div>
+    <div class="lead-actions">
+      <button class="btn btn-primary" type="button" onclick="updateLeadStatus('${lead.id}','accepted')"><i class="fas fa-check"></i> Aceitei o serviço</button>
+      <button class="btn btn-secondary" type="button" onclick="updateLeadStatus('${lead.id}','declined')"><i class="fas fa-times"></i> Não fechei</button>
+      <button class="btn btn-secondary" type="button" onclick="updateLeadStatus('${lead.id}','archived')">Arquivar</button>
+    </div>
+  </div>`;
+}
+async function loadPendingLeads(){
+  const panel = document.getElementById('pendingLeadsPanel');
+  const list = document.getElementById('pendingLeadsList');
+  const servicesList = document.getElementById('servicesLeadsList');
+  try{
+    const res = await fetch('/api/profissional/contatos-pendentes');
+    const data = await res.json();
+    if(!data.ok && data.setup_required){
+      const msg = '<p class="small">Histórico de contatos ainda não ativado. Rode o SQL 06_contact_leads.sql para ligar esta área.</p>';
+      if(servicesList) servicesList.innerHTML = msg;
+      return;
+    }
+    const leads = data.leads || [];
+    const currentIds = new Set(leads.map(l=>l.id));
+    const hasNew = leads.some(l=>!lastLeadIds.has(l.id));
+    if(leads.length){
+      const html = leads.map(leadCardHtml).join('');
+      if(panel) panel.style.display = '';
+      if(list) list.innerHTML = html;
+      if(servicesList) servicesList.innerHTML = html;
+      if(hasNew && lastLeadIds.size){
+        document.getElementById('leadFloatingAlert')?.classList.add('active');
+        safePlayLeadSound('new');
+      }
+    } else {
+      if(panel) panel.style.display = 'none';
+      if(list) list.innerHTML = '';
+      if(servicesList) servicesList.innerHTML = '<p class="small">Nenhum serviço pendente agora.</p>';
+    }
+    lastLeadIds = currentIds;
+  } catch(err){
+    if(servicesList) servicesList.innerHTML = '<p class="small">Não foi possível carregar os serviços pendentes agora.</p>';
+  }
+}
+window.updateLeadStatus = async function(id, status){
+  try{
+    await fetch(`/api/profissional/contatos/${id}/status`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({status}) });
+    safePlayLeadSound('alert');
+    await loadPendingLeads();
+  } catch(err){ alert('Não foi possível atualizar este contato.'); }
+};
+loadPendingLeads();
+setInterval(loadPendingLeads, 60000);
+    
+const approvalConfirmModal = document.getElementById('approvalConfirmModal');
+const approvalSentModal = document.getElementById('approvalSentModal');
+const openApprovalModalBtn = document.getElementById('openApprovalModal');
+const closeApprovalModalBtn = document.getElementById('closeApprovalModal');
+const closeApprovalSentModalBtn = document.getElementById('closeApprovalSentModal');
+if(openApprovalModalBtn){openApprovalModalBtn.addEventListener('click', ()=> approvalConfirmModal?.classList.add('active'));}
+if(closeApprovalModalBtn){closeApprovalModalBtn.addEventListener('click', ()=> approvalConfirmModal?.classList.remove('active'));}
+if(closeApprovalSentModalBtn){closeApprovalSentModalBtn.addEventListener('click', ()=> approvalSentModal?.classList.remove('active'));}
+const portfolioRemoveModal=document.getElementById('portfolioRemoveModal');
+const cancelPortfolioRemove=document.getElementById('cancelPortfolioRemove');
+const confirmPortfolioRemove=document.getElementById('confirmPortfolioRemove');
+let pendingPortfolioRemoveForm=null;
+document.querySelectorAll('.portfolio-remove-form').forEach(form=>form.addEventListener('submit',(ev)=>{
+  ev.preventDefault(); pendingPortfolioRemoveForm=form; portfolioRemoveModal?.classList.add('active');
+}));
+cancelPortfolioRemove?.addEventListener('click',()=>{ pendingPortfolioRemoveForm=null; portfolioRemoveModal?.classList.remove('active'); });
+confirmPortfolioRemove?.addEventListener('click',()=>{
+  if(!pendingPortfolioRemoveForm) return;
+  confirmPortfolioRemove.disabled=true; confirmPortfolioRemove.innerHTML='<i class="fas fa-spinner fa-spin"></i> Removendo...';
+  pendingPortfolioRemoveForm.submit();
+});
+const portfolioCaptionModal=document.getElementById('portfolioCaptionModal');
+const portfolioCaptionForm=document.getElementById('portfolioCaptionForm');
+const portfolioCaptionId=document.getElementById('portfolioCaptionId');
+const portfolioCaptionSlot=document.getElementById('portfolioCaptionSlot');
+const portfolioCaptionText=document.getElementById('portfolioCaptionText');
+const portfolioCaptionCounter=document.getElementById('portfolioCaptionCounter');
+const cancelPortfolioCaption=document.getElementById('cancelPortfolioCaption');
+function syncCaptionCounter(){ if(portfolioCaptionCounter) portfolioCaptionCounter.textContent=`${String(portfolioCaptionText?.value||'').length}/180`; }
+document.querySelectorAll('.edit-portfolio-caption').forEach(btn=>btn.addEventListener('click',()=>{
+  if(portfolioCaptionId) portfolioCaptionId.value=btn.dataset.id||'';
+  if(portfolioCaptionSlot) portfolioCaptionSlot.value=btn.dataset.slot||'';
+  if(portfolioCaptionText) portfolioCaptionText.value=btn.dataset.caption||'';
+  syncCaptionCounter(); portfolioCaptionModal?.classList.add('active'); setTimeout(()=>portfolioCaptionText?.focus(),80);
+}));
+portfolioCaptionText?.addEventListener('input',syncCaptionCounter);
+cancelPortfolioCaption?.addEventListener('click',()=>portfolioCaptionModal?.classList.remove('active'));
+portfolioCaptionForm?.addEventListener('submit',()=>{ const b=portfolioCaptionForm.querySelector('button[type="submit"]'); if(b){b.disabled=true;b.innerHTML='<i class="fas fa-spinner fa-spin"></i> Salvando...';} });
+const deleteProfileModal=document.getElementById('deleteProfileModal');
+window.addEventListener('click', (ev)=>{ if(ev.target === approvalConfirmModal) approvalConfirmModal.classList.remove('active'); if(ev.target === approvalSentModal) approvalSentModal.classList.remove('active'); if(ev.target === portfolioRemoveModal){ portfolioRemoveModal.classList.remove('active'); pendingPortfolioRemoveForm=null; } if(ev.target === portfolioCaptionModal){ portfolioCaptionModal.classList.remove('active'); } if(ev.target === deleteProfileModal) deleteProfileModal.classList.remove('active'); });
+if((new URLSearchParams(window.location.search)).get('success') === 'Solicitação enviada para análise'){ approvalSentModal?.classList.add('active'); }
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(()=>{}),{once:true}); }
+
+window.openDeleteProfileModal = function(){ document.getElementById('deleteProfileModal')?.classList.add('active'); };
+window.closeDeleteProfileModal = function(){ document.getElementById('deleteProfileModal')?.classList.remove('active'); };
+window.cancelProfileEdit = function(){
+  const url = new URL(window.location.href);
+  url.searchParams.set('tab', 'perfil');
+  url.searchParams.delete('success');
+  url.searchParams.delete('error');
+  window.location.href = url.toString();
+};
+window.openPortfolioPicker = function(){
+  document.getElementById('dashboardPortfolioInput')?.click();
+};
+document.getElementById('dashboardPortfolioInput')?.addEventListener('change', function(){
+  if(this.files && this.files.length){
+    document.getElementById('dashboardPortfolioForm')?.requestSubmit();
+  }
+});
+const paymentProofInput = document.getElementById('paymentProofInput');
+const paymentWhatsappCheck = document.getElementById('paymentWhatsappCheck');
+const approvalSubmitBtn = document.getElementById('approvalSubmitBtn');
+function syncApprovalSubmit(){
+  if(!approvalSubmitBtn) return;
+  const enabled = Boolean(paymentProofInput?.files?.length || paymentWhatsappCheck?.checked);
+  approvalSubmitBtn.disabled = !enabled;
+}
+paymentProofInput?.addEventListener('change', syncApprovalSubmit);
+paymentWhatsappCheck?.addEventListener('change', syncApprovalSubmit);
+document.getElementById('approvalRequestForm')?.addEventListener('submit',()=>{ if(approvalSubmitBtn){ approvalSubmitBtn.disabled=true; approvalSubmitBtn.textContent='⏳ Enviando...'; } });
+function maskPhone(value){
+  const digits=String(value||'').replace(/\D/g,'').slice(0,11);
+  if(digits.length<=2) return digits ? `(${digits}` : '';
+  if(digits.length<=6) return `(${digits.slice(0,2)}) ${digits.slice(2)}`;
+  if(digits.length<=10) return `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
+}
+function maskCep(value){ const d=String(value||'').replace(/\D/g,'').slice(0,8); return d.length>5?`${d.slice(0,5)}-${d.slice(5)}`:d; }
+document.querySelectorAll('[data-mask="phone"]').forEach(field=>{ field.value=maskPhone(field.value); field.addEventListener('input',()=>field.value=maskPhone(field.value)); });
+document.querySelectorAll('[data-mask="cep"]').forEach(field=>{ field.value=maskCep(field.value); field.addEventListener('input',()=>field.value=maskCep(field.value)); });
+document.querySelectorAll('input[name="service_fee_amount"]').forEach(field=>field.addEventListener('input',()=>field.value=field.value.replace(/[^\d,]/g,'')));
+async function lookupProfileCep(){
+  const cepField=document.getElementById('profileCepInput'); const status=document.getElementById('profileCepStatus'); const cep=String(cepField?.value||'').replace(/\D/g,'');
+  if(cep.length!==8){ if(status) status.textContent='Informe um CEP com 8 números.'; return; }
+  if(status) status.innerHTML='<i class="fas fa-spinner fa-spin"></i> Buscando CEP...';
+  try{
+    const response=await fetch(`/api/cep/${cep}`); const data=await response.json(); if(!response.ok) throw new Error(data.error||'CEP não encontrado');
+    const set=(id,value)=>{const el=document.getElementById(id); if(el && value) el.value=value;};
+    set('profileCityInput',data.city); set('profileStateInput',data.state); set('profileStreetInput',data.street); set('profileNeighborhoodInput',data.neighborhood); set('profileComplementInput',data.complement);
+    if(cepField) cepField.value=maskCep(data.cep||cep); if(status) status.innerHTML='<i class="fas fa-circle-check" style="color:#73d38a"></i> CEP encontrado. Confira os dados antes de salvar.';
+  }catch(err){ if(status) status.textContent=err.message||'Não foi possível consultar o CEP agora.'; }
+}
+document.getElementById('lookupProfileCep')?.addEventListener('click',lookupProfileCep);
+document.getElementById('profileCepInput')?.addEventListener('blur',function(){ if(String(this.value||'').replace(/\D/g,'').length===8) lookupProfileCep(); });
+async function lookupCepByAddress(){
+  const state=String(document.getElementById('profileStateInput')?.value||'').trim().toUpperCase();
+  const city=String(document.getElementById('profileCityInput')?.value||'').trim();
+  const street=String(document.getElementById('profileStreetInput')?.value||'').trim();
+  const status=document.getElementById('profileCepStatus'); const modal=document.getElementById('cepAddressModal'); const results=document.getElementById('cepAddressResults');
+  if(state.length!==2 || city.length<3 || street.length<3){ if(status) status.textContent='Para procurar o CEP pelo endereço, informe Estado, Cidade e Rua/Avenida.'; return; }
+  if(results) results.innerHTML='<div class="small"><i class="fas fa-spinner fa-spin"></i> Procurando endereços...</div>'; modal?.classList.add('active');
+  try{
+    const response=await fetch(`/api/cep/buscar?state=${encodeURIComponent(state)}&city=${encodeURIComponent(city)}&street=${encodeURIComponent(street)}`); const data=await response.json();
+    if(!response.ok) throw new Error(data.error||'Não foi possível procurar o CEP');
+    const matches=Array.isArray(data.matches)?data.matches:[];
+    if(!matches.length){ if(results) results.innerHTML='<div class="small">Nenhum CEP correspondente foi encontrado. Você pode fechar esta janela e salvar o endereço sem CEP; o Maps usará rua, número, cidade e estado. Informar o CEP, quando disponível, melhora a precisão.<br><br><a href="https://www.correios.com.br/atendimento/ferramentas/sistemas" target="_blank" rel="noopener" style="color:#ffb020;font-weight:800">Consultar o Busca CEP dos Correios</a></div>'; return; }
+    if(results) results.innerHTML='';
+    matches.forEach(match=>{
+      const btn=document.createElement('button'); btn.type='button'; btn.className='btn btn-secondary'; btn.style.cssText='justify-content:flex-start;text-align:left;white-space:normal;min-height:48px';
+      const icon=document.createElement('i'); icon.className='fas fa-location-dot';
+      const copy=document.createElement('span'); const title=document.createElement('strong'); title.textContent=match.street||street; const br=document.createElement('br'); const meta=document.createElement('small'); meta.textContent=`${match.neighborhood?match.neighborhood+' · ':''}${match.city||city}/${match.state||state} · CEP ${match.cep||''}`; copy.append(title,br,meta); btn.append(icon,copy);
+      btn.addEventListener('click',()=>{ const set=(id,value)=>{const el=document.getElementById(id); if(el && value) el.value=value;}; set('profileCepInput',maskCep(match.cep)); set('profileCityInput',match.city); set('profileStateInput',match.state); set('profileStreetInput',match.street); set('profileNeighborhoodInput',match.neighborhood); if(status) status.innerHTML='<i class="fas fa-circle-check" style="color:#73d38a"></i> CEP escolhido pelo endereço. Confira os dados antes de salvar.'; modal?.classList.remove('active'); });
+      results?.appendChild(btn);
+    });
+  }catch(err){ if(results) results.innerHTML=`<div class="small">${err.message||'Não foi possível procurar o CEP agora.'}<br>Você ainda pode salvar o endereço sem CEP.</div>`; }
+}
+document.getElementById('lookupCepByAddress')?.addEventListener('click',lookupCepByAddress);
+document.getElementById('closeCepAddressModal')?.addEventListener('click',()=>document.getElementById('cepAddressModal')?.classList.remove('active'));
+document.getElementById('cepAddressModal')?.addEventListener('click',e=>{ if(e.target.id==='cepAddressModal') e.currentTarget.classList.remove('active'); });
+document.querySelectorAll('input[name="city"], input[name="state"]').forEach((field)=>field.addEventListener('input', ()=>{
+  field.value = field.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '');
+  if(field.name === 'state') field.value = field.value.toUpperCase().slice(0,2);
+}));
+document.querySelectorAll('form').forEach(form => form.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') e.preventDefault(); }));
+
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<nav class="mobile-bottom-nav mobile-only">
+    <a href="/" class="nav-item <%= (typeof active !== 'undefined' && active === 'inicio') ? 'active' : '' %>">
+        <i class="fas fa-home"></i><span>Início</span>
+    </a>
+    <a href="/#busca-rapida" class="nav-item <%= (typeof active !== 'undefined' && active === 'busca') ? 'active' : '' %>">
+        <i class="fas fa-search"></i><span>Busca</span>
+    </a>
+    <button class="nav-item" id="mobile-menu-trigger" type="button">
+        <i class="fas fa-bars"></i><span>Menu</span>
+    </button>
+    <% if (typeof userId !== 'undefined' && userId) { %>
+        <a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>" class="nav-item <%= (typeof active !== 'undefined' && active === 'entrar') ? 'active' : '' %>">
+            <i class="fas fa-user"></i><span>Painel</span>
+        </a>
+    <% } else { %>
+        <a href="/auth/login" class="nav-item <%= (typeof active !== 'undefined' && active === 'entrar') ? 'active' : '' %>">
+            <i class="fas fa-user"></i><span>Entrar</span>
+        </a>
+    <% } %>
+</nav>

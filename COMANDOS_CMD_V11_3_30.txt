@@ -1,0 +1,17 @@
+cd /d C:\Users\Administrator\Downloads\contratae\contrataeapp_v11_3_30_refino_profissoes_preview_publico
+
+dir package.json
+
+git init
+git checkout -B main
+
+git remote remove origin 2>NUL
+git remote add origin https://github.com/contrataeapp/contrataeapp.github.io.git
+
+git config user.name "contrataeapp"
+git config user.email "time.contratae@gmail.com"
+
+git add .
+git commit -m "fix: v11.3.30 refino dashboard profissoes e preview publico"
+
+git push -u origin main --force

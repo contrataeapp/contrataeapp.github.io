@@ -1,0 +1,127 @@
+/* feedback.css */
+
+.feedback-section {
+    background-color: #333;
+    padding: 2em;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #f8f9fa;
+    max-width: 700px; /* Largura máxima para o formulário */
+    margin: 20px auto;
+}
+
+.feedback-section h2 {
+    color: #ffa500;
+    margin-bottom: 1em;
+    text-align: center;
+}
+
+.feedback-section p {
+    text-align: center;
+    margin-bottom: 1.5em;
+    color: #ccc;
+}
+
+.form-group {
+    margin-bottom: 1.5em;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    color: #eee;
+}
+
+.rating-group {
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+    margin-bottom: 1.5em;
+}
+
+.rating-group input[type="radio"] {
+    display: none; /* Esconde o input de rádio original */
+}
+
+.rating-group label {
+    background-color: #555;
+    color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-weight: normal; /* Sobrescreve o font-weight bold padrão da label */
+    margin-bottom: 0; /* Remove margem extra das labels de radio */
+}
+
+.rating-group input[type="radio"]:checked + label {
+    background-color: #ffa500; /* Laranja quando selecionado */
+    color: #222;
+}
+
+.feedback-section input[type="text"],
+.feedback-section input[type="email"],
+.feedback-section textarea {
+    width: calc(100% - 20px); /* Ajuste para o padding */
+    padding: 10px;
+    border: 1px solid #666;
+    border-radius: 5px;
+    background-color: #444;
+    color: #f8f9fa;
+    font-size: 1em;
+}
+
+.feedback-section textarea {
+    resize: vertical; /* Permite redimensionar verticalmente */
+}
+
+.feedback-section input::placeholder,
+.feedback-section textarea::placeholder {
+    color: #bbb;
+}
+
+.button-group {
+    text-align: center;
+    margin-top: 2em;
+}
+
+.feedback-section button[type="submit"] {
+    background-color: #ffa500;
+    color: #222;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.feedback-section button[type="submit"]:hover {
+    background-color: #e69500;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .feedback-section {
+        max-width: 95%;
+        padding: 1.5em;
+    }
+    .feedback-section h2 {
+        font-size: 1.8em;
+    }
+    .rating-group {
+        flex-wrap: wrap;
+        gap: 0.5em;
+    }
+    .rating-group label {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+    .feedback-section input[type="text"],
+    .feedback-section input[type="email"],
+    .feedback-section textarea {
+        width: calc(100% - 16px); /* Ajuste para padding em telas menores */
+        padding: 8px;
+    }
+}

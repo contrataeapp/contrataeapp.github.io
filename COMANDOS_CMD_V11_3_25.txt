@@ -1,0 +1,17 @@
+Depois de extrair o ZIP na pasta do repositório correto, rode no CMD:
+
+git status
+git add .
+git commit -m "v11.3.25 dashboard profissional por profissao"
+git push origin main
+
+Antes ou logo depois do deploy, rode no Supabase SQL Editor:
+
+sql_scripts/07_profession_profiles_portfolios.sql
+
+Depois teste:
+1. /profissional/dashboard?tab=profissoes
+2. edite uma profissão oficial
+3. adicione uma imagem nessa profissão
+4. abra /categoria/pedreiros ou /categoria/eletricistas
+5. clique em Ver Perfil e confirme se o perfil usa a profissão correta

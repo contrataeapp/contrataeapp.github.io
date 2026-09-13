@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outras Categorias - Contrataê</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .outros-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .outros-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .outros-header h1 {
+            font-size: 36px;
+            color: #ffa500;
+            margin-bottom: 10px;
+        }
+
+        .outros-header p {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        .categorias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .categoria-card {
+            background: #222;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #333;
+        }
+
+        .categoria-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255,165,0,0.2);
+            border-color: #ffa500;
+        }
+        .outros-search { max-width: 620px; margin: -22px auto 34px; display:flex; gap:10px; align-items:center; }
+        .outros-search input { width:100%; background:#111; color:#fff; border:1px solid #333; border-radius:999px; padding:14px 18px; font-size:15px; }
+        .outros-search button{width:52px;height:52px;border-radius:50%;border:0;background:#ffa500;color:#111;font-size:18px;cursor:pointer;font-weight:800;box-shadow:0 8px 20px rgba(255,165,0,.2)}
+        .outros-empty-filter { display:none; text-align:center; color:#9da5af; margin: 18px 0 30px; }
+
+        .categoria-icon {
+            font-size: 48px;
+            color: #ffa500;
+        }
+
+        .categoria-card h3 {
+            margin: 0;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .categoria-card p {
+            margin: 0;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .info-section {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .info-section h2 {
+            color: #ffa500;
+            margin-bottom: 20px;
+        }
+
+        .info-section p {
+            color: #ccc;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .info-section a {
+            color: #ffa500;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .info-section a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .outros-container {
+                margin: 20px auto;
+            }
+
+            .outros-header h1 {
+                font-size: 24px;
+            }
+
+            .categorias-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <% const bannerEsq = typeof banners !== 'undefined' && banners.find(b => b.posicao === 3); %>
+    <% if (bannerEsq) { %>
+    <div class="banner-lateral banner-esquerda" id="banner-mov">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerEsq.link_destino || bannerEsq.link_destination || '#' %>">
+            <img src="<%= bannerEsq.imagem_url || bannerEsq.image_url %>" alt="<%= bannerEsq.titulo || bannerEsq.title || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
+    <% const bannerDir = typeof banners !== 'undefined' && banners.find(b => b.posicao === 4); %>
+    <% if (bannerDir) { %>
+    <div class="banner-lateral banner-direita" id="banner-speed">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerDir.link_destino || bannerDir.link_destination || '#' %>">
+            <img src="<%= bannerDir.imagem_url || bannerDir.image_url %>" alt="<%= bannerDir.titulo || bannerDir.title || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
+    <%- include('partials/top-status-bar') %>
+    <%- include('partials/header', { currentPage: 'outros' }) %>
+
+    <main>
+        <div class="outros-container">
+            <div class="outros-header">
+                <h1>Outras Categorias</h1>
+                <p>Explore todas as profissões disponíveis na plataforma Contrataê</p>
+            </div>
+
+            <div class="outros-search">
+                <input type="search" id="outrosCategorySearch" placeholder="Pesquisar profissão em outras categorias..." autocomplete="off"><button id="outrosCategorySearchBtn" type="button" title="Pesquisar"><i class="fas fa-search"></i></button>
+            </div>
+            <p class="outros-empty-filter" id="outrosEmptyFilter">Nenhuma categoria encontrada com esse termo.</p>
+
+            <div class="categorias-grid">
+                <% const extras = (typeof extraCategories !== 'undefined' && extraCategories.length > 0) ? extraCategories : null; %>
+                <% if (extras) { %>
+                    <% extras.forEach(cat => { %>
+                        <a href="/categoria/<%= cat.slug %>" class="categoria-card" data-category-name="<%= String(cat.name || '').toLowerCase() %>">
+                            <i class="fas fa-briefcase categoria-icon"></i>
+                            <h3><%= cat.name %></h3>
+                            <p>Profissionais disponíveis nesta categoria</p>
+                        </a>
+                    <% }) %>
+                <% } else { %>
+                    <div class="info-section" style="grid-column: 1/-1;">
+                        <h2>Nenhuma subcategoria cadastrada ainda</h2>
+                        <p>As novas profissões adicionadas à plataforma aparecerão aqui como cards dentro de Outros.</p>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="info-section">
+                <h2>Não encontrou sua profissão?</h2>
+                <p>Se você é um profissional em uma área não listada acima, pode se cadastrar como "Outros" durante o registro. Sua profissão será adicionada à plataforma e você terá sua própria página!</p>
+                <p style="margin-top: 20px;">
+                    <a href="/auth/login">Cadastre-se agora →</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+    <script>
+        (function(){
+            const input = document.getElementById('outrosCategorySearch');
+            const button = document.getElementById('outrosCategorySearchBtn');
+            const empty = document.getElementById('outrosEmptyFilter');
+            const cards = Array.from(document.querySelectorAll('.categoria-card[data-category-name]'));
+            const aliasRoutes = {
+                'pintor':'/categoria/pintores', 'pintores':'/categoria/pintores',
+                'pedreiro':'/categoria/pedreiros', 'pedreiros':'/categoria/pedreiros',
+                'eletricista':'/categoria/eletricistas', 'eletricistas':'/categoria/eletricistas',
+                'encanador':'/categoria/encanadores', 'encanadores':'/categoria/encanadores',
+                'camera':'/categoria/cameras', 'cameras':'/categoria/cameras', 'instalador de cameras':'/categoria/cameras', 'instalador de camera':'/categoria/cameras',
+                'marceneiro':'/categoria/marceneiro', 'marceneiros':'/categoria/marceneiro'
+            };
+            if (!input) return;
+            const normalize = (value) => String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            function filterCards(){
+                const term = normalize(input.value.trim());
+                let visible = 0;
+                cards.forEach(card => {
+                    const name = normalize(card.dataset.categoryName || '');
+                    const slug = normalize(card.getAttribute('href') || '');
+                    const aliasHit = aliasRoutes[term];
+                    const show = !term || name.includes(term) || slug.includes(term) || term.includes(name.replace(/s$/,'')) || (aliasHit && card.getAttribute('href') === aliasHit);
+                    card.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+                if (empty) empty.style.display = visible ? 'none' : 'block';
+                return visible;
+            }
+            function submitSearch(){
+                const term = normalize(input.value.trim());
+                const visible = filterCards();
+                if (!term) return;
+                if (aliasRoutes[term]) { window.location.href = aliasRoutes[term]; return; }
+                if (visible !== 1) return;
+                const card = cards.find(c => c.style.display !== 'none');
+                if (card) window.location.href = card.getAttribute('href');
+            }
+            input.addEventListener('input', filterCards);
+            input.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); submitSearch(); } });
+            button?.addEventListener('click', submitSearch);
+        })();
+    </script>
+    
+    <!-- Barra de Navegação Inferior (Mobile) -->
+    <nav class="mobile-bottom-nav mobile-only">
+        <a href="/" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="#" class="nav-item" id="mobile-menu-trigger">
+            <i class="fas fa-search"></i>
+            <span>Explorar</span>
+        </a>
+        <a href="/auth/login" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+</body>
+</html>

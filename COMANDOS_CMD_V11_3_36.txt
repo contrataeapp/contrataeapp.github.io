@@ -1,0 +1,19 @@
+cd /d C:\Users\Administrator\Downloads\contratae\contrataeapp_v11_3_36_mobile_area_profissional
+
+dir package.json
+
+rmdir /s /q .git 2>NUL
+
+git init
+git checkout -B main
+
+git remote remove origin 2>NUL
+git remote add origin https://github.com/contrataeapp/contrataeapp.github.io.git
+
+git config user.name "contrataeapp"
+git config user.email "time.contratae@gmail.com"
+
+git add .
+git commit -m "fix: v11.3.36 mobile area profissional"
+
+git push -u origin main --force
