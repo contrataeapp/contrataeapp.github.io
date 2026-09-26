@@ -1,0 +1,199 @@
+<footer>
+    <div class="footer-partners-area" id="parceiros-area">
+        <div class="container">
+            <h4 style="color: #ffa500; text-align: center; margin-bottom: 10px; font-size: 1rem;">Nossos Parceiros</h4>
+            <section class="carousel-section footer-carousel" id="carousel-baixo">
+                <div class="carousel-container">
+                    <% const bannersRodape = typeof banners !== 'undefined' ? banners.filter(b => Number(b.posicao) === 2 || (b.position === 'home' && Number(b.order) >= 100 && Number(b.order) < 200)).sort((a,b)=>Number(a.order || 0)-Number(b.order || 0)) : []; %>
+
+                    <% if (bannersRodape.length > 0) { %>
+                        <% bannersRodape.forEach(function(banner, index) { %>
+                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                <a href="#" class="trigger-modal" data-link="<%= banner.link_destino || banner.link_destination || '#' %>">
+                                    <img src="<%= banner.imagem_url || banner.image_url %>" alt="<%= banner.titulo || banner.title || 'Parceiro' %>" style="width:100%; height:100%; object-fit:fill;">
+                                </a>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="carousel-item active">
+                            <a href="#" class="trigger-modal" data-link="https://wa.me/5516996484492?text=Olá, vi o anúncio do Ponto Forte no Contrataê e gostaria de mais informações!">
+                                <img src="/imagens/parceiros/ponto_forte.png" alt="Ponto Forte" style="width:100%; height:100%; object-fit:fill;">
+                            </a>
+                        </div>
+                    <% } %>
+
+                    <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+                    <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                    <div class="carousel-dots">
+                        <% if (bannersRodape && bannersRodape.length > 0) { %>
+                            <% bannersRodape.forEach(function(_, index) { %>
+                                <span class="dot <%= index === 0 ? 'active' : '' %>"></span>
+                            <% }); %>
+                        <% } else { %>
+                            <span class="dot active"></span>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <div class="footer-copyright-bar">
+        <div class="container copyright-flex">
+            <p>&copy; 2026 Contrataê</p>
+            <div class="footer-links">
+                <a href="/avaliacao">Avaliação</a> | 
+                <a href="/contato">Sobre Nós</a> | 
+                <a href="/termos-de-uso">Termos</a>
+            </div>
+            <% const ps = (typeof platformSettings !== 'undefined' && platformSettings) ? platformSettings : {}; %>
+            <% const hasSocial = (ps.instagram_active && ps.instagram_url) || (ps.facebook_active && ps.facebook_url) || (ps.x_active && ps.x_url) || (ps.whatsapp_active && ps.whatsapp_url) || ps.contact_email; %>
+            <% if (hasSocial) { %>
+            <div class="footer-social-links" aria-label="Canais oficiais do Contrataê">
+                <% if (ps.instagram_active && ps.instagram_url) { %><a href="<%= ps.instagram_url %>" target="_blank" rel="noopener" aria-label="Instagram do Contrataê"><i class="fab fa-instagram"></i></a><% } %>
+                <% if (ps.facebook_active && ps.facebook_url) { %><a href="<%= ps.facebook_url %>" target="_blank" rel="noopener" aria-label="Facebook do Contrataê"><i class="fab fa-facebook-f"></i></a><% } %>
+                <% if (ps.x_active && ps.x_url) { %><a href="<%= ps.x_url %>" target="_blank" rel="noopener" aria-label="X do Contrataê"><i class="fab fa-x-twitter"></i></a><% } %>
+                <% if (ps.whatsapp_active && ps.whatsapp_url) { %><a href="<%= ps.whatsapp_url %>" target="_blank" rel="noopener" aria-label="WhatsApp do Contrataê"><i class="fab fa-whatsapp"></i></a><% } %>
+                <% if (ps.contact_email) { %><a href="mailto:<%= ps.contact_email %>" aria-label="E-mail do Contrataê"><i class="fas fa-envelope"></i></a><% } %>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</footer>
+
+<div id="external-link-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>Você está saindo do Contrataê</h3>
+        <p id="modal-msg">Você será redirecionado(a) para o site de nosso parceiro.</p>
+        <p class="modal-link-preview" id="modal-link-dest"></p>
+        <div class="modal-buttons">
+            <button id="cancel-link" class="button secondary-button">Cancelar</button>
+            <button id="confirm-link" class="button primary-button">Continuar</button>
+        </div>
+    </div>
+</div>
+
+<% if (!(typeof ownerPublishedView !== 'undefined' && ownerPublishedView) && !(typeof currentPage !== 'undefined' && currentPage === 'instalar')) { %>
+<style>
+.footer-social-links{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap}
+.footer-social-links a{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid #353a43;background:#17191e;color:#ffb020;text-decoration:none;transition:transform .16s ease,border-color .16s ease,background .16s ease}
+.footer-social-links a:hover,.footer-social-links a:focus{transform:translateY(-2px);border-color:#ffb020;background:#21242a;outline:none}
+body.light-mode .footer-social-links a{background:#fff;border-color:#d8dee7;color:#c77500}
+.public-install-card{display:none;position:fixed;z-index:5200;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(500px,calc(100vw - 24px));background:#17191e;border:1px solid rgba(255,176,32,.42);border-radius:18px;padding:14px;box-shadow:0 24px 70px rgba(0,0,0,.55);color:#fff}.public-install-card.active{display:block}.public-install-head{display:flex;align-items:flex-start;gap:10px}.public-install-icon{width:42px;height:42px;border-radius:13px;background:#ffb020;color:#111;display:flex;align-items:center;justify-content:center;flex:0 0 42px}.public-install-copy{min-width:0;flex:1}.public-install-copy strong{display:block;font-size:14px;margin-bottom:3px}.public-install-copy p{margin:0;color:#b7c0cb;font-size:12px;line-height:1.4}.public-install-close{border:0;background:transparent;color:#aab3bf;width:36px;height:36px;border-radius:999px;cursor:pointer}.public-install-actions{display:flex;gap:8px;margin-top:12px}.public-install-actions button{flex:1;min-height:44px;border-radius:11px;border:1px solid #3a404a;font-weight:800;cursor:pointer}.public-install-primary{background:#ffb020;color:#111;border-color:#ffb020!important}.public-install-secondary{background:#23262c;color:#fff}.public-install-modal{display:none;position:fixed;inset:0;z-index:5300;background:rgba(0,0,0,.72);align-items:flex-end;justify-content:center;padding:12px}.public-install-modal.active{display:flex}.public-install-sheet{width:min(520px,100%);background:#17191e;border:1px solid #353a43;border-radius:22px 22px 16px 16px;padding:18px;color:#fff;box-shadow:0 -24px 70px rgba(0,0,0,.55)}.public-install-sheet h3{margin:0 0 6px;color:#ffb020}.public-install-sheet p{margin:0;color:#b7c0cb;line-height:1.45;font-size:13px}.public-install-steps{display:grid;gap:8px;margin-top:14px}.public-install-step{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #30353d;border-radius:12px;background:#111318;font-size:12px}.public-install-step b{width:25px;height:25px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#ffb020;color:#111;flex:0 0 25px}.public-install-sheet-actions{display:flex;gap:8px;margin-top:16px}.public-install-sheet-actions button{flex:1;min-height:44px;border-radius:11px;border:1px solid #3a404a;font-weight:800;cursor:pointer}.light-mode .public-install-card,.light-mode .public-install-sheet{background:#fff;color:#1d222b}.light-mode .public-install-copy p,.light-mode .public-install-sheet p{color:#596575}.light-mode .public-install-step{background:#f8fafc;color:#222a35;border-color:#d8dee7}
+@media(min-width:821px){.public-install-card{bottom:24px}.public-install-modal{align-items:center}}
+</style>
+<div class="public-install-card" id="publicInstallCard" aria-live="polite">
+  <div class="public-install-head">
+    <div class="public-install-icon"><i class="fas fa-mobile-screen-button"></i></div>
+    <div class="public-install-copy"><strong>Tenha o Contrataê no celular</strong><p>Abra pela tela inicial como um aplicativo.</p></div>
+    <button type="button" class="public-install-close" id="publicInstallClose" aria-label="Fechar"><i class="fas fa-xmark"></i></button>
+  </div>
+  <div class="public-install-actions"><button type="button" class="public-install-primary" id="publicInstallOpen">Instalar agora</button><button type="button" class="public-install-secondary" id="publicInstallLater">Instalar depois</button></div>
+</div>
+<div class="public-install-modal" id="publicInstallModal" aria-hidden="true">
+  <div class="public-install-sheet" role="dialog" aria-modal="true" aria-label="Instalar Contrataê">
+    <h3>Instalar Contrataê</h3>
+    <p id="publicInstallIntro">Tenha acesso rápido pela tela inicial.</p>
+    <div id="publicInstallGuide"></div>
+    <div class="public-install-sheet-actions"><button type="button" class="public-install-secondary" id="publicInstallCancel">Agora não</button><button type="button" class="public-install-primary" id="publicInstallPrimary">Instalar</button></div>
+  </div>
+</div>
+<script>
+(function(){
+  if(window.__contrataePublicInstallInit) return; window.__contrataePublicInstallInit=true;
+  let deferredPrompt=null;
+  const card=document.getElementById('publicInstallCard'), modal=document.getElementById('publicInstallModal');
+  const primary=document.getElementById('publicInstallPrimary'), guide=document.getElementById('publicInstallGuide'), intro=document.getElementById('publicInstallIntro');
+  const snoozeKey='contratae-public-install-v1143-snooze-until';
+  const currentPage=<%- JSON.stringify(typeof currentPage !== 'undefined' ? currentPage : '') %>;
+  const isAndroid=()=>/android/i.test(navigator.userAgent||'');
+  const isChromeIOS=()=>/CriOS/i.test(navigator.userAgent||'');
+  const isFirefoxIOS=()=>/FxiOS/i.test(navigator.userAgent||'');
+  const isEdgeIOS=()=>/EdgiOS/i.test(navigator.userAgent||'');
+  const isSafariIOS=()=>isiOS()&&!isChromeIOS()&&!isFirefoxIOS()&&!isEdgeIOS();
+  const isMobile=()=>isAndroid()||isiOS();
+  let installRequested=false;
+  const installed=()=>window.matchMedia?.('(display-mode: standalone)')?.matches||navigator.standalone===true;
+  const isiOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent||'');
+  const snooze=(days)=>{try{localStorage.setItem(snoozeKey,String(Date.now()+days*86400000))}catch(_){}};
+  const canShow=()=>{if(installed()||!isMobile())return false;try{return Date.now()>=Number(localStorage.getItem(snoozeKey)||0)}catch(_){return true}};
+  function fill(){
+    if(isiOS()){
+      const browser = isChromeIOS() ? 'Chrome' : isSafariIOS() ? 'Safari' : isFirefoxIOS() ? 'Firefox' : isEdgeIOS() ? 'Edge' : 'seu navegador';
+      intro.textContent=`No iPhone/iPad, siga o passo a passo abaixo no ${browser}.`;
+      if(isChromeIOS()){
+        guide.innerHTML='<div class="public-install-steps"><div class="public-install-step"><b>1</b><span>No Chrome, toque em <strong>Compartilhar</strong> ao lado da barra de endereço.</span></div><div class="public-install-step"><b>2</b><span>Escolha <strong>Adicionar à tela inicial</strong>.</span></div><div class="public-install-step"><b>3</b><span>Confirme em <strong>Adicionar</strong>.</span></div></div><p style="margin-top:10px;font-size:12px">Se a opção não aparecer, abra <strong>Instalar</strong> no menu do Contrataê para ver o tutorial completo.</p>';
+      }else if(isSafariIOS()){
+        guide.innerHTML='<div class="public-install-steps"><div class="public-install-step"><b>1</b><span>No Safari, toque em <strong>Compartilhar</strong>.</span></div><div class="public-install-step"><b>2</b><span>Escolha <strong>Adicionar à Tela de Início</strong>.</span></div><div class="public-install-step"><b>3</b><span>Ative <strong>Abrir como App Web</strong>, se essa opção aparecer, e toque em <strong>Adicionar</strong>.</span></div></div>';
+      }else{
+        guide.innerHTML='<div class="public-install-steps"><div class="public-install-step"><b>1</b><span>Abra o menu de compartilhamento do navegador.</span></div><div class="public-install-step"><b>2</b><span>Procure <strong>Adicionar à Tela de Início</strong>.</span></div><div class="public-install-step"><b>3</b><span>Se não encontrar, toque em <strong>Ver tutorial completo</strong>.</span></div></div>';
+      }
+      primary.style.display='';
+      primary.textContent='Ver tutorial completo';
+    }else if(deferredPrompt){
+      intro.textContent='Seu Android permite instalar o Contrataê agora.';
+      guide.innerHTML='';
+      primary.style.display='';
+      primary.textContent='Instalar agora';
+    }else{
+      intro.textContent='Seu navegador ainda não liberou a instalação automática.';
+      guide.innerHTML='<div class="public-install-steps"><div class="public-install-step"><b>1</b><span>Toque em <strong>Ver tutorial</strong>.</span></div><div class="public-install-step"><b>2</b><span>Escolha o navegador que você usa e siga os passos.</span></div></div>';
+      primary.style.display='';
+      primary.textContent='Ver tutorial';
+    }
+  }
+  function openModal(){fill();modal.classList.add('active');modal.setAttribute('aria-hidden','false');card.classList.remove('active')}
+  function closeModal(){modal.classList.remove('active');modal.setAttribute('aria-hidden','true')}
+  window.addEventListener('beforeinstallprompt',async e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('publicInstallOpen');if(b&&!isiOS()){b.textContent='Instalar agora';b.disabled=false;}if(installRequested&&isAndroid()){installRequested=false;await launchAndroidInstall();}});
+  window.addEventListener('appinstalled',()=>{deferredPrompt=null;card.classList.remove('active');closeModal();try{localStorage.removeItem(snoozeKey)}catch(_){}});
+  async function launchAndroidInstall(){
+    const openBtn=document.getElementById('publicInstallOpen');
+    if(!deferredPrompt){installRequested=true;if(openBtn){openBtn.disabled=true;openBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Preparando instalação...';}const copy=card?.querySelector('.public-install-copy p');if(copy)copy.textContent='Preparando a instalação no Android...';setTimeout(()=>{if(!deferredPrompt&&installRequested){installRequested=false;if(openBtn){openBtn.disabled=false;openBtn.textContent='Instalar agora';}if(copy)copy.textContent='O Android ainda não liberou a instalação automática. Abrindo a ajuda de instalação...';location.href='/instalar?source=android-fallback';}},3200);return;}
+    const p=deferredPrompt;deferredPrompt=null;installRequested=false;if(openBtn){openBtn.disabled=true;openBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Abrindo instalação...';}
+    try{await p.prompt();const choice=await p.userChoice;if(choice?.outcome!=='accepted')snooze(3)}catch(_){snooze(1)}finally{if(openBtn){openBtn.disabled=false;openBtn.textContent='Instalar agora';}}
+  }
+  document.getElementById('publicInstallOpen')?.addEventListener('click',async()=>{
+    if(isiOS()){ openModal(); return; }
+    if(isAndroid()){await launchAndroidInstall();return;}
+    openModal();
+  });
+  document.getElementById('publicInstallClose')?.addEventListener('click',()=>{card.classList.remove('active');snooze(7)});
+  document.getElementById('publicInstallLater')?.addEventListener('click',()=>{card.classList.remove('active');snooze(3)});
+  document.getElementById('publicInstallCancel')?.addEventListener('click',()=>{closeModal();snooze(3)});
+  modal?.addEventListener('click',e=>{if(e.target===modal){closeModal();snooze(3)}});
+  primary?.addEventListener('click',async()=>{
+    if(isiOS()){ location.href='/instalar?source=ios'; return; }
+    if(!deferredPrompt){ location.href='/instalar?source=fallback'; return; }
+    primary.disabled=true;
+    try{await deferredPrompt.prompt();await deferredPrompt.userChoice}catch(_){}
+    finally{deferredPrompt=null;primary.disabled=false;closeModal()}
+  });
+  setTimeout(()=>{if(canShow()){const b=document.getElementById('publicInstallOpen');if(b)b.textContent='Instalar agora';card?.classList.add('active')}},currentPage==='index'?450:1400);
+})();
+</script>
+<% } %>
+
+<script src="/js/theme-toggle.js"></script>
+<script src="/js/index.js"></script>
+<script src="/js/form-validation.js"></script>
+
+<div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+    </div>
+</div>
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>new window.VLibras.Widget('https://vlibras.gov.br/app');</script>
+
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+      if (!document.querySelector('.goog-te-gadget')) {
+        new google.translate.TranslateElement({
+            pageLanguage: 'pt',
+            includedLanguages: 'pt,en',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+          }, 'google_translate_element');
+      }
+    }
+</script>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>

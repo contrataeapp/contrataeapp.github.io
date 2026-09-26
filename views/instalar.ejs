@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instalar Contrataê</title>
+  <link rel="manifest" href="/manifest.webmanifest"><link rel="icon" type="image/png" href="/imagens/app/favicon.png"><link rel="apple-touch-icon" href="/imagens/app/apple-touch-icon.png"><meta name="theme-color" content="#101114">
+  <meta name="description" content="Instale o Contrataê na tela inicial do seu celular."><meta property="og:site_name" content="Contrataê"><meta property="og:type" content="website"><meta property="og:title" content="Instalar Contrataê"><meta property="og:description" content="Tenha acesso rápido ao Contrataê pela tela inicial do celular."><meta property="og:image" content="https://contrataeapp.onrender.com/imagens/app/contratae-social.png">
+  <link rel="stylesheet" href="/css/style_laranja_preto.css"><link rel="stylesheet" href="/css/header.css"><link rel="stylesheet" href="/css/footer.css"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    html,body{min-height:100%;overflow-x:hidden}.install-page{max-width:880px;margin:0 auto;padding:28px 18px 34px}.install-hero{text-align:center;padding:20px 10px}.install-hero img{width:84px;height:84px;border-radius:24px;margin-bottom:16px}.install-hero h1{font-size:clamp(29px,7vw,44px);color:#ffb020;margin:0 0 8px}.install-hero p{max-width:600px;margin:0 auto;color:#b9c1cc;line-height:1.55}.install-device-card{background:#18191d;border:1px solid #333841;border-radius:20px;padding:20px;margin:12px auto 0;max-width:680px}.install-device-card h2{color:#fff;font-size:21px;margin:0 0 8px}.install-device-card>p{color:#aeb8c5;line-height:1.5}.install-actions{display:flex;gap:10px;max-width:520px;margin:18px auto 0}.install-primary,.install-secondary{display:flex;align-items:center;justify-content:center;gap:9px;flex:1;min-height:50px;padding:13px 16px;border-radius:13px;font-weight:900;font-size:15px;cursor:pointer}.install-primary{border:0;background:#ffb020;color:#111}.install-secondary{border:1px solid #3a404a;background:#24272e;color:#fff}.install-primary:disabled{opacity:.58;cursor:wait}.steps{display:grid;gap:10px;margin-top:16px}.step{display:flex;gap:12px;align-items:flex-start;padding:13px;background:#111318;border:1px solid #30353d;border-radius:13px;color:#dbe2ea;line-height:1.45}.step b{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:#ffb020;color:#111;flex:0 0 30px}.install-status{text-align:center;color:#9da8b5;font-size:13px;margin-top:12px}.ios-only,.android-only,.fallback-only,.installed-only{display:none}.ios-browser-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.ios-browser-tab{border:1px solid #3a404a;background:#23262c;color:#fff;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}.ios-browser-tab.active{background:#ffb020;color:#111;border-color:#ffb020}.ios-browser-guide{display:none}.ios-browser-guide.active{display:block}.install-note{padding:11px 13px;border-radius:12px;background:rgba(255,176,32,.08);border:1px solid rgba(255,176,32,.25);color:#d9dee6;font-size:13px;line-height:1.45;margin-top:12px}.back-link{display:inline-flex;align-items:center;gap:8px;color:#ffb020;text-decoration:none;font-weight:800;margin:22px 0 0}.install-page+footer{margin-top:0!important}.light-mode .install-device-card{background:#fff;border-color:#dbe1e8}.light-mode .install-device-card h2{color:#1d222b}.light-mode .install-device-card>p,.light-mode .install-status{color:#586575}.light-mode .step{background:#f8fafc;border-color:#dbe1e8;color:#222a35}.light-mode .install-secondary{background:#f5f7fa;color:#26303c;border-color:#d8dee7}.light-mode .ios-browser-tab{background:#f4f6f9;color:#26303c;border-color:#d8dee7}.light-mode .ios-browser-tab.active{background:#ffb020;color:#111}.light-mode .install-note{color:#495565;background:#fff8e9}
+    @media(max-width:620px){.install-page{padding:18px 14px calc(86px + env(safe-area-inset-bottom))}.install-hero{padding:12px 4px}.install-device-card{padding:15px}.install-actions{flex-direction:column}.install-primary,.install-secondary{width:100%}}
+  </style>
+</head>
+<body class="dark-mode">
+  <%- include('partials/header', { currentPage: 'instalar' }) %>
+  <%- include('partials/top-status-bar') %>
+  <main class="install-page">
+    <section class="install-hero"><img src="/imagens/app/contratae-192.png" alt="Ícone Contrataê"><h1>Contrataê no seu celular</h1><p>Abra o Contrataê direto pela tela inicial, como um aplicativo. Sua conta e suas informações continuam as mesmas.</p></section>
+    <section class="install-device-card android-only" id="androidCard"><h2><i class="fab fa-android"></i> Instalar no Android</h2><p>É simples: toque em <strong>Instalar agora</strong> e confirme a instalação quando o Android mostrar a janela.</p><div class="install-actions"><button type="button" class="install-primary" id="installPageButton"><i class="fas fa-download"></i> Instalar agora</button><button type="button" class="install-secondary" id="installPageLater">Instalar depois</button></div><div class="install-status" id="installPageStatus" aria-live="polite">Preparando a instalação...</div><div id="androidFallbackGuide" class="install-note" style="display:none"><strong>Se a janela de instalação não aparecer:</strong><div class="steps" style="margin-top:10px"><div class="step"><b>1</b><span>No Chrome, toque em <strong>Mais (⋮)</strong>.</span></div><div class="step"><b>2</b><span>Toque em <strong>Instalar e criar atalho</strong> ou <strong>Instalar app</strong>.</span></div><div class="step"><b>3</b><span>Toque em <strong>Instalar</strong> e confirme.</span></div></div></div></section>
+    <section class="install-device-card ios-only" id="iosCard">
+      <h2><i class="fab fa-apple"></i> Instalar no iPhone / iPad</h2>
+      <p>Escolha o navegador que você usa. O Contrataê mostra somente os passos necessários.</p>
+      <div class="ios-browser-tabs" role="tablist" aria-label="Navegador do iPhone">
+        <button type="button" class="ios-browser-tab" data-ios-browser="chrome"><i class="fab fa-chrome"></i> Chrome</button>
+        <button type="button" class="ios-browser-tab" data-ios-browser="safari"><i class="fab fa-safari"></i> Safari</button>
+        <button type="button" class="ios-browser-tab" data-ios-browser="other"><i class="fas fa-globe"></i> Outro</button>
+      </div>
+      <div class="ios-browser-guide" data-ios-guide="chrome">
+        <div class="steps"><div class="step"><b>1</b><span>No <strong>Chrome</strong>, toque em <strong>Compartilhar</strong> ao lado da barra de endereço.</span></div><div class="step"><b>2</b><span>Toque em <strong>Adicionar à tela inicial</strong>.</span></div><div class="step"><b>3</b><span>Confira o nome Contrataê e toque em <strong>Adicionar</strong>.</span></div></div>
+      </div>
+      <div class="ios-browser-guide" data-ios-guide="safari">
+        <div class="steps"><div class="step"><b>1</b><span>No <strong>Safari</strong>, toque em <strong>Compartilhar</strong> <i class="fas fa-arrow-up-from-bracket"></i>.</span></div><div class="step"><b>2</b><span>Escolha <strong>Adicionar à Tela de Início</strong>.</span></div><div class="step"><b>3</b><span>Ative <strong>Abrir como App Web</strong>, se essa opção aparecer.</span></div><div class="step"><b>4</b><span>Toque em <strong>Adicionar</strong>.</span></div></div>
+      </div>
+      <div class="ios-browser-guide" data-ios-guide="other">
+        <div class="steps"><div class="step"><b>1</b><span>Abra o menu de <strong>Compartilhar</strong> do seu navegador.</span></div><div class="step"><b>2</b><span>Procure <strong>Adicionar à Tela de Início</strong>.</span></div><div class="step"><b>3</b><span>Se essa opção não existir, abra esta página pelo Chrome ou Safari e siga o tutorial correspondente.</span></div></div>
+      </div>
+      <div class="install-note"><i class="fas fa-circle-info"></i> No iPhone, o navegador exige estes passos manuais. O Contrataê não consegue confirmar a instalação sozinho como no Android.</div>
+    </section>
+    <section class="install-device-card installed-only" id="installedCard"><h2><i class="fas fa-circle-check"></i> Contrataê já instalado</h2><p>Este aparelho já está abrindo o Contrataê como aplicativo.</p></section>
+    <section class="install-device-card fallback-only" id="fallbackCard"><h2>Instalar Contrataê</h2><p>Seu navegador não ofereceu a instalação automática neste momento. Continue usando normalmente ou tente novamente depois.</p><div class="install-note">No Android, prefira Chrome ou outro navegador compatível com instalação de PWA. No iPhone, escolha Chrome ou Safari no tutorial acima.</div></section>
+    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Voltar ao Contrataê</a>
+  </main>
+  <%- include('partials/footer', { currentPage: 'instalar' }) %>
+  <%- include('partials/mobile-bottom-nav', { active: '' }) %>
+<script>
+(function(){
+  let deferred=null;
+  const ua=navigator.userAgent||'';
+  const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  const ios=/iphone|ipad|ipod/i.test(ua);
+  const android=/android/i.test(ua);
+  const chromeIOS=/CriOS/i.test(ua);
+  const firefoxIOS=/FxiOS/i.test(ua);
+  const edgeIOS=/EdgiOS/i.test(ua);
+  const safariIOS=ios&&!chromeIOS&&!firefoxIOS&&!edgeIOS;
+  const btn=document.getElementById('installPageButton'), later=document.getElementById('installPageLater'), status=document.getElementById('installPageStatus');
+  const androidFallbackGuide=document.getElementById('androidFallbackGuide');
+  const source=new URLSearchParams(location.search).get('source')||'';
+  function showAndroidFallback(){if(androidFallbackGuide)androidFallbackGuide.style.display='block';if(status)status.textContent='Se a janela automática não aparecer, use os passos abaixo.';}
+
+  function selectIOSBrowser(name){
+    document.querySelectorAll('[data-ios-browser]').forEach(b=>b.classList.toggle('active',b.dataset.iosBrowser===name));
+    document.querySelectorAll('[data-ios-guide]').forEach(g=>g.classList.toggle('active',g.dataset.iosGuide===name));
+  }
+  document.querySelectorAll('[data-ios-browser]').forEach(button=>button.addEventListener('click',()=>selectIOSBrowser(button.dataset.iosBrowser)));
+
+  if(standalone()){document.getElementById('installedCard').style.display='block';return}
+  if(ios){
+    document.getElementById('iosCard').style.display='block';
+    selectIOSBrowser(chromeIOS?'chrome':safariIOS?'safari':'other');
+    return;
+  }
+  if(android){document.getElementById('androidCard').style.display='block';if(source==='android-fallback')showAndroidFallback()}else{document.getElementById('fallbackCard').style.display='block'}
+
+  function ready(){if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-download"></i> Instalar agora'}if(status)status.textContent='Pronto para instalar.'}
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;ready()});
+  btn?.addEventListener('click',async()=>{
+    if(!deferred){
+      btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Preparando...';
+      if(status)status.textContent='O Android ainda está preparando a instalação. Se não liberar em instantes, você pode tentar novamente depois.';
+      setTimeout(()=>{btn.disabled=false;btn.innerHTML='<i class="fas fa-download"></i> Instalar agora';showAndroidFallback()},1600);
+      return;
+    }
+    const p=deferred;deferred=null;btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Abrindo instalação...';
+    try{await p.prompt();const r=await p.userChoice;if(status)status.textContent=r?.outcome==='accepted'?'Instalação iniciada.':'Instalação adiada. Você pode instalar quando quiser.'}
+    catch(_){if(status)status.textContent='Não foi possível abrir a instalação agora.'}
+    finally{btn.disabled=false;btn.innerHTML='<i class="fas fa-download"></i> Instalar agora'}
+  });
+  later?.addEventListener('click',()=>{try{localStorage.setItem('contratae-public-install-v1143-snooze-until',String(Date.now()+3*86400000))}catch(_){}location.href='/'});
+  window.addEventListener('appinstalled',()=>{if(status)status.textContent='Contrataê instalado com sucesso.';if(btn)btn.style.display='none';if(later)later.textContent='Voltar ao Contrataê'});
+  setTimeout(()=>{if(android&&!deferred&&status){status.textContent='Toque em “Instalar agora”. Se o Android não abrir a janela, mostramos os passos manuais.';if(source==='android-fallback')showAndroidFallback()}},1200);
+})();
+</script>
+</body></html>

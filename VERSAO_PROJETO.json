@@ -1,0 +1,17 @@
+{
+  "project": "Contratae",
+  "version": "11.3.43",
+  "label": "publico_institucional_pwa",
+  "base_version": "11.3.42",
+  "requires_new_sql": true,
+  "required_sql": [
+    "SQL_V11_3_43_CONFIGURACOES_PLATAFORMA.sql"
+  ],
+  "confirmed_sql": [
+    "10_portfolio_draft_legendas",
+    "11_profile_contact_address"
+  ],
+  "render_health_check": "/healthz",
+  "next_priority": "11.3.44_meu_plano",
+  "continuity_file": "CONTINUAR_PROJETO_CONTRATAE.md"
+}

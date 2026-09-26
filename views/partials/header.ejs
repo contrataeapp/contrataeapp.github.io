@@ -1,0 +1,129 @@
+<header class="airbnb-header">
+    <div class="container header-grid">
+        <div class="header-left">
+            <a href="/" class="site-logo"><img src="/imagens/logo/logo_contratae.png" alt="Logo Contrataê"></a>
+        </div>
+
+        <div class="header-center desktop-only">
+            <div class="search-pill">
+                <input type="text" class="search-input-pill" placeholder="Busque por pintor, pedreiro...">
+                <button class="search-btn-round"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <!-- Google Translate Element (Apenas um) -->
+            <div id="google_translate_element" class="desktop-only"></div>
+            
+            <button id="theme-toggle" class="icon-btn" title="Alternar Tema">
+                <i class="fas fa-moon"></i>
+            </button>
+            
+            <% if (typeof adminLogado !== 'undefined' && adminLogado) { %>
+                <a href="/admin" class="login-pill">
+                    <span class="login-text">Painel ADM</span>
+                    <span class="login-icon"><i class="fas fa-user-shield"></i></span>
+                </a>
+            <% } else if (typeof userId !== 'undefined' && userId) { %>
+                <div class="user-menu-wrapper">
+                    <button type="button" class="login-pill user-menu-toggle" id="userMenuToggle" aria-expanded="false" aria-controls="userDropdown">
+                        <span class="login-text"><%= fullName ? fullName.split(' ')[0] : 'Minha Conta' %></span>
+                        <span class="login-icon">
+                            <% if (typeof avatarUrl !== 'undefined' && avatarUrl) { %>
+                                <img src="<%= avatarUrl %>" alt="" class="header-user-avatar">
+                            <% } else { %>
+                                <i class="fas fa-user-circle"></i>
+                            <% } %>
+                        </span>
+                        <span class="caret"><i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="<%= userType === 'professional' ? '/profissional/dashboard?tab=perfil' : '/cliente/dashboard?tab=perfil' %>"><i class="fas fa-pen-to-square"></i> Editar meu perfil</a>
+                        <% if (userType === 'professional') { %>
+                            <a href="/perfil/<%= userId %>?ownerView=1&returnTab=resumo" data-loading-label="Abrindo seu perfil publicado..."><i class="fas fa-eye"></i> Ver meu perfil publicado</a>
+                        <% } %>
+                        <a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>"><i class="fas fa-gauge-high"></i> <%= userType === 'professional' ? 'Área Profissional' : 'Área do Cliente' %></a>
+                        <form method="POST" action="/auth/logout" class="logout-inline-form"><button type="submit" class="logout-inline-btn"><i class="fas fa-right-from-bracket"></i> Sair</button></form>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/auth/login" class="login-pill">
+                    <span class="login-text">Entrar / Cadastrar</span>
+                    <span class="login-icon"><i class="fas fa-user-circle"></i></span>
+                </a>
+            <% } %>
+        </div>
+    </div>
+
+    <nav class="categories-nav" id="main-nav">
+        <div class="container">
+            <div class="nav-header mobile-only">
+                <h3>Menu</h3>
+                <button id="close-menu-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <ul>
+                <li><a href="/" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'index') ? 'active' : '' %>"><i class="fas fa-home"></i> Início</a></li>
+                <li><a href="/categoria/pintores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pintores') ? 'active' : '' %>"><i class="fas fa-paint-roller"></i> Pintores</a></li>
+                <li><a href="/categoria/pedreiros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'pedreiros') ? 'active' : '' %>"><i class="fa-solid fa-trowel-bricks"></i> Pedreiros</a></li>
+                <li><a href="/categoria/eletricistas" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'eletricistas') ? 'active' : '' %>"><i class="fas fa-bolt"></i> Eletricistas</a></li>
+                <li><a href="/categoria/encanadores" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'encanadores') ? 'active' : '' %>"><i class="fas fa-wrench"></i> Encanadores</a></li>
+                <li><a href="/categoria/outros" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'outros') ? 'active' : '' %>"><i class="fas fa-th"></i> Outros</a></li>
+                <li><a href="/contato" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'contato') ? 'active' : '' %>"><i class="fas fa-envelope"></i> Contato</a></li>
+                <li><a href="/instalar" class="<%= (typeof currentPage !== 'undefined' && currentPage === 'instalar') ? 'active' : '' %>"><i class="fas fa-download"></i> Instalar</a></li>
+                <% if (adminLogado) { %>
+                    <li class="mobile-only"><a href="/admin"><i class="fas fa-user-shield"></i> Painel ADM</a></li>
+                <% } else if (userId) { %>
+                    <li class="mobile-only"><a href="<%= userType === 'professional' ? '/profissional/dashboard?tab=perfil' : '/cliente/dashboard?tab=perfil' %>"><i class="fas fa-pen-to-square"></i> Editar meu perfil</a></li>
+                    <% if (userType === 'professional') { %><li class="mobile-only"><a href="/perfil/<%= userId %>?ownerView=1&returnTab=resumo"><i class="fas fa-eye"></i> Ver meu perfil publicado</a></li><% } %>
+                    <li class="mobile-only"><a href="<%= userType === 'professional' ? '/profissional/dashboard' : '/cliente/dashboard' %>"><i class="fas fa-gauge-high"></i> <%= userType === 'professional' ? 'Área Profissional' : 'Área do Cliente' %></a></li>
+                    <li class="mobile-only"><form method="POST" action="/auth/logout" class="logout-inline-form"><button type="submit" class="logout-inline-btn"><i class="fas fa-right-from-bracket"></i> Sair</button></form></li>
+                <% } else { %>
+                    <li class="mobile-only"><a href="/auth/login"><i class="fas fa-user"></i> Entrar / Cadastrar</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </nav>
+        <style>
+        /* O menu de conta precisa funcionar mesmo nas páginas públicas que usam apenas index.css. */
+        .user-menu-wrapper{position:relative;min-width:0}
+        .user-menu-toggle{cursor:pointer;position:relative;z-index:1210;max-width:min(230px,56vw)}
+        .user-menu-toggle .login-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .header-user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;display:block;border:1px solid rgba(255,176,32,.55)}
+        .user-menu-toggle .caret{display:inline-flex;color:#c8cbd1;transition:transform .18s ease}
+        .user-menu-toggle[aria-expanded="true"] .caret{transform:rotate(180deg)}
+        .user-dropdown{position:absolute;right:0;top:calc(100% + 8px);min-width:210px;background:#1c1d21;border:1px solid #373a41;border-radius:14px;box-shadow:0 16px 38px rgba(0,0,0,.45);display:none!important;overflow:hidden;z-index:1250}
+        .user-dropdown.open{display:block!important}
+        .user-dropdown a,.user-dropdown .logout-inline-btn{display:flex!important;align-items:center;gap:10px;width:100%;padding:12px 14px!important;color:#f4f6f8!important;text-decoration:none;font-size:.92rem;border:0;border-bottom:1px solid #2b2e34!important;background:transparent;text-align:left;cursor:pointer}
+        .user-dropdown a:hover,.user-dropdown .logout-inline-btn:hover{background:rgba(255,176,32,.12)!important;color:#ffb020!important}
+        .user-dropdown form:last-child .logout-inline-btn{border-bottom:0!important}
+        body.light-mode .user-dropdown{background:#fff;border-color:#d8dde5;box-shadow:0 16px 38px rgba(0,0,0,.16)}
+        body.light-mode .user-dropdown a,body.light-mode .user-dropdown .logout-inline-btn{color:#252b34!important;border-bottom-color:#e8ebef!important}
+        @media(max-width:520px){.user-dropdown{position:fixed;right:12px;top:72px;min-width:220px;max-width:calc(100vw - 24px)}.user-menu-toggle{max-width:205px}}
+        </style>
+        <style>
+        .logout-inline-form{margin:0}
+        .logout-inline-btn{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:0;display:flex;align-items:center;gap:8px;width:100%;text-align:left}
+        .user-dropdown .logout-inline-btn{padding:0}
+        .mobile-logout-form .logout-inline-btn{padding:0;color:inherit}
+    </style>
+    <script>
+        (function(){
+            const toggle = document.getElementById('userMenuToggle');
+            const menu = document.getElementById('userDropdown');
+            if (toggle && menu) {
+                const setOpen = function(open){ menu.classList.toggle('open', !!open); toggle.setAttribute('aria-expanded', String(!!open)); };
+                setOpen(false);
+                toggle.addEventListener('click', function(e){
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setOpen(!menu.classList.contains('open'));
+                });
+                document.addEventListener('click', function(e){ if (!menu.contains(e.target) && !toggle.contains(e.target)) setOpen(false); });
+                document.addEventListener('keydown', function(e){ if(e.key === 'Escape') { setOpen(false); toggle.focus(); } });
+            }
+            if ('serviceWorker' in navigator) { window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(){}); }, { once: true }); }
+        })();
+    </script>
+    <script src="/js/navigation-feedback.js" defer></script>
+    <script src="/js/search.js" defer></script>
+</header>

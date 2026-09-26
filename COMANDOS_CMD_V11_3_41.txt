@@ -1,0 +1,22 @@
+REM Contrataê v11.3.41 — deploy no GitHub/Render
+REM Este ZIP foi gerado SEM pasta-pai duplicada.
+
+cd /d C:\Users\Administrator\Downloads\contratae\contrataeapp_v11_3_41_fechamento_ux_profissional
+
+dir package.json
+
+rmdir /s /q .git 2>NUL
+
+git init
+git checkout -B main
+
+git remote remove origin 2>NUL
+git remote add origin https://github.com/contrataeapp/contrataeapp.github.io.git
+
+git config user.name "contrataeapp"
+git config user.email "time.contratae@gmail.com"
+
+git add .
+git commit -m "fix: v11.3.41 fechamento ux profissional"
+
+git push -u origin main --force

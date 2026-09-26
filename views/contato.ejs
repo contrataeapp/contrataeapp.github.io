@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/png" href="/imagens/app/favicon.png">
+    <link rel="apple-touch-icon" href="/imagens/app/apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Contrataê">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#101114">
+    <meta property="og:site_name" content="Contrataê">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Contrataê · Profissionais locais">
+    <meta property="og:description" content="Encontre profissionais locais, veja portfólios e entre em contato com facilidade.">
+    <meta property="og:image" content="https://contrataeapp.onrender.com/imagens/app/contratae-social.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://contrataeapp.onrender.com/imagens/app/contratae-social.png">
+    <title>Contato - Contrataê</title>
+    <link rel="stylesheet" href="/css/style_laranja_preto.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .contato-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .contato-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .contato-header h1 {
+            font-size: 36px;
+            color: #ffa500;
+            margin-bottom: 10px;
+        }
+
+        .contato-header p {
+            font-size: 16px;
+            color: #ccc;
+        }
+
+        .contato-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .contato-info {
+            background: #222;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+        }
+
+        .contato-info h2 {
+            color: #ffa500;
+            margin-bottom: 25px;
+            font-size: 22px;
+            text-align: center;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            transition: 0.3s;
+            border: 1px solid #444;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffa500;
+        }
+
+        .info-card i {
+            font-size: 30px;
+            color: #ffa500;
+            margin-bottom: 15px;
+        }
+
+        .info-card h3 {
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .info-card p, .info-card a {
+            color: #ccc;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .info-card a:hover {
+            color: #ffa500;
+        }
+
+        .contato-form {
+            background: #222;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+        }
+
+        .contato-form h2 {
+            color: #ffa500;
+            margin-bottom: 25px;
+            font-size: 22px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ffa500;
+            box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn-submit {
+            background: #ffa500;
+            color: #000;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #ff8c00;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.3);
+        }
+
+        .sobre-section {
+            background: #222;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 50px;
+            border: 1px solid #333;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .sobre-section h2 {
+            color: #ffa500;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .sobre-section p {
+            color: #ccc;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .sobre-section strong {
+            color: #ffa500;
+        }
+
+
+        body.light-mode .contato-header p{color:#65707d}
+        body.light-mode .contato-info,body.light-mode .contato-form,body.light-mode .sobre-section{background:#fff;border-color:#dde2e8;box-shadow:0 4px 18px rgba(0,0,0,.07)}
+        body.light-mode .info-card{background:#f7f8fa;border-color:#dde2e8}
+        body.light-mode .info-card h3,body.light-mode .form-group label{color:#222a34}
+        body.light-mode .info-card p,body.light-mode .info-card a,body.light-mode .sobre-section p{color:#65707d}
+        body.light-mode .form-group input,body.light-mode .form-group textarea{background:#fff;color:#222a34;border-color:#d7dce3}
+
+        @media (max-width: 768px) {
+            .contato-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .contato-header h1 {
+                font-size: 28px;
+            }
+
+            .contato-container {
+                margin: 20px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <% const bannerEsq = typeof banners !== 'undefined' && banners.find(b => b.posicao === 3); %>
+    <% if (bannerEsq) { %>
+    <div class="banner-lateral banner-esquerda" id="banner-mov">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerEsq.link_destino || bannerEsq.link_destination || '#' %>">
+            <img src="<%= bannerEsq.imagem_url || bannerEsq.image_url %>" alt="<%= bannerEsq.titulo || bannerEsq.title || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
+    <% const bannerDir = typeof banners !== 'undefined' && banners.find(b => b.posicao === 4); %>
+    <% if (bannerDir) { %>
+    <div class="banner-lateral banner-direita" id="banner-speed">
+        <button class="close-banner" title="Fechar anúncio">&times;</button>
+        <div class="banner-content" data-link="<%= bannerDir.link_destino || bannerDir.link_destination || '#' %>">
+            <img src="<%= bannerDir.imagem_url || bannerDir.image_url %>" alt="<%= bannerDir.titulo || bannerDir.title || 'Anúncio' %>">
+        </div>
+    </div>
+    <% } %>
+
+    <%- include('partials/header', { currentPage: 'contato' }) %>
+    <%- include('partials/top-status-bar') %>
+
+    <main>
+        <div class="contato-container">
+            <div class="contato-header">
+                <h1>Entre em Contato</h1>
+                <p>Tem dúvidas ou sugestões? Adoraríamos ouvir de você!</p>
+            </div>
+
+            <div class="sobre-section">
+                <h2>Conheça a Contrataê</h2>
+                <p>
+                    Na <strong>Contrataê</strong>, nossa paixão é conectar pessoas que precisam de soluções com profissionais que as oferecem com excelência. Acreditamos que a tecnologia pode simplificar o dia a dia e trazer mais eficiência para a contratação de serviços.
+                </p>
+                <p>
+                    Desde a nossa fundação, trabalhamos incansavelmente para construir uma plataforma intuitiva, segura e confiável, onde clientes encontram desde pequenos reparos até grandes projetos, e profissionais expandem suas oportunidades de trabalho.
+                </p>
+                <p>
+                    Nosso compromisso é com a <strong>qualidade</strong>, a <strong>transparência</strong> e a <strong>inovação</strong>. Estamos sempre buscando novas maneiras de aprimorar a experiência de todos os usuários, garantindo que cada conexão seja um sucesso.
+                </p>
+            </div>
+
+            <div class="contato-grid">
+                <div class="contato-info">
+                    <h2>Informações</h2>
+                    <div class="info-cards">
+                        <% const ps = (typeof platformSettings !== 'undefined' && platformSettings) ? platformSettings : {}; %>
+                        <div class="info-card">
+                            <i class="fas fa-envelope"></i>
+                            <h3>E-mail</h3>
+                            <% if (ps.contact_email) { %><p><a href="mailto:<%= ps.contact_email %>"><%= ps.contact_email %></a></p><% } else { %><p>Disponível em breve</p><% } %>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <h3>Localização</h3>
+                            <p><%= ps.location_text || 'Taquaritinga - SP' %></p>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-share-alt"></i>
+                            <h3>Redes e canais</h3>
+                            <div style="display:flex;justify-content:center;gap:15px;margin-top:10px;flex-wrap:wrap;">
+                                <% if (ps.facebook_active && ps.facebook_url) { %><a href="<%= ps.facebook_url %>" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><% } %>
+                                <% if (ps.instagram_active && ps.instagram_url) { %><a href="<%= ps.instagram_url %>" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a><% } %>
+                                <% if (ps.x_active && ps.x_url) { %><a href="<%= ps.x_url %>" target="_blank" rel="noopener" aria-label="X"><i class="fab fa-x-twitter"></i></a><% } %>
+                                <% if (ps.whatsapp_active && ps.whatsapp_url) { %><a href="<%= ps.whatsapp_url %>" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a><% } %>
+                                <% if (!(ps.facebook_active && ps.facebook_url) && !(ps.instagram_active && ps.instagram_url) && !(ps.x_active && ps.x_url) && !(ps.whatsapp_active && ps.whatsapp_url)) { %><span style="color:#888;font-size:13px">Canais sociais serão exibidos aqui quando ativados.</span><% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contato-form">
+                    <h2>Envie uma Mensagem</h2>
+                    <form action="/api/contato" method="POST">
+                        <div class="form-group">
+                            <label for="nome">Nome Completo</label>
+                            <input type="text" id="nome" name="nome" placeholder="Seu nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mensagem">Mensagem</label>
+                            <textarea id="mensagem" name="mensagem" placeholder="Como podemos ajudar?" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">Enviar Mensagem</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+    
+    <%- include('partials/mobile-bottom-nav', { active: 'menu' }) %>
+</body>
+</html>

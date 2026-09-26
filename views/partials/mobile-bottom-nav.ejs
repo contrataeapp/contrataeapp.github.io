@@ -1,0 +1,99 @@
+<% 
+const publicNavActive = typeof active !== 'undefined' ? active : '';
+const publicNavLogged = typeof userId !== 'undefined' && !!userId;
+const publicNavProfessional = publicNavLogged && typeof userType !== 'undefined' && userType === 'professional';
+const publicNavLastHref = publicNavLogged ? (publicNavProfessional ? '/profissional/dashboard' : '/cliente/dashboard') : '/auth/login';
+const publicNavLastLabel = publicNavLogged ? 'Painel' : 'Entrar';
+const publicNavLastIcon = 'fa-user';
+const publicNavLastActive = ['entrar','painel','perfil','area'].includes(publicNavActive);
+%>
+<style>
+.public-mobile-nav{padding-bottom:env(safe-area-inset-bottom);min-height:70px}
+.public-mobile-nav .nav-item{min-width:0;min-height:50px;justify-content:center;gap:4px;border-radius:12px;transition:color .16s ease,background .16s ease,transform .12s ease}
+.public-mobile-nav .nav-item.active{color:#ffb020!important}
+.public-mobile-nav .nav-item:active{transform:scale(.96);background:rgba(255,176,32,.08)!important}
+.public-mobile-nav .nav-item span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:82px}
+body.light-mode .public-mobile-nav{background:#fff!important;border-top-color:#d9dde4!important;box-shadow:0 -6px 22px rgba(0,0,0,.08)}
+body.light-mode .public-mobile-nav .nav-item{color:#697382}
+body.light-mode .public-mobile-nav .nav-item.active{color:#d77f00!important}
+@media(max-width:380px){.public-mobile-nav .nav-item{font-size:.72rem}.public-mobile-nav .nav-item i{font-size:1.1rem}.public-mobile-nav .nav-item span{max-width:68px}}
+
+.public-search-overlay{display:none;position:fixed;inset:0;z-index:2400;background:rgba(0,0,0,.72);align-items:flex-end;justify-content:center;padding:12px}
+.public-search-overlay.open{display:flex}
+.public-search-sheet{width:min(620px,100%);max-height:min(78vh,700px);overflow:auto;background:#17191e;border:1px solid #353a43;border-radius:22px 22px 16px 16px;padding:16px;color:#fff;box-shadow:0 -24px 70px rgba(0,0,0,.55)}
+.public-search-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.public-search-sheet-head strong{font-size:20px}
+.public-search-sheet-head button{width:42px;height:42px;border:0;border-radius:50%;background:#292c32;color:#fff;font-size:18px}
+.public-search-field{display:flex;align-items:center;gap:9px;border:1px solid #404650;background:#101216;border-radius:14px;padding:0 13px}
+.public-search-field i{color:#ffb020}
+.public-search-field input{width:100%;min-height:50px;border:0;background:transparent;color:#fff;outline:none;font-size:16px}
+.public-search-hint{margin:9px 2px 0;color:#9da7b4;font-size:12px;line-height:1.4}
+.public-search-results{display:grid;gap:8px;margin-top:12px}
+.public-search-result{display:flex;align-items:center;gap:11px;min-height:54px;padding:10px 12px;border:1px solid #30353d;background:#202329;border-radius:13px;color:#fff;text-decoration:none}
+.public-search-result-icon,.public-search-result-avatar{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:0 0 38px;background:rgba(255,176,32,.12);color:#ffb020;object-fit:cover}
+.public-search-result-copy{min-width:0}.public-search-result-copy strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.public-search-result-copy small{display:block;color:#aeb7c4;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.light-mode .public-search-sheet{background:#fff;color:#222a35;border-color:#d7dde6}
+body.light-mode .public-search-sheet-head button{background:#eef1f5;color:#222a35}
+body.light-mode .public-search-field{background:#f8fafc;border-color:#d7dde6}
+body.light-mode .public-search-field input{color:#222a35}
+body.light-mode .public-search-result{background:#fff;color:#222a35;border-color:#dde2e8}
+@media(min-width:821px){.public-search-overlay{align-items:center}}
+
+</style>
+<nav class="mobile-bottom-nav public-mobile-nav mobile-only" data-public-mobile-nav>
+    <a href="/" class="nav-item <%= publicNavActive === 'inicio' ? 'active' : '' %>" data-loading-label="Abrindo início...">
+        <i class="fas fa-home"></i><span>Início</span>
+    </a>
+    <button type="button" class="nav-item <%= publicNavActive === 'busca' ? 'active' : '' %>" data-public-search-trigger aria-label="Pesquisar no Contrataê">
+        <i class="fas fa-search"></i><span>Busca</span>
+    </button>
+    <button class="nav-item <%= publicNavActive === 'menu' ? 'active' : '' %>" data-public-menu-trigger type="button" aria-label="Abrir menu do Contrataê">
+        <i class="fas fa-bars"></i><span>Menu</span>
+    </button>
+    <a href="<%= publicNavLastHref %>" class="nav-item <%= publicNavLastActive ? 'active' : '' %>" data-loading-label="<%= publicNavLogged ? 'Abrindo sua área...' : 'Abrindo acesso...' %>">
+        <i class="fas <%= publicNavLastIcon %>"></i><span><%= publicNavLastLabel %></span>
+    </a>
+</nav>
+<div class="public-search-overlay" data-public-search-overlay aria-hidden="true">
+  <div class="public-search-sheet" role="dialog" aria-modal="true" aria-label="Buscar no Contrataê">
+    <div class="public-search-sheet-head">
+      <strong>O que você precisa?</strong>
+      <button type="button" data-public-search-close aria-label="Fechar busca"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="public-search-field">
+      <i class="fas fa-search"></i>
+      <input type="search" data-public-search-input placeholder="Ex.: pedreiro, marceneiro..." autocomplete="off">
+    </div>
+    <p class="public-search-hint">Digite para ver profissões e profissionais enquanto você pesquisa.</p>
+    <div class="public-search-results" data-public-search-results aria-live="polite"></div>
+  </div>
+</div>
+<script>
+(function(){
+  const nav=document.currentScript?.previousElementSibling;
+  if(!nav || !nav.matches('[data-public-mobile-nav]')) return;
+  const trigger=nav.querySelector('[data-public-menu-trigger]');
+  const searchTrigger=nav.querySelector('[data-public-search-trigger]');
+  const searchOverlay=document.querySelector('[data-public-search-overlay]');
+  const searchClose=searchOverlay?.querySelector('[data-public-search-close]');
+  const searchInput=searchOverlay?.querySelector('[data-public-search-input]');
+  const mainMenu=document.getElementById('main-nav');
+  if(trigger && mainMenu){
+    trigger.addEventListener('click',function(e){e.preventDefault();mainMenu.classList.add('active');mainMenu.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';});
+    const close=mainMenu.querySelector('#close-menu-btn');
+    if(close && !close.dataset.publicNavBound){close.dataset.publicNavBound='1';close.addEventListener('click',function(){mainMenu.classList.remove('active');mainMenu.setAttribute('aria-hidden','true');document.body.style.overflow='';});}
+    mainMenu.querySelectorAll('a').forEach(function(a){if(!a.dataset.publicNavBound){a.dataset.publicNavBound='1';a.addEventListener('click',function(){mainMenu.classList.remove('active');document.body.style.overflow='';});}});
+  }
+  function setSearch(open){
+    if(!searchOverlay) return;
+    searchOverlay.classList.toggle('open',!!open);
+    searchOverlay.setAttribute('aria-hidden',String(!open));
+    document.body.style.overflow=open?'hidden':'';
+    if(open) setTimeout(()=>searchInput?.focus(),60);
+  }
+  searchTrigger?.addEventListener('click',()=>setSearch(true));
+  searchClose?.addEventListener('click',()=>setSearch(false));
+  searchOverlay?.addEventListener('click',e=>{if(e.target===searchOverlay)setSearch(false)});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&searchOverlay?.classList.contains('open'))setSearch(false)});
+})();
+</script>

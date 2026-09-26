@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrataê - Login Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #121212; 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        
+        .auth-container { width: 100%; max-width: 400px; padding: 20px; }
+        .auth-card { 
+            background: #1e1e1e; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+            padding: 40px; 
+            border: 1px solid #333;
+        }
+        
+        .auth-header { text-align: center; margin-bottom: 30px; }
+        .auth-header h1 { font-size: 24px; color: #ffa500; margin-bottom: 10px; font-weight: 800; }
+        .auth-header i { font-size: 40px; color: #ffa500; margin-bottom: 15px; }
+        .auth-header p { color: #ccc; font-size: 14px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #fff; font-size: 14px; }
+        .form-group input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 1px solid #444; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            transition: 0.3s; 
+            background: #2c2c2c;
+            color: #fff;
+        }
+        .form-group input:focus { outline: none; border-color: #ffa500; box-shadow: 0 0 0 3px rgba(255,165,0,0.1); }
+        
+        .btn { 
+            width: 100%; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-size: 15px; 
+            background: #ffa500; 
+            color: #000; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn:hover { background: #ffb733; transform: translateY(-2px); }
+        
+        .error-message { 
+            background: rgba(220, 53, 69, 0.1); 
+            color: #ff4d4d; 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            font-size: 13px; 
+            border: 1px solid rgba(220, 53, 69, 0.2); 
+            text-align: center; 
+        }
+        
+        .back-link { 
+            display: block; 
+            text-align: center; 
+            margin-top: 20px; 
+            color: #999; 
+            text-decoration: none; 
+            font-size: 14px; 
+        }
+        .back-link:hover { color: #ffa500; }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <i class="fas fa-user-shield"></i>
+                <h1>Painel Admin</h1>
+                <p>Acesso restrito</p>
+            </div>
+            
+            <% if (erro) { %>
+                <div class="error-message"><%= erro %></div>
+            <% } %>
+            
+            <form method="POST" action="/login-adm">
+                <div class="form-group">
+                    <label>Usuário</label>
+                    <input type="text" name="usuario" required placeholder="Usuário admin">
+                </div>
+                
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" name="senha" required placeholder="Sua senha">
+                </div>
+                
+                <button type="submit" class="btn">Entrar no Painel</button>
+            </form>
+            
+            <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Voltar para o site</a>
+        </div>
+    </div>
+</body>
+</html>

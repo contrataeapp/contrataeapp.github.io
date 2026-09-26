@@ -1,0 +1,29 @@
+<style>
+.context-mode-bar{position:relative;z-index:95;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.16);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+.context-mode-bar .container{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;padding-inline:12px}
+.context-mode-label{display:inline-flex;align-items:center;gap:7px;min-width:0;font-weight:800;line-height:1.2}
+.context-mode-action{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;padding:7px 13px;border-radius:999px;text-decoration:none;font-size:.82rem;font-weight:850;white-space:nowrap;transition:.18s ease}
+.context-mode-action:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.context-mode-bar.professional{background:#ffb020;color:#111}.context-mode-bar.professional .context-mode-action{background:#121316;color:#fff}
+.context-mode-bar.client{background:#2563eb;color:#fff}.context-mode-bar.client .context-mode-action{background:#fff;color:#0b2f7a}
+.context-mode-bar.admin{background:#ffb020;color:#111}.context-mode-bar.admin .context-mode-action{background:#121316;color:#fff}
+@media(max-width:520px){.context-mode-bar{padding:7px 0}.context-mode-bar .container{gap:7px;justify-content:space-between}.context-mode-label{font-size:.78rem}.context-mode-action{font-size:.74rem;padding:7px 10px}.context-mode-action .context-mode-action-long{display:none}}
+</style>
+<% if (!adminLogado && userId && userType === 'professional' && professionalReady) { %>
+<div class="context-mode-bar professional" data-professional-mode-bar>
+  <div class="container">
+    <span class="context-mode-label"><i class="fas fa-briefcase"></i> Modo Profissional Ativo</span>
+    <a href="/profissional/dashboard" class="context-mode-action" data-loading-label="Abrindo Área Profissional..."><i class="fas fa-gauge-high"></i><span class="context-mode-action-long">Acessar </span>Área Profissional</a>
+  </div>
+</div>
+<% } %>
+<% if (!adminLogado && userId && userType === 'client') { %>
+<div class="context-mode-bar client">
+  <div class="container"><span class="context-mode-label"><i class="fas fa-user"></i> Área do Cliente</span><a href="/cliente/dashboard" class="context-mode-action"><i class="fas fa-gauge-high"></i> Meu Painel</a></div>
+</div>
+<% } %>
+<% if (adminLogado) { %>
+<div class="context-mode-bar admin">
+  <div class="container"><span class="context-mode-label"><i class="fas fa-user-shield"></i> Modo Administrador Ativo</span><a href="/admin" class="context-mode-action"><i class="fas fa-gauge-high"></i> Acessar Painel</a></div>
+</div>
+<% } %>

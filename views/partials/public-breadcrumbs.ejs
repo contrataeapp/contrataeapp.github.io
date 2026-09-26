@@ -1,0 +1,29 @@
+<%
+const crumbLabel = typeof breadcrumbLabel !== 'undefined' && breadcrumbLabel
+  ? breadcrumbLabel
+  : (typeof categoriaNome !== 'undefined' && categoriaNome ? categoriaNome : (typeof currentPage !== 'undefined' ? currentPage : ''));
+%>
+<div class="public-context-bar" aria-label="Localização na plataforma">
+  <button type="button" class="public-context-back" data-public-context-back aria-label="Voltar uma etapa"><i class="fas fa-arrow-left"></i><span>Voltar</span></button>
+  <nav class="public-breadcrumbs" aria-label="Migalhas de navegação">
+    <a href="/">Início</a><i class="fas fa-chevron-right"></i><span><%= crumbLabel %></span>
+  </nav>
+</div>
+<style>
+.public-context-bar{width:min(1180px,calc(100% - 28px));margin:14px auto 0;display:flex;align-items:center;gap:12px;min-width:0}
+.public-context-back{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:8px 12px;border:1px solid #34383f;background:#1b1d21;color:#e8edf3;border-radius:999px;font-weight:800;cursor:pointer;flex:0 0 auto}
+.public-breadcrumbs{display:flex;align-items:center;gap:8px;min-width:0;color:#98a1ad;font-size:13px}.public-breadcrumbs a{color:#ffb020;text-decoration:none;font-weight:800}.public-breadcrumbs span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.public-breadcrumbs i{font-size:9px;color:#6f7782}
+body.light-mode .public-context-back{background:#fff;color:#28313c;border-color:#d7dde5}body.light-mode .public-breadcrumbs{color:#66717e}
+@media(max-width:520px){.public-context-bar{margin-top:10px}.public-context-back span{display:none}.public-context-back{width:40px;padding:0;justify-content:center}.public-breadcrumbs{font-size:12px}}
+</style>
+<script>
+(function(){
+  const btn=document.currentScript?.previousElementSibling?.previousElementSibling?.querySelector?.('[data-public-context-back]') || document.querySelector('[data-public-context-back]');
+  if(!btn || btn.dataset.bound==='1') return;btn.dataset.bound='1';
+  btn.addEventListener('click',()=>{
+    let sameOrigin=false;try{sameOrigin=!!document.referrer&&new URL(document.referrer).origin===location.origin}catch(_){}
+    if(sameOrigin&&history.length>1){window.ContrataeNavigationFeedback?.start(btn,'Voltando...');history.back();}
+    else location.href='/';
+  });
+})();
+</script>
