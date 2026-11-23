@@ -363,6 +363,46 @@ function fecharModal(idModal) {
 // ============================================
 // GESTÃO DE PROFISSIONAIS E REATIVAÇÃO
 // ============================================
+function abrirModalRedefinirSenha(button) {
+    const form = document.getElementById('form-redefinir-senha');
+    form.reset();
+    form.dataset.userId = button.dataset.id;
+    document.getElementById('conta-redefinir-senha').textContent = button.dataset.email;
+    document.getElementById('status-redefinir-senha').textContent = '';
+    abrirModal('modal-redefinir-senha');
+    form.elements.password.focus();
+}
+
+async function salvarNovaSenha(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = event.submitter;
+    const status = document.getElementById('status-redefinir-senha');
+    const { password, confirmation } = Object.fromEntries(new FormData(form));
+    if (password !== confirmation) {
+        status.textContent = 'As senhas não coincidem.';
+        return;
+    }
+
+    button.disabled = true;
+    status.textContent = 'Redefinindo senha…';
+    try {
+        const response = await fetch('/api/admin/profissionais/' + encodeURIComponent(form.dataset.userId) + '/redefinir-senha', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Admin-Reset-Token': form.dataset.token },
+            body: JSON.stringify({ password, confirmation })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error(result.erro || 'Não foi possível redefinir a senha.');
+        form.reset();
+        status.textContent = 'Senha redefinida.';
+    } catch (error) {
+        status.textContent = error instanceof SyntaxError ? 'Não foi possível redefinir a senha.' : error.message;
+    } finally {
+        button.disabled = false;
+    }
+}
+
 function abrirModalAprovar(id, nome, encodedData = '') {
     document.getElementById('id-prof-aprovar').value = id;
     document.getElementById('nome-prof-aprovar').textContent = nome;

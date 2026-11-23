@@ -1,6 +1,8 @@
 // FIX v11.3.4 cadastro estável: cancelar cadastro agora só sai do fluxo sem apagar conta em rascunho
 require("dotenv").config();
 const express = require("express");
+const bcrypt = require("bcrypt");
+const { randomBytes } = require("node:crypto");
 const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 const session = require("express-session");
@@ -1043,6 +1045,8 @@ app.get('/outros', catchAsync(async (req, res) => {
 // ROTAS DO PAINEL ADM (Refatorado para Novo Schema)
 // ============================================
 app.get("/admin", checkAdmin, async (req, res) => {
+    req.session.adminPasswordResetToken ||= randomBytes(32).toString("hex");
+    res.locals.adminPasswordResetToken = req.session.adminPasswordResetToken;
     try {
         const { categoria, status, busca, ordenar, cidade } = req.query;
         const statusDb = normalizeStatusForDb(status);
@@ -1161,6 +1165,45 @@ app.get("/admin", checkAdmin, async (req, res) => {
     } catch (err) {
         console.error("Erro no painel admin:", err);
         res.render("admin/admin", { profissionais: [], totais: { ativos: 0, pendentes: 0, pausados: 0, receitaTotal: 0, receitaMes: 0 }, filtroAtivo: {} });
+    }
+});
+
+app.post('/api/admin/profissionais/:id/redefinir-senha', checkAdminAPI, async (req, res) => {
+    const token = req.session.adminPasswordResetToken;
+    if (!token || req.get('X-Admin-Reset-Token') !== token) {
+        return res.status(403).json({ erro: 'Reabra o painel antes de redefinir a senha.' });
+    }
+    if (!process.env.ADMIN_PASS || !supabaseServiceKey) {
+        return res.status(503).json({ erro: 'A redefinição de senha não está configurada neste ambiente.' });
+    }
+
+    const { id } = req.params;
+    const { password, confirmation } = req.body || {};
+    if (!isUuid(id)) return res.status(400).json({ erro: 'Profissional inválido.' });
+    if (typeof password !== 'string' || password.trim().length < 12 ||
+        Buffer.byteLength(password, 'utf8') > 72 || password !== confirmation) {
+        return res.status(400).json({ erro: 'Use pelo menos 12 caracteres, até 72 bytes, e confirme a mesma senha.' });
+    }
+
+    try {
+        const { data: professional, error: profileError } = await supabaseAdmin
+            .from('professionals').select('user_id').eq('user_id', id)
+            .neq('status', 'excluded').maybeSingle();
+        if (profileError) throw profileError;
+        if (!professional) return res.status(404).json({ erro: 'Cadastro profissional não encontrado.' });
+
+        const hash = await bcrypt.hash(password, 10);
+        const { data: user, error: updateError } = await supabaseAdmin.from('users')
+            .update({ password: hash }).eq('id', professional.user_id).eq('user_type', 'professional')
+            .not('password', 'is', null).neq('password', '').select('id').maybeSingle();
+        if (updateError) throw updateError;
+        if (!user) return res.status(409).json({ erro: 'Esta conta não tem login por senha para redefinir.' });
+
+        console.info('Senha de profissional redefinida pelo painel administrativo.', { userId: user.id });
+        return res.json({ ok: true });
+    } catch (error) {
+        console.error('Erro ao redefinir senha de profissional.', { code: error.code });
+        return res.status(500).json({ erro: 'Não foi possível redefinir a senha.' });
     }
 });
 

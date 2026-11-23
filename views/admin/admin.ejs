@@ -278,6 +278,10 @@
                                                     <i class="fab fa-whatsapp"></i>
                                                 </button>
                                                 
+                                                <button type="button" class="btn-action edit" data-id="<%= p.id %>" data-email="<%= p.email %>" onclick="abrirModalRedefinirSenha(this)" title="Redefinir senha" aria-label="Redefinir senha">
+                                                    <i class="fas fa-key"></i>
+                                                </button>
+
                                                 <button class="btn-action logs" onclick="abrirModalLogs('<%= p.id %>', '<%= p.nome %>')" title="Histórico de Pagamentos">
                                                     <i class="fas fa-file-invoice-dollar"></i>
                                                 </button>
@@ -557,6 +561,28 @@
                 <div class="modal-buttons">
                     <button type="button" class="btn-cancel" onclick="fecharModal('modal-aprovar')">Cancelar</button>
                     <button type="submit" class="btn-confirm">Aprovar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-redefinir-senha" class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-redefinir-senha">
+        <div class="modal-content">
+            <h2 id="titulo-redefinir-senha">Redefinir senha</h2>
+            <p id="conta-redefinir-senha"></p>
+            <form id="form-redefinir-senha" data-token="<%= adminPasswordResetToken %>" onsubmit="salvarNovaSenha(event)">
+                <div class="form-group">
+                    <label for="nova-senha-profissional">Nova senha (mínimo de 12 caracteres)</label>
+                    <input id="nova-senha-profissional" name="password" type="password" minlength="12" maxlength="72" autocomplete="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmar-senha-profissional">Confirme a nova senha</label>
+                    <input id="confirmar-senha-profissional" name="confirmation" type="password" minlength="12" maxlength="72" autocomplete="new-password" required>
+                </div>
+                <p id="status-redefinir-senha" role="status"></p>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="this.form.reset(); fecharModal('modal-redefinir-senha')">Fechar</button>
+                    <button type="submit" class="btn-save">Redefinir senha</button>
                 </div>
             </form>
         </div>
