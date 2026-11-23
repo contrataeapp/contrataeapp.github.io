@@ -1173,16 +1173,15 @@ app.post('/api/admin/profissionais/:id/redefinir-senha', checkAdminAPI, async (r
     if (!token || req.get('X-Admin-Reset-Token') !== token) {
         return res.status(403).json({ erro: 'Reabra o painel antes de redefinir a senha.' });
     }
-    if (!process.env.ADMIN_PASS || !supabaseServiceKey) {
-        return res.status(503).json({ erro: 'A redefinição de senha não está configurada neste ambiente.' });
+    if (!process.env.ADMIN_PASS) {
+        return res.status(503).json({ erro: 'Configure ADMIN_PASS no Render para habilitar a redefinição.' });
     }
 
     const { id } = req.params;
     const { password, confirmation } = req.body || {};
     if (!isUuid(id)) return res.status(400).json({ erro: 'Profissional inválido.' });
-    if (typeof password !== 'string' || password.trim().length < 12 ||
-        Buffer.byteLength(password, 'utf8') > 72 || password !== confirmation) {
-        return res.status(400).json({ erro: 'Use pelo menos 12 caracteres, até 72 bytes, e confirme a mesma senha.' });
+    if (typeof password !== 'string' || !/^\d{6,8}$/.test(password) || password !== confirmation) {
+        return res.status(400).json({ erro: 'Informe de 6 a 8 dígitos e repita a mesma senha.' });
     }
 
     try {
@@ -1202,6 +1201,9 @@ app.post('/api/admin/profissionais/:id/redefinir-senha', checkAdminAPI, async (r
         console.info('Senha de profissional redefinida pelo painel administrativo.', { userId: user.id });
         return res.json({ ok: true });
     } catch (error) {
+        if (error.code === '42501') {
+            return res.status(503).json({ erro: 'A conexão do Render com o Supabase não tem permissão para redefinir senhas.' });
+        }
         console.error('Erro ao redefinir senha de profissional.', { code: error.code });
         return res.status(500).json({ erro: 'Não foi possível redefinir a senha.' });
     }
